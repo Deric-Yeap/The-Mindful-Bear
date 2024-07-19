@@ -34,9 +34,6 @@ class LoginView(generics.GenericAPIView):
             return Response({
                 'refresh': str(refresh),
                 'access': str(refresh.access_token),
-                'date_of_birth': str(user.date_of_birth),
-                'gender': user.gender,
-                'department': user.department,
             })
         return Response({'detail': 'Invalid username or password'}, status=status.HTTP_401_UNAUTHORIZED)
     
