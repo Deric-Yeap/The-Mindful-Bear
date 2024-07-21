@@ -4,12 +4,12 @@ from .models import CustomUser
 class CustomUserSerializer(serializers.ModelSerializer):
     class Meta:
         model = CustomUser
-        fields = ['user_id', 'username', 'date_of_birth', 'gender', 'department', 'password']
+        fields = ['user_id', 'username', 'date_of_birth', 'gender', 'department']
 
 class UserCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = CustomUser
-        fields = ['username', 'date_of_birth', 'gender', 'department', 'password']
+        fields = ['username', 'date_of_birth', 'gender', 'department']
 
     def create(self, validated_data):
         user = CustomUser.objects.create_user(
