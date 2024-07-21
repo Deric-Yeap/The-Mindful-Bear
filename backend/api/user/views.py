@@ -8,6 +8,8 @@ from django.contrib.auth import authenticate
 
 # Create your views here.
 class UserCreateView(generics.CreateAPIView):
+    authentication_classes = []
+    permission_classes = []
     queryset = CustomUser.objects.all()
     serializer_class = UserCreateSerializer
 
@@ -23,6 +25,8 @@ class UserRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
         return CustomUserSerializer
 
 class LoginView(generics.GenericAPIView):
+    authentication_classes = []
+    permission_classes = []
     def post(self, request):
         username = request.data.get('username')
         password = request.data.get('password')
@@ -34,9 +38,6 @@ class LoginView(generics.GenericAPIView):
             return Response({
                 'refresh': str(refresh),
                 'access': str(refresh.access_token),
-                'date_of_birth': str(user.date_of_birth),
-                'gender': user.gender,
-                'department': user.department,
             })
         return Response({'detail': 'Invalid username or password'}, status=status.HTTP_401_UNAUTHORIZED)
     
