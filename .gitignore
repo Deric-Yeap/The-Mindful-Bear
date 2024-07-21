@@ -6,3 +6,4 @@ backend/venv
 backend/pyvenv.cfg
 /backend/Scripts
 /backend/api/user/__pycache__
+
