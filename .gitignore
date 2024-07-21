@@ -2,3 +2,4 @@
 backend/db.sqlite3
 backend/api/user/__pycache__/views.cpython-311.pyc
 *.pyc
+backend/venv
