@@ -30,10 +30,8 @@ class LoginView(generics.GenericAPIView):
     def post(self, request):
         username = request.data.get('username')
         password = request.data.get('password')
-        print(username, password)
         user = authenticate(username=username, password=password)
         if user is not None:
-            print("in user not none")
             refresh = CustomRefreshToken().for_user(user)
             return Response({
                 'refresh': str(refresh),
