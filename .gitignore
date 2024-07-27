@@ -7,3 +7,6 @@ backend/pyvenv.cfg
 /backend/Scripts
 /backend/api/*/__pycache__
 /backend/api/*/migrations
+*.pyc
+*.sqlite3
+

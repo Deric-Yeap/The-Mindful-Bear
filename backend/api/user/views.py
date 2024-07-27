@@ -3,7 +3,8 @@ from .serializer import CustomUserSerializer, UserCreateSerializer, UserUpdateSe
 from rest_framework import generics
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.response import Response
-from rest_framework.exceptions import AuthenticationFailed, NotFound
+from rest_framework.exceptions import NotFound
+from ..common.permission import CustomDjangoModelPermissions
 from rest_framework import status
 from django.contrib.auth import authenticate
 from ..common.jwt import getMe
@@ -25,12 +26,17 @@ class UserCreateView(generics.CreateAPIView):
 class UserGetMeView(generics.RetrieveAPIView):
     def get(self, request):
         try:
-            user = getMe(request)
+            user = request.user
+            all_permissions = user.get_all_permissions()
+            print(all_permissions)
             return Response(CustomUserSerializer(user).data)
         except Exception as e:
-            raise AuthenticationFailed(f"Authentication failed: {str(e)}")
+            return Response({'detail': str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
 class UserUpdateDestroyView(generics.GenericAPIView):
+    permission_classes = [CustomDjangoModelPermissions]
+    queryset = CustomUser.objects.all()
+
     def put(self, request):
         user = getMe(request)
         try:
