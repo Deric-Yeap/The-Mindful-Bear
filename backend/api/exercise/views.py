@@ -10,8 +10,12 @@ class ExerciseCreateView(generics.CreateAPIView):
     queryset = Exercise.objects.all()
     serializer_class = ExerciseSerializer
 
-
 class ExerciseListView(generics.ListAPIView):
     queryset = Exercise.objects.all()
     serializer_class = ExerciseSerializer
+
+class ExerciseRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
+    queryset=Exercise.objects.all()
+    serializer_class = ExerciseSerializer
+    lookup_field = "pk"
 
