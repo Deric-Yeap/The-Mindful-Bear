@@ -45,6 +45,11 @@ INSTALLED_APPS = [
     "rest_framework",
     "rest_framework_simplejwt",
     "api.user",
+    "api.form",
+    "api.question",
+    "api.response",
+    "api.session",
+    "api.formSession"
 ]
 
 REST_FRAMEWORK = {
