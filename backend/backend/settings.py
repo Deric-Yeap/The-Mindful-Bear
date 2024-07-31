@@ -46,7 +46,7 @@ INSTALLED_APPS = [
     "rest_framework_simplejwt",
     "api.user",
     "api.landmark",
-    "api.exercise"
+    "api.exercise",
     "api.form",
     "api.question",
     "api.response",
