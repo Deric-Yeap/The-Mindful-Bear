@@ -47,6 +47,11 @@ INSTALLED_APPS = [
     "api.user",
     "api.landmark",
     "api.exercise"
+    "api.form",
+    "api.question",
+    "api.response",
+    "api.session",
+    "api.formSession"
 ]
 
 REST_FRAMEWORK = {
