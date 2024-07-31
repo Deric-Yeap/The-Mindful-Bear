@@ -15,12 +15,12 @@ class ExerciseListView(generics.ListAPIView):
     queryset = Exercise.objects.all()
     serializer_class = ExerciseSerializer
 
-class ExerciseGetExerciseView(generics.RetrieveAPIView):
+class ExerciseGetExerciseByIdView(generics.RetrieveAPIView):
     queryset=Exercise.objects.all()
     serializer_class = ExerciseSerializer
     lookup_field = "pk"
 
-class ExerciseUpdateDestroyView(generics.GenericAPIView):
+class ExerciseUpdateDestroyView(generics.UpdateAPIView, generics.DestroyAPIView):
     permission_classes = [CustomDjangoModelPermissions]
     queryset=Exercise.objects.all()
     serializer_class = ExerciseUpdateSerializer
