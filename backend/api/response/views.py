@@ -6,7 +6,7 @@ from rest_framework.exceptions import ValidationError
 
 #Note: No need read responses as it would be done by analytics side.
 
-# TODO: Double check on this table, need to store some kind of session id to it?
+# TODO: Double check on this table, need to store some kind of session id to it? 
    
 # add user response only if store_response is true
 class AddResponse(generics.CreateAPIView):
@@ -26,13 +26,3 @@ class AddResponse(generics.CreateAPIView):
             raise ValidationError(f"Form associated with Question ID {question_id} does not need to be stored in database")
         
         serializer.save()
-# Admin can Edit Responses
-class UpdateResponse(generics.UpdateAPIView):
-    queryset = Response.objects.all()
-    serializer_class = ResponseSerializer
-    lookup_field = "pk"
-# Admin can Delete Responses
-class DeleteResponse(generics.DestroyAPIView):
-    queryset = Response.objects.all()
-    serializer_class = ResponseSerializer
-    lookup_field = "pk"
