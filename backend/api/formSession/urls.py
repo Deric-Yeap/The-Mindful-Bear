@@ -3,7 +3,7 @@ from . import views
 
 urlpatterns = [
     # Create a new FormSession
-     path('create/', views.FormSessionCreate.as_view(), name='create-form-session'),
+    path('create/', views.FormSessionCreate.as_view(), name='create-form-session'),
 
     # Get all forms for a specific session
     path('session/<int:session_id>/forms/', views.FormsForSession.as_view(), name='get-forms-for-session'),

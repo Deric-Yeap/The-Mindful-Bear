@@ -4,30 +4,25 @@ from .models import Session
 from .serializer import SessionSerializer, SessionUpdateSerializer
 
 class SessionCreate(generics.CreateAPIView):
-    """
-    Create a new session
-    """
+    # Create a new session
     queryset = Session.objects.all()
     serializer_class = SessionSerializer
 
 class SessionList(generics.ListCreateAPIView):
-    """
-    Get all sessions and create a new session
-    """
+   
+    # Get all sessions and create a new session
     queryset = Session.objects.all()
     serializer_class = SessionSerializer
 
 class SessionDetail(generics.RetrieveAPIView):
-    """
-    Retrieve a session
-    """
+   
+    # Retrieve a session
     queryset = Session.objects.all()
     serializer_class = SessionSerializer
 
 class UpdateSessionDetail(generics.RetrieveUpdateAPIView):
-    """
-    Retrieve and update a session without modifying start_datetime
-    """
+   
+    # Retrieve and update a session without modifying start_datetime
     queryset = Session.objects.all()
     serializer_class = SessionSerializer
 
