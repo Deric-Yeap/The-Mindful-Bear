@@ -29,7 +29,7 @@ def make_file_upload_path(user, filename):
     path = f'journals/{user.user_id}/{today_date}/{new_filename}'
     return (new_filename, path)
 
-def create_presigned_url(bucket_name, object_path, expiration=10):
+def create_presigned_url(bucket_name, object_path, expiration=3600):
     s3_client = boto3.client('s3',
                             aws_access_key_id=os.getenv('AWS_ACCESS_KEY_ID'),
                             aws_secret_access_key=os.getenv('AWS_SECRET_ACCESS_KEY'),
