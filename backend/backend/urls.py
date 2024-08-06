@@ -22,5 +22,10 @@ urlpatterns = [
     path("api/landmark/", include("api.landmark.urls")),
     path("api/exercise/", include("api.exercise.urls")),
     path("api/users/", include("api.user.urls")),
-
+    path("api/journal/", include("api.journal.urls")),
+    path("api/form/", include("api.form.urls")),
+    path("api/question/", include("api.question.urls")),
+    path("api/response/", include("api.response.urls")),
+    path("api/session/", include("api.session.urls")),
+    path("api/formSession/", include("api.formSession.urls")),
 ]

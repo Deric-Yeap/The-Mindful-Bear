@@ -27,8 +27,6 @@ class UserGetMeView(generics.RetrieveAPIView):
     def get(self, request):
         try:
             user = request.user
-            all_permissions = user.get_all_permissions()
-            print(all_permissions)
             return Response(CustomUserSerializer(user).data)
         except Exception as e:
             return Response({'detail': str(e)}, status=status.HTTP_400_BAD_REQUEST)
