@@ -7,7 +7,6 @@ from rest_framework.response import Response
 from rest_framework import status
 # Create your views here.
 
-
 # Create  View
 class ExerciseCreateView(generics.CreateAPIView):
     permission_classes = [CustomDjangoModelPermissions]
@@ -31,8 +30,6 @@ class ExerciseListView(generics.ListAPIView):
         serializer = self.get_serializer(queryset, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
-
-
 # get by Id view
 class ExerciseGetExerciseByIdView(generics.RetrieveAPIView):
     queryset=Exercise.objects.all()
@@ -45,16 +42,14 @@ class ExerciseGetExerciseByIdView(generics.RetrieveAPIView):
         except Exception as e:
             return Response({'detail': str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
-    
-
 # update or delete view
 class ExerciseUpdateDestroyView(generics.UpdateAPIView, generics.DestroyAPIView):
     permission_classes = [CustomDjangoModelPermissions]
     queryset=Exercise.objects.all()
-    serializer_class = ExerciseUpdateSerializer
     lookup_field = "pk"
-    def update(self, request):
+    def put(self, request):
         instance = self.get_object()
+
         serializer = ExerciseUpdateSerializer(instance, data=request.data, partial=True)
         if serializer.is_valid():
             serializer.save()
@@ -64,8 +59,6 @@ class ExerciseUpdateDestroyView(generics.UpdateAPIView, generics.DestroyAPIView)
         instance = self.get_object()
         instance.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
-
-
 
 
 
