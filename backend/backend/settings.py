@@ -159,6 +159,10 @@ USE_TZ = True
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 AUTH_USER_MODEL = "user.CustomUser"
 
+# for statics
+STATIC_URL = 'static/'
+
+
 # # AWS S3 Cloudfront
 
 # DEBUG = True
@@ -172,10 +176,6 @@ AWS_QUERYSTRING_EXPIRE = 604800
 
 CLOUDFRONT_DOMAIN = os.getenv("CLOUDFRONT_DOMAIN")
 AWS_S3_CUSTOM_DOMAIN = CLOUDFRONT_DOMAIN
-
-STATIC_LOCATION = "static"
-STATIC_URL = f'https://{CLOUDFRONT_DOMAIN}/{STATIC_LOCATION}/'
-STATICFILES_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
 
 MEDIA_LOCATION = "media"
 MEDIA_URL = f'https://{CLOUDFRONT_DOMAIN}/{MEDIA_LOCATION}/'
