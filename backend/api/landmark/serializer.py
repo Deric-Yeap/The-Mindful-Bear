@@ -12,8 +12,8 @@ def is_decimal_places(value):
         return serializers.ValidationError('only numbers with 6 decimal places is allowed')
 
 def is_max_digits(value):
-    no_of_digits = len(str(value))
-    if (no_of_digits - 1)>9:
+    no_of_digits = len(str(value).replace('.', '').replace('-', ''))
+    if no_of_digits>9:
          return serializers.ValidationError('only numbers with maximum 9 digits are allowed')
 def is_num(value):
     if not isinstance(value, float):
@@ -26,16 +26,31 @@ class LandmarkSerializer(serializers.ModelSerializer):
 
 
 class LandmarkCreateSerializer(serializers.ModelSerializer):
-    x_coordinates = serializers.DecimalField(validators=[is_field_empty, is_decimal_places, is_max_digits, is_num], required = True)
-    y_coordinates = serializers.DecimalField(validators=[is_field_empty, is_decimal_places, is_max_digits, is_num], required = True)
-
+    x_coordinates = serializers.DecimalField(
+        max_digits=9, decimal_places=6,
+        validators=[is_field_empty, is_decimal_places, is_max_digits, is_num],
+        required=True
+    )
+    y_coordinates = serializers.DecimalField(
+        max_digits=9, decimal_places=6,
+        validators=[is_field_empty, is_decimal_places, is_max_digits, is_num],
+        required=True
+    )
     class Meta:
         model = Landmark
         fields = ['landmark_id', 'x_coordinates', 'y_coordinates', 'exercise_id']
 # update serialiser to validate empty fields, with arguments optional
 class LandmarkUpdateSerializer(serializers.ModelSerializer):
-    x_coordinates = serializers.DecimalField(validators=[is_field_empty, is_decimal_places, is_max_digits, is_num], required = False)
-    y_coordinates = serializers.DecimalField(validators=[is_field_empty, is_decimal_places, is_max_digits, is_num], required = False)
+    x_coordinates = serializers.DecimalField(
+        max_digits=9, decimal_places=6,
+        validators=[is_field_empty, is_decimal_places, is_max_digits, is_num],
+        required=True
+    )
+    y_coordinates = serializers.DecimalField(
+        max_digits=9, decimal_places=6,
+        validators=[is_field_empty, is_decimal_places, is_max_digits, is_num],
+        required=True
+    )
 
     class Meta:
         model = Landmark
