@@ -6,6 +6,7 @@ from rest_framework import status
 from .models import Landmark
 from .serializer import LandmarkCreateSerializer, LandmarkSerializer, LandmarkUpdateSerializer
 # Create your views here.
+## to add show exercise as a json object when as a response
 class LandmarkCreateView(generics.CreateAPIView):
     permission_classes = [CustomDjangoModelPermissions]
     queryset = Landmark.objects.all()
@@ -33,10 +34,13 @@ class LandmarkGetLandmarkByIdView(generics.RetrieveAPIView):
     queryset=Landmark.objects.all()
     serializer_class = LandmarkSerializer
     lookup_field = "pk"
-    def get(self,request):
+    def get(self,request, *args, **kwargs):
         try:
-            landmark = request.landmark
-            return Response(LandmarkSerializer(landmark).data)
+            landmark = self.get_object()
+            serializer = self.get_serializer(landmark)
+            return Response(serializer.data)
+        except Landmark.DoesNotExist:
+            return Response({'detail': 'Landmark not found'}, status=status.HTTP_404_NOT_FOUND)
         except Exception as e:
             return Response({'detail': str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
@@ -44,14 +48,16 @@ class LandmarkUpdateDestroyView(generics.UpdateAPIView, generics.DestroyAPIView)
     permission_classes = [CustomDjangoModelPermissions]
     queryset=Landmark.objects.all()
     lookup_field = "pk"
-    def update(self, request):
+    def update(self, request, *args, **kwargs):
         instance = self.get_object()
         serializer = LandmarkUpdateSerializer(instance, data=request.data, partial=True)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-    def delete(self, request): 
+    def delete(self, request, *args, **kwargs): 
         instance = self.get_object()
+        serializer = LandmarkSerializer(instance)
+        serialized_data = serializer.data
         instance.delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
+        return Response(serialized_data, status=status.HTTP_204_NO_CONTENT)

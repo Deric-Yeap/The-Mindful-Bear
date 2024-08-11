@@ -1,11 +1,7 @@
 from rest_framework import serializers
 from .models import Exercise
+from ..common.validators import is_field_empty
 
-
-def is_field_empty(value):
-    if value is None or len(value) <=0:
-        raise serializers.ValidationError('field to be updated cannot be empty!')
-    
 # general serializer with no validation
 class ExerciseSerializer(serializers.ModelSerializer):
     class Meta:
@@ -13,7 +9,7 @@ class ExerciseSerializer(serializers.ModelSerializer):
         fields = ['exercise_id', 'audio_url', 'description']
 # create serializer to validate empty fields
 class ExerciseCreateSerializer(serializers.ModelSerializer):
-    audio_url = serializers.URLField(validators=[is_field_empty], required = True)
+    audio_url = serializers.URLField(validators=[is_field_empty], required = False)
     description = serializers.CharField(validators=[is_field_empty], required = True)
     class Meta:
         model = Exercise
@@ -29,4 +25,3 @@ class ExerciseUpdateSerializer(serializers.ModelSerializer):
             'audio_url': {'required': False},
             'description': {'required': False},
         }
-    

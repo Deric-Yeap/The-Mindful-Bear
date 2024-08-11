@@ -35,10 +35,13 @@ class ExerciseGetExerciseByIdView(generics.RetrieveAPIView):
     queryset=Exercise.objects.all()
     serializer_class = ExerciseSerializer
     lookup_field = "pk"
-    def get(self,request):
+    def get(self,request, *args, **kwargs):
         try:
-            exercise = request.exercise
-            return Response(ExerciseSerializer(exercise).data)
+            exercise = self.get_object()
+            serializer = self.get_serializer(exercise)
+            return Response(serializer.data)
+        except Exercise.DoesNotExist:
+            return Response({'detail': 'Exercise not found'}, status=status.HTTP_404_NOT_FOUND)
         except Exception as e:
             return Response({'detail': str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
@@ -47,18 +50,19 @@ class ExerciseUpdateDestroyView(generics.UpdateAPIView, generics.DestroyAPIView)
     permission_classes = [CustomDjangoModelPermissions]
     queryset=Exercise.objects.all()
     lookup_field = "pk"
-    def put(self, request):
+    def update(self, request,*args, **kwargs):
         instance = self.get_object()
-
         serializer = ExerciseUpdateSerializer(instance, data=request.data, partial=True)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-    def delete(self, request): 
+    def delete(self, request, *args, **kwargs): 
         instance = self.get_object()
+        serializer = ExerciseSerializer(instance)
+        serialized_data = serializer.data
         instance.delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
+        return Response(serialized_data, status=status.HTTP_204_NO_CONTENT)
 
 
 

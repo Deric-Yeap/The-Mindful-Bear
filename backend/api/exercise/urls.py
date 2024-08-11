@@ -4,6 +4,7 @@ from . import views
 urlpatterns = [
     path("create",views.ExerciseCreateView.as_view(),name="exercise-create"),
     path("get",views.ExerciseListView.as_view(),name="exercise-getExercises"),
-    path("getExerciseById", views.ExerciseGetExerciseByIdView.as_view(), name="exercise-get-exercise-by-id"),
-    path("update-delete", views.ExerciseUpdateDestroyView.as_view(), name="exercise-update-delete")
+    path("getExerciseById/<int:pk>", views.ExerciseGetExerciseByIdView.as_view(), name="exercise-get-exercise-by-id"),
+    path("update/<int:pk>", views.ExerciseUpdateDestroyView.as_view(), name="exercise-update"),
+    path("delete/<int:pk>", views.ExerciseUpdateDestroyView.as_view(), name="exercise-delete")
 ]
