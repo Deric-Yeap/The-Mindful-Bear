@@ -54,6 +54,7 @@ INSTALLED_APPS = [
     "api.session",
     "api.formSession",
     "api.journal",
+    "api.gender"
 ]
 
 REST_FRAMEWORK = {

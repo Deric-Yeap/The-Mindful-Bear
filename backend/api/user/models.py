@@ -27,7 +27,7 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     user_id = models.AutoField(primary_key=True)
     username = models.CharField(max_length=150, unique=True)
     date_of_birth = models.DateField()
-    gender = models.CharField(max_length=10)
+    gender = models.ForeignKey('gender.Gender', on_delete=models.CASCADE)
     department = models.CharField(max_length=150)
     is_staff = models.BooleanField(default=False)
     is_active = models.BooleanField(default=True)
