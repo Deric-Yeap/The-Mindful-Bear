@@ -7,7 +7,9 @@ from rest_framework.exceptions import NotFound
 from ..common.permission import CustomDjangoModelPermissions
 from rest_framework import status
 from django.contrib.auth import authenticate
+from django.utils import timezone
 from ..common.jwt import getMe
+from ..gender.serializer import GenderSerializer
 
 # Create your views here.
 class UserCreateView(generics.CreateAPIView):
@@ -65,6 +67,8 @@ class LoginView(generics.GenericAPIView):
         password = request.data.get('password')
         user = authenticate(username=username, password=password)
         if user is not None:
+            user.last_login = timezone.now()
+            user.save()
             refresh = CustomRefreshToken().for_user(user)
             return Response({
                 'refresh': str(refresh),
@@ -82,8 +86,10 @@ def get_tokens_for_user(user):
 class CustomRefreshToken(RefreshToken):
     def for_user(self, user):
         refresh = super().for_user(user)
+        gender_serializer = GenderSerializer(user.gender)
+
         #can edit these to add more claims in jwt
         refresh['date_of_birth'] = str(user.date_of_birth)
-        refresh['gender'] = user.gender
+        refresh['gender'] = gender_serializer.data
         refresh['department'] = user.department
         return refresh

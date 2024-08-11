@@ -1,10 +1,15 @@
 from rest_framework import serializers
 from .models import CustomUser
+from ..gender.serializer import GenderSerializer
 
 class CustomUserSerializer(serializers.ModelSerializer):
+    gender = GenderSerializer()
     class Meta:
         model = CustomUser
         fields = ['user_id', 'username', 'date_of_birth', 'gender', 'department']
+        
+        def get_gender(self, obj):
+            return str(obj.gender)
 
 class UserCreateSerializer(serializers.ModelSerializer):
     class Meta:
