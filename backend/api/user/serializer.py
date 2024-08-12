@@ -7,9 +7,6 @@ class CustomUserSerializer(serializers.ModelSerializer):
     class Meta:
         model = CustomUser
         fields = ['user_id', 'username', 'date_of_birth', 'gender', 'department']
-        
-        def get_gender(self, obj):
-            return str(obj.gender)
 
 class UserCreateSerializer(serializers.ModelSerializer):
     class Meta:
