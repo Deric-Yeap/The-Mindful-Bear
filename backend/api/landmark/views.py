@@ -6,7 +6,6 @@ from rest_framework import status
 from .models import Landmark
 from .serializer import LandmarkCreateSerializer, LandmarkSerializer, LandmarkUpdateSerializer
 # Create your views here.
-## to add show exercise as a json object when as a response
 class LandmarkCreateView(generics.CreateAPIView):
     permission_classes = [CustomDjangoModelPermissions]
     queryset = Landmark.objects.all()
@@ -43,7 +42,7 @@ class LandmarkGetLandmarkByIdView(generics.RetrieveAPIView):
             return Response({'detail': 'Landmark not found'}, status=status.HTTP_404_NOT_FOUND)
         except Exception as e:
             return Response({'detail': str(e)}, status=status.HTTP_400_BAD_REQUEST)
-
+#update and delete view
 class LandmarkUpdateDestroyView(generics.UpdateAPIView, generics.DestroyAPIView):
     permission_classes = [CustomDjangoModelPermissions]
     queryset=Landmark.objects.all()

@@ -1,38 +1,25 @@
 from rest_framework import serializers
+
+from ..exercise.serializer import ExerciseSerializer
+
+from ..exercise.models import Exercise
 from .models import Landmark
-from ..common.validators import is_field_empty, is_decimal_places, is_max_digits, is_num
+from ..common.validators import is_field_empty
 class LandmarkSerializer(serializers.ModelSerializer):
+    exercise = ExerciseSerializer(many=False, read_only=True)
     class Meta:
         model = Landmark
         fields = ['landmark_id', 'x_coordinates','y_coordinates', 'exercise']
 
 class LandmarkCreateSerializer(serializers.ModelSerializer):
-    x_coordinates = serializers.DecimalField(
-        max_digits=9, decimal_places=6,
-        validators=[is_field_empty, is_decimal_places, is_max_digits, is_num],
-        required=True
-    )
-    y_coordinates = serializers.DecimalField(
-        max_digits=9, decimal_places=6,
-        validators=[is_field_empty, is_decimal_places, is_max_digits, is_num],
-        required=True
-    )
-    #add validator for exercise relation
     class Meta:
         model = Landmark
         fields = ['landmark_id', 'x_coordinates', 'y_coordinates', 'exercise']
-# update serialiser to validate empty fields, with arguments optional
+    def to_representation(self, instance):
+        representation = super().to_representation(instance)
+        representation['exercise'] = ExerciseSerializer(instance.exercise).data
+        return representation
 class LandmarkUpdateSerializer(serializers.ModelSerializer):
-    x_coordinates = serializers.DecimalField(
-        max_digits=9, decimal_places=6,
-        validators=[is_field_empty, is_decimal_places, is_max_digits, is_num],
-        required=True
-    )
-    y_coordinates = serializers.DecimalField(
-        max_digits=9, decimal_places=6,
-        validators=[is_field_empty, is_decimal_places, is_max_digits, is_num],
-        required=True
-    )
     class Meta:
         model = Landmark
         fields = ['landmark_id', 'x_coordinates', 'y_coordinates', 'exercise']
@@ -41,3 +28,10 @@ class LandmarkUpdateSerializer(serializers.ModelSerializer):
             'y_coordinates': {'required': False},
             'exercise': {'required': False}
         }
+    def to_representation(self, instance):
+        representation = super().to_representation(instance)
+        # Serialize the exercise field separately
+        representation['exercise'] = ExerciseSerializer(instance.exercise).data
+        return representation
+
+    
