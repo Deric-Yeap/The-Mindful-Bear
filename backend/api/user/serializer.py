@@ -1,9 +1,11 @@
 from rest_framework import serializers
 from .models import CustomUser
 from ..gender.serializer import GenderSerializer
+from ..department.serializer import DepartmentSerializer
 
 class CustomUserSerializer(serializers.ModelSerializer):
     gender = GenderSerializer()
+    department = DepartmentSerializer()
     class Meta:
         model = CustomUser
         fields = ['user_id', 'email', 'date_of_birth', 'gender', 'department']

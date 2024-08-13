@@ -10,6 +10,7 @@ from django.contrib.auth import authenticate
 from django.utils import timezone
 from ..common.jwt import getMe
 from ..gender.serializer import GenderSerializer
+from ..department.serializer import DepartmentSerializer
 
 # Create your views here.
 class UserCreateView(generics.CreateAPIView):
@@ -87,9 +88,10 @@ class CustomRefreshToken(RefreshToken):
     def for_user(self, user):
         refresh = super().for_user(user)
         gender_serializer = GenderSerializer(user.gender)
+        department_serializer = DepartmentSerializer(user.department)
 
         #can edit these to add more claims in jwt
         refresh['date_of_birth'] = str(user.date_of_birth)
         refresh['gender'] = gender_serializer.data
-        refresh['department'] = user.department
+        refresh['department'] = department_serializer.data
         return refresh
