@@ -7,6 +7,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.parsers import MultiPartParser, FormParser
 from .models import Journal
+from ..common.s3 import rsa_signer
 
 
 class JournalListView(APIView):
@@ -28,6 +29,8 @@ class UploadFileView(APIView):
     def post(self, request):
         serializer = JournalUploadFileSerializer(data=request.data, context={'request': request})
         if serializer.is_valid():
-            journal_entry = serializer.save()
-            return Response({'message': 'File uploaded successfully', 'journal_entry': JournalGetSerializer(journal_entry).data}, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            try: 
+                journal_entry = serializer.save()
+                return Response({'message': 'File uploaded successfully', 'journal_entry': JournalGetSerializer(journal_entry).data}, status=status.HTTP_201_CREATED)
+            except Exception as e:
+                return Response({'message': 'File upload failed', 'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

@@ -3,10 +3,10 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.db import models
 
 class CustomUserManager(BaseUserManager):
-    def create_user(self, username, password, **extra_fields):
-        if not username:
-            raise ValueError("The Username field must be set")
-        user = self.model(username=username, **extra_fields)
+    def create_user(self, email, password, **extra_fields):
+        if not email:
+            raise ValueError("The email field must be set")
+        user = self.model(email=email, **extra_fields)
         user.set_password(password)
         user.save(using=self._db)
         try:
@@ -14,18 +14,17 @@ class CustomUserManager(BaseUserManager):
             user.groups.add(staff_group)
         except ObjectDoesNotExist:
             print("The 'staff' group does not exist. Please create it.")
-
         return user
 
-    def create_superuser(self, username, password, **extra_fields):
+    def create_superuser(self, email, password, **extra_fields):
         extra_fields.setdefault('is_staff', True)
         extra_fields.setdefault('is_superuser', True)
 
-        return self.create_user(username, password, **extra_fields)
+        return self.create_user(email, password, **extra_fields)
 
 class CustomUser(AbstractBaseUser, PermissionsMixin):
     user_id = models.AutoField(primary_key=True)
-    username = models.CharField(max_length=150, unique=True)
+    email = models.CharField(max_length=150, unique=True)
     date_of_birth = models.DateField()
     gender = models.ForeignKey('gender.Gender', on_delete=models.CASCADE)
     department = models.CharField(max_length=150)
@@ -36,10 +35,10 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     updated_at = models.DateTimeField(auto_now=True)
 
 
-    USERNAME_FIELD = 'username'
+    USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['date_of_birth', 'gender', 'department']
 
     objects = CustomUserManager()
 
     def __str__(self):
-        return self.username
+        return self.email

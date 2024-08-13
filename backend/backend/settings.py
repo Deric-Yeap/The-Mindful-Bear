@@ -17,6 +17,7 @@ import os
 
 load_dotenv()
 
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -167,6 +168,7 @@ STATIC_URL = 'static/'
 # # AWS S3 Cloudfront
 
 # DEBUG = True
+CLOUDFRONT_KEY_ID = os.getenv("CLOUDFRONT_KEY_ID")
 AWS_ACCESS_KEY_ID = os.getenv("AWS_ACCESS_KEY_ID")
 AWS_SECRET_ACCESS_KEY = os.getenv("AWS_SECRET_ACCESS_KEY")
 AWS_STORAGE_BUCKET_NAME = os.getenv("AWS_STORAGE_BUCKET_NAME")
@@ -183,3 +185,4 @@ MEDIA_URL = f'https://{CLOUDFRONT_DOMAIN}/{MEDIA_LOCATION}/'
 DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
 
 AWS_PRESIGNED_EXPIRY = 3600
+

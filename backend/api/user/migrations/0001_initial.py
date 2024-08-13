@@ -30,7 +30,7 @@ class Migration(migrations.Migration):
                     ),
                 ),
                 ("user_id", models.AutoField(primary_key=True, serialize=False)),
-                ("username", models.CharField(max_length=150, unique=True)),
+                ("email", models.CharField(max_length=150, unique=True)),
                 ("date_of_birth", models.DateField()),
                 ("gender", models.CharField(max_length=10)),
                 ("department", models.CharField(max_length=150)),

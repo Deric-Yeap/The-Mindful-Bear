@@ -63,9 +63,9 @@ class LoginView(generics.GenericAPIView):
     authentication_classes = []
     permission_classes = []
     def post(self, request):
-        username = request.data.get('username')
+        email = request.data.get('email')
         password = request.data.get('password')
-        user = authenticate(username=username, password=password)
+        user = authenticate(email=email, password=password)
         if user is not None:
             user.last_login = timezone.now()
             user.save()
@@ -74,7 +74,7 @@ class LoginView(generics.GenericAPIView):
                 'refresh': str(refresh),
                 'access': str(refresh.access_token),
             })
-        return Response({'detail': 'Invalid username or password'}, status=status.HTTP_401_UNAUTHORIZED)
+        return Response({'detail': 'Invalid email or password'}, status=status.HTTP_401_UNAUTHORIZED)
     
 def get_tokens_for_user(user):
     refresh = RefreshToken.for_user(user)

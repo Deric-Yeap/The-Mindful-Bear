@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from .models import Journal
 from django.conf import settings
-from ..common.s3 import create_presigned_url, upload_fileobj, make_file_upload_path
+from ..common.s3 import create_presigned_url, upload_fileobj, make_file_upload_path, delete_s3_object
 
 class JournalGetSerializer(serializers.ModelSerializer):
     file_url = serializers.SerializerMethodField()
@@ -12,7 +12,7 @@ class JournalGetSerializer(serializers.ModelSerializer):
 
     def get_file_url(self, obj):
         if obj.audio_file_path:
-            return create_presigned_url(settings.AWS_STORAGE_BUCKET_NAME, obj.audio_file_path)
+            return create_presigned_url(obj.audio_file_path)
         return None
 
 class JournalCreateSerializer(serializers.ModelSerializer):
@@ -50,23 +50,28 @@ class JournalUploadFileSerializer(serializers.Serializer):
         file_name, object_path = make_file_upload_path(user, file.name)
         bucket = settings.AWS_STORAGE_BUCKET_NAME
 
-        if upload_fileobj(file, bucket, object_path):
-            if id:
-                try:
-                    journal_entry = Journal.objects.get(id=id, user_id=user)
-                    journal_entry.audio_file_path = object_path
-                    journal_entry.save()
-                except Journal.DoesNotExist:
-                    raise serializers.ValidationError("Journal entry does not exist.")
-            else:
-                journal_entry = Journal.objects.create(
-                    audio_file_path=object_path,
-                    emotion_id=1,  # hardcoded for now, can be changed later
-                    user_id=user
-                )
-            return journal_entry
-        else:
+        if not upload_fileobj(file, bucket, object_path):
             raise serializers.ValidationError("File upload to S3 failed")
+        
+        if id:
+            try:
+                journal_entry = Journal.objects.get(id=id, user_id=user)
+                if journal_entry.audio_file_path:
+                    delete_s3_object(bucket, journal_entry.audio_file_path)
+                journal_entry.audio_file_path = object_path
+                journal_entry.save()
+            except Journal.DoesNotExist:
+                raise serializers.ValidationError("Journal entry does not exist.")
+            except Exception as e:
+                raise serializers.ValidationError(e)
+        else:
+            journal_entry = Journal.objects.create(
+                audio_file_path=object_path,
+                emotion_id=1,  # hardcoded for now, can be changed later
+                user_id=user
+            )
+        
+        return journal_entry
 
 class JournalUpdateSerializer(serializers.ModelSerializer):
     class Meta:

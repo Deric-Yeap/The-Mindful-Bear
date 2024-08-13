@@ -6,3 +6,4 @@ backend/pyvenv.cfg
 /backend/Scripts
 *.sqlite3
 *.pyc
+*.pem

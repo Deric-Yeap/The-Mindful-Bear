@@ -6,16 +6,16 @@ class CustomUserSerializer(serializers.ModelSerializer):
     gender = GenderSerializer()
     class Meta:
         model = CustomUser
-        fields = ['user_id', 'username', 'date_of_birth', 'gender', 'department']
+        fields = ['user_id', 'email', 'date_of_birth', 'gender', 'department']
 
 class UserCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = CustomUser
-        fields = ['username', 'date_of_birth', 'gender', 'department', 'password']
+        fields = ['email', 'date_of_birth', 'gender', 'department', 'password']
 
     def create(self, validated_data):
         user = CustomUser.objects.create_user(
-            username=validated_data['username'],
+            email=validated_data['email'],
             date_of_birth=validated_data['date_of_birth'],
             gender=validated_data['gender'],
             department=validated_data['department'],
@@ -26,9 +26,9 @@ class UserCreateSerializer(serializers.ModelSerializer):
 class UserUpdateSerializer(serializers.ModelSerializer):
     class Meta:
         model = CustomUser
-        fields = ['username', 'date_of_birth', 'gender', 'department']
+        fields = ['email', 'date_of_birth', 'gender', 'department']
         extra_kwargs = {
-            'username': {'required': False},
+            'email': {'required': False},
             'date_of_birth': {'required': False},
             'gender': {'required': False},
             'department': {'required': False},
