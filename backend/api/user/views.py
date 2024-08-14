@@ -11,6 +11,7 @@ from django.utils import timezone
 from ..common.jwt import getMe
 from ..gender.serializer import GenderSerializer
 from ..department.serializer import DepartmentSerializer
+from datetime import datetime, timedelta
 
 # Create your views here.
 class UserCreateView(generics.CreateAPIView):
@@ -68,7 +69,13 @@ class LoginView(generics.GenericAPIView):
         password = request.data.get('password')
         user = authenticate(email=email, password=password)
         if user is not None:
-            user.last_login = timezone.now()
+            now = timezone.now()
+            yesterday = now - timedelta(days=1)
+            if user.last_login and user.last_login.date() == yesterday.date():
+                user.login_streak += 1
+            elif not user.last_login or user.last_login.date() != now.date():
+                user.login_streak = 1
+            user.last_login = now
             user.save()
             refresh = CustomRefreshToken().for_user(user)
             return Response({
