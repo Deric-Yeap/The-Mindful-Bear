@@ -8,5 +8,5 @@ backend/pyvenv.cfg
 *.pyc
 *.pem
 *.sqlite3
-
-
+/backend/venv
+*.DS_Store
