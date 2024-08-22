@@ -14,7 +14,7 @@ export default function App() {
             urbanist font types are declared in tailwindconfig
           </Text>
           <StatusBar style="auto" />
-          <Link href="/home" className="text-blue-300 text-lg">
+          <Link href="/home" className="text-kind-purple-40 text-lg">
             Jump to home
           </Link>
           <CustomButton
