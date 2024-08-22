@@ -51,12 +51,13 @@ INSTALLED_APPS = [
     "api.exercise",
     "api.form",
     "api.question",
-    "api.response",
     "api.session",
     "api.formSession",
     "api.journal",
     "api.gender",
-    "api.department"
+    "api.department",
+    "debug_toolbar",
+    "api.response"
 ]
 
 REST_FRAMEWORK = {
@@ -91,6 +92,7 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    'debug_toolbar.middleware.DebugToolbarMiddleware',
 ]
 
 ROOT_URLCONF = "backend.urls"
