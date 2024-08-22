@@ -52,7 +52,7 @@ INSTALLED_APPS = [
     "api.form",
     "api.question",
     "api.session",
-    "api.formSession",
+    "api.formQuestion",
     "api.journal",
     "api.gender",
     "api.department",

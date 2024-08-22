@@ -26,5 +26,5 @@ urlpatterns = [
     path("api/form/", include("api.form.urls")),
     path("api/question/", include("api.question.urls")),
     path("api/session/", include("api.session.urls")),
-    path("api/formSession/", include("api.formSession.urls")),
+    path("api/formQuestion/", include("api.formQuestion.urls")),
 ]

@@ -1,38 +1,58 @@
-from rest_framework import generics, status
+from django.shortcuts import render
+from rest_framework import generics
 from rest_framework.response import Response
+from rest_framework import status
 from .models import FormQuestion
+from api.question.models import Question
 from .serializer import FormQuestionSerializer
 
-# Get responses of a certain user based on a specific form with form_name='feedback'
-# TODO: need to wait for User Session Table
-# class UserFeedback(generics.ListAPIView):
-#     serializer_class = FormQuestionSerializer
-
-#     def get_queryset(self):
-#         user_id = self.kwargs['user_id']
-#         return FormQuestion.objects.filter(
-#             SessionID__user_id=user_id,
-#             SessionID__form_name__iexact='feedback'
-#         )
-
-# Get all feedback responses based on forms with form_name='feedback'
-class AllFeedbackResponsesList(generics.ListAPIView):
+class FormQuestionList(generics.ListAPIView):
     serializer_class = FormQuestionSerializer
 
     def get_queryset(self):
-        return FormQuestion.objects.filter(SessionID__form_name__iexact='feedback')
+        queryset = FormQuestion.objects.all()
+        session_id = self.request.query_params.get('session_id', None)
+        question_id = self.request.query_params.get('question_id', None)
 
-# Create - POST
+        # Filter queryset by session_id if provided
+        if session_id is not None:
+            queryset = queryset.filter(SessionID=session_id)
+        # Filter queryset by question_id if provided
+        if question_id is not None:
+            queryset = queryset.filter(QuestionID=question_id)
+
+        return queryset
+
 class FormQuestionCreate(generics.CreateAPIView):
+    queryset = FormQuestion.objects.all()
     serializer_class = FormQuestionSerializer
 
-    def create(self, request, *args, **kwargs):
-        serializer = self.get_serializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        self.perform_create(serializer)
-        headers = self.get_success_headers(serializer.data)
-        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
-
     def perform_create(self, serializer):
-        # You can add custom logic here before saving if needed
-        serializer.save()
+        question = Question.objects.get(pk=self.request.data['QuestionID'])
+        # Check if store_responses is True for the given question
+        if question.store_responses:
+            serializer.save()
+        else:
+            raise ValueError("store_responses is False for the given question.")
+
+class FormQuestionUpdate(generics.UpdateAPIView):
+    queryset = FormQuestion.objects.all()
+    serializer_class = FormQuestionSerializer
+
+    def put(self, request, *args, **kwargs):
+        question_id = request.data.get('QuestionID')
+        session_id = request.session.get('session_id')
+        response_data = request.data.get('Response')
+
+        # Retrieve the FormQuestion object based on QuestionID and SessionID
+        try:
+            form_question = FormQuestion.objects.get(QuestionID=question_id, SessionID=session_id)
+        except FormQuestion.DoesNotExist:
+            return Response({"detail": "FormQuestion not found."}, status=status.HTTP_404_NOT_FOUND)
+
+        # Update the response
+        form_question.Response = response_data
+        form_question.save()
+
+        serializer = self.get_serializer(form_question)
+        return Response(serializer.data, status=status.HTTP_200_OK)
