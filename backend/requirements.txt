@@ -9,3 +9,4 @@ python-dotenv
 django-storages
 boto3
 cryptography
+django-rest-passwordreset
