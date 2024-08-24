@@ -32,7 +32,7 @@
       [
         "@rnmapbox/maps",
         {
-          "RNMapboxMapsDownloadToken": "sk.ey.."
+          "RNMapboxMapsDownloadToken": ""
         }
       ]
     ]

@@ -1,15 +1,16 @@
-import * as dotenv from 'dotenv'
+import 'dotenv/config'
 
-// initialize dotenv
-dotenv.config()
-
-export default ({ config }) => ({
-  ...config,
-  slug: 'TheMindfulBear',
-  name: 'TheMindfulBear',
-  plugins: {
-    config: {
-      RNMapboxMapsDownloadToken: process.env.MAPBOX_API_KEY,
-    },
+export default () => ({
+  expo: {
+    name: 'TheMindfulBear',
+    slug: 'TheMindfulBear',
+    plugins: [
+      [
+        '@rnmapbox/maps',
+        {
+          RNMapboxMapsDownloadToken: process.env.RNMapboxMapsDownloadToken,
+        },
+      ],
+    ],
   },
 })
