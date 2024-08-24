@@ -29,11 +29,12 @@
     "plugins": [
       "expo-router",
       "expo-font",
-
-      "@rnmapbox/maps",
-      {
-        "RNMapboxMapsDownloadToken": ""
-      }
+      [
+        "@rnmapbox/maps",
+        {
+          "RNMapboxMapsDownloadToken": "sk.ey.."
+        }
+      ]
     ]
   }
 }
