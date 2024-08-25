@@ -3,8 +3,16 @@ import { ScrollView, Text, View } from 'react-native'
 import { Link, router } from 'expo-router'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import CustomButton from '../components/customButton'
+import { useDispatch, useSelector } from 'react-redux'
+import { setUserDetails } from '../redux/slices/userSlice'
 
 export default function App() {
+  const dispatch = useDispatch()
+  const user = useSelector((state) => state.user)
+
+  const handleUpdateUser = () => {
+    dispatch(setUserDetails({ email: 'test@example.com', userId: 55 }))
+  }
   return (
     <SafeAreaView className="h-full">
       <ScrollView>
@@ -24,6 +32,10 @@ export default function App() {
             textStyle="text-white"
             isLoading={false}
           />
+          <Text>User ID: {user.userId}</Text>
+          <Text>Email: {user.email}</Text>
+          <StatusBar style="auto" />
+          <CustomButton title="Update User" handlePress={handleUpdateUser} />
         </View>
       </ScrollView>
     </SafeAreaView>
