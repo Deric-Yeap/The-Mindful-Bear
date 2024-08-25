@@ -1,10 +1,10 @@
 from django.shortcuts import render
-from rest_framework import generics
+from rest_framework import generics, status
 from rest_framework.response import Response
-from rest_framework import status
 from .models import FormQuestion
 from api.question.models import Question
 from .serializer import FormQuestionSerializer
+from rest_framework.exceptions import ValidationError
 
 class FormQuestionList(generics.ListAPIView):
     serializer_class = FormQuestionSerializer
@@ -14,10 +14,8 @@ class FormQuestionList(generics.ListAPIView):
         session_id = self.request.query_params.get('session_id', None)
         question_id = self.request.query_params.get('question_id', None)
 
-        # Filter queryset by session_id if provided
         if session_id is not None:
             queryset = queryset.filter(SessionID=session_id)
-        # Filter queryset by question_id if provided
         if question_id is not None:
             queryset = queryset.filter(QuestionID=question_id)
 
@@ -28,12 +26,25 @@ class FormQuestionCreate(generics.CreateAPIView):
     serializer_class = FormQuestionSerializer
 
     def perform_create(self, serializer):
-        question = Question.objects.get(pk=self.request.data['QuestionID'])
-        # Check if store_responses is True for the given question
-        if question.store_responses:
-            serializer.save()
-        else:
-            raise ValueError("store_responses is False for the given question.")
+        session_id = self.request.data.get('session_id')
+        question_id = self.request.data.get('question_id')
+
+        if not session_id or not question_id:
+            raise ValidationError({"error": "session_id and question_id are required."})
+
+        try:
+            question = Question.objects.get(pk=question_id)
+        except Question.DoesNotExist:
+            raise ValidationError({"error": "Question not found."})
+
+        # Check if the associated form allows storing responses
+        form = question.form_id  # Assuming the Question model has a ForeignKey to Form
+        if not form.store_responses:
+            raise ValidationError({"error": "Responses cannot be stored for this form."})
+
+        # Save the FormQuestion instance
+        serializer.save(question=question)
+
 
 class FormQuestionUpdate(generics.UpdateAPIView):
     queryset = FormQuestion.objects.all()
@@ -44,13 +55,11 @@ class FormQuestionUpdate(generics.UpdateAPIView):
         session_id = request.session.get('session_id')
         response_data = request.data.get('Response')
 
-        # Retrieve the FormQuestion object based on QuestionID and SessionID
         try:
             form_question = FormQuestion.objects.get(QuestionID=question_id, SessionID=session_id)
         except FormQuestion.DoesNotExist:
             return Response({"detail": "FormQuestion not found."}, status=status.HTTP_404_NOT_FOUND)
 
-        # Update the response
         form_question.Response = response_data
         form_question.save()
 
