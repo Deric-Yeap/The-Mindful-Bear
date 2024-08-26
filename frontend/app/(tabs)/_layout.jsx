@@ -23,6 +23,15 @@ const TabsLayout = () => {
             ),
           }}
         />
+        <Tabs.Screen
+          name="admin"
+          options={{
+            title: 'Admin',
+            tabBarIcon: ({ color, size, focused }) => (
+                <MaterialCommunityIcons name={"account"} size={size} color={color} />
+            ),
+          }}
+        />
       </Tabs>
     </>
   )
