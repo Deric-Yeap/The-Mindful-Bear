@@ -2,26 +2,12 @@ import React from 'react';
 import { View, Text, ScrollView, TextInput, TouchableOpacity, Image } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
-import BackButton from '../../components/backButton';
+import TopBrownSearchBar from '../../components/topBrownSearchBar'; 
 
 const Landmark = () => {
   return (
     <SafeAreaView className="flex-1 bg-optimistic-gray-10">
-      <View className="bg-mindful-brown-100 p-4 rounded-b-3xl">
-        <BackButton title="Landmark Management"/>
-        {/* <Text className="text-white font-urbanist-bold text-2xl">Landmark Management</Text> */}
-        <View className="flex-row items-center mt-4">
-          <TextInput
-            placeholder="Search anything..."
-            placeholderTextColor="#F7F4F2"
-            className="flex-1 bg-mindful-brown-70 p-3 rounded-full text-white"
-          />
-          <TouchableOpacity className="ml-2 p-3 bg-mindful-brown-80 rounded-full">
-            <MaterialIcons name="search" size={24} color="#F7F4F2" />
-          </TouchableOpacity>
-        </View>
-      </View>
-
+    <TopBrownSearchBar title="Landmark Management" />
       <ScrollView className="px-4 mt-4">
         <Text className="text-serenity-green-70 font-urbanist-bold text-lg mb-4">Create New Landmark</Text>
         
