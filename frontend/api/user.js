@@ -8,3 +8,7 @@ export const getMe = (data) => {
   return axiosInstance.get('users/getMe', data)
 }
 
+export const create = (data) => {
+  return axiosInstance.post('users/create', data)
+}
+
