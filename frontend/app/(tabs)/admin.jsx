@@ -42,7 +42,7 @@ export default function Admin() {
             </View>
           </TouchableOpacity>
         </Link>
-        <Link href="/admin/form" asChild>
+        <Link href="/form" asChild>
           <TouchableOpacity className="flex-1 bg-empathy-orange-40 p-2 rounded-2xl ml-2">
             <View className="items-start">
               <Text className="text-empathy-orange-10 font-urbanist-bold text-lg">Form</Text>
