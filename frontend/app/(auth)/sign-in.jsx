@@ -1,4 +1,4 @@
-import { View, Text, ScrollView } from 'react-native'
+import { View, Text, ScrollView, StatusBar } from 'react-native'
 import { useState } from 'react'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import CustomButton from '../../components/customButton'
@@ -37,10 +37,11 @@ const SignIn = () => {
   return (
     // <SafeAreaView className="relative h-full bg-mindful-brown-10">
     <ScrollView>
+      <StatusBar barStyle="light-content" />
       <View className="absolute top-[-500px] left-0 right-0 items-center z-10">
         <View className="bg-mindful-brown-80 h-[150vw] w-[150vw] rounded-full"></View>
       </View>
-      <View className="min-h-[100vh] justify-center items-center mx-5">
+      <View className="min-h-[78vh] mt-[25vh] items-center mx-5">
         <Text className="font-urbanist-extra-bold text-3xl text-mindful-brown-80 pb-10">
           Sign In
         </Text>
@@ -51,6 +52,8 @@ const SignIn = () => {
           handleChange={(value) => setForm({ ...form, email: value })}
           customStyles="w-full pb-4"
           keyboardType="email-address"
+          placeHolder="Enter your email address"
+          errorMessage="If you want to hide it pass in nothing to errorMessage :)"
         />
         <FormField
           title="Password"
