@@ -17,6 +17,8 @@
      ```bash
      python3.12 -m venv venv
      ```
+   - https://docs.expo.dev/get-started/set-up-your-environment/?platform=android&device=simulated&mode=development-build&buildEnv=local
+   
 
 ---
 
@@ -51,6 +53,15 @@
 **4. Verify:**
    - Django administration can be found at http://127.0.0.1:8000/admin/
 ---
+
+**5. Start the Andriod Emulator**
+   - On another terminal:
+   - ```bash
+    cd frontend
+    npm install
+    npx expo run:android
+    ```
+   
 
 ### Stopping the Application
 
