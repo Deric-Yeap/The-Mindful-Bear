@@ -17,6 +17,7 @@
      ```bash
      python3.12 -m venv venv
      ```
+**2. Setting up the mobile android emulator:**
    - https://docs.expo.dev/get-started/set-up-your-environment/?platform=android&device=simulated&mode=development-build&buildEnv=local
    
 
