@@ -7,7 +7,7 @@ const BackButton = ({ title })  => {
     const navigation = useNavigation();
 
     return (
-      <View className="flex-row items-center p-4">
+      <View className="flex-row items-center p-2">
         <TouchableOpacity
           onPress={() => navigation.goBack()}
           className="p-3 bg-mindful-brown-80 rounded-full mr-2"
