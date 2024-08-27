@@ -1,8 +1,8 @@
-import { Text, View } from 'react-native'
+import { Text } from 'react-native'
 import React from 'react'
 import { Slot } from 'expo-router'
-import { store } from '../redux/store';
-import { Provider } from 'react-redux';
+import { store } from '../redux/store'
+import { Provider } from 'react-redux'
 import {
   useFonts,
   Urbanist_100Thin,

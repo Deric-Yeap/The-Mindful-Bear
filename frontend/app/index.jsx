@@ -27,7 +27,7 @@ export default function App() {
           </Link>
           <CustomButton
             title="Map"
-            handlePress={() => router.push('/(map)/maps')}
+            handlePress={() => router.push('/(map)/map')}
             buttonStyle="w-60"
             textStyle="text-white"
             isLoading={false}

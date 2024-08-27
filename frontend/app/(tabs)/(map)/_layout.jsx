@@ -1,11 +1,10 @@
 import { Stack } from 'expo-router'
 
-
 const MapLayout = () => {
   return (
     <>
       <Stack>
-        <Stack.Screen name="maps" options={{ headerShown: false }} />
+        <Stack.Screen name="map" options={{ headerShown: false }} />
       </Stack>
     </>
   )
