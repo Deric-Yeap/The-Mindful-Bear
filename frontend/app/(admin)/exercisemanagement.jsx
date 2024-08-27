@@ -15,7 +15,7 @@ const ExerciseManagement = () => {
 
       <ScrollView style={{ flex: 1, backgroundColor: colors.optimisticGray10, borderRadius: 40 }}>
 
-        <View style={{ backgroundColor: colors.mindfulBrown90, padding: 16, borderBottomLeftRadius: 32, borderBottomRightRadius: 32 }}>
+        <View style={{ backgroundColor: colors.mindfulBrown, padding: 16, borderBottomLeftRadius: 32, borderBottomRightRadius: 32 }}>
           <BackButton title="Exercise Management" />
           <View style={{ flexDirection: "row", alignItems: "center", marginTop: 16 }}>
             <TextInput
