@@ -1,39 +1,28 @@
 import { Tabs } from 'expo-router'
-import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons'
-import { StyleSheet } from 'react-native'
 import TabBar from '../../components/tabBar'
 
 const TabsLayout = () => {
+  const TabsScreens = {
+    home: 'Home',
+    '(map)': 'Map',
+    admin: 'Admin',
+    settings: 'Settings',
+  }
   return (
     <Tabs
       tabBar={(props) => <TabBar {...props} />}
       screenOptions={{ headerShown: false }}
     >
-      <Tabs.Screen
-        name="home"
-        options={{
-          title: 'Home',
-          headerShown: false,
-        }}
-      />
-      <Tabs.Screen
-        name="(map)"
-        options={{ title: 'Map', headerShown: false }}
-      />
-      <Tabs.Screen
-        name="admin"
-        options={{
-          title: 'Admin',
-          headerShown: false,
-        }}
-      />
-      <Tabs.Screen
-        name="settings"
-        options={{
-          title: 'Settings',
-          headerShown: false,
-        }}
-      />
+      {Object.entries(TabsScreens).map(([name, title]) => (
+        <Tabs.Screen
+          key={name}
+          name={name}
+          options={{
+            title: title,
+            headerShown: false,
+          }}
+        />
+      ))}
     </Tabs>
   )
 }
