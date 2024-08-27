@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, FlatList } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import TopBrownSearchBar from '../../components/topBrownSearchBar'; 
+import BrownPageTitlePortion from '../../components/brownPageTitlePortion'; 
+import StatusBarComponent from '../../components/darkThemStatusBar'; 
 
 const CreateForm = () => {
   const [userState, setUserState] = useState([
@@ -14,7 +15,8 @@ const CreateForm = () => {
 
   return (
     <SafeAreaView className="flex-1 bg-optimistic-gray-10">
-      <TopBrownSearchBar title="Create New Form" />
+       <StatusBarComponent barStyle="light-content" backgroundColor="#251404" />
+       <BrownPageTitlePortion title="Form Management" />
       
     </SafeAreaView>
   );
