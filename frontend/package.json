@@ -13,7 +13,7 @@
     "@reduxjs/toolkit": "^2.2.7",
     "axios": "^1.7.5",
     "expo": "~51.0.28",
-    "expo-app-loading": "^2.1.1",
+    "expo-app-loading": "^1.0.3",
     "expo-constants": "~16.0.2",
     "expo-dev-client": "~4.0.24",
     "expo-font": "~12.0.9",
