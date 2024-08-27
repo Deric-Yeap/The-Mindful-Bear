@@ -1,10 +1,26 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, ScrollView, TextInput, TouchableOpacity, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import BackButton from '../../components/backButton';  // Adjust the import path if needed
+import { getExercises } from '../../api/exercise';  // Import the new API function
 
 const ExerciseManagement = () => {
+  const [exercises, setExercises] = useState([]);
+
+  useEffect(() => {
+    const fetchExercises = async () => {
+      try {
+        const data = await getExercises();
+        setExercises(data);
+      } catch (error) {
+        console.error('Failed to load exercises:', error);
+      }
+    };
+
+    fetchExercises();
+  }, []);
+
   const handleExercisePress = (exercise) => {
     // Handle navigation to the exercise details page
     console.log(`Navigating to details for ${exercise}`);
@@ -38,13 +54,13 @@ const ExerciseManagement = () => {
             </TouchableOpacity>
           </View>
 
-          {['Exercise 1', 'Exercise 2', 'Exercise 3'].map((exercise, index) => (
+          {exercises.map((exercise, index) => (
             <TouchableOpacity 
               key={index} 
               style={styles.exerciseCard} 
-              onPress={() => handleExercisePress(exercise)}
+              onPress={() => handleExercisePress(exercise.exercise_name)}
             >
-              <Text style={styles.exerciseText}>{exercise}</Text>
+              <Text style={styles.exerciseText}>{exercise.exercise_name}</Text>
               <MaterialIcons
                 name="chevron-right"
                 size={24}
