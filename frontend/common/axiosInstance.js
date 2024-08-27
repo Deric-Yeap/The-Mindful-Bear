@@ -1,5 +1,5 @@
 import axios from 'axios'
-import { store } from '..//redux/store'
+import { store } from '../redux/store'
 
 const axiosInstance = axios.create({
   baseURL: 'http://10.0.2.2:8000/api/',
@@ -21,7 +21,12 @@ axiosInstance.interceptors.request.use(
     }
     return config
   },
-  (error) => {
+  (error) => {    
+    if (error.response && error.response.data && error.response.data.error_description) {
+      console.error('API Error:', error.response.data.error_description)
+    } else {
+      console.error('API Error:', error.message)
+    }
     return Promise.reject(error)
   }
 )
