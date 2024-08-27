@@ -6,10 +6,10 @@ const Loading = ({ title }) => {
   return (
     <View className="flex-1 justify-center items-center">
       <LottieView
-        source={require('../assets/Animation.json')}
+        source={require('../assets/animatedBear.json')}
         autoPlay
         loop
-        className="w-48 h-48" // Approximately 200px
+        className="w-60 h-60" // Approximately 200px
       />
       <View className="flex flex-row items-center mt-[-80]">
         <Text className="text-lg font-bold mr-[-20]">Loading</Text> 
