@@ -1,28 +1,51 @@
 import { View, Text, ScrollView, StatusBar } from 'react-native'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { router } from 'expo-router'
 
 import CustomButton from '../../components/customButton'
 import FormField from '../../components/formField'
+import Dropdown from '../../components/dropdown'
+import DatePicker from '../../components/datePicker'
 import { create } from '../../api/user'
+import { listGender } from '../../api/gender'
+import { listDepartment } from '../../api/department'
 
 const SignUp = () => {
   const [form, setForm] = useState({
     email: '',
+    name: '',
     password: '',
-    confirmPassword: '',
+    confirm_password: '',
+    gender: '',
+    department: '',
+    date_of_birth: new Date().toISOString().split('T')[0],
   })
+
+  const [genderList, setGenderList] = useState([])
+  const [departmentList, setDepartmentList] = useState([])
+  const [errorMessage, setErrorMessage] = useState({})
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const genderResponse = await listGender()
+        setGenderList(genderResponse)
+
+        const departmentResponse = await listDepartment()
+        setDepartmentList(departmentResponse)
+      } catch (error) {
+        console.error(error)
+      }
+    }
+    fetchData()
+  }, [])
 
   const handleSignUp = async () => {
     try {
-      const response = await create({
-        email: form.email,
-        password: form.password,
-        confirm_password: form.confirmPassword,
-      })
+      const response = await create(form)
       router.push('/sign-in')
     } catch (error) {
-      console.error(error)
+      setErrorMessage(error.response.data.error_description)
     }
   }
   return (
@@ -42,6 +65,7 @@ const SignUp = () => {
           handleChange={(value) => setForm({ ...form, email: value })}
           customStyles="w-full pb-4"
           keyboardType="email-address"
+          errorMessage={errorMessage.email ? errorMessage.email : ''}
         />
         <FormField
           title="Password"
@@ -49,14 +73,58 @@ const SignUp = () => {
           value={form.password}
           handleChange={(value) => setForm({ ...form, password: value })}
           customStyles="w-full pb-6"
+          errorMessage={errorMessage.password ? errorMessage.password : ''}
         />
         <FormField
           title="Password Confirmation"
           iconName="lock-outline"
-          value={form.confirmPassword}
-          handleChange={(value) => setForm({ ...form, confirmPassword: value })}
+          value={form.confirm_password}
+          handleChange={(value) =>
+            setForm({ ...form, confirm_password: value })
+          }
           customStyles="w-full pb-6"
+          errorMessage={
+            errorMessage.confirm_password ? errorMessage.confirm_password : ''
+          }
         />
+        <FormField
+          title="Name"
+          iconName="card-account-details-outline"
+          value={form.name}
+          handleChange={(value) => setForm({ ...form, name: value })}
+          customStyles="w-full pb-4"
+          errorMessage={errorMessage.name ? errorMessage.name : ''}
+        />
+
+        <Dropdown
+          title="Department"
+          data={departmentList}
+          customStyles="w-full pb-6"
+          placeHolder="Select Department"
+          handleSelect={(value) => setForm({ ...form, department: value })}
+          errorMessage={errorMessage.department ? errorMessage.department : ''}
+        />
+
+        <Dropdown
+          title="Gender"
+          data={genderList}
+          customStyles="w-full pb-6"
+          placeHolder="Select Gender"
+          handleSelect={(value) => setForm({ ...form, gender: value })}
+          errorMessage={errorMessage.gender ? errorMessage.gender : ''}
+        />
+
+        <DatePicker
+          title="Date of Birth"
+          customStyles="w-full pb-6"
+          onDateChange={(selectedDate) => {
+            setForm({
+              ...form,
+              date_of_birth: selectedDate.toISOString().split('T')[0],
+            })
+          }}
+        />
+
         <CustomButton
           title="Sign Up"
           handlePress={handleSignUp}

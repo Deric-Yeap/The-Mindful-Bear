@@ -14,9 +14,7 @@ axiosInstance.interceptors.request.use(
     const state = store.getState()
     const token = state.auth.token
     config.headers['X-Request-Timestamp'] = new Date().toISOString()
-    console.log(token)
     if (token) {
-      console.log(token)
       config.headers['Authorization'] = `Bearer ${token}`
     }
     return config
