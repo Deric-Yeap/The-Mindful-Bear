@@ -25,7 +25,7 @@ const Landmark = () => {
       </View>
 
       <ScrollView className="px-4 mt-4">
-      <Link href="/admin/createlandmark" asChild>
+      <Link href="/landmarkCreator" asChild>
           <TouchableOpacity className="mb-4">
             <Text className="text-serenity-green-70 font-urbanist-bold text-lg mb-4">Create New Landmark</Text>
           </TouchableOpacity>
