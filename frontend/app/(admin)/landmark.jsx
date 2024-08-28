@@ -4,6 +4,8 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import BackButton from '../../components/backButton';
 import SearchBar from '../../components/searchBar';
 import { getLandmarks } from '../../api/landmark';
+import MaterialIcons from '@expo/vector-icons/MaterialIcons';
+import TopBrownSearchBar from '../../components/topBrownSearchBar'; 
 
 const Landmark = () => {  
   const [landmarks, setLandmarks] = useState([]);
@@ -24,11 +26,7 @@ const Landmark = () => {
 
   return (
     <SafeAreaView className="flex-1 bg-optimistic-gray-10">
-      <View className="bg-mindful-brown-80 p-4 rounded-b-3xl">
-        <BackButton title="Landmark Management"/>
-        <SearchBar />
-      </View>
-
+    <TopBrownSearchBar title="Landmark Management" />
       <ScrollView className="px-4 mt-4">
         <Text className="text-serenity-green-60 font-urbanist-bold text-lg mb-4 text-right">Create New Landmark</Text>
         
