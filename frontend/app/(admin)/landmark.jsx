@@ -6,6 +6,7 @@ import SearchBar from '../../components/searchBar';
 import { getLandmarks } from '../../api/landmark';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import TopBrownSearchBar from '../../components/topBrownSearchBar'; 
+import StatusBarComponent from '../../components/darkThemStatusBar'; 
 
 const Landmark = () => {  
   const [landmarks, setLandmarks] = useState([]);
@@ -26,10 +27,10 @@ const Landmark = () => {
 
   return (
     <SafeAreaView className="flex-1 bg-optimistic-gray-10">
+      <StatusBarComponent barStyle="light-content" backgroundColor="#251404" />
     <TopBrownSearchBar title="Landmark Management" />
       <ScrollView className="px-4 mt-4">
-        <Text className="text-serenity-green-60 font-urbanist-bold text-lg mb-4 text-right">Create New Landmark</Text>
-        
+        <Text className="text-serenity-green-60 font-urbanist-bold text-lg mb-4 text-right">Create New Landmark</Text>        
         <View className="flex-wrap flex-row justify-between">
           {landmarks.map((landmark, index) => (
             <View key={index} className="bg-mindful-brown-20 rounded-2xl w-[48%] mb-4">
