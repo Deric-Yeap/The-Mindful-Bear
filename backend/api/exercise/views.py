@@ -54,7 +54,21 @@ class ExerciseUpdateDestroyView(generics.UpdateAPIView, generics.DestroyAPIView)
         instance = self.get_object()
         serializer = ExerciseUpdateSerializer(instance, data=request.data, partial=True)
         if serializer.is_valid():
+            validated_data = serializer.validated_data
             serializer.save()
+            landmark_ids = validated_data.get('landmarks', [])
+            if landmark_ids is not None:
+                # If an empty list is provided, remove all landmarks associated with the exercise
+                if not landmark_ids:
+                    instance.landmarks.update(exercise=None)  # Remove all landmarks
+                else:
+                    current_landmarks = instance.landmarks.all()
+                    for landmark_id in current_landmarks:
+                        if landmark_id not in landmark_ids:
+                            landmark = Landmark.objects.get(pk=landmark_id)
+                            landmark.exercise = None  # Remove the association
+                            landmark.save()
+                    
             return Response(serializer.data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     def delete(self, request, *args, **kwargs): 
