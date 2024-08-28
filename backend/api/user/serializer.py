@@ -5,10 +5,10 @@ from ..department.serializer import DepartmentSerializer
 
 class CustomUserSerializer(serializers.ModelSerializer):
     gender = GenderSerializer()
-    department = DepartmentSerializer()
+    department = DepartmentSerializer()    
     class Meta:
         model = CustomUser
-        fields = ['user_id', 'email', 'date_of_birth', 'gender', 'department']
+        fields = ['user_id', 'email', 'date_of_birth', 'gender', 'department', 'is_staff']
 
 class UserCreateSerializer(serializers.ModelSerializer):
     confirm_password = serializers.CharField(write_only=True)
@@ -49,5 +49,5 @@ class UserUpdateSerializer(serializers.ModelSerializer):
             'email': {'required': False},
             'date_of_birth': {'required': False},
             'gender': {'required': False},
-            'department': {'required': False},
+            'department': {'required': False},            
         }

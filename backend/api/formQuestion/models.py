@@ -11,7 +11,7 @@ class FormQuestion(models.Model):
         unique_together = ('SessionID', 'QuestionID')
 
     def __str__(self):
-        return f"{self.SessionID} - {self.QuestionID}"
+        return f"Session Id: {self.SessionID} - QuestionId:{self.QuestionID}"
     
 
 
