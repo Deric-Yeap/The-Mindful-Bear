@@ -45,10 +45,10 @@ const ExerciseManagement = () => {
   }
 
   const handleExercisePress = (exercise) => {
-    console.log(`Navigating to details for ${exercise.description}`);
+    console.log(`Navigating to exercise details:`, exercise);
     router.push({
       pathname: '/exercisedetails',
-      params: { exercise },
+      params: { exercise: JSON.stringify(exercise)},
     });
   };
 

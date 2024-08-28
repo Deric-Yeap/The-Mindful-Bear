@@ -1,30 +1,24 @@
-import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, TextInput, ScrollView } from 'react-native';
+import React from 'react';
+import { View, Text, TextInput, ScrollView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRoute } from '@react-navigation/native';
 import { colors } from '../../common/styles';
 import TopBrownSearchBar from '../../components/topBrownSearchBar';
 
 const ExerciseDetails = () => {
+
   const route = useRoute();
-  const { exercise } = route.params;
+  console.log('Route Params:', route.params); // Log route params to inspect the content
 
-  const [isEditing, setIsEditing] = useState(false);
-  const [exerciseName, setExerciseName] = useState(exercise.description); // Use exercise.description for the name as placeholder
-  const [description, setDescription] = useState(exercise.description);
-  const [error, setError] = useState(null);  // Initialize the error state
+  const exercise = JSON.parse(route.params.exercise); // Parse the string back to an object
+  console.log('Exercise received:', exercise);
 
-  const handleSave = () => {
-    if (!exerciseName.trim()) {
-      setError('Exercise name cannot be empty.');
-      return;
-    }
-    // Reset error and set to non-editable mode
-    setError(null);
-    setIsEditing(false);
-    // API call or further processing for saving changes can be done here
-    console.log('Saved:', { exerciseName, description });
-  };
+  const exerciseName = exercise.description || "dd"; // Fallback to empty string if description is missing
+  const description = exercise.description || "ii";
+  const audioFileName = exercise.audio_url || "audio is empty.mp4"; // Fallback if audio_url is empty
+  console.log('Exercise ID:', exerciseName);
+  
+  const error = null;  // No error handling needed since editing is removed
 
   return (
     <SafeAreaView className="flex-1 bg-optimistic-gray-10">
@@ -33,62 +27,57 @@ const ExerciseDetails = () => {
         
         <View className="px-4 pt-5 pb-10">
           {/* Exercise Name Section */}
-          <Text className="text-mindful-brown-100 text-lg mb-3">Exercise Name</Text>
-          <View className="bg-gray-300 rounded-3xl px-4 py-3 mb-6">
+          <Text className="text-mindful-brown-80 text-lg mb-3">Exercise Name</Text>
+          <View className="bg-optimistic-gray-20 rounded-3xl px-4 py-3 mb-6">
             <TextInput
               value={exerciseName}
-              editable={isEditing}
-              onChangeText={setExerciseName}
-              placeholder={exercise.description}  // Placeholder from API
-              className="text-mindful-brown-100"
-              placeholderTextColor={colors.optimisticGr}
-              style={{ backgroundColor: isEditing ? colors.optimisticGray20 : 'transparent' }}
+              editable={false}  // Non-editable
+              placeholder="Enter exercise name"  // Clear placeholder for better visibility
+              className="text-mindful-brown-80"
+              placeholderTextColor={colors.optimisticGray100}
+              style={{ backgroundColor: 'transparent' }}
             />
           </View>
 
           {/* Description Section */}
-          <Text className="text-mindful-brown-100 text-lg mb-3">Description</Text>
-          <View className="bg-white rounded-[32px] p-4 mb-6">
-            <View className="bg-optimistic-gray-10 border-mindful-brown-100 rounded-2xl border px-4 py-3">
+          <Text className="text-mindful-brown-80 text-lg mb-3">Description</Text>
+          <View className="bg-optimistic-gray-30 rounded-[32px] p-3 mb-6">
+            <View className="bg-optimistic-gray-20 border-optimistic-gray-30 rounded-2xl border px-4 py-3">
               <TextInput
                 value={description}
-                editable={isEditing}
-                onChangeText={setDescription}
+                editable={false}  // Non-editable
                 multiline
-                placeholder={exercise.description}  // Placeholder from API
+                placeholder="Enter description here"  // Clear placeholder for better visibility
                 className="text-mindful-brown-100"
                 placeholderTextColor={colors.optimisticGray50}
-                style={{ backgroundColor: isEditing ? colors.optimisticGray20 : 'transparent' }}
+                style={{ backgroundColor: 'transparent' }}
               />
             </View>
           </View>
 
           {/* Error Message */}
           {error && (
-            <Text className="text-red-500 mb-3">{error}</Text>
+            <Text className="text-present-red-50 mb-3">{error}</Text>
           )}
 
           {/* Upload Audio Section */}
           <View className="flex-row justify-between items-center mb-6">
-            <TouchableOpacity className="w-1/2 flex-row justify-center items-center bg-serenity-green-50 rounded-full py-3 mr-4 shadow-lg">
+            <View className="flex-1 flex-row justify-center items-center bg-serenity-green-50 rounded-full py-3 mr-4 shadow-lg">
               <Text className="text-white text-lg">Upload Audio</Text>
-            </TouchableOpacity>
-            <Text className="text-mindful-brown-100 text-lg">123.mp4</Text>
+            </View>
+            <Text className="text-mindful-brown-100 text-lg">{audioFileName}</Text> 
           </View>
 
           {/* Assign to Landmark Section */}
           <Text className="text-mindful-brown-100 text-lg mb-3">Assign to which landmark?</Text>
-          <TouchableOpacity className="w-[187px] flex-row justify-between items-center bg-serenity-green-50 rounded-lg px-4 py-3 mb-12 shadow-lg">
+          <View className="w-[187px] flex-row justify-between items-center bg-serenity-green-50 rounded-lg px-4 py-3 mb-12 shadow-lg">
             <Text className="text-white text-lg">Select Landmark</Text>
-          </TouchableOpacity>
+          </View>
 
           {/* Save/Change Button */}
-          <TouchableOpacity
-            onPress={isEditing ? handleSave : () => setIsEditing(true)}
-            className="bg-mindful-brown-100 rounded-full py-5 flex-row justify-center items-center shadow-lg"
-          >
-            <Text className="text-white text-lg">{isEditing ? 'Save' : 'Change'}</Text>
-          </TouchableOpacity>
+          <View className="bg-mindful-brown-80 rounded-full py-4 w-2/3 self-center flex-row justify-center items-center shadow-lg">
+            <Text className="text-optimistic-gray-10 text-lg font-bold">View Only</Text>
+          </View>
         </View>
       </ScrollView>
     </SafeAreaView>

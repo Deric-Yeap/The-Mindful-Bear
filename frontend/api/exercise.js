@@ -1,11 +1,13 @@
+// api/exercise.js
+
 import axiosInstance from '../common/axiosInstance';
 
-export const getExercises = async () => {
+// Function to fetch exercises
+export const fetchExercises = async () => {
   try {
-    const response = await axiosInstance.get('/exercise/get');
-    return response.data;  // Assuming the data is in response.data
+    const response = await axiosInstance.get('exercise/get');
+    return response; // Return the fetched exercises
   } catch (error) {
-    console.error('Error fetching exercises:', error);
-    throw error;
+    throw error; // Throw error to be handled in the calling function
   }
 };
