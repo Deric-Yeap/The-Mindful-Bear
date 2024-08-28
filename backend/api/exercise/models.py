@@ -6,6 +6,7 @@ from django.db.models.functions import Length
 models.CharField.register_lookup(Length)
 class Exercise(models.Model):
     exercise_id = models.AutoField(primary_key=True)
+    exercise_name = models.CharField(max_length=250)
     audio_url = models.URLField()
     description = models.CharField(max_length=250)
 
