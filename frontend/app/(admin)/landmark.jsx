@@ -2,9 +2,11 @@ import React from 'react';
 import { View, Text, ScrollView, TextInput, TouchableOpacity, Image } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
+import { Link } from 'expo-router';
 import BackButton from '../../components/backButton';
 
 const Landmark = () => {
+  
   return (
     <SafeAreaView className="flex-1 bg-optimistic-gray-10">
       <View className="bg-mindful-brown-100 p-4 rounded-b-3xl">
@@ -23,7 +25,11 @@ const Landmark = () => {
       </View>
 
       <ScrollView className="px-4 mt-4">
-        <Text className="text-serenity-green-70 font-urbanist-bold text-lg mb-4">Create New Landmark</Text>
+      <Link href="/admin/createlandmark" asChild>
+          <TouchableOpacity className="mb-4">
+            <Text className="text-serenity-green-70 font-urbanist-bold text-lg mb-4">Create New Landmark</Text>
+          </TouchableOpacity>
+        </Link>
         
         <View className="flex-wrap flex-row justify-between">
           {['Landmark 1', 'Landmark 2', 'Landmark 3', 'Landmark 4'].map((landmark, index) => (
