@@ -9,12 +9,12 @@ class LandmarkSerializer(serializers.ModelSerializer):
     exercise = ExerciseSerializer(many=False, read_only=True)
     class Meta:
         model = Landmark
-        fields = ['landmark_id', 'x_coordinates','y_coordinates', 'exercise']
+        fields = ['landmark_id', 'landmark_name', 'image_file', 'x_coordinates','y_coordinates', 'exercise']
 
 class LandmarkCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Landmark
-        fields = ['landmark_id', 'x_coordinates', 'y_coordinates', 'exercise']
+        fields = ['landmark_id', 'landmark_name', 'image_file', 'x_coordinates', 'y_coordinates', 'exercise']
     def to_representation(self, instance):
         representation = super().to_representation(instance)
         representation['exercise'] = ExerciseSerializer(instance.exercise).data
@@ -22,8 +22,10 @@ class LandmarkCreateSerializer(serializers.ModelSerializer):
 class LandmarkUpdateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Landmark
-        fields = ['landmark_id', 'x_coordinates', 'y_coordinates', 'exercise']
+        fields = ['landmark_id', 'landmark_name', 'image_file', 'x_coordinates', 'y_coordinates', 'exercise']
         extra_kwargs = {
+            'landmark_name' : {'required': True}, 
+            'image_file' : {'required': False},
             'x_coordinates': {'required': False},
             'y_coordinates': {'required': False},
             'exercise': {'required': False}
