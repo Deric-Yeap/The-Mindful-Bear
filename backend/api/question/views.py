@@ -14,6 +14,10 @@ class FormGetQuestions(generics.ListAPIView):
     
 # Admin Side
 # Admin can create more questions
+class GetQuestions(generics.ListAPIView):
+    queryset = Question.objects.all()
+    serializer_class = QuestionSerializer
+    
 class CreateQuestion(generics.CreateAPIView):
     serializer_class = QuestionSerializer
 
