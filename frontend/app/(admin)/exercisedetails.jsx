@@ -13,7 +13,7 @@ const ExerciseDetails = () => {
   const exercise = JSON.parse(route.params.exercise); // Parse the string back to an object
   console.log('Exercise received:', exercise);
 
-  const exerciseName = exercise.description || "dd"; // Fallback to empty string if description is missing
+  const exerciseName = exercise.exercise_name || "dd"; // Fallback to empty string if description is missing
   const description = exercise.description || "ii";
   const audioFileName = exercise.audio_url || "audio is empty.mp4"; // Fallback if audio_url is empty
   console.log('Exercise ID:', exerciseName);
@@ -22,7 +22,7 @@ const ExerciseDetails = () => {
 
   return (
     <SafeAreaView className="flex-1 bg-optimistic-gray-10">
-      <ScrollView className="flex-1 bg-optimistic-gray-10 rounded-[40px]">
+      <ScrollView className="flex-1 bg-optimistic-gray-10">
         <TopBrownSearchBar title="Exercise Management" />
         
         <View className="px-4 pt-5 pb-10">
@@ -74,9 +74,17 @@ const ExerciseDetails = () => {
             <Text className="text-white text-lg">Select Landmark</Text>
           </View>
 
-          {/* Save/Change Button */}
+          {/* Change Button */}
           <View className="bg-mindful-brown-80 rounded-full py-4 w-2/3 self-center flex-row justify-center items-center shadow-lg">
-            <Text className="text-optimistic-gray-10 text-lg font-bold">View Only</Text>
+            <Text className="text-optimistic-gray-10 text-lg font-bold">Change</Text>
+          </View>
+
+           {/* Add margin here */}
+           <View className="my-2"></View>
+
+          {/* Delete Button */}
+          <View className="bg-optimistic-gray-80 rounded-full py-4 w-2/3 self-center flex-row justify-center items-center shadow-lg">
+            <Text className="text-optimistic-gray-10 text-lg font-bold">Delete</Text>
           </View>
         </View>
       </ScrollView>

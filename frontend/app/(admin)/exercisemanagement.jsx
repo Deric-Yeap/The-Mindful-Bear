@@ -54,7 +54,7 @@ const ExerciseManagement = () => {
 
   return (
     <SafeAreaView className="flex-1 bg-optimistic-gray-10">
-      <ScrollView className="flex-1 bg-optimistic-gray-10 rounded-[40px]">
+      <ScrollView className="flex-1 bg-optimistic-gray-10">
         
         <TopBrownSearchBar title="Exercise Management" />
         
