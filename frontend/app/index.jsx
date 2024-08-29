@@ -26,6 +26,13 @@ export default function App() {
             Jump to home
           </Link>
           <CustomButton
+            title="Map"
+            handlePress={() => router.push('/(map)/map')}
+            buttonStyle="w-60"
+            textStyle="text-white"
+            isLoading={false}
+          />
+          <CustomButton
             title="Get Started"
             handlePress={() => router.push('/(auth)/sign-in')}
             buttonStyle="w-60"
