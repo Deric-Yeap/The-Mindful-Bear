@@ -35,7 +35,7 @@ const SignIn = () => {
       else{
         router.push('/home')
       }
-      // router.push('/home')
+      
     } catch (error) {
       console.error(error)
     }
