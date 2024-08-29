@@ -19,22 +19,23 @@ axiosInstance.interceptors.request.use(
     }
     return config
   },
-  (error) => {    
-    if (error.response && error.response.data && error.response.data.error_description) {
-      console.error('API Error:', error.response.data.error_description)
-    } else {
-      console.error('API Error:', error.message)
-    }
+  (error) => {        
     return Promise.reject(error)
   }
 )
 
 axiosInstance.interceptors.response.use(
-  (response) => {
+  (response) => {    
     return response.data.data
   },
   (error) => {
-    return Promise.reject(error)
+    if (error.response && error.response.data && error.response.data.error_description) {
+      console.log('Error Description:', error.response.data.error_description);
+    } else {
+      console.log('Error:', error.message);
+    }
+    
+    return Promise.reject(error);
   }
 )
 

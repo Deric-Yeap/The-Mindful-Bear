@@ -3,14 +3,18 @@ import { View, Text, ScrollView, TouchableOpacity, Image } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import BackButton from '../../components/backButton';
 import SearchBar from '../../components/searchBar';
-import { getLandmarks } from '../../api/landmark';
+import { getLandmarks, deleteLandmark } from '../../api/landmark';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import TopBrownSearchBar from '../../components/topBrownSearchBar'; 
 import StatusBarComponent from '../../components/darkThemStatusBar'; 
+import CustomButton from '../../components/customButton';
+import SuccessMessage from '../../components/successMessage';
+import { Link } from 'expo-router'
 
 const Landmark = () => {  
   const [landmarks, setLandmarks] = useState([]);
-
+  // const [showSuccess, setShowSuccess] = useState(false);
+  
   useEffect(() => {
     const fetchLandmarks = async () => {
       try {
@@ -23,11 +27,19 @@ const Landmark = () => {
     };
 
     fetchLandmarks();
-    
-    // console.log(landmarks)
-    // console.log("")
-    // console.log(landmarks[0])
   }, []);
+
+  const handleDelete = async (id) => {
+    try {
+      await deleteLandmark(id);   
+      setLandmarks((prevLandmarks) => prevLandmarks.filter((landmark) => landmark.landmark_id !== id));
+      //success modal
+      
+    } catch (error) {
+        console.error('Error:', error.message);
+    }
+  }
+
 
 
   return (
@@ -35,7 +47,13 @@ const Landmark = () => {
       <StatusBarComponent barStyle="light-content" backgroundColor="#251404" />
     <TopBrownSearchBar title="Landmark Management" />
       <ScrollView className="px-4 mt-4">
-        <Text className="text-serenity-green-60 font-urbanist-bold text-lg mb-4 text-right">Create New Landmark</Text>        
+      <Link href="/createLandmarkPage" asChild>
+        <TouchableOpacity >
+          <Text className="text-serenity-green-60 font-urbanist-bold text-lg mb-4 text-right">
+            Create New Landmark
+          </Text>
+        </TouchableOpacity>
+        </Link>
         <View className="flex-wrap flex-row justify-between">
           {landmarks.map((landmark, index) => (
             
@@ -55,9 +73,15 @@ const Landmark = () => {
                   <TouchableOpacity className="bg-mindful-brown-50 px-3 py-1 rounded-full">
                     <Text className="text-mindful-brown-100 font-urbanist-bold">Modify</Text>
                   </TouchableOpacity>
-                  <TouchableOpacity className="bg-mindful-brown-50 px-3 py-1 rounded-full">
+                  <TouchableOpacity
+                    onPress={() => handleDelete(landmark.landmark_id)}
+                    className="bg-mindful-brown-50 px-3 py-1 rounded-full"
+                  >
                     <Text className="text-mindful-brown-100 font-urbanist-bold">Delete</Text>
                   </TouchableOpacity>
+                  {/* <TouchableOpacity className="bg-mindful-brown-50 px-3 py-1 rounded-full">
+                    <Text className="text-mindful-brown-100 font-urbanist-bold">Delete</Text>
+                  </TouchableOpacity> */}
                 </View>
               </View>            
             </View>

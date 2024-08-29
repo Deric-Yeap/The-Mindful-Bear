@@ -7,26 +7,54 @@ export const getLandmarks = () => {
 export const createLandmark = async (landmarkData) => {
     const formData = new FormData();
     formData.append('landmark_name', landmarkData.landmark_name);
-    formData.append('image_file', landmarkData.image_file);  // Assuming 'landmark_image_url' is the file input
+    formData.append('landmark_image_url', { 
+        uri: landmarkData.image_file.uri,
+        name: landmarkData.image_file.name,
+        type: landmarkData.image_file.type,
+    });
     formData.append('exercise', landmarkData.exercise);
-    formData.append('x_coordinates', landmarkData.x_coordinates);
-    formData.append('y_coordinates', landmarkData.y_coordinates);
+    formData.append('x_coordinates', parseFloat(landmarkData.x_coordinates));
+    formData.append('y_coordinates', parseFloat(landmarkData.y_coordinates));
 
     try {
-        const response = await fetch('landmark/create', {
-            method: 'POST',
-            body: formData
+        const response = await axiosInstance.post('landmark/create', formData, {
+            headers: {
+                'Content-Type': 'multipart/form-data',
+            },
         });
-
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
-
-        const data = await response.json();
-        console.log('Landmark created successfully:', data);
-        return data;
-
+        return response;
     } catch (error) {
-        console.error('Error creating landmark:', error);
+        console.log('Error Description:', error.response?.data?.error_description || error.response?.data || error.message);
+        throw error;
     }
+};
+
+export const updateLandmark = async (landmarkId, landmarkData) => {
+    const formData = new FormData();
+    formData.append('landmark_name', landmarkData.landmark_name);
+    formData.append('landmark_image_url', {
+        uri: landmarkData.image_file.uri,
+        name: landmarkData.image_file.name,
+        type: landmarkData.image_file.type,
+    });
+    formData.append('exercise', landmarkData.exercise);
+    formData.append('x_coordinates', parseFloat(landmarkData.x_coordinates));
+    formData.append('y_coordinates', parseFloat(landmarkData.y_coordinates));
+
+    try {
+        const response = await axiosInstance.put(`landmark/update/${landmarkId}`, formData, {
+            headers: {
+                'Content-Type': 'multipart/form-data',
+            },
+        });
+        return response;
+    } catch (error) {
+        console.log('Error Description:', error.response?.data?.error_description || error.response?.data || error.message);
+        throw error;
+    }
+};
+
+
+export const deleteLandmark = async (id) => {
+    return axiosInstance.delete(`landmark/delete/${id}`);             
 };
