@@ -6,7 +6,7 @@ from ..common.validators import is_field_empty
 class MinimalLandmarkSerializer(serializers.ModelSerializer):
     class Meta:
         model = Landmark
-        fields = ['landmark_id', 'landmark_name', 'image_file', 'x_coordinates', 'y_coordinates']
+        fields = ['landmark_id', 'landmark_name', 'landmark_image_url', 'x_coordinates', 'y_coordinates']
 # general serializer with no validation
 class ExerciseSerializer(serializers.ModelSerializer):
     landmarks = MinimalLandmarkSerializer(many=True, read_only=True)
