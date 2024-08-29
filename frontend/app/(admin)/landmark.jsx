@@ -23,6 +23,10 @@ const Landmark = () => {
     };
 
     fetchLandmarks();
+    
+    // console.log(landmarks)
+    // console.log("")
+    // console.log(landmarks[0])
   }, []);
 
 
@@ -34,11 +38,16 @@ const Landmark = () => {
         <Text className="text-mindful-brown-80 font-bold text-3xl mb-4">Create New Landmark</Text>
         <View className="flex-wrap flex-row justify-between">
           {landmarks.map((landmark, index) => (
+            
             <View key={index} className="bg-mindful-brown-20 rounded-2xl w-[48%] mb-4">
               <Image
-                source={{ uri: landmark.landmark_image_url }} 
-                className="h-40 w-full rounded-t-2xl"
+                
+                source={{ uri: landmark.image_file_url }} 
+                className="h-40 w-full rounded-t-2xl"                
                 resizeMode="cover"
+                accessible={true} // Make the image accessible
+                accessibilityLabel="A beautiful landscape with mountains and a sunset" // Equivalent to 'alt'
+                onError={(e) => console.log('Image failed to load', e.nativeEvent.error)}
               />
               <View className="p-3 rounded-b-2xl bg-mindful-brown-60">
                 <Text className="text-white font-urbanist-bold text-lg">{landmark.landmark_name}</Text>
@@ -50,10 +59,12 @@ const Landmark = () => {
                     <Text className="text-mindful-brown-100 font-urbanist-bold">Delete</Text>
                   </TouchableOpacity>
                 </View>
-              </View>
+              </View>            
             </View>
           ))}
+              
         </View>
+        
       </ScrollView>
     </SafeAreaView>
   );

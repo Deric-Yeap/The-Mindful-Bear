@@ -31,6 +31,14 @@ const SignIn = () => {
           refreshToken: response.refresh,
         })
       )
+      const user = await getMe()      
+      if (user.is_staff){                
+        router.push('/admin')
+      }
+      else{
+        router.push('/home')
+      }
+      
     } catch (error) {
       console.error(error.response.data.error_description)
     }
