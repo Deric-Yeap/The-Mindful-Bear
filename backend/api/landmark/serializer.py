@@ -12,38 +12,38 @@ class LandmarkSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Landmark
-        fields = ['landmark_id', 'landmark_name', 'image_file', 'x_coordinates', 'y_coordinates', 'exercise']
+        fields = ['landmark_id', 'landmark_name', 'landmark_image_url', 'x_coordinates', 'y_coordinates', 'exercise']
 
     def get_file_url(self, obj):
-        if obj.image_file:
-            return create_presigned_url(obj.image_file)
+        if obj.landmark_image_url:
+            return create_presigned_url(obj.landmark_image_url)
         return None
 
 class LandmarkCreateSerializer(serializers.ModelSerializer):
-    image_file = serializers.ImageField(write_only=True, required=True)
+    landmark_image_url = serializers.ImageField(write_only=True, required=True)
 
     class Meta:
         model = Landmark
-        fields = ['landmark_id', 'landmark_name', 'image_file', 'x_coordinates', 'y_coordinates', 'exercise']
+        fields = ['landmark_id', 'landmark_name', 'landmark_image_url', 'x_coordinates', 'y_coordinates', 'exercise']
 
-    def validate_image_file(self, value):
+    def validate_landmark_image_url(self, value):
         if not value.name.endswith(('.jpg', '.jpeg', '.png')):
             raise serializers.ValidationError("Image file must be in JPG, JPEG, or PNG format.")
         return value
 
     def create(self, validated_data):
-        image_file = validated_data.pop('image_file')
+        landmark_image_url = validated_data.pop('landmark_image_url')
         user = self.context['request'].user  # Assumes the request is available in the context
 
-        file_name, object_path = make_file_upload_path(user, image_file.name)
+        file_name, object_path = make_file_upload_path(user, landmark_image_url.name)
         bucket = settings.AWS_STORAGE_BUCKET_NAME
 
-        if not upload_fileobj(image_file, bucket, object_path):
+        if not upload_fileobj(landmark_image_url, bucket, object_path):
             raise serializers.ValidationError("File upload to S3 failed")
-        file_location = quote(create_presigned_url(image_file), safe=':/')           
+        file_location = quote(create_presigned_url(landmark_image_url), safe=':/')           
         landmark = Landmark.objects.create(
             landmark_name=validated_data['landmark_name'],
-            image_file=file_location,
+            landmark_image_url=file_location,
             x_coordinates=validated_data['x_coordinates'],
             y_coordinates=validated_data['y_coordinates'],
             exercise=validated_data['exercise']
@@ -53,44 +53,44 @@ class LandmarkCreateSerializer(serializers.ModelSerializer):
 
     def to_representation(self, instance):
         representation = super().to_representation(instance)
-        # representation['image_file'] = quote(create_presigned_url(instance.image_file), safe=':/')
-        representation['image_file'] = create_presigned_url(instance.image_file)
+        # representation['landmark_image_url'] = quote(create_presigned_url(instance.landmark_image_url), safe=':/')
+        representation['landmark_image_url'] = create_presigned_url(instance.landmark_image_url)
         representation['exercise'] = ExerciseSerializer(instance.exercise).data
         return representation
 
 
 
 class LandmarkUpdateSerializer(serializers.ModelSerializer):
-    image_file = serializers.ImageField(write_only=True, required=False)
+    landmark_image_url = serializers.ImageField(write_only=True, required=False)
 
     class Meta:
         model = Landmark
-        fields = ['landmark_id', 'landmark_name', 'image_file', 'x_coordinates', 'y_coordinates', 'exercise']
+        fields = ['landmark_id', 'landmark_name', 'landmark_image_url', 'x_coordinates', 'y_coordinates', 'exercise']
         extra_kwargs = {
             'landmark_name': {'required': True},
-            'image_file': {'required': False},
+            'landmark_image_url': {'required': False},
             'x_coordinates': {'required': False},
             'y_coordinates': {'required': False},
             'exercise': {'required': False}
         }
 
-    def validate_image_file(self, value):
+    def validate_landmark_image_url(self, value):
         if value and not value.name.endswith(('.jpg', '.jpeg', '.png')):
             raise serializers.ValidationError("Image file must be in JPG, JPEG, or PNG format.")
         return value
 
     def update(self, instance, validated_data):
-        image_file = validated_data.pop('image_file', None)
+        landmark_image_url = validated_data.pop('landmark_image_url', None)
         user = self.context['request'].user  # Assumes the request is available in the context
 
-        if image_file:
-            file_name, object_path = make_file_upload_path(user, image_file.name)
+        if landmark_image_url:
+            file_name, object_path = make_file_upload_path(user, landmark_image_url.name)
             bucket = settings.AWS_STORAGE_BUCKET_NAME
 
-            if not upload_fileobj(image_file, bucket, object_path):
+            if not upload_fileobj(landmark_image_url, bucket, object_path):
                 raise serializers.ValidationError("File upload to S3 failed")
             file_location = quote(create_presigned_url(object_path), safe=':/')
-            instance.image_file = file_location
+            instance.landmark_image_url = file_location
 
         # Update the remaining fields
         instance.landmark_name = validated_data.get('landmark_name', instance.landmark_name)
@@ -105,6 +105,6 @@ class LandmarkUpdateSerializer(serializers.ModelSerializer):
         representation = super().to_representation(instance)
         # Serialize the exercise field separately
         representation['exercise'] = ExerciseSerializer(instance.exercise).data
-        representation['image_file'] = create_presigned_url(instance.image_file)
+        representation['landmark_image_url'] = create_presigned_url(instance.landmark_image_url)
         return representation
     

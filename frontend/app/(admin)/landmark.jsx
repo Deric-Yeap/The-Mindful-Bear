@@ -35,7 +35,7 @@ const Landmark = () => {
           {landmarks.map((landmark, index) => (
             <View key={index} className="bg-mindful-brown-20 rounded-2xl w-[48%] mb-4">
               <Image
-                source={{ uri: landmark.image_file }} 
+                source={{ uri: landmark.landmark_image_url }} 
                 className="h-40 w-full rounded-t-2xl"
                 resizeMode="cover"
               />
