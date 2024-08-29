@@ -11,3 +11,4 @@ backend/pyvenv.cfg
 /backend/venv
 *.DS_Store
 node_modules
+/frontend/.idea
