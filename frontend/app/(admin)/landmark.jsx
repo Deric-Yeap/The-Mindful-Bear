@@ -3,14 +3,15 @@ import { View, Text, ScrollView, TextInput, TouchableOpacity, Image } from 'reac
 import { SafeAreaView } from 'react-native-safe-area-context';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import TopBrownSearchBar from '../../components/topBrownSearchBar'; 
+import StatusBarComponent from '../../components/darkThemStatusBar'; 
 
 const Landmark = () => {
   return (
     <SafeAreaView className="flex-1 bg-optimistic-gray-10">
+      <StatusBarComponent barStyle="light-content" backgroundColor="#251404" />
     <TopBrownSearchBar title="Landmark Management" />
       <ScrollView className="px-4 mt-4">
-        <Text className="text-serenity-green-70 font-urbanist-bold text-lg mb-4">Create New Landmark</Text>
-        
+        <Text className="text-mindful-brown-80 font-bold text-3xl mb-4">Create New Landmark</Text>
         <View className="flex-wrap flex-row justify-between">
           {['Landmark 1', 'Landmark 2', 'Landmark 3', 'Landmark 4'].map((landmark, index) => (
             <View key={index} className="bg-mindful-brown-20 rounded-2xl w-[48%] mb-4">

@@ -8,7 +8,7 @@ const TopBrownSearchBar = ({ title }) => {
   const navigation = useNavigation(); // Initialize navigation
 
   return (
-    <View className="bg-mindful-brown-100 p-4 rounded-b-3xl">
+    <View className="bg-mindful-brown-100 p-4 rounded-b-[32]">
       {/* Ensure the title is rendered with a Text component */}
       <BackButton title={title} />
       <View className="flex-row items-center mt-4">

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, TouchableOpacity, FlatList, ActivityIndicator } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import TopBrownSearchBar from '../../components/topBrownSearchBar'; 
+import StatusBarComponent from '../../components/darkThemStatusBar'; 
 import { Link } from 'expo-router';
 import axiosInstance from '../../common/axiosInstance'; 
 
@@ -45,6 +46,7 @@ const Form = () => {
 
   return (
     <SafeAreaView className="flex-1 bg-optimistic-gray-10">
+      <StatusBarComponent barStyle="light-content" backgroundColor="#251404" />
       <TopBrownSearchBar title="Form Management" />
         
       <View className="flex-row justify-between items-center pt-4 pb-0 px-4">
@@ -56,18 +58,31 @@ const Form = () => {
         </Link>
       </View>
 
-      <FlatList
-        data={forms}
-        renderItem={({ item }) => (
-          <View className="w-full h-16 p-4 items-start bg-[#9BB167] shadow-lg mt-6 rounded-[15px]">
-            <Text className="text-[#F7F4F2] font-bold text-lg">
-              {item.form_name}
-            </Text>
-          </View>
-        )}
-        keyExtractor={item => item.id.toString()} // Ensure unique key extraction
-        contentContainerStyle={{ paddingHorizontal: 16 }}
-      />
+      {forms.length === 0 ? (
+        <View className="flex-1 justify-center items-center">
+          <Text className="text-mindful-brown-80 font-bold text-lg">
+            No forms available
+          </Text>
+        </View>
+      ) : (
+        <FlatList
+          data={forms}
+          renderItem={({ item }) => (
+            <Link href="/updateform/{id:1}" asChild>
+            <TouchableOpacity className="w-full h-auto p-4 items-start bg-[#9BB167] shadow-lg mt-6 rounded-[15px]">
+              <Text className="text-[#F7F4F2] font-bold text-lg">
+                {item.form_name}
+              </Text>
+              <Text className="text-[#F7F4F2] text-md font-bold">
+                {item.store_responses ? "Store User Response" : "Don't Store Response"}
+              </Text>
+            </TouchableOpacity>
+          </Link>
+          )}
+          keyExtractor={item => item.id.toString()} // Ensure unique key extraction
+          contentContainerStyle={{ paddingHorizontal: 16 }}
+        />
+      )}
     </SafeAreaView>
   );
 };
