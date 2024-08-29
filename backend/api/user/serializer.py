@@ -8,14 +8,14 @@ class CustomUserSerializer(serializers.ModelSerializer):
     department = DepartmentSerializer()    
     class Meta:
         model = CustomUser
-        fields = ['user_id', 'email', 'date_of_birth', 'gender', 'department', 'is_staff']
+        fields = ['user_id', 'email', 'date_of_birth', 'gender', 'department', 'is_staff', 'name']
 
 class UserCreateSerializer(serializers.ModelSerializer):
     confirm_password = serializers.CharField(write_only=True)
 
     class Meta:
         model = CustomUser
-        fields = ['email', 'date_of_birth', 'gender', 'department', 'password', 'confirm_password']
+        fields = ['email', 'date_of_birth', 'gender', 'department', 'password', 'confirm_password', 'name']
 
     def create(self, validated_data):
         user = CustomUser.objects.create_user(
@@ -23,7 +23,8 @@ class UserCreateSerializer(serializers.ModelSerializer):
             date_of_birth=validated_data['date_of_birth'],
             gender=validated_data['gender'],
             department=validated_data['department'],
-            password=validated_data.get('password') 
+            password=validated_data.get('password'), 
+            name=validated_data['name']
         )
         return user
     
@@ -49,5 +50,6 @@ class UserUpdateSerializer(serializers.ModelSerializer):
             'email': {'required': False},
             'date_of_birth': {'required': False},
             'gender': {'required': False},
-            'department': {'required': False},            
+            'department': {'required': False},
+            'name': {'required': False}
         }

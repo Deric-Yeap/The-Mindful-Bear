@@ -9,7 +9,7 @@ class LandmarkCreateView(generics.CreateAPIView):
     permission_classes = [CustomDjangoModelPermissions]
     queryset = Landmark.objects.all()
     serializer_class = LandmarkCreateSerializer
-
+    
 class LandmarkListView(generics.ListAPIView):
     queryset = Landmark.objects.all()
     serializer_class = LandmarkSerializer

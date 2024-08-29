@@ -14,6 +14,8 @@ const SignIn = () => {
     email: '',
     password: '',
   })
+  const [errorMessage, setErrorMessage] = useState({})
+
   const dispatch = useDispatch()
   const auth = useSelector((state) => state.auth)
   const handleLogin = async () => {
@@ -37,7 +39,7 @@ const SignIn = () => {
       }
       
     } catch (error) {
-      console.error(error)
+      console.error(error.response.data.error_description)
     }
   }
 
@@ -60,7 +62,7 @@ const SignIn = () => {
           customStyles="w-full pb-4"
           keyboardType="email-address"
           placeHolder="Enter your email address"
-          errorMessage="If you want to hide it pass in nothing to errorMessage :)"
+          errorMessage={errorMessage.email ? errorMessage.email : ''}
         />
         <FormField
           title="Password"
@@ -68,6 +70,7 @@ const SignIn = () => {
           value={form.password}
           handleChange={(value) => setForm({ ...form, password: value })}
           customStyles="w-full pb-6"
+          errorMessage={errorMessage.password ? errorMessage.password : ''}
         />
         <CustomButton
           title="Sign In"

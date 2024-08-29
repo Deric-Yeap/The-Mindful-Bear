@@ -6,7 +6,6 @@ import { colors } from '../../common/styles'
 import BackButton from '../../components/backButton';
 import SearchBar from '../../components/searchBar';
 import TopBrownSearchBar from '../../components/topBrownSearchBar'
-
 export default function Admin() {
   return (
     <SafeAreaView className="flex-1 bg-optimistic-gray-10">

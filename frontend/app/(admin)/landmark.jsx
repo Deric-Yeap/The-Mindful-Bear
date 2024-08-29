@@ -28,8 +28,8 @@ const Landmark = () => {
     // console.log("")
     // console.log(landmarks[0])
   }, []);
-  if (landmarks.length > 0){
-  }
+
+
   return (
     <SafeAreaView className="flex-1 bg-optimistic-gray-10">
       <StatusBarComponent barStyle="light-content" backgroundColor="#251404" />
