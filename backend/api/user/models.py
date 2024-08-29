@@ -28,6 +28,7 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     date_of_birth = models.DateField()
     gender = models.ForeignKey('gender.Gender', on_delete=models.CASCADE)
     department = models.ForeignKey('department.Department', on_delete=models.CASCADE)
+    name= models.CharField(max_length=150)
     is_staff = models.BooleanField(default=False)
     is_active = models.BooleanField(default=True)
     is_admin = models.BooleanField(default=False)
@@ -37,7 +38,7 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
 
 
     USERNAME_FIELD = 'email'
-    REQUIRED_FIELDS = ['date_of_birth', 'gender', 'department']
+    REQUIRED_FIELDS = ['date_of_birth', 'gender', 'department', 'name']
 
     objects = CustomUserManager()
 
