@@ -19,17 +19,10 @@ def upload_fileobj(fileobj, bucket, object_path=None):
     s3_client = boto3.client('s3',
                             aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
                             aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY,
-                            region_name=settings.AWS_S3_REGION_NAME,
-               
+                            region_name=settings.AWS_S3_REGION_NAME
                             )
     try:
-        s3_client.upload_fileobj(fileobj, 
-                                 bucket, 
-                                 object_path,                             
-                                 ExtraArgs={
-                                    "ContentType": "image/png"
-                                    }     
-                                )
+        s3_client.upload_fileobj(fileobj, bucket, object_path)
     except ClientError as e:
         logging.error(e)
         return False
@@ -46,11 +39,11 @@ def delete_s3_object(bucket, object_path):
     except ClientError as e:
         raise Exception(f"Error deleting object from S3. {e}")
 
-def make_file_upload_path(folder, user, filename):
+def make_file_upload_path(user, filename):
     random_string = ''.join(random.choices(string.ascii_letters, k=8))
     new_filename = f'{random_string}_{filename}'
     today_date = datetime.datetime.now().strftime('%Y_%m_%d')
-    path = f'{folder}/{user.user_id}/{today_date}/{new_filename}'
+    path = f'journals/{user.user_id}/{today_date}/{new_filename}'
     return (new_filename, path)
 
 def create_presigned_url(object_path, expiration_days=1):

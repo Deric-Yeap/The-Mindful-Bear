@@ -47,7 +47,7 @@ class JournalUploadFileSerializer(serializers.Serializer):
         user = self.context['request'].user
         id = self.validated_data['id'] if 'id' in self.validated_data else None
 
-        file_name, object_path = make_file_upload_path("journals", user, file.name)
+        file_name, object_path = make_file_upload_path(user, file.name)
         bucket = settings.AWS_STORAGE_BUCKET_NAME
 
         if not upload_fileobj(file, bucket, object_path):

@@ -7,20 +7,18 @@ from django.conf import settings
 from ..common.s3 import create_presigned_url, upload_fileobj, make_file_upload_path, delete_s3_object
 from urllib.parse import quote
 
-
 class LandmarkSerializer(serializers.ModelSerializer):
     exercise = ExerciseSerializer(many=False, read_only=True)
-    image_file_url = serializers.SerializerMethodField()
 
     class Meta:
         model = Landmark
-        fields = ['landmark_id', 'landmark_name', 'landmark_image_url', 'x_coordinates', 'y_coordinates', 'exercise', 'image_file_url']
+        fields = ['landmark_id', 'landmark_name', 'landmark_image_url', 'x_coordinates', 'y_coordinates', 'exercise']
 
-    def get_image_file_url(self, obj):
+    def get_file_url(self, obj):
         if obj.landmark_image_url:
             return create_presigned_url(obj.landmark_image_url)
         return None
-    
+
 class LandmarkCreateSerializer(serializers.ModelSerializer):
     landmark_image_url = serializers.ImageField(write_only=True, required=True)
 
@@ -34,23 +32,18 @@ class LandmarkCreateSerializer(serializers.ModelSerializer):
         return value
 
     def create(self, validated_data):
-        landmark_image_file = validated_data.pop('landmark_image_url')
-        print(landmark_image_file)        
-        user = self.context['request'].user
+        landmark_image_url = validated_data.pop('landmark_image_url')
+        user = self.context['request'].user  # Assumes the request is available in the context
 
-        # Generate file path and upload the file
-        file_name, object_path = make_file_upload_path("landmark", user, quote(landmark_image_file.name))
-        print(object_path)
-        # object_path = object_path.replace(" ", "")
+        file_name, object_path = make_file_upload_path(user, landmark_image_url.name)
         bucket = settings.AWS_STORAGE_BUCKET_NAME
-        file_url = upload_fileobj(landmark_image_file, bucket, object_path)
-        if not file_url:        
-            raise serializers.ValidationError("File upload to S3 failed")
 
-        
+        if not upload_fileobj(landmark_image_url, bucket, object_path):
+            raise serializers.ValidationError("File upload to S3 failed")
+        file_location = quote(create_presigned_url(landmark_image_url), safe=':/')           
         landmark = Landmark.objects.create(
             landmark_name=validated_data['landmark_name'],
-            landmark_image_url=object_path,
+            landmark_image_url=file_location,
             x_coordinates=validated_data['x_coordinates'],
             y_coordinates=validated_data['y_coordinates'],
             exercise=validated_data['exercise']
@@ -60,7 +53,8 @@ class LandmarkCreateSerializer(serializers.ModelSerializer):
 
     def to_representation(self, instance):
         representation = super().to_representation(instance)
-        representation['landmark_image_url'] = instance.landmark_image_url  
+        # representation['landmark_image_url'] = quote(create_presigned_url(instance.landmark_image_url), safe=':/')
+        representation['landmark_image_url'] = create_presigned_url(instance.landmark_image_url)
         representation['exercise'] = ExerciseSerializer(instance.exercise).data
         return representation
 
