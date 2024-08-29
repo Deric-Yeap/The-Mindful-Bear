@@ -39,6 +39,13 @@ export default function App() {
             textStyle="text-white"
             isLoading={false}
           />
+          <CustomButton
+            title="create-form"
+            handlePress={() => router.push('/create-form')}
+            buttonStyle="w-60"
+            textStyle="text-white"
+            isLoading={false}
+          />
           <Text>User ID: {user.userId}</Text>
           <Text>Email: {user.email}</Text>
           <StatusBar style="auto" />
