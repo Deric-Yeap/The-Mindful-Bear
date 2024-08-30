@@ -8,7 +8,7 @@ import axios from 'axios';
 //     console.error('Error creating landmark:', error);
 //   }
 // };
-// import axiosInstance from '../common/axiosInstance'
+import axiosInstance from '../common/axiosInstance'
 
 export const getLandmarks = () => {
     return axiosInstance.get('landmark/get')

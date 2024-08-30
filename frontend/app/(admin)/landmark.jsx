@@ -10,7 +10,7 @@ import TopBrownSearchBar from '../../components/topBrownSearchBar';
 import StatusBarComponent from '../../components/darkThemStatusBar'; 
 import CustomButton from '../../components/customButton';
 import SuccessMessage from '../../components/successMessage';
-import { Link } from 'expo-router'
+
 
 const Landmark = () => {  
   const [landmarks, setLandmarks] = useState([]);
