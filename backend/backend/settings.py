@@ -49,6 +49,7 @@ INSTALLED_APPS = [
     'django_rest_passwordreset',
     "storages",
     'corsheaders',
+    "debug_toolbar",
     "api.user",
     "api.landmark",
     "api.exercise",
@@ -59,8 +60,8 @@ INSTALLED_APPS = [
     "api.journal",
     "api.gender",
     "api.department",
-    "debug_toolbar",
-    "api.response"
+    "api.response",
+    "api.optionSet",
 ]
 
 REST_FRAMEWORK = {

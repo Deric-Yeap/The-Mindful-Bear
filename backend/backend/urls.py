@@ -22,6 +22,7 @@ urlpatterns = [
     path("api/gender/", include('api.gender.urls')),
     path("api/department/", include('api.department.urls')),
     path('api/password_reset/', include('django_rest_passwordreset.urls', namespace='password_reset')),
+    path("api/option_set/", include("api.optionSet.urls")),
     path("api/landmark/", include("api.landmark.urls")),
     path("api/exercise/", include("api.exercise.urls")),
     path("api/users/", include("api.user.urls")),

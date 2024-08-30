@@ -1,7 +1,9 @@
 from rest_framework import serializers
 from .models import OptionSet
 
-class FormSerializer(serializers.ModelSerializer):
+class OptionSetSerializer(serializers.ModelSerializer):
+    key = serializers.IntegerField(source='id')
+    value = serializers.CharField(source='description')
     class Meta:
         model = OptionSet
-        fields = '__all__' 
+        fields = ['key', 'value']
