@@ -10,9 +10,9 @@ import axios from 'axios';
 // };
 // import axiosInstance from '../common/axiosInstance'
 
-// export const getLandmarks = () => {
-//     return axiosInstance.get('landmark/get')
-// }
+export const getLandmarks = () => {
+    return axiosInstance.get('landmark/get')
+}
 
 export const createLandmark = async (landmarkData) => {
     const formData = new FormData();
