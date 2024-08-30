@@ -1,39 +1,29 @@
 import { Tabs } from 'expo-router'
-import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
+import TabBar from '../../components/tabBar'
 
 const TabsLayout = () => {
+  const TabsScreens = {
+    home: 'Home',
+    '(map)': 'Map',
+    admin: 'Admin',
+    settings: 'Settings',
+  }
   return (
-    <>
-      <Tabs>
+    <Tabs
+      tabBar={(props) => <TabBar {...props} />}
+      screenOptions={{ headerShown: false }}
+    >
+      {Object.entries(TabsScreens).map(([name, title]) => (
         <Tabs.Screen
-          name="home"
+          key={name}
+          name={name}
           options={{
-            title: 'Home',
-            tabBarIcon: ({ color, size, focused }) => (
-                <MaterialCommunityIcons name={"home"} size={size} color={color}/>
-            ),
+            title: title,
+            headerShown: false,
           }}
         />
-        <Tabs.Screen
-          name="settings"
-          options={{
-            title: 'Settings',
-            tabBarIcon: ({ color, size, focused }) => (
-                <MaterialCommunityIcons name={"account"} size={size} color={color} />
-            ),
-          }}
-        />
-        <Tabs.Screen
-          name="admin"
-          options={{
-            title: 'Admin',
-            tabBarIcon: ({ color, size, focused }) => (
-                <MaterialCommunityIcons name={"account"} size={size} color={color} />
-            ),
-          }}
-        />
-      </Tabs>
-    </>
+      ))}
+    </Tabs>
   )
 }
 

@@ -1,8 +1,8 @@
-import { Text, View } from 'react-native'
-import React from 'react'
+import React, {useEffect} from 'react'
 import { Slot } from 'expo-router'
-import { store } from '../redux/store';
-import { Provider } from 'react-redux';
+import { store } from '../redux/store'
+import { Provider } from 'react-redux'
+import * as SplashScreen from 'expo-splash-screen'
 import {
   useFonts,
   Urbanist_100Thin,
@@ -25,8 +25,10 @@ import {
   Urbanist_900Black_Italic,
 } from '@expo-google-fonts/urbanist'
 
+SplashScreen.preventAutoHideAsync()
+
 const RootLayout = () => {
-  let [fontsLoaded] = useFonts({
+  const [loaded, error] = useFonts({
     Urbanist_100Thin,
     Urbanist_200ExtraLight,
     Urbanist_300Light,
@@ -46,9 +48,17 @@ const RootLayout = () => {
     Urbanist_800ExtraBold_Italic,
     Urbanist_900Black_Italic,
   })
-  if (!fontsLoaded) {
-    return <Text>Loading...</Text>
+
+  useEffect(() => {
+    if (loaded || error) {
+      SplashScreen.hideAsync()
+    }
+  }, [loaded, error])
+
+  if (!loaded && !error) {
+    return null
   }
+
   return (
     <Provider store={store}>
       <Slot />

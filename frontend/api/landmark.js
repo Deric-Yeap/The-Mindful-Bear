@@ -8,3 +8,8 @@ const createLandmark = async (landmarkData) => {
     console.error('Error creating landmark:', error);
   }
 };
+import axiosInstance from '../common/axiosInstance'
+
+export const getLandmarks = () => {
+    return axiosInstance.get('landmark/get')
+}

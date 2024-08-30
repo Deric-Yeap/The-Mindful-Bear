@@ -19,7 +19,10 @@ from django.urls import path, include
 
 urlpatterns = [
     path("admin/", admin.site.urls),
+    path("api/gender/", include('api.gender.urls')),
+    path("api/department/", include('api.department.urls')),
     path('api/password_reset/', include('django_rest_passwordreset.urls', namespace='password_reset')),
+    path("api/option_set/", include("api.optionSet.urls")),
     path("api/landmark/", include("api.landmark.urls")),
     path("api/exercise/", include("api.exercise.urls")),
     path("api/users/", include("api.user.urls")),
@@ -27,5 +30,5 @@ urlpatterns = [
     path("api/form/", include("api.form.urls")),
     path("api/question/", include("api.question.urls")),
     path("api/session/", include("api.session.urls")),
-    path("api/formSession/", include("api.formSession.urls")),
+    path("api/formQuestion/", include("api.formQuestion.urls")),
 ]
