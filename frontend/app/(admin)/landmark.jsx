@@ -3,15 +3,19 @@ import { View, Text, ScrollView, TouchableOpacity, Image } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import BackButton from '../../components/backButton';
 import SearchBar from '../../components/searchBar';
-import { getLandmarks } from '../../api/landmark';
+import { getLandmarks, deleteLandmark } from '../../api/landmark';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { Link } from 'expo-router';
 import TopBrownSearchBar from '../../components/topBrownSearchBar'; 
 import StatusBarComponent from '../../components/darkThemStatusBar'; 
+import CustomButton from '../../components/customButton';
+import SuccessMessage from '../../components/successMessage';
+import { Link } from 'expo-router'
 
 const Landmark = () => {  
   const [landmarks, setLandmarks] = useState([]);
-
+  // const [showSuccess, setShowSuccess] = useState(false);
+  
   useEffect(() => {
     const fetchLandmarks = async () => {
       try {
@@ -24,11 +28,20 @@ const Landmark = () => {
     };
 
     fetchLandmarks();
-    
-    // console.log(landmarks)
-    // console.log("")
-    // console.log(landmarks[0])
   }, []);
+
+  const handleDelete = async (id) => {
+    try {
+      await deleteLandmark(id);   
+      setLandmarks((prevLandmarks) => prevLandmarks.filter((landmark) => landmark.landmark_id !== id));
+      //success modal
+      
+    } catch (error) {
+        console.error('Error:', error.message);
+    }
+  }
+
+
 
   return (
     <SafeAreaView className="flex-1 bg-optimistic-gray-10">
@@ -60,9 +73,15 @@ const Landmark = () => {
                   <TouchableOpacity className="bg-mindful-brown-50 px-3 py-1 rounded-full">
                     <Text className="text-mindful-brown-100 font-urbanist-bold">Modify</Text>
                   </TouchableOpacity>
-                  <TouchableOpacity className="bg-mindful-brown-50 px-3 py-1 rounded-full">
+                  <TouchableOpacity
+                    onPress={() => handleDelete(landmark.landmark_id)}
+                    className="bg-mindful-brown-50 px-3 py-1 rounded-full"
+                  >
                     <Text className="text-mindful-brown-100 font-urbanist-bold">Delete</Text>
                   </TouchableOpacity>
+                  {/* <TouchableOpacity className="bg-mindful-brown-50 px-3 py-1 rounded-full">
+                    <Text className="text-mindful-brown-100 font-urbanist-bold">Delete</Text>
+                  </TouchableOpacity> */}
                 </View>
               </View>            
             </View>
