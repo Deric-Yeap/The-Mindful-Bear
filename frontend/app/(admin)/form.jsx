@@ -5,28 +5,29 @@ import TopBrownSearchBar from '../../components/topBrownSearchBar';
 import StatusBarComponent from '../../components/darkThemStatusBar'; 
 import { Link } from 'expo-router';
 import axiosInstance from '../../common/axiosInstance'; 
+import { Ionicons } from '@expo/vector-icons'; // Import Ionicons for the arrow icon
 
 const Form = () => {
-  const [loading, setLoading] = useState(true); // Loading state
-  const [error, setError] = useState(null); // Error state
-  const [forms, setForms] = useState([]); // State to hold fetched forms
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [forms, setForms] = useState([]);
 
   useEffect(() => {
     const fetchForms = async () => {
       try {
-        const response = await axiosInstance.get('form/get'); // Use axiosInstance
+        const response = await axiosInstance.get('form/get');
         console.log('Fetched data:', response);
-        setForms(response); // Set the fetched data to state
+        setForms(response);
       } catch (error) {
         console.error('Error fetching data:', error.response ? error.response.data : error.message);
-        setError(error); // Set error if fetching fails
+        setError(error);
       } finally {
-        setLoading(false); // Set loading to false after fetching
+        setLoading(false);
       }
     };
 
-    fetchForms(); // Call the fetch function
-  }, []); // Empty dependency array means this runs once on mount
+    fetchForms();
+  }, []);
 
   if (loading) {
     return (
@@ -68,18 +69,21 @@ const Form = () => {
         <FlatList
           data={forms}
           renderItem={({ item }) => (
-            <Link href="/view-form" asChild>
-            <TouchableOpacity className="w-full h-auto p-4 items-start bg-[#9BB167] shadow-lg mt-6 rounded-[15px]">
-              <Text className="text-[#F7F4F2] font-bold text-lg">
-                {item.form_name}
-              </Text>
-              <Text className="text-[#F7F4F2] text-md font-bold">
-                {item.store_responses ? "Store User Response" : "Don't Store Response"}
-              </Text>
-            </TouchableOpacity>
-          </Link>
+            <Link href={`/updateform/${item.id}`} asChild>
+              <TouchableOpacity className="w-full h-auto p-4 flex-row justify-between items-center bg-[#9BB167] shadow-lg mt-6 rounded-[15px]">
+                <View>
+                  <Text className="text-[#F7F4F2] font-bold text-lg">
+                    {item.form_name}
+                  </Text>
+                  <Text className="text-[#F7F4F2] text-md font-bold">
+                    {item.store_responses ? "Store User Response" : "Don't Store Response"}
+                  </Text>
+                </View>
+                <Ionicons name="chevron-forward" size={24} color="#F7F4F2" />
+              </TouchableOpacity>
+            </Link>
           )}
-          keyExtractor={item => item.id.toString()} // Ensure unique key extraction
+          keyExtractor={item => item.id.toString()}
           contentContainerStyle={{ paddingHorizontal: 16 }}
         />
       )}

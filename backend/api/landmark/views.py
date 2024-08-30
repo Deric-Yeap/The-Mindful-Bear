@@ -10,17 +10,6 @@ class LandmarkCreateView(generics.CreateAPIView):
     permission_classes = [CustomDjangoModelPermissions]
     queryset = Landmark.objects.all()
     serializer_class = LandmarkCreateSerializer
-    # override default create
-    def create(self, request):
-        # initialises serializer based on data obtained from request
-        serializer = self.get_serializer(data=request.data)
-        # validates according to serializer rules
-        serializer.is_valid(raise_exception=True)
-        landmark = serializer.save()
-        # creates a new serializer instance for the newly created Landmark object, to convert it to a JSON serializable format.
-        landmarkSerializer = LandmarkCreateSerializer(landmark)
-        return Response(landmarkSerializer.data, status=status.HTTP_201_CREATED)
-# get all view
 class LandmarkListView(generics.ListAPIView):
     queryset = Landmark.objects.all()
     serializer_class = LandmarkSerializer
