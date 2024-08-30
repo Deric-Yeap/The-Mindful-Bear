@@ -23,7 +23,11 @@ const Map = () => {
   const handleSessionStart = () => {
     const currentStartDateTime = getCurrentFormattedDateTime()
     console.log(currentStartDateTime)
-    setForm({ start_datetime: currentStartDateTime })
+    setForm(prevForm => ({
+      ...prevForm,
+      start_datetime: currentStartDateTime
+    }))
+    console.log(form);
     setIsSessionStarted(true)
   }
   const handleSessionEnd = () => {
@@ -31,12 +35,16 @@ const Map = () => {
   }
   const handleSessionConfirmEnd = async () => {
     const currentEndDateTime = getCurrentFormattedDateTime()
-    setForm({ end_datetime: currentEndDateTime })
+    setForm(prevForm => ({
+      ...prevForm,
+      end_datetime: currentEndDateTime
+    }))
     try {
-      const response = await createSession({
+      const response = await createSession(
         form,
-      })
+      )
       setIsSessionStarted(false)
+      setIsModalOpen(false)
     } catch (error) {
       console.error(error.response.data.error_description)
     }
