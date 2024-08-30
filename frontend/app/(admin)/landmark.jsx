@@ -30,8 +30,6 @@ const Landmark = () => {
     // console.log(landmarks[0])
   }, []);
 
-
-  
   return (
     <SafeAreaView className="flex-1 bg-optimistic-gray-10">
       <StatusBarComponent barStyle="light-content" backgroundColor="#251404" />
