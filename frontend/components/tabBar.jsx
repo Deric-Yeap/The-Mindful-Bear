@@ -13,8 +13,8 @@ const TabBar = ({ state, descriptors, navigation }) => {
   //add into this list the routes that you do not want in the navbar
   const notIncludedRoutes = ['_sitemap', '+not-found']
   return (
-    <View>
-      <View className="absolute bottom-3 flex-row justify-between items-center py-5 z-10 bg-white rounded-full shadow-md shadow-black">
+    <View className="absolute bottom-5 left-0 right-0 z-20">
+      <View className="flex-row justify-between items-center py-3 bg-white rounded-full shadow-md shadow-black">
         {state.routes.map((route, index) => {
           const { options } = descriptors[route.key]
           const label =
