@@ -68,7 +68,7 @@ const Form = () => {
         <FlatList
           data={forms}
           renderItem={({ item }) => (
-            <Link href="/updateform/{id:1}" asChild>
+            <Link href="/view-form" asChild>
             <TouchableOpacity className="w-full h-auto p-4 items-start bg-[#9BB167] shadow-lg mt-6 rounded-[15px]">
               <Text className="text-[#F7F4F2] font-bold text-lg">
                 {item.form_name}
