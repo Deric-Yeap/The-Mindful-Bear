@@ -24,9 +24,6 @@ const CreateForm = () => {
     ],
   })
 
-  // State for Checkbox
-  const [isChecked, setIsChecked] = useState(false)
-
   // Function to add a new question
   const addQuestion = () => {
     setRequest((prevRequest) => ({
@@ -118,11 +115,11 @@ const CreateForm = () => {
           </Text>
           <TouchableOpacity
             className="flex-1 flex-row items-center justify-end"
-            onPress={() => setIsChecked(!isChecked)}
+            onPress={() => setRequest({ ...request, store_responses: !request.store_responses })}
           >
             <View
               className={`w-6 h-6 rounded border-2 border-mindful-brown-80 ${
-                isChecked ? 'bg-mindful-brown-80' : ''
+                request.store_responses ? 'bg-mindful-brown-80' : ''
               }`}
             />
           </TouchableOpacity>
