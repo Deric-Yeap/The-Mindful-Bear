@@ -65,8 +65,8 @@ const Form = () => {
         <Toggle
           selectionMode={1}
           roundCorner={true}
-          option1={'First'}
-          option2={'Second'}
+          option1={'Form Set'}
+          option2={'Option Set'}
           onSelectSwitch={onSelectSwitch}
           selectionColor={colors.mindfulBrown80}
         />
