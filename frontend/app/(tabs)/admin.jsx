@@ -9,6 +9,7 @@ import TopBrownSearchBar from '../../components/topBrownSearchBar'
 export default function Admin() {
   return (
     <SafeAreaView className="flex-1 bg-optimistic-gray-10">
+      <StatusBarComponent barStyle="light-content" backgroundColor="#251404" />
     <TopBrownSearchBar title="Hi Admin!" />
     <ScrollView className="flex-1 bg-optimistic-gray-10 p-4">
       <Text className="text-mindful-brown-100 font-urbanist-bold text-xl mb-4">
