@@ -19,29 +19,48 @@ const Form = () => {
   const [loading, setLoading] = useState(true); // Loading state
   const [error, setError] = useState(null); // Error state
   const [forms, setForms] = useState([]); // State to hold fetched forms
+  const [selectedOption, setSelectedOption] = useState(1); // State to handle toggle selection
+
   const onSelectSwitch = (index) => {
-    alert('Selected index: ' + index);
+    setSelectedOption(index); // Update the selected option based on toggle switch
   };
 
   useEffect(() => {
     const fetchForms = async () => {
+      setLoading(true); // Set loading to true before fetching
       try {
         const response = await axiosInstance.get('form/get'); // Use axiosInstance
-        console.log('Fetched data:', response);
-        setForms(response); // Set the fetched data to state
+        console.log('Full response:', response); // Log the full response
+
+        // Directly set forms from the response if it's an array
+        if (Array.isArray(response)) {
+          setForms(response); // Set the fetched data to state
+          console.log('Forms state updated:', response); // Log the updated forms state
+        } else {
+          console.warn('Expected an array but got:', response);
+          setForms([]); // Set to empty array if not an array
+        }
       } catch (error) {
-        console.error(
-          'Error fetching data:',
-          error.response ? error.response.data : error.message
-        );
-        setError(error); // Set error if fetching fails
+        console.error('Error fetching data:', error);
+        if (error.response) {
+          console.error('Response data:', error.response.data);
+          setError(error.response.data); // Set error if fetching fails
+        } else if (error.request) {
+          console.error('Request made but no response received:', error.request);
+          setError('No response received from the server.');
+        } else {
+          console.error('Error setting up the request:', error.message);
+          setError(error.message);
+        }
       } finally {
         setLoading(false); // Set loading to false after fetching
       }
     };
 
-    fetchForms(); // Call the fetch function
-  }, []); // Empty dependency array means this runs once on mount
+    if (selectedOption === 1) {
+      fetchForms(); // Fetch forms only if Form Set is selected
+    }
+  }, [selectedOption]); // Fetch data when selectedOption changes
 
   if (loading) {
     return (
@@ -54,10 +73,13 @@ const Form = () => {
   if (error) {
     return (
       <SafeAreaView className="flex-1 bg-optimistic-gray-10 justify-center items-center">
-        <Text>Error fetching data: {error.message}</Text>
+        <Text>Error fetching data: {error}</Text>
       </SafeAreaView>
     );
   }
+
+  // Log the forms state before rendering
+  console.log('Forms to render:', forms);
 
   return (
     <SafeAreaView className="flex-1 bg-optimistic-gray-10">
@@ -65,7 +87,7 @@ const Form = () => {
       <TopBrownSearchBar title="Form Management" />
       <View style={{ alignItems: 'center', margin: 20 }}>
         <Toggle
-          selectionMode={1}
+          selectionMode={selectedOption}
           roundCorner={true}
           option1={'Form Set'}
           option2={'Option Set'}
@@ -74,45 +96,57 @@ const Form = () => {
         />
       </View>
       <View className="flex-row justify-between items-center pt-4 pb-0 px-4">
-        <Text className="text-mindful-brown-80 font-bold text-3xl">Form</Text>
-        <Link href="/create-form" asChild>
-          <TouchableOpacity className="bg-mindful-brown-80 px-4 py-1 rounded-full">
-            <Text className="text-white font-bold text-base">Create Form</Text>
-          </TouchableOpacity>
-        </Link>
+        <Text className="text-mindful-brown-80 font-bold text-3xl">
+          {selectedOption === 1 ? 'Form' : 'Option Set'}
+        </Text>
+        {selectedOption === 1 && (
+          <Link href="/create-form" asChild>
+            <TouchableOpacity className="bg-mindful-brown-80 px-4 py-1 rounded-full">
+              <Text className="text-white font-bold text-base">Create Form</Text>
+            </TouchableOpacity>
+          </Link>
+        )}
       </View>
 
-      {forms.length === 0 ? (
+      {selectedOption === 1 ? (
+        forms.length === 0 ? (
+          <View className="flex-1 justify-center items-center">
+            <Text className="text-mindful-brown-80 font-bold text-lg">
+              No forms available
+            </Text>
+          </View>
+        ) : (
+          <FlatList
+            data={forms}
+            renderItem={({ item }) => (
+              <Link href={`/updateform/${item.id}`} asChild>
+                <TouchableOpacity className="w-full h-auto p-4 items-center bg-[#9BB167] shadow-lg mt-6 rounded-[15px] flex-row justify-between">
+                  <View style={{ flex: 1 }}>
+                    <Text className="text-mindful-brown-10 font-bold text-lg">
+                      {item.form_name}
+                    </Text>
+                    <Text className="text-mindful-brown-10 text-md font-bold">
+                      {item.store_responses
+                        ? 'Store User Response'
+                        : "Don't Store Response"}
+                    </Text>
+                  </View>
+                  <View style={{ justifyContent: 'center', alignItems: 'center' }}>
+                    <Icon name="chevron-right" size={20} color={colors.mindfulBrown10} /> 
+                  </View>
+                </TouchableOpacity>
+              </Link>
+            )}
+            keyExtractor={(item) => item.id.toString()} // Ensure unique key extraction
+            contentContainerStyle={{ paddingHorizontal: 16 }}
+          />
+        )
+      ) : (
         <View className="flex-1 justify-center items-center">
           <Text className="text-mindful-brown-80 font-bold text-lg">
-            No forms available
+            Option Set is empty
           </Text>
         </View>
-      ) : (
-        <FlatList
-          data={forms}
-          renderItem={({ item }) => (
-            <Link href={`/updateform/${item.id}`} asChild>
-              <TouchableOpacity className="w-full h-auto p-4 items-center bg-[#9BB167] shadow-lg mt-6 rounded-[15px] flex-row justify-between">
-                <View style={{ flex: 1 }}>
-                  <Text className="text-mindful-brown-10 font-bold text-lg">
-                    {item.form_name}
-                  </Text>
-                  <Text className="text-mindful-brown-10 text-md font-bold">
-                    {item.store_responses
-                      ? 'Store User Response'
-                      : "Don't Store Response"}
-                  </Text>
-                </View>
-                <View style={{ justifyContent: 'center', alignItems: 'center' }}>
-                  <Icon name="chevron-right" size={20} color={colors.mindfulBrown10} /> 
-                </View>
-              </TouchableOpacity>
-            </Link>
-          )}
-          keyExtractor={(item) => item.id.toString()} // Ensure unique key extraction
-          contentContainerStyle={{ paddingHorizontal: 16 }}
-        />
       )}
     </SafeAreaView>
   );
