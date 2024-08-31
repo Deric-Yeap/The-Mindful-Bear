@@ -1,22 +1,54 @@
-import React from 'react'
-
+import { React, useState } from 'react'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { View, ScrollView } from 'react-native'
 // import Mapbox from '@rnmapbox/maps'
 import CustomButton from '../../../components/customButton'
+import { getCurrentFormattedDateTime } from '../../../common/getCurrentFormattedDateTime'
+import ConfirmModal from '../../../components/confirmModal'
+import { createSession } from '../../../api/session'
+
 const Map = () => {
   Mapbox.setAccessToken(process.env.MAPBOX_PUBLIC_KEY)
   const [form, setForm] = useState({
     start_datetime: '',
     end_datetime: '',
-    pss_before: '',
-    pss_after: '',
-    physical_tiredness_before: '',
-    physical_tiredness_after: '',
-    engagement_metrics: '',
-    
-
+    pss_before: 1,
+    pss_after: 1,
+    physical_tiredness_before: 1,
+    physical_tiredness_after: 1,
+    engagement_metrics: 1,
   })
+  const [isModalOpen, setIsModalOpen] = useState(false)
+  const [isSessionStarted, setIsSessionStarted] = useState(false)
+  const handleSessionStart = () => {
+    const currentStartDateTime = getCurrentFormattedDateTime()
+    console.log(currentStartDateTime)
+    setForm(prevForm => ({
+      ...prevForm,
+      start_datetime: currentStartDateTime
+    }))
+    console.log(form);
+    setIsSessionStarted(true)
+  }
+  const handleSessionEnd = () => {
+    setIsModalOpen(true)
+  }
+  const handleSessionConfirmEnd = async () => {
+    const currentEndDateTime = getCurrentFormattedDateTime()
+    setForm(prevForm => ({
+      ...prevForm,
+      end_datetime: currentEndDateTime
+    }))
+    try {
+      const response = await createSession(
+        form,
+      )
+      setIsSessionStarted(false)
+      setIsModalOpen(false)
+    } catch (error) {
+      console.error(error.response.data.error_description)
+    }
+  }
   return (
     <SafeAreaView className="h-full">
       <View className="flex-1 relative">
@@ -39,13 +71,26 @@ const Map = () => {
           </View>
         </ScrollView>
         <CustomButton
-          title="Start"
-          handlePress={() => console.log('hi')}
-          buttonStyle="w-96 z-10 absolute bottom-10 self-center" // Adjust position here
+          title={isSessionStarted ? 'End Session' : 'Start Session'}
+          handlePress={isSessionStarted ? handleSessionEnd : handleSessionStart}
+          buttonStyle={`w-96 z-10 absolute bottom-10 self-center ${isSessionStarted ? 'bg-red-500' : ''}`}
           textStyle="text-white"
           isLoading={false}
         />
       </View>
+      {isModalOpen && (
+        <ConfirmModal
+          isConfirmButton={true}
+          isCancelButton={true}
+          title={'Are you sure you want to end now'}
+          subTitle={'test'}
+          imageSource={'../../../assets/confirmModalImage.png'}
+          handleCancel={() => {
+            setIsModalOpen(false)
+          }}
+          handleConfirm={handleSessionConfirmEnd}
+        />
+      )}
     </SafeAreaView>
   )
 }
