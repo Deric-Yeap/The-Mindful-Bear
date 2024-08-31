@@ -7,6 +7,7 @@ import Dropdown from '../../components/dropdown';
 import CustomButton from '../../components/customButton';
 import { createLandmark, updateLandmark } from '../../api/landmark';
 import { getExercises } from '../../api/exercise';
+import ConfirmModal from '../../components/confirmModal';
 
 const LandmarkCreator = () => {
   const route = useRoute();
@@ -30,6 +31,8 @@ const LandmarkCreator = () => {
   });
   const [exerciseList, setExerciseList] = useState([]);
   const [selectedExerciseName, setSelectedExerciseName] = useState('');
+  const [showSuccess, setShowSuccess] = useState(false);
+
 
   useEffect(() => {
     const fetchExercises = async () => {
@@ -37,8 +40,7 @@ const LandmarkCreator = () => {
         const data = await getExercises();
         setExerciseList(data);
         if (exerciseId) {
-          const selectedExercise = data.find(exercise => exercise.exercise_id === exerciseId);
-          console.log(selectedExercise)
+          const selectedExercise = data.find(exercise => exercise.exercise_id === exerciseId);          
           setSelectedExerciseName(selectedExercise?.exercise_name || '');
         }
       } catch (error) {
@@ -78,12 +80,16 @@ const LandmarkCreator = () => {
     try {
       if (landmark) {
         await updateLandmark(landmark.landmark_id, landmarkData); 
-        Alert.alert('Landmark updated successfully!');
       } else {
         await createLandmark(landmarkData); 
-        Alert.alert('Landmark created successfully!');
+        // Alert.alert('Landmark created successfully!');
         resetForm(); 
       }
+      setShowSuccess(true); 
+      setTimeout(() => {
+        setShowSuccess(false);
+      }, 3000);
+
     } catch (error) {
       console.log(error);
       Alert.alert(`Error ${landmark ? 'updating' : 'creating'} landmark:`, error.message);
@@ -175,6 +181,15 @@ const LandmarkCreator = () => {
           </View>
         </View>
       </View>
+       {/* Success Modal */}
+       {showSuccess && (
+        <ConfirmModal
+          title="Success!"
+          subTitle={`Landmark ${landmark ? 'updated' : 'created'} successfully.`}
+          isConfirmButton={true}
+          isCancelButton={false}
+        />
+      )}
     </ScrollView>
   );
 };

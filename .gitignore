@@ -12,3 +12,5 @@ backend/pyvenv.cfg
 *.DS_Store
 node_modules
 /frontend/.idea
+general-developer_credentials.csv
+general-developer_accessKeys.csv
