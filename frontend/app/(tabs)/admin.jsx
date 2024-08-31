@@ -1,11 +1,15 @@
 import React from 'react'
-import { View, Text, ScrollView, TouchableOpacity } from 'react-native'
+import { View, Text, ScrollView, TouchableOpacity, SafeAreaView } from 'react-native'
 import { Link } from 'expo-router'
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons'
 import { colors } from '../../common/styles'
-
+import BackButton from '../../components/backButton';
+import SearchBar from '../../components/searchBar';
+import TopBrownSearchBar from '../../components/topBrownSearchBar'
 export default function Admin() {
   return (
+    <SafeAreaView className="flex-1 bg-optimistic-gray-10">
+    <TopBrownSearchBar title="Hi Admin!" />
     <ScrollView className="flex-1 bg-optimistic-gray-10 p-4">
       <Text className="text-mindful-brown-100 font-urbanist-bold text-xl mb-4">
         Management
@@ -215,5 +219,6 @@ export default function Admin() {
         </View>
       </View>
     </ScrollView>
+    </SafeAreaView>
   )
 }

@@ -41,6 +41,7 @@ const Form = () => {
     fetchForms() // Call the fetch function
   }, []) // Empty dependency array means this runs once on mount
 
+
   if (loading) {
     return (
       <SafeAreaView className="flex-1 bg-optimistic-gray-10 justify-center items-center">

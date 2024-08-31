@@ -2,12 +2,15 @@ import { Tabs } from 'expo-router'
 import TabBar from '../../components/tabBar'
 
 const TabsLayout = () => {
-  const TabsScreens = {
+  var TabsScreens = {
     home: 'Home',
     '(map)': 'Map',
-    admin: 'Admin',
-    settings: 'Settings',
+    stats: 'Stats',
+    settings: 'Settings',   
+    admin: 'Admin', 
   }
+
+  
   return (
     <Tabs
       tabBar={(props) => <TabBar {...props} />}
