@@ -1,16 +1,15 @@
 from rest_framework.permissions import AllowAny, IsAuthenticated
-from rest_framework import viewsets
-from .sterializer import OptionSetSerializer
+from rest_framework import viewsets,generics, status
+from .serializer import OptionSetSerializer
 from .models import OptionSet
+from rest_framework.response import Response
 
-# Create your views here.
-class OptionSetViewSet(viewsets.ModelViewSet):
+class OptionFormGet(generics.ListCreateAPIView):
+    queryset = OptionSet.objects.all()
     serializer_class = OptionSetSerializer
-    queryset= OptionSet.objects.all()
 
-    def get_permissions(self):
-        if self.action in ['list', 'retrieve']:
-            permission_classes = [AllowAny]
-        else:
-            permission_classes = [IsAuthenticated]
-        return [permission() for permission in permission_classes]
+    def get(self, request, *args, **kwargs):
+        try:
+            return super().get(request, *args, **kwargs)
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
