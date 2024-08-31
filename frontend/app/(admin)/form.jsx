@@ -137,6 +137,13 @@ const Forms = () => {
             </TouchableOpacity>
           </Link>
         )}
+        {selectedOption === 2 && (
+          <Link href="/create-scale" asChild>
+            <TouchableOpacity className="bg-mindful-brown-80 px-4 py-1 rounded-full">
+              <Text className="text-white font-bold text-base">Create Scale</Text>
+            </TouchableOpacity>
+          </Link>
+        )}
       </View>
 
       {selectedOption === 1 ? (
@@ -181,24 +188,24 @@ const Forms = () => {
           </View>
         ) : (
           <FlatList
-            data={likertOptions}
-            renderItem={({ item }) => (
-              <Link href={`/updateform/${item.id}`} asChild>
-                <TouchableOpacity className="w-full h-auto p-4 items-center bg-[#9BB167] shadow-lg mt-6 rounded-[15px] flex-row justify-between">
-                  <View style={{ flex: 1 }}>
-                    <Text className="text-mindful-brown-10 font-bold text-lg">
-                      {item.value}
-                    </Text>
-                  </View>
-                  <View style={{ justifyContent: 'center', alignItems: 'center' }}>
-                    <Icon name="chevron-right" size={20} color={colors.mindfulBrown10} /> 
-                  </View>
-                </TouchableOpacity>
-              </Link>
-            )}
-            keyExtractor={(item) => item.key.toString()} // Ensure unique key extraction
-            contentContainerStyle={{ paddingHorizontal: 16 }}
-          />
+          data={likertOptions.filter(item => item.value.startsWith("Likert Scale"))} 
+          renderItem={({ item }) => (
+            <Link href={`/updateform/${item.id}`} asChild>
+              <TouchableOpacity className="w-full h-auto p-4 items-center bg-[#9BB167] shadow-lg mt-6 rounded-[15px] flex-row justify-between">
+                <View style={{ flex: 1 }}>
+                  <Text className="text-mindful-brown-10 font-bold text-lg">
+                    {item.value}
+                  </Text>
+                </View>
+                <View style={{ justifyContent: 'center', alignItems: 'center' }}>
+                  <Icon name="chevron-right" size={20} color={colors.mindfulBrown10} /> 
+                </View>
+              </TouchableOpacity>
+            </Link>
+          )}
+          keyExtractor={(item) => item.key.toString()} 
+          contentContainerStyle={{ paddingHorizontal: 16 }}
+        />
         )
       )}
     </SafeAreaView>
