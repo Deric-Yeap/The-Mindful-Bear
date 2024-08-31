@@ -19,8 +19,7 @@ const Landmark = () => {
   useEffect(() => {
     const fetchLandmarks = async () => {
       try {
-        const data = await getLandmarks();
-        console.log(data);
+        const data = await getLandmarks();        
         setLandmarks(data);        
       } catch (error) {
         console.error(error);
