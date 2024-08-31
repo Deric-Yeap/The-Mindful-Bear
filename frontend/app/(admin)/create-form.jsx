@@ -110,7 +110,7 @@ const CreateForm = () => {
         />
 
         <View className="flex flex-row items-center mb-4 mx-4">
-          <Text className="text-mindful-brown-80 font-bold text-[24px]">
+          <Text className="text-mindful-brown-80 font-bold text-[18px]">
             Store Response?
           </Text>
           <TouchableOpacity
