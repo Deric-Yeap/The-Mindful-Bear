@@ -1,53 +1,54 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
   TouchableOpacity,
   FlatList,
   ActivityIndicator,
-} from 'react-native'
-import { SafeAreaView } from 'react-native-safe-area-context'
-import TopBrownSearchBar from '../../components/topBrownSearchBar'
-import StatusBarComponent from '../../components/darkThemStatusBar'
-import Toggle from '../../components/toggle'
-import { Link } from 'expo-router'
-import axiosInstance from '../../common/axiosInstance'
-import { colors } from '../../common/styles'
+} from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import TopBrownSearchBar from '../../components/topBrownSearchBar';
+import StatusBarComponent from '../../components/darkThemStatusBar';
+import Toggle from '../../components/toggle';
+import { Link } from 'expo-router';
+import axiosInstance from '../../common/axiosInstance';
+import { colors } from '../../common/styles';
+import Icon from 'react-native-vector-icons/FontAwesome'; // Import the icon
 
 const Form = () => {
-  const [loading, setLoading] = useState(true) // Loading state
-  const [error, setError] = useState(null) // Error state
-  const [forms, setForms] = useState([]) // State to hold fetched forms
+  const [loading, setLoading] = useState(true); // Loading state
+  const [error, setError] = useState(null); // Error state
+  const [forms, setForms] = useState([]); // State to hold fetched forms
   const onSelectSwitch = (index) => {
-    alert('Selected index: ' + index)
-  }
+    alert('Selected index: ' + index);
+  };
+
   useEffect(() => {
     const fetchForms = async () => {
       try {
-        const response = await axiosInstance.get('form/get') // Use axiosInstance
-        console.log('Fetched data:', response)
-        setForms(response) // Set the fetched data to state
+        const response = await axiosInstance.get('form/get'); // Use axiosInstance
+        console.log('Fetched data:', response);
+        setForms(response); // Set the fetched data to state
       } catch (error) {
         console.error(
           'Error fetching data:',
           error.response ? error.response.data : error.message
-        )
-        setError(error) // Set error if fetching fails
+        );
+        setError(error); // Set error if fetching fails
       } finally {
-        setLoading(false) // Set loading to false after fetching
+        setLoading(false); // Set loading to false after fetching
       }
-    }
+    };
 
-    fetchForms() // Call the fetch function
-  }, []) // Empty dependency array means this runs once on mount
-
+    fetchForms(); // Call the fetch function
+  }, []); // Empty dependency array means this runs once on mount
 
   if (loading) {
     return (
       <SafeAreaView className="flex-1 bg-optimistic-gray-10 justify-center items-center">
         <ActivityIndicator size="large" color="#0000ff" />
       </SafeAreaView>
-    )
+    );
   }
 
   if (error) {
@@ -55,7 +56,7 @@ const Form = () => {
       <SafeAreaView className="flex-1 bg-optimistic-gray-10 justify-center items-center">
         <Text>Error fetching data: {error.message}</Text>
       </SafeAreaView>
-    )
+    );
   }
 
   return (
@@ -91,16 +92,21 @@ const Form = () => {
         <FlatList
           data={forms}
           renderItem={({ item }) => (
-            <Link href="/updateform/{id:1}" asChild>
-              <TouchableOpacity className="w-full h-auto p-4 items-start bg-[#9BB167] shadow-lg mt-6 rounded-[15px]">
-                <Text className="text-mindful-brown-10 font-bold text-lg">
-                  {item.form_name}
-                </Text>
-                <Text className="text-mindful-brown-10 text-md font-bold">
-                  {item.store_responses
-                    ? 'Store User Response'
-                    : "Don't Store Response"}
-                </Text>
+            <Link href={`/updateform/${item.id}`} asChild>
+              <TouchableOpacity className="w-full h-auto p-4 items-center bg-[#9BB167] shadow-lg mt-6 rounded-[15px] flex-row justify-between">
+                <View style={{ flex: 1 }}>
+                  <Text className="text-mindful-brown-10 font-bold text-lg">
+                    {item.form_name}
+                  </Text>
+                  <Text className="text-mindful-brown-10 text-md font-bold">
+                    {item.store_responses
+                      ? 'Store User Response'
+                      : "Don't Store Response"}
+                  </Text>
+                </View>
+                <View style={{ justifyContent: 'center', alignItems: 'center' }}>
+                  <Icon name="chevron-right" size={20} color={colors.mindfulBrown10} /> 
+                </View>
               </TouchableOpacity>
             </Link>
           )}
@@ -109,7 +115,7 @@ const Form = () => {
         />
       )}
     </SafeAreaView>
-  )
-}
+  );
+};
 
-export default Form
+export default Form;
