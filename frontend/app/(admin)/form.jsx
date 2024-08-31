@@ -190,7 +190,7 @@ const Forms = () => {
           <FlatList
           data={likertOptions.filter(item => item.value.startsWith("Likert Scale"))} 
           renderItem={({ item }) => (
-            <Link href={`/updateform/${item.id}`} asChild>
+            <Link href={`/updateScale/${item.key}`} asChild>
               <TouchableOpacity className="w-full h-auto p-4 items-center bg-[#9BB167] shadow-lg mt-6 rounded-[15px] flex-row justify-between">
                 <View style={{ flex: 1 }}>
                   <Text className="text-mindful-brown-10 font-bold text-lg">
