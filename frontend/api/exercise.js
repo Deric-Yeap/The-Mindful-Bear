@@ -1,6 +1,6 @@
 import axiosInstance from '../common/axiosInstance'
 
-export const listExercise = (data) => {
-  return axiosInstance.get('exercise', data)
+export const getExercises = async (data) => {
+  return axiosInstance.get('exercise/get', data)
 }
 

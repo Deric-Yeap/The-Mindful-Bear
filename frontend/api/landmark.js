@@ -19,7 +19,7 @@ export const createLandmark = async (landmarkData) => {
     formData.append('landmark_name', landmarkData.landmark_name);
     formData.append('landmark_image_url', { 
         uri: landmarkData.image_file.uri,
-        name: landmarkData.image_file.name,
+        name: landmarkData.image_file.fileName,
         type: landmarkData.image_file.type,
     });
     formData.append('exercise', landmarkData.exercise);
