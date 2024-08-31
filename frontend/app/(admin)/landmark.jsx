@@ -41,14 +41,12 @@ const Landmark = () => {
     }
   }
 
-
-
   return (
     <SafeAreaView className="flex-1 bg-optimistic-gray-10">
       <StatusBarComponent barStyle="light-content" backgroundColor="#251404" />
     <TopBrownSearchBar title="Landmark Management" />
       <ScrollView className="px-4 mt-4">
-      <Link href="/landmarkCreator" asChild>
+        <Link href="/landmarkCreator" asChild>
           <TouchableOpacity className="mb-4">
             <Text className="text-serenity-green-70 font-urbanist-bold text-lg mb-4">Create New Landmark</Text>
           </TouchableOpacity>
@@ -63,16 +61,16 @@ const Landmark = () => {
                 source={{ uri: landmark.image_file_url }} 
                 className="h-40 w-full rounded-t-2xl"                
                 resizeMode="cover"
-                accessible={true} // Make the image accessible
-                accessibilityLabel="A beautiful landscape with mountains and a sunset" // Equivalent to 'alt'
                 onError={(e) => console.log('Image failed to load', e.nativeEvent.error)}
               />
               <View className="p-3 rounded-b-2xl bg-mindful-brown-60">
                 <Text className="text-white font-urbanist-bold text-lg">{landmark.landmark_name}</Text>
                 <View className="flex-row justify-between mt-2">
-                  <TouchableOpacity className="bg-mindful-brown-50 px-3 py-1 rounded-full">
-                    <Text className="text-mindful-brown-100 font-urbanist-bold">Modify</Text>
-                  </TouchableOpacity>
+                  <Link href={`/landmarkCreator?landmark=${encodeURIComponent(JSON.stringify(landmark))}`} asChild>
+                    <TouchableOpacity className="bg-mindful-brown-50 px-3 py-1 rounded-full">
+                      <Text className="text-mindful-brown-100 font-urbanist-bold">Modify</Text>
+                    </TouchableOpacity>
+                  </Link>
                   <TouchableOpacity
                     onPress={() => handleDelete(landmark.landmark_id)}
                     className="bg-mindful-brown-50 px-3 py-1 rounded-full"
