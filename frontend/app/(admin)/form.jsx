@@ -93,10 +93,10 @@ const Form = () => {
           renderItem={({ item }) => (
             <Link href="/updateform/{id:1}" asChild>
               <TouchableOpacity className="w-full h-auto p-4 items-start bg-[#9BB167] shadow-lg mt-6 rounded-[15px]">
-                <Text className="text-[#F7F4F2] font-bold text-lg">
+                <Text className="text-mindful-brown-10 font-bold text-lg">
                   {item.form_name}
                 </Text>
-                <Text className="text-[#F7F4F2] text-md font-bold">
+                <Text className="text-mindful-brown-10 text-md font-bold">
                   {item.store_responses
                     ? 'Store User Response'
                     : "Don't Store Response"}
