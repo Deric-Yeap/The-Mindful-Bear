@@ -12,20 +12,19 @@ import { useRoute } from '@react-navigation/native';
 
 const UpdateForm = () => {
   const route = useRoute();
-  const formId = route.params.formId; // Extract formId from route params
+  const formId = route.params.formId;
   console.log('Form ID:', formId);
 
   const [formName, setFormName] = useState("");
   const [storeResponses, setStoreResponses] = useState(false);
   const [questions, setQuestions] = useState([]);
   const [responseTypeList, setResponseTypeList] = useState([]);
-  const [editable, setEditable] = useState(false); // State to toggle editability
+  const [editable, setEditable] = useState(false);
 
   useEffect(() => {
     const fetchFormDetails = async () => {
       try {
         console.log('Fetching form details for Form ID:', formId);
-        // Fetch the form details
         const response = await axiosInstance.get(`/form/get-form-and-questions/${formId}`);
         console.log('Form details fetched:', response);
 
@@ -35,11 +34,10 @@ const UpdateForm = () => {
         setQuestions(formDetails.questions.map(q => ({
           ...q,
           editable: false,
-          optionSet_id: q.optionSet || '', // Set optionSet_id based on the data provided
+          optionSet_id: q.optionSet || '',
         })));
         console.log('Questions after setting state:', formDetails.questions);
 
-        // Fetch the option sets
         const optionSetResponse = await listOptionSet();
         console.log('Option Set Response:', optionSetResponse);
         setResponseTypeList(optionSetResponse);
@@ -50,6 +48,11 @@ const UpdateForm = () => {
 
     fetchFormDetails();
   }, [formId]);
+
+  const getPlaceholder = (optionSetId) => {
+    const foundOption = responseTypeList.find(opt => opt.id === optionSetId);
+    return foundOption ? foundOption.description : "Select Response Type";
+  };
 
   const toggleEditable = () => {
     setEditable(!editable);
@@ -71,7 +74,7 @@ const UpdateForm = () => {
         })),
       });
       Alert.alert('Form Updated Successfully');
-      toggleEditable(); // Disable editing after saving
+      toggleEditable();
     } catch (error) {
       console.error('Error saving form:', error);
     }
@@ -100,7 +103,7 @@ const UpdateForm = () => {
           value={formName}
           handleChange={(value) => setFormName(value)}
           customStyles="mb-4 m-4"
-          editable={editable} // Make form name editable if toggle is on
+          editable={editable}
         />
 
         <View className="flex flex-row items-center mb-4 mx-4">
@@ -119,17 +122,14 @@ const UpdateForm = () => {
           </TouchableOpacity>
         </View>
 
-        {/* Horizontal Line */}
-        <View
-          style={{ height: 1, backgroundColor: '#E1E1E0', marginVertical: 10 }}
-        />
+        <View style={{ height: 1, backgroundColor: '#E1E1E0', marginVertical: 10 }} />
 
         {questions.map((question, index) => {
+          const placeholder = getPlaceholder(question.optionSet_id);
           console.log(`Rendering Question ${index + 1}`);
           console.log('Question Details:', question);
-
-          const placeholder = responseTypeList.find(opt => opt.key === question.optionSet_id)?.value || "Select Response Type";
-          console.log(`Placeholder for Question ${index + 1}:`, placeholder);
+          console.log('Selected OptionSet ID:', question.optionSet_id);
+          console.log('Placeholder:', placeholder);
 
           return (
             <View key={index} className="mb-4 px-4">
@@ -139,7 +139,6 @@ const UpdateForm = () => {
                 </Text>
               </View>
 
-              {/* Text Input for Question */}
               <FormField
                 iconName="text-box-outline"
                 value={question.question}
@@ -149,52 +148,46 @@ const UpdateForm = () => {
                   setQuestions(newQuestions);
                 }}
                 customStyles="mx-0"
-                editable={editable} // Make question editable if toggle is on
-                multiline={true} // Enable multiline input
-                numberOfLines={4} // Specify a default number of lines
-                textAlignVertical="top" // Align text at the top
+                editable={editable}
+                multiline={true}
+                numberOfLines={4}
+                textAlignVertical="top"
                 style={{
-                  minHeight: 50, // Set a minimum height
-                  maxHeight: 200, // Set a maximum height
-                  }}
-                />
+                  minHeight: 50,
+                  maxHeight: 200,
+                }}
+              />
 
-              {/* Dropdown List for Response Type */}
               <Dropdown
                 title="Question Response Type"
-                data={responseTypeList}
+                data={responseTypeList.map(opt => ({ key: opt.id, value: opt.description }))}
                 customStyles="pb-2 mt-2"
                 placeHolder={placeholder}
                 handleSelect={(value) => {
                   const newQuestions = [...questions];
                   newQuestions[index].optionSet_id = value;
                   setQuestions(newQuestions);
+                  console.log(`Option selected for Question ${index + 1}:`, value);
                 }}
-                disabled={!editable} // Disable dropdown if not in edit mode
+                disabled={!editable}
               />
 
-              {/* Buttons Container */}
               <View className="flex-row justify-between mt-4 mb-4">
-                {/* Make Changes Button */}
                 <View className="bg-mindful-brown-70 rounded-full py-3 flex-1 justify-center items-center mr-2">
                   <Text className="text-white text-lg font-bold">Make Changes</Text>
                 </View>
 
-                {/* Delete Button */}
                 <View className="bg-optimistic-gray-60 rounded-full py-3 flex-1 justify-center items-center ml-2">
                   <Text className="text-white text-lg font-bold">Delete</Text>
                 </View>
               </View>
 
-
-                {/* Horizontal Line */}
-                <View
-                  style={{ height: 1, backgroundColor: '#E1E1E0', marginVertical: 10 }}
-                />
-                </View>
+              <View
+                style={{ height: 1, backgroundColor: '#E1E1E0', marginVertical: 10 }}
+              />
+            </View>
           );
         })}
-
       </ScrollView>
     </SafeAreaView>
   );

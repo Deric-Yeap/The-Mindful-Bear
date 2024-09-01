@@ -161,8 +161,9 @@ const Forms = () => {
           <FlatList
             data={forms}
             renderItem={({ item }) => (
-              <Link href={`/updateform/${item.id}`} asChild>
-                <TouchableOpacity className="w-full h-auto p-4 items-center bg-[#9BB167] shadow-lg mt-6 rounded-[15px] flex-row justify-between">
+              //<Link href={`/updateform/${item.id}`} asChild>
+                <TouchableOpacity  className="w-full h-auto p-4 items-center bg-[#9BB167] shadow-lg mt-6 rounded-[15px] flex-row justify-between"
+                onPress={() => handleFormPress(item)}>
                   <View style={{ flex: 1 }}>
                     <Text className="text-mindful-brown-10 font-bold text-lg">
                       {item.form_name}
@@ -177,7 +178,7 @@ const Forms = () => {
                     <Icon name="chevron-right" size={20} color={colors.mindfulBrown10} /> 
                   </View>
                 </TouchableOpacity>
-              </Link>
+              //</Link>
             )}
             keyExtractor={(item) => item.id.toString()} // Ensure unique key extraction
             contentContainerStyle={{ paddingHorizontal: 16 }}
