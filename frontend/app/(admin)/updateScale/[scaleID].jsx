@@ -26,6 +26,32 @@ const UpdateScale = () => {
     // Your submission logic here
     console.log('Form submitted')
   }
+  const updateOptionDescription = async (optionId, newDescription) => {
+    try {
+      const url = `update/${optionId}`; // Adjust the URL as per your API
+      const response = await axiosInstance.put(url, { description: newDescription });
+      console.log('Update response:', response.data);
+      return response.data; // Return the updated data
+    } catch (error) {
+      console.error('Error updating option description:', error);
+      if (error.response) {
+        // The request was made and the server responded with a status code
+        // that falls out of the range of 2xx
+        console.error('Error response data:', error.response.data);
+        console.error('Error response status:', error.response.status);
+        console.error('Error response headers:', error.response.headers);
+        throw new Error(`Error updating option description: ${error.response.data}`);
+      } else if (error.request) {
+        // The request was made but no response was received
+        console.error('Error request:', error.request);
+        throw new Error('Error updating option description: No response received');
+      } else {
+        // Something happened in setting up the request that triggered an Error
+        console.error('Error message:', error.message);
+        throw new Error(`Error updating option description: ${error.message}`);
+      }
+    }
+  };
   useEffect(() => {
     const fetchForms = async () => {
       setLoading(true)
@@ -106,13 +132,13 @@ const UpdateScale = () => {
           {option.value} {/* Display the option.value */}
         </Text>
         <FormField
-          value={option.description} // Use option.description for the FormField value
-          handleChange={(value) =>
-            handleInputChange(index, value, option.id)
-          } // Pass option.id as well
-          customStyles="mb-4 m-4 w-1/2"
-          editable={true}
-        />
+              value={option.description} // Use option.description for the FormField value
+              handleChange={(value) =>
+                handleInputChange(index, value, option.id)
+              } // Pass option.id as well
+              customStyles="mb-4 m-4 w-1/2"
+              editable={true}
+            />
       </View>
     ))}
 </View>
