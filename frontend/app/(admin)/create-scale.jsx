@@ -61,7 +61,7 @@ const CreateForm = () => {
 
   const handleChange = (index, value) => {
     if (index === 0) {
-      const newValue = value.trim() === '' ? '' : value.replace('Liker Scale - ', '');
+      const newValue = value.trim() === '' ? '' : value.replace('Likert Scale - ', '');
       setRequest((prev) => ({
         ...prev,
         scale_name: newValue,
@@ -85,7 +85,7 @@ const CreateForm = () => {
         <FormField
           title="Scale Name"
           iconName="form-select"
-          value={`Liker Scale - ${request.scale_name}`}
+          value={`Likert Scale - ${request.scale_name}`}
           handleChange={(value) => handleChange(0, value)}
           customStyles="mb-4 m-4"
           editable={true}
