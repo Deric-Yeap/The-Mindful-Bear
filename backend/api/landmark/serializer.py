@@ -1,7 +1,5 @@
 from rest_framework import serializers
-
 from ..exercise.serializer import ExerciseSerializer
-
 from ..exercise.models import Exercise
 from .models import Landmark
 from ..common.validators import is_field_empty
@@ -24,6 +22,8 @@ class LandmarkSerializer(serializers.ModelSerializer):
         return None
     
 class LandmarkCreateSerializer(serializers.ModelSerializer):
+    landmark_image_url = serializers.ImageField(write_only=True, required=True)
+
     class Meta:
         model = Landmark
         fields = ['landmark_id', 'landmark_name', 'landmark_image_url', 'x_coordinates', 'y_coordinates', 'exercise']
@@ -34,19 +34,13 @@ class LandmarkCreateSerializer(serializers.ModelSerializer):
         return value
 
     def create(self, validated_data):
-        landmark_image_file = validated_data.pop('landmark_image_url')
-        print(landmark_image_file)        
-        user = self.context['request'].user
-
-        # Generate file path and upload the file
-        file_name, object_path = make_file_upload_path("landmark", user, quote(landmark_image_file.name))
-        print(object_path)
-        # object_path = object_path.replace(" ", "")
+        landmark_image_file = validated_data.pop('landmark_image_url')        
+        user = self.context['request'].user    
+        file_name, object_path = make_file_upload_path("landmark", user, quote(landmark_image_file.name))                
         bucket = settings.AWS_STORAGE_BUCKET_NAME
         file_url = upload_fileobj(landmark_image_file, bucket, object_path)
         if not file_url:        
             raise serializers.ValidationError("File upload to S3 failed")
-
         
         landmark = Landmark.objects.create(
             landmark_name=validated_data['landmark_name'],
@@ -63,21 +57,41 @@ class LandmarkCreateSerializer(serializers.ModelSerializer):
         representation['landmark_image_url'] = instance.landmark_image_url  
         representation['exercise'] = ExerciseSerializer(instance.exercise).data
         return representation
+    
 class LandmarkUpdateSerializer(serializers.ModelSerializer):
+    landmark_image_url = serializers.ImageField(write_only=True, required=False)
+
     class Meta:
         model = Landmark
-        fields = ['landmark_id', 'landmark_name', 'landmark_image_url', 'x_coordinates', 'y_coordinates', 'exercise']
-        extra_kwargs = {
-            'landmark_name' : {'required': True}, 
-            'landmark_image_url' : {'required': False},
-            'x_coordinates': {'required': False},
-            'y_coordinates': {'required': False},
-            'exercise': {'required': False}
-        }
+        fields = ['landmark_name', 'landmark_image_url', 'x_coordinates', 'y_coordinates', 'exercise']
+
+    def validate_landmark_image_url(self, value):
+        if not value.name.endswith(('.jpg', '.jpeg', '.png')):
+            raise serializers.ValidationError("Image file must be in JPG, JPEG, or PNG format.")
+        return value
+
+    def update(self, instance, validated_data):
+        user = self.context['request'].user    
+        if 'landmark_image_url' in validated_data:
+            landmark_image_file = validated_data.pop('landmark_image_url')
+            file_name, object_path = make_file_upload_path("landmark", user, quote(landmark_image_file.name))            
+            bucket = settings.AWS_STORAGE_BUCKET_NAME
+            file_url = upload_fileobj(landmark_image_file, bucket, object_path)
+            if not file_url:
+                raise serializers.ValidationError("File upload to S3 failed")
+
+            instance.landmark_image_url = object_path
+        
+        instance.landmark_name = validated_data.get('landmark_name', instance.landmark_name)
+        instance.x_coordinates = validated_data.get('x_coordinates', instance.x_coordinates)
+        instance.y_coordinates = validated_data.get('y_coordinates', instance.y_coordinates)
+        instance.exercise = validated_data.get('exercise', instance.exercise)
+
+        instance.save()
+        return instance
+
     def to_representation(self, instance):
         representation = super().to_representation(instance)
-        # Serialize the exercise field separately
+        representation['landmark_image_url'] = instance.landmark_image_url
         representation['exercise'] = ExerciseSerializer(instance.exercise).data
         return representation
-
-    

@@ -47,6 +47,7 @@ INSTALLED_APPS = [
     "rest_framework",
     "rest_framework_simplejwt",
     'django_rest_passwordreset',
+    
     "storages",
     'corsheaders',
     "debug_toolbar",
@@ -62,6 +63,7 @@ INSTALLED_APPS = [
     "api.department",
     "api.response",
     "api.optionSet",
+    "api.option"
 ]
 
 REST_FRAMEWORK = {

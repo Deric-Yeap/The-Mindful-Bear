@@ -1,21 +1,25 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, ScrollView, TouchableOpacity, Image } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, Image, Modal } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import BackButton from '../../components/backButton';
 import SearchBar from '../../components/searchBar';
-import { getLandmarks } from '../../api/landmark';
+import { getLandmarks, deleteLandmark } from '../../api/landmark';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
+import { Link } from 'expo-router';
 import TopBrownSearchBar from '../../components/topBrownSearchBar'; 
 import StatusBarComponent from '../../components/darkThemStatusBar'; 
+import CustomButton from '../../components/customButton';
+import SuccessMessage from '../../components/successMessage';
+import ConfirmModal from '../../components/confirmModal';
 
 const Landmark = () => {  
   const [landmarks, setLandmarks] = useState([]);
-
+  const [showSuccess, setShowSuccess] = useState(false);
+  
   useEffect(() => {
     const fetchLandmarks = async () => {
       try {
-        const data = await getLandmarks();
-        console.log(data);
+        const data = await getLandmarks();        
         setLandmarks(data);        
       } catch (error) {
         console.error(error);
@@ -23,19 +27,43 @@ const Landmark = () => {
     };
 
     fetchLandmarks();
-    
-    // console.log(landmarks)
-    // console.log("")
-    // console.log(landmarks[0])
   }, []);
 
+  const handleDelete = async (id) => {
+    try {
+      await deleteLandmark(id);   
+      setLandmarks((prevLandmarks) => prevLandmarks.filter((landmark) => landmark.landmark_id !== id));
+      
+      setShowSuccess(true);
+      setTimeout(() => {
+        setShowSuccess(false);
+      }, 3000);
+      
+    } catch (error) {
+        console.error('Error:', error.message);
+    }
+  }
 
   return (
     <SafeAreaView className="flex-1 bg-optimistic-gray-10">
       <StatusBarComponent barStyle="light-content" backgroundColor="#251404" />
     <TopBrownSearchBar title="Landmark Management" />
+    {showSuccess && (
+        <ConfirmModal
+          title="Success!"
+          subTitle="Landmark deleted successfully."
+          isConfirmButton={true}
+          isCancelButton={false}
+        />
+      )}
+
       <ScrollView className="px-4 mt-4">
-        <Text className="text-mindful-brown-80 font-bold text-3xl mb-4">Create New Landmark</Text>
+        <Link href="/landmarkCreator" asChild>
+          <TouchableOpacity className="mb-4">
+            <Text className="text-serenity-green-70 font-urbanist-bold text-lg mb-4">Create New Landmark</Text>
+          </TouchableOpacity>
+        </Link>
+        
         <View className="flex-wrap flex-row justify-between">
           {landmarks.map((landmark, index) => (
             
@@ -45,17 +73,20 @@ const Landmark = () => {
                 source={{ uri: landmark.image_file_url }} 
                 className="h-40 w-full rounded-t-2xl"                
                 resizeMode="cover"
-                accessible={true} // Make the image accessible
-                accessibilityLabel="A beautiful landscape with mountains and a sunset" // Equivalent to 'alt'
                 onError={(e) => console.log('Image failed to load', e.nativeEvent.error)}
               />
               <View className="p-3 rounded-b-2xl bg-mindful-brown-60">
                 <Text className="text-white font-urbanist-bold text-lg">{landmark.landmark_name}</Text>
                 <View className="flex-row justify-between mt-2">
-                  <TouchableOpacity className="bg-mindful-brown-50 px-3 py-1 rounded-full">
-                    <Text className="text-mindful-brown-100 font-urbanist-bold">Modify</Text>
-                  </TouchableOpacity>
-                  <TouchableOpacity className="bg-mindful-brown-50 px-3 py-1 rounded-full">
+                  <Link href={`/landmarkCreator?landmark=${encodeURIComponent(JSON.stringify(landmark))}`} asChild>
+                    <TouchableOpacity className="bg-mindful-brown-50 px-3 py-1 rounded-full">
+                      <Text className="text-mindful-brown-100 font-urbanist-bold">Modify</Text>
+                    </TouchableOpacity>
+                  </Link>
+                  <TouchableOpacity
+                    onPress={() => handleDelete(landmark.landmark_id)}
+                    className="bg-mindful-brown-50 px-3 py-1 rounded-full"
+                  >
                     <Text className="text-mindful-brown-100 font-urbanist-bold">Delete</Text>
                   </TouchableOpacity>
                 </View>

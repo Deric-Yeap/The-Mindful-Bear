@@ -1,6 +1,8 @@
-from rest_framework.routers import DefaultRouter
-from . import views
+from django.urls import path
+from .views import OptionFormGet,OptionSetDetail
 
-router = DefaultRouter()
-router.register('', views.OptionSetViewSet, basename='gender')
-urlpatterns = router.urls
+urlpatterns = [
+    path('get', OptionFormGet.as_view(), name='form_question_list'),
+    path('get/<int:pk>/', OptionSetDetail.as_view(), name='option-detail'), 
+    
+]

@@ -3,7 +3,7 @@ import { useState } from 'react'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import CustomButton from '../../components/customButton'
 import FormField from '../../components/formField'
-import { login } from '../../api/user'
+import { login, getMe } from '../../api/user'
 import { useDispatch, useSelector } from 'react-redux'
 import { setTokens } from '../../redux/slices/authSlice'
 import { router } from 'expo-router'
@@ -23,8 +23,7 @@ const SignIn = () => {
       const response = await login({
         email: form.email,
         password: form.password,
-      })
-      router.push('/home')
+      })      
       dispatch(
         setTokens({
           token: response.access,
