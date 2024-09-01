@@ -1,5 +1,5 @@
 import axios from 'axios'
-import { store } from '..//redux/store'
+import { store } from '../redux/store'
 
 const axiosInstance = axios.create({
   baseURL: 'http://10.0.2.2:8000/api/',
@@ -14,24 +14,28 @@ axiosInstance.interceptors.request.use(
     const state = store.getState()
     const token = state.auth.token
     config.headers['X-Request-Timestamp'] = new Date().toISOString()
-    console.log(token)
     if (token) {
-      console.log(token)
       config.headers['Authorization'] = `Bearer ${token}`
     }
     return config
   },
-  (error) => {
+  (error) => {        
     return Promise.reject(error)
   }
 )
 
 axiosInstance.interceptors.response.use(
-  (response) => {
+  (response) => {    
     return response.data.data
   },
   (error) => {
-    return Promise.reject(error)
+    if (error.response && error.response.data && error.response.data.error_description) {
+      console.log('Error Description:', error.response.data.error_description);
+    } else {
+      console.log('Error:', error.message);
+    }
+    
+    return Promise.reject(error);
   }
 )
 

@@ -1,5 +1,5 @@
 export const colors = {
-  mindfulrown100: '#251404',
+  mindfulBrown100: '#251404',
   mindfulBrown90: '#372315',
   mindfulBrown80: '#4F3422',
   mindfulBrown70: '#704A33',

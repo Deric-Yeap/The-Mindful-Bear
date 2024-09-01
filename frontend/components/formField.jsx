@@ -15,9 +15,12 @@ const FormField = ({
   const [showPassword, setShowPassword] = useState(false)
   return (
     <View className={`space-y-2 ${customStyles}`}>
-      <Text className=" text-mindful-brown-80 font-urbanist-extra-bold text-lg">
-        {title}
-      </Text>
+      {title && (
+        <Text className=" text-mindful-brown-80 font-urbanist-extra-bold text-lg">
+          {title}
+        </Text>
+      )}
+
       <View className="border-2 border-optimistic-gray-20 w-full h-16 px-4 rounded-full focus:border-serenity-green-50 items-center flex-row">
         <MaterialCommunityIcons
           name={iconName}
@@ -31,11 +34,11 @@ const FormField = ({
           placeholderTextColor="optimistic-gray-50"
           onChangeText={handleChange}
           secureTextEntry={
-            title.toLowerCase().includes('password') && !showPassword
+            title && title.toLowerCase().includes('password') && !showPassword
           }
         />
 
-        {title.toLowerCase().includes('password') && (
+        {title && title.toLowerCase().includes('password') && (
           <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
             <MaterialCommunityIcons
               name={showPassword ? 'eye-off' : 'eye'}
@@ -44,7 +47,7 @@ const FormField = ({
           </TouchableOpacity>
         )}
       </View>
-      {errorMessage &&(
+      {errorMessage && (
         <View className="border border-present-red-50 bg-present-red-10 w-full h-16 px-4 rounded-full items-center flex-row">
           <MaterialCommunityIcons
             name="alert-outline"

@@ -47,20 +47,23 @@ INSTALLED_APPS = [
     "rest_framework",
     "rest_framework_simplejwt",
     'django_rest_passwordreset',
+    
     "storages",
     'corsheaders',
+    "debug_toolbar",
     "api.user",
     "api.landmark",
     "api.exercise",
     "api.form",
     "api.question",
     "api.session",
-    "api.formSession",
+    "api.formQuestion",
     "api.journal",
     "api.gender",
     "api.department",
-    "debug_toolbar",
-    "api.response"
+    "api.response",
+    "api.optionSet",
+    "api.option"
 ]
 
 REST_FRAMEWORK = {
