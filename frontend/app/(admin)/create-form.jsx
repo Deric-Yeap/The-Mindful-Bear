@@ -32,15 +32,13 @@ const CreateForm = () => {
   // Fetch option sets on component mount
   useEffect(() => {
     const fetchData = async () => {
-      try {
-        const response = await listOptionSet();
-        if (response.code === 200) {
-          setResponseTypeList(response.data); // Set the response type list from the API
-        } else {
-          throw new Error(response.error_description || 'Error fetching option set');
-        }
+      try {   
+
+        const optionSetResponse = await listOptionSet();
+        console.log('Option Set Response:', optionSetResponse);
+        setResponseTypeList(optionSetResponse);
       } catch (error) {
-        console.error('Failed to fetch option sets:', error);
+        console.error('Error fetching form details:', error);
       }
     };
     fetchData();
@@ -236,7 +234,7 @@ const CreateForm = () => {
             {/* Dropdown List for Response Type */}
             <Dropdown
               title="Question Response Type"
-              data={responseTypeList} // Use the fetched response type list
+              data={responseTypeList.map(opt => ({ key: opt.id, value: opt.description }))}
               customStyles="pb-6 m-4"
               placeHolder="Select Response Type"
               handleSelect={(value) => handleResponseTypeChange(index, value)}
