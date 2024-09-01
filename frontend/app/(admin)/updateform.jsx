@@ -121,7 +121,7 @@ const UpdateForm = () => {
 
         {/* Horizontal Line */}
         <View
-          style={{ height: 1, backgroundColor: '#A0A0A0', marginVertical: 10 }}
+          style={{ height: 1, backgroundColor: '#E1E1E0', marginVertical: 10 }}
         />
 
         {questions.map((question, index) => {
@@ -156,8 +156,8 @@ const UpdateForm = () => {
                 style={{
                   minHeight: 50, // Set a minimum height
                   maxHeight: 200, // Set a maximum height
-                }}
-              />
+                  }}
+                />
 
               {/* Dropdown List for Response Type */}
               <Dropdown
@@ -174,19 +174,24 @@ const UpdateForm = () => {
               />
 
               {/* Buttons Container */}
-              <View className="flex-row justify-between mt-4">
-                <CustomButton
-                  title="Make Changes"
-                  handlePress={() => console.log('Make Changes pressed')}
-                  buttonStyle="bg-mindful-brown-70 rounded-full flex-1 mr-2"
-                />
-                <CustomButton
-                  title="Delete"
-                  handlePress={() => console.log('Delete pressed')}
-                  buttonStyle="bg-mindful-brown-70  rounded-full flex-1 mr-2"
-                />
+              <View className="flex-row justify-between mt-4 mb-4">
+                {/* Make Changes Button */}
+                <View className="bg-mindful-brown-70 rounded-full py-3 flex-1 justify-center items-center mr-2">
+                  <Text className="text-white text-lg font-bold">Make Changes</Text>
+                </View>
+
+                {/* Delete Button */}
+                <View className="bg-optimistic-gray-60 rounded-full py-3 flex-1 justify-center items-center ml-2">
+                  <Text className="text-white text-lg font-bold">Delete</Text>
+                </View>
               </View>
-            </View>
+
+
+                {/* Horizontal Line */}
+                <View
+                  style={{ height: 1, backgroundColor: '#E1E1E0', marginVertical: 10 }}
+                />
+                </View>
           );
         })}
 
