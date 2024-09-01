@@ -39,6 +39,25 @@ class CreateOptionSet(generics.CreateAPIView):
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
+class UpdateOptionSet(generics.UpdateAPIView):
+    queryset = OptionSet.objects.all()
+    serializer_class = OptionSetSerializer
+    lookup_field = "pk"
+
+    def update(self, request, *args, **kwargs):
+        try:
+            instance = self.get_object()
+            serializer = self.get_serializer(instance, data=request.data, partial=True)
+            serializer.is_valid(raise_exception=True)
+            self.perform_update(serializer)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        except NotFound:
+            return Response({"error": "Form not found."}, status=status.HTTP_404_NOT_FOUND)
+        except ValidationError as ve:
+            return Response({"errors": ve.detail}, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
 class OptionSetDestroy(generics.DestroyAPIView):
     queryset = OptionSet.objects.all()
     serializer_class = OptionSetSerializer
