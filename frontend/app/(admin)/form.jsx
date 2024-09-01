@@ -1,16 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import {
-  View,
-  Text,
-  TouchableOpacity,
-  FlatList,
-  ActivityIndicator,
-} from 'react-native';
+import {View, Text, TouchableOpacity, FlatList, ActivityIndicator,} from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import TopBrownSearchBar from '../../components/topBrownSearchBar';
 import StatusBarComponent from '../../components/darkThemStatusBar';
 import Toggle from '../../components/toggle';
 import { Link } from 'expo-router';
+import { router } from 'expo-router';
 import axiosInstance from '../../common/axiosInstance';
 import { colors } from '../../common/styles';
 import Icon from 'react-native-vector-icons/FontAwesome'; // Import the icon
