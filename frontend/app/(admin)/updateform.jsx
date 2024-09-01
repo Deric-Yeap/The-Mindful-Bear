@@ -132,9 +132,9 @@ const UpdateForm = () => {
           console.log(`Placeholder for Question ${index + 1}:`, placeholder);
 
           return (
-            <View key={index} className="mb-2">
-              <View className="flex-row justify-between items-center">
-                <Text className="text-mindful-brown-80 font-urbanist-extra-bold text-lg mb-2 p-4">
+            <View key={index} className="mb-4 px-4">
+              <View className="flex-row justify-between items-center mb-2">
+                <Text className="text-mindful-brown-80 font-urbanist-extra-bold text-lg">
                   Question {index + 1}
                 </Text>
               </View>
@@ -148,15 +148,22 @@ const UpdateForm = () => {
                   newQuestions[index].question = value;
                   setQuestions(newQuestions);
                 }}
-                customStyles="mx-4"
+                customStyles="mx-0"
                 editable={editable} // Make question editable if toggle is on
+                multiline={true} // Enable multiline input
+                numberOfLines={4} // Specify a default number of lines
+                textAlignVertical="top" // Align text at the top
+                style={{
+                  minHeight: 50, // Set a minimum height
+                  maxHeight: 200, // Set a maximum height
+                }}
               />
 
               {/* Dropdown List for Response Type */}
               <Dropdown
                 title="Question Response Type"
                 data={responseTypeList}
-                customStyles="pb-6 m-4"
+                customStyles="pb-2 mt-2"
                 placeHolder={placeholder}
                 handleSelect={(value) => {
                   const newQuestions = [...questions];
@@ -165,23 +172,24 @@ const UpdateForm = () => {
                 }}
                 disabled={!editable} // Disable dropdown if not in edit mode
               />
+
+              {/* Buttons Container */}
+              <View className="flex-row justify-between mt-4">
+                <CustomButton
+                  title="Make Changes"
+                  handlePress={() => console.log('Make Changes pressed')}
+                  buttonStyle="bg-mindful-brown-70 rounded-full flex-1 mr-2"
+                />
+                <CustomButton
+                  title="Delete"
+                  handlePress={() => console.log('Delete pressed')}
+                  buttonStyle="bg-mindful-brown-70  rounded-full flex-1 mr-2"
+                />
+              </View>
             </View>
           );
         })}
 
-        {/* Make Changes Button */}
-        <CustomButton
-          title={editable ? "Save Changes" : "Make Changes"}
-          handlePress={editable ? handleSaveChanges : toggleEditable}
-          buttonStyle="mx-4 mb-2"
-        />
-
-        {/* Delete Button */}
-        <CustomButton
-          title="Delete"
-          handlePress={handleDelete}
-          buttonStyle="mx-4"
-        />
       </ScrollView>
     </SafeAreaView>
   );
