@@ -1,25 +1,20 @@
 import React, { useState, useEffect } from 'react';
-import {
-  View,
-  Text,
-  TouchableOpacity,
-  FlatList,
-  ActivityIndicator,
-} from 'react-native';
+import {View, Text, TouchableOpacity, FlatList, ActivityIndicator,} from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import TopBrownSearchBar from '../../components/topBrownSearchBar';
 import StatusBarComponent from '../../components/darkThemStatusBar';
 import Toggle from '../../components/toggle';
 import { Link } from 'expo-router';
+import { router } from 'expo-router';
 import axiosInstance from '../../common/axiosInstance';
 import { colors } from '../../common/styles';
 import Icon from 'react-native-vector-icons/FontAwesome'; // Import the icon
 
 
 const Forms = () => {
-  const [loading, setLoading] = useState(true); // Loading state
-  const [error, setError] = useState(null); // Error state
-  const [forms, setForms] = useState([]); // State to hold fetched forms
+  const [loading, setLoading] = useState(true); // Loading state // Loading state
+  const [error, setError] = useState(null); // Error state // Error state
+  const [forms, setForms] = useState([]); // State to hold fetched forms // State to hold fetched forms
   const [likertOptions, setLikertOptions] = useState([]); // State to hold fetched Likert options
   const [selectedOption, setSelectedOption] = useState(1); // State to handle toggle selection
 
@@ -109,6 +104,14 @@ const Forms = () => {
     );
   }
 
+  const handleFormPress = (form) => {
+    console.log(`Navigating to update form:`, form);
+    router.push({
+      pathname: '/updateform',
+      params: { formId: form.id },
+    });
+  };
+
   // Log the forms state before rendering
   console.log('Forms to render:', forms);
   console.log('Likert options to render:', likertOptions);
@@ -158,8 +161,9 @@ const Forms = () => {
           <FlatList
             data={forms}
             renderItem={({ item }) => (
-              <Link href={`/updateform/${item.id}`} asChild>
-                <TouchableOpacity className="w-full h-auto p-4 items-center bg-[#9BB167] shadow-lg mt-6 rounded-[15px] flex-row justify-between">
+              //<Link href={`/updateform/${item.id}`} asChild>
+                <TouchableOpacity  className="w-full h-auto p-4 items-center bg-[#9BB167] shadow-lg mt-6 rounded-[15px] flex-row justify-between"
+                onPress={() => handleFormPress(item)}>
                   <View style={{ flex: 1 }}>
                     <Text className="text-mindful-brown-10 font-bold text-lg">
                       {item.form_name}
@@ -174,7 +178,7 @@ const Forms = () => {
                     <Icon name="chevron-right" size={20} color={colors.mindfulBrown10} /> 
                   </View>
                 </TouchableOpacity>
-              </Link>
+              //</Link>
             )}
             keyExtractor={(item) => item.id.toString()} // Ensure unique key extraction
             contentContainerStyle={{ paddingHorizontal: 16 }}
