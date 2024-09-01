@@ -80,6 +80,7 @@ const UpdateScale = () => {
     return <Text>Loading...</Text>
   }
 
+  const trimmedDescription = description.description.slice(15);
   return (
     <SafeAreaView className="flex-1 bg-optimistic-gray-10">
       <StatusBarComponent barStyle="light-content" backgroundColor="#251404" />
@@ -88,14 +89,14 @@ const UpdateScale = () => {
         <FormField
           title="Scale Name"
           iconName="form-select"
-          value={description.description} // Bind the description state
+          value={`Likert Scale - ${trimmedDescription}`}
           handleChange={
             (value) => setDescription({ ...request, description: value }) // Update description in state
           }
           customStyles="mb-4 m-4"
           editable={true}
         />
-       <View className="mx-4 mt-1">
+       <View className="mx-4">
   {options
     .slice() // Create a shallow copy of the options array
     .sort((a, b) => a.value - b.value) // Sort the options in ascending order by option.value
