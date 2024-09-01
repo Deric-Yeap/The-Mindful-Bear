@@ -27,31 +27,72 @@ const UpdateScale = () => {
     console.log('Form submitted')
   }
   const updateOptionDescription = async (optionId, newDescription) => {
-    try {
-      const url = `update/${optionId}`; // Adjust the URL as per your API
-      const response = await axiosInstance.put(url, { description: newDescription });
-      console.log('Update response:', response.data);
-      return response.data; // Return the updated data
-    } catch (error) {
-      console.error('Error updating option description:', error);
-      if (error.response) {
-        // The request was made and the server responded with a status code
-        // that falls out of the range of 2xx
-        console.error('Error response data:', error.response.data);
-        console.error('Error response status:', error.response.status);
-        console.error('Error response headers:', error.response.headers);
-        throw new Error(`Error updating option description: ${error.response.data}`);
-      } else if (error.request) {
-        // The request was made but no response was received
-        console.error('Error request:', error.request);
-        throw new Error('Error updating option description: No response received');
-      } else {
-        // Something happened in setting up the request that triggered an Error
-        console.error('Error message:', error.message);
-        throw new Error(`Error updating option description: ${error.message}`);
-      }
+  try {
+    const url = `update/${optionId}`; // Adjust the URL as per your API
+    const response = await axiosInstance.put(url, { description: newDescription });
+    console.log('Update response:', response.data);
+    return response.data; // Return the updated data
+  } catch (error) {
+    console.error('Error updating option description:', error);
+    if (error.response) {
+      // The request was made and the server responded with a status code
+      // that falls out of the range of 2xx
+      console.error('Error response data:', error.response.data);
+      console.error('Error response status:', error.response.status);
+      console.error('Error response headers:', error.response.headers);
+      throw new Error(`Error updating option description: ${error.response.data}`);
+    } else if (error.request) {
+      // The request was made but no response was received
+      console.error('Error request:', error.request);
+      throw new Error('Error updating option description: No response received');
+    } else {
+      // Something happened in setting up the request that triggered an Error
+      console.error('Error message:', error.message);
+      throw new Error(`Error updating option description: ${error.message}`);
     }
-  };
+  }
+};
+
+const deleteScale = async () => {
+  if (!scaleID) {
+    console.warn('scaleID is undefined. Cannot delete scale.');
+    return;
+  }
+
+  try {
+    const url = `/option_set/delete/${scaleID}/`;
+    const response = await axiosInstance.delete(url);
+    console.log('Delete response:', response);
+
+    // Check if the response status is successful
+    if (response.status === 204) {
+      Alert.alert('Success', 'Scale deleted successfully');
+      // Reset the state or navigate back
+      setOptions([]); // Clear options if needed
+      setDescription({ description: '' }); // Reset description if needed
+    } else {
+      // Handle unexpected response
+      setError('Error: Unexpected response from server.');
+    }
+  } catch (error) {
+    console.error('Error deleting scale:', error);
+    
+    if (error.response) {
+      // Server responded with a status code outside the range of 2xx
+      console.error('Response data:', error.response.data);
+      setError(`Error: ${error.response.data}`);
+    } else if (error.request) {
+      // The request was made but no response was received
+      console.error('Request data:', error.request);
+      setError('Error: No response received from server.');
+    } else {
+      // Something happened in setting up the request that triggered an Error
+      setError('Error: Unable to delete scale');
+    }
+  }
+};
+
+
   useEffect(() => {
     const fetchForms = async () => {
       setLoading(true)
@@ -151,7 +192,7 @@ const UpdateScale = () => {
         />
         <CustomButton
           title="Delete"
-          // handlePress={handleSave}
+          handlePress={deleteScale} 
           buttonStyle="mx-4 mt-2"
         />
         {error && (

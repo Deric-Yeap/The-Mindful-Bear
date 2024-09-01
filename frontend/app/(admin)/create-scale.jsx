@@ -44,25 +44,32 @@ const CreateScale = () => {
   const handleSave = async () => {
     setLoading(true);
     setError(null); // Reset error state
-
+  
     try {
-      // Step 1: Create the option
+      // Step 1: Create the option set
       const optionSetData = {
         description: `Likert Scale - ${request.scale_name}`
       };
-
-      const optionResponse = await axiosInstance.post('/option_set/create/', optionSetData);
-      console.log('what is this:"',optionResponse)
-      // Step 2: Create the option set using the created option's ID
-      const optionData = {
-        description: request.scale_name,
-        OptionSetID: [optionResponse.id], 
-        value: request.value       
-      };
-
-      const optionResponseData = await axiosInstance.post(`/option/create/${optionResponse.id}/`, optionData);
-      console.log('Option set created:', optionResponseData.data);
-
+  
+      const optionSetResponse = await axiosInstance.post('/option_set/create/', optionSetData);
+      const optionSetId = optionSetResponse.id;
+      console.log('optionSetResponse',optionSetResponse)
+      // Step 2: Create options for each form name
+      const optionPromises = request.form_names.map(async (formName, index) => {
+        if (formName.trim() !== '') {
+          const optionData = {
+            description: formName,
+            OptionSetID: optionSetId, // Pass the optionSetId directly
+            value: index
+          };
+  
+          const optionResponse = await axiosInstance.post(`/option/create/${optionSetId}/`, optionData);
+          console.log(`Option created for form name "${formName}":`, optionResponse.data);
+        }
+      });
+  
+      await Promise.all(optionPromises);
+  
       // Optionally, you can reset the form or navigate to another screen after successful creation
       // Resetting the form
       setRequest({
@@ -70,9 +77,9 @@ const CreateScale = () => {
         form_names: ['', '', '', '', ''],
       });
     } catch (error) {
-      console.error('Error creating option or option set:', error);
+      console.error('Error creating options or option set:', error);
       if (error.response) {
-        setError(error.response.data || 'Failed to create option or option set.');
+        setError(error.response.data || 'Failed to create options or option set.');
       } else {
         setError('An unexpected error occurred.');
       }
@@ -80,7 +87,6 @@ const CreateScale = () => {
       setLoading(false);
     }
   };
-
   return (
     <SafeAreaView className="flex-1 bg-optimistic-gray-10">
       <StatusBarComponent barStyle="light-content" backgroundColor="#251404" />
@@ -104,7 +110,7 @@ const CreateScale = () => {
           {request.form_names.map((formName, index) => (
             <View key={index} className="flex-row items-center mb-2">
               <Text className="text-mindful-brown-80 font-bold text-lg mr-2">
-                {index + 1}
+                {index}
               </Text>
               <FormField
                 value={formName}
