@@ -2,7 +2,6 @@ from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework import viewsets,generics, status
 from .serializer import OptionSetSerializer
 from .models import OptionSet
-
 from rest_framework.response import Response
 
 class OptionFormGet(generics.ListCreateAPIView):
