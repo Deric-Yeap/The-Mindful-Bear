@@ -9,6 +9,8 @@ import CustomButton from '../../components/customButton';
 import axiosInstance from '../../common/axiosInstance';
 import { listOptionSet } from '../../api/option-set';
 import { useRoute } from '@react-navigation/native';
+import { colors } from '../../common/styles'
+
 
 const UpdateForm = () => {
   const route = useRoute();
@@ -93,7 +95,7 @@ const UpdateForm = () => {
 
   return (
     <SafeAreaView className="flex-1 bg-optimistic-gray-10">
-      <StatusBarComponent barStyle="light-content" backgroundColor="#251404" />
+      <StatusBarComponent barStyle="light-content" backgroundColor={colors.mindfulBrown100} />
       <BrownPageTitlePortion title="Form Management" />
 
       <ScrollView contentContainerStyle={{ paddingBottom: 20 }}>
