@@ -31,7 +31,7 @@ const ExerciseDetails = () => {
 
   return (
     <SafeAreaView className="flex-1 bg-optimistic-gray-10">
-      <StatusBarComponent barStyle="light-content" backgroundColor="#251404" />
+      <StatusBarComponent barStyle="light-content" backgroundColor="mindfulBrown100" />
       <BrownPageTitlePortion title="Exercise Management" />
 
       <ScrollView contentContainerStyle={{ paddingBottom: 20 }}>
