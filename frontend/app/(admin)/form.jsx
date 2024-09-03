@@ -118,7 +118,7 @@ const Forms = () => {
 
   return (
     <SafeAreaView className="flex-1 bg-optimistic-gray-10">
-      <StatusBarComponent barStyle="light-content" backgroundColor="mindfulBrown100" />
+      <StatusBarComponent barStyle="light-content" backgroundColor={colors.mindfulBrown100}/>
       <TopBrownSearchBar title="Form Management" />
       <View style={{ alignItems: 'center', margin: 20 }}>
         <Toggle
