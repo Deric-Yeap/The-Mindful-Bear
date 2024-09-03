@@ -9,7 +9,7 @@ import CustomButton from '../../components/customButton';
 import axiosInstance from '../../common/axiosInstance';
 import { listOptionSet } from '../../api/option-set';
 import { useRoute } from '@react-navigation/native';
-import FormField from '../../components/formField'
+
 
 const UpdateForm = () => {
   const route = useRoute();
