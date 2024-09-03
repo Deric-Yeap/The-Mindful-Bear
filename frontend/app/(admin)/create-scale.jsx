@@ -101,7 +101,7 @@ const CreateScale = () => {
         barStyle="light-content"
         backgroundColor={colors.mindfulBrown100}
       />
-      <BrownPageTitlePortion title="Form Management" />
+      <BrownPageTitlePortion title="Scale Management" />
       <ScrollView contentContainerStyle={{ paddingBottom: 20 }}>
         <FormField
           title="Scale Name"
