@@ -11,6 +11,7 @@ import StatusBarComponent from '../../components/darkThemStatusBar';
 import CustomButton from '../../components/customButton';
 import SuccessMessage from '../../components/successMessage';
 import ConfirmModal from '../../components/confirmModal';
+import { colors } from '../../common/styles';
 
 const Landmark = () => {  
   const [landmarks, setLandmarks] = useState([]);
@@ -46,7 +47,7 @@ const Landmark = () => {
 
   return (
     <SafeAreaView className="flex-1 bg-optimistic-gray-10">
-      <StatusBarComponent barStyle="light-content" backgroundColor="mindfulBrown100" />
+      <StatusBarComponent barStyle="light-content" backgroundColor={colors.mindfulBrown100} />
     <TopBrownSearchBar title="Landmark Management" />
     {showSuccess && (
         <ConfirmModal

@@ -7,6 +7,7 @@ import StatusBarComponent from '../../../components/darkThemStatusBar'
 import axiosInstance from '../../../common/axiosInstance'
 import { useLocalSearchParams } from 'expo-router'
 import CustomButton from '../../../components/customButton'
+import { colors } from '../../../common/styles'
 
 const UpdateScale = () => {
   const { scaleID } = useLocalSearchParams()
@@ -155,7 +156,10 @@ const UpdateScale = () => {
   const trimmedDescription = description.description.slice(15)
   return (
     <SafeAreaView className="flex-1 bg-optimistic-gray-10">
-      <StatusBarComponent barStyle="light-content" backgroundColor="mindfulBrown100" />
+      <StatusBarComponent
+        barStyle="light-content"
+        backgroundColor={colors.mindfulBrown100}
+      />
       <BrownPageTitlePortion title="Form Management" />
       <ScrollView contentContainerStyle={{ paddingBottom: 20 }}>
         <FormField
