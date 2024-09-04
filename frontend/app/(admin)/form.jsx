@@ -9,7 +9,7 @@ import { router } from 'expo-router';
 import axiosInstance from '../../common/axiosInstance';
 import { colors } from '../../common/styles';
 import Icon from 'react-native-vector-icons/FontAwesome'; // Import the icon
-
+import Loading from '../../components/loading'; 
 
 const Forms = () => {
   const [loading, setLoading] = useState(true); // Loading state // Loading state
@@ -90,9 +90,9 @@ const Forms = () => {
 
   if (loading) {
     return (
-      <SafeAreaView className="flex-1 bg-optimistic-gray-10 justify-center items-center">
-        <ActivityIndicator size="large" color="#0000ff" />
-      </SafeAreaView>
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: colors.optimisticGray10 }}>
+        <Loading /> 
+      </View>
     );
   }
 
