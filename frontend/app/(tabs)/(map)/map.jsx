@@ -23,11 +23,10 @@ const Map = () => {
   const handleSessionStart = () => {
     const currentStartDateTime = getCurrentFormattedDateTime()
     console.log(currentStartDateTime)
-    setForm(prevForm => ({
+    setForm((prevForm) => ({
       ...prevForm,
-      start_datetime: currentStartDateTime
+      start_datetime: currentStartDateTime,
     }))
-    console.log(form);
     setIsSessionStarted(true)
   }
   const handleSessionEnd = () => {
@@ -35,14 +34,12 @@ const Map = () => {
   }
   const handleSessionConfirmEnd = async () => {
     const currentEndDateTime = getCurrentFormattedDateTime()
-    setForm(prevForm => ({
+    setForm((prevForm) => ({
       ...prevForm,
-      end_datetime: currentEndDateTime
+      end_datetime: currentEndDateTime,
     }))
     try {
-      const response = await createSession(
-        form,
-      )
+      const response = await createSession(form)
       setIsSessionStarted(false)
       setIsModalOpen(false)
     } catch (error) {
@@ -73,7 +70,7 @@ const Map = () => {
         <CustomButton
           title={isSessionStarted ? 'End Session' : 'Start Session'}
           handlePress={isSessionStarted ? handleSessionEnd : handleSessionStart}
-          buttonStyle={`w-96 z-10 absolute bottom-10 self-center ${isSessionStarted ? 'bg-red-500' : ''}`}
+          buttonStyle={`w-11/12 z-10 absolute bottom-10 self-center ${isSessionStarted ? 'bg-red-500' : ''}`}
           textStyle="text-white"
           isLoading={false}
         />
@@ -84,7 +81,6 @@ const Map = () => {
           isCancelButton={true}
           title={'Are you sure you want to end now'}
           subTitle={'test'}
-          imageSource={'../../../assets/confirmModalImage.png'}
           handleCancel={() => {
             setIsModalOpen(false)
           }}
