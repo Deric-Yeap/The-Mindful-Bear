@@ -8,9 +8,11 @@ import CustomButton from '../../components/customButton';
 import { createLandmark, updateLandmark } from '../../api/landmark';
 import { getExercises } from '../../api/exercise';
 import ConfirmModal from '../../components/confirmModal';
+import { useRouter } from 'expo-router';
 
 const LandmarkCreator = () => {
   const route = useRoute();
+  const router = useRouter();
   var { landmark } = route.params || {}; 
   if (landmark) {
     try {
@@ -80,15 +82,24 @@ const LandmarkCreator = () => {
     try {
       if (landmark) {
         await updateLandmark(landmark.landmark_id, landmarkData); 
+        setShowSuccess(true); 
+        setTimeout(() => {
+          setShowSuccess(false);
+          router.push('/landmark')  
+        }, 3000);
+        
+        
+
       } else {
         await createLandmark(landmarkData); 
-        // Alert.alert('Landmark created successfully!');
+        setShowSuccess(true); 
+        setTimeout(() => {
+          setShowSuccess(false);
+          
+        }, 3000);
+        
         resetForm(); 
       }
-      setShowSuccess(true); 
-      setTimeout(() => {
-        setShowSuccess(false);
-      }, 3000);
 
     } catch (error) {
       console.log(error);
@@ -110,8 +121,8 @@ const LandmarkCreator = () => {
 
   return (
     <ScrollView className="flex-1" contentContainerStyle={{ flexGrow: 1 }} bounces={false}>
-      <View className="flex flex-col bg-stone-100 rounded-[40px]">
-        <View className="bg-mindful-brown-100 p-4 rounded-b-[32]">
+      <View className="flex flex-col bg-stone-100 ">
+        <View className="bg-mindful-brown-100 p-4 rounded-b-3xl">
           <BackButton title={landmark ? "Modify Landmark" : "Create Landmark"} />
         </View>
         <View className="flex relative flex-col pb-2 w-full aspect-[1.011]">

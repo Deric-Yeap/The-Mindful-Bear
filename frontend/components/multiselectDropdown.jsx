@@ -1,5 +1,5 @@
-import { View, Text, TouchableOpacity, ScrollView } from 'react-native';
-import React, { useState } from 'react';
+import { View, Text, ScrollView } from 'react-native';
+import React, { useState, useEffect } from 'react';
 import { SelectList } from 'react-native-dropdown-select-list';
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 
@@ -8,24 +8,29 @@ const MultiselectDropdown = ({
   data,
   placeHolder,
   handleSelect,
-  iconName,
+  selectedItems = [],
+  disabled = false, // Add a disabled prop
   customStyles,
   dropdownShown,
   notFoundText,
   errorMessage,
   ...props
 }) => {
-  const [selectedItems, setSelectedItems] = useState([]);
+  const [internalSelectedItems, setInternalSelectedItems] = useState(selectedItems);
+
+  useEffect(() => {
+    setInternalSelectedItems(selectedItems);
+  }, [selectedItems]);
 
   const toggleSelection = (item) => {
-    if (selectedItems.includes(item)) {
-      setSelectedItems((prevItems) =>
-        prevItems.filter((selectedItem) => selectedItem !== item)
-      );
-    } else {
-      setSelectedItems((prevItems) => [...prevItems, item]);
+    if (!disabled) { // Prevent selection if disabled
+      const newSelectedItems = internalSelectedItems.includes(item)
+        ? internalSelectedItems.filter((selectedItem) => selectedItem !== item)
+        : [...internalSelectedItems, item];
+
+      setInternalSelectedItems(newSelectedItems);
+      handleSelect(newSelectedItems);
     }
-    handleSelect(selectedItems);
   };
 
   return (
@@ -42,12 +47,13 @@ const MultiselectDropdown = ({
           boxStyles={{ borderRadius: 100 }}
           dropdownStyles={{ borderRadius: 20 }}
           dropdownShown={dropdownShown}
-          notFoundText={notFoundText}          
+          notFoundText={notFoundText}
+          disabled={disabled} // Apply the disabled prop to SelectList
         />
       </View>
-      {selectedItems.length > 0 && (
+      {internalSelectedItems.length > 0 && (
         <ScrollView horizontal className="flex-row mt-2">
-          {selectedItems.map((item, index) => (
+          {internalSelectedItems.map((item, index) => (
             <View
               key={index}
               className="bg-mindful-brown-10 border border-mindful-brown-50 rounded-full px-3 py-1 mr-2"

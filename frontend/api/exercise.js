@@ -1,49 +1,13 @@
-import axiosInstance from '../common/axiosInstance'
+// api/exercise.js
 
-export const getExercises = async (data) => {
-  return axiosInstance.get('exercise/get', data)
-}
+import axiosInstance from '../common/axiosInstance';
 
-export const createExercise = async (exerciseData) => {
-  const formData = new FormData();
-  formData.append('exercise_name', exerciseData.exercise_name);
-  formData.append('description', exerciseData.exercise);
-  formData.append('audio_url', exerciseData.audio_url);
- 
-
+// Function to fetch exercises
+export const fetchExercises = async () => {
   try {
-      const response = await axiosInstance.post('exercise/create', formData, {
-          headers: {
-              'Content-Type': 'multipart/form-data',
-          },
-      });
-      return response;
+    const response = await axiosInstance.get('exercise/get');
+    return response; // Return the fetched exercises
   } catch (error) {
-      console.log('Error Description:', error.response?.data?.error_description || error.response?.data || error.message);
-      throw error;
+    throw error; // Throw error to be handled in the calling function
   }
 };
-
-export const updateexercise = async (exerciseId, exerciseData) => {
-  const formData = new FormData();
-  formData.append('exercise_name', exerciseData.exercise_name);
-  formData.append('description', exerciseData.exercise);
-  formData.append('audio_url', exerciseData.audio_url);
-
-  try {
-      const response = await axiosInstance.put(`exercise/update/${exerciseId}`, formData, {
-          headers: {
-              'Content-Type': 'multipart/form-data',
-          },
-      });
-      return response;
-  } catch (error) {
-      console.log('Error Description:', error.response?.data?.error_description || error.response?.data || error.message);
-      throw error;
-  }
-};
-
-
-export const deleteexercise = async (id) => {
-  return axiosInstance.delete(`exercise/delete/${id}`);  
-}    

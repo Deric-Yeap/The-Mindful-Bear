@@ -6,9 +6,11 @@ import { colors } from '../../common/styles'
 import BackButton from '../../components/backButton';
 import SearchBar from '../../components/searchBar';
 import TopBrownSearchBar from '../../components/topBrownSearchBar'
+import StatusBarComponent from '../../components/darkThemStatusBar';
 export default function Admin() {
   return (
     <SafeAreaView className="flex-1 bg-optimistic-gray-10">
+      <StatusBarComponent barStyle="light-content" backgroundColor="#251404" />
     <TopBrownSearchBar title="Hi Admin!" />
     <ScrollView className="flex-1 bg-optimistic-gray-10 p-4">
       <Text className="text-mindful-brown-100 font-urbanist-bold text-xl mb-4">
@@ -50,7 +52,7 @@ export default function Admin() {
       </View>
 
       <View className="flex-row justify-between mb-4">
-        <Link href="/exercise" asChild>
+        <Link href="/exercisemanagement" asChild>
           <TouchableOpacity className="flex-1 bg-serenity-green-50 p-2 rounded-2xl mr-2">
             <View className="items-start">
               <Text className="text-serenity-green-10 font-urbanist-bold text-lg">

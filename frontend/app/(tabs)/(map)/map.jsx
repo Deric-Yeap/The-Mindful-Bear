@@ -1,7 +1,7 @@
 import { React, useState } from 'react'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { View, ScrollView } from 'react-native'
-// import Mapbox from '@rnmapbox/maps'
+import Mapbox from '@rnmapbox/maps'
 import CustomButton from '../../../components/customButton'
 import { getCurrentFormattedDateTime } from '../../../common/getCurrentFormattedDateTime'
 import ConfirmModal from '../../../components/confirmModal'
