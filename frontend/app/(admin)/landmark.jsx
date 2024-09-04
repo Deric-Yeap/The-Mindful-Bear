@@ -57,13 +57,23 @@ const Landmark = () => {
           isCancelButton={false}
         />
       )}
+      <View className="flex-row justify-between items-center pt-4 pb-0 px-4">
+      <Text className="text-mindful-brown-80 font-bold text-3xl">Landmarks</Text>
+        <Link href="/landmarkCreator" asChild>
+          <TouchableOpacity className="bg-mindful-brown-80 px-4 py-1 rounded-full">
+            <Text className="text-white font-bold text-base">Create New Landmark</Text>
+          </TouchableOpacity>
+        </Link>
+        
+      </View>
 
       <ScrollView className="px-4 mt-4">
-        <Link href="/landmarkCreator" asChild>
+      
+        {/* <Link href="/landmarkCreator" asChild>
           <TouchableOpacity className="mb-4">
             <Text className="text-serenity-green-70 font-urbanist-bold text-lg mb-4">Create New Landmark</Text>
           </TouchableOpacity>
-        </Link>
+        </Link> */}
         
         <View className="flex-wrap flex-row justify-between">
           {landmarks.map((landmark, index) => (

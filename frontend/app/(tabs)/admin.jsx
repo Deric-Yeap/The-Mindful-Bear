@@ -50,7 +50,7 @@ export default function Admin() {
       </View>
 
       <View className="flex-row justify-between mb-4">
-        <Link href="/admin/exercise" asChild>
+        <Link href="/exercise" asChild>
           <TouchableOpacity className="flex-1 bg-serenity-green-50 p-2 rounded-2xl mr-2">
             <View className="items-start">
               <Text className="text-serenity-green-10 font-urbanist-bold text-lg">
