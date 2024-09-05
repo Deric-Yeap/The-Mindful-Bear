@@ -8,7 +8,7 @@ import ConfirmModal from '../../../components/confirmModal'
 import { createSession } from '../../../api/session'
 import LottieView from 'lottie-react-native'
 import { landmarkIcon } from '../../../assets/image'
-import getGeoJSON, { getGeoJson } from '../../../common/getGeoJson'
+import { getGeoJson } from '../../../common/getGeoJson'
 
 const landmarksData = [
   {
