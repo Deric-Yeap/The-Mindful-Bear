@@ -6,7 +6,64 @@ import CustomButton from '../../../components/customButton'
 import { getCurrentDateTime } from '../../../common/getCurrentFormattedDateTime'
 import ConfirmModal from '../../../components/confirmModal'
 import { createSession } from '../../../api/session'
+import LottieView from 'lottie-react-native'
+import { landmarkIcon } from '../../../assets/image'
+import getGeoJSON, { getGeoJson } from '../../../common/getGeoJson'
 
+const landmarksData = [
+  {
+    landmark_name: 'asf',
+    x_coordinates: '103.834800',
+    y_coordinates: '1.280400',
+    exercise: {
+      exercise_id: 1,
+      exercise_name: 'testExercise',
+      audio_url: '',
+      description: 'this is a test',
+      landmarks: [
+        {
+          landmark_id: 173,
+          landmark_name: 'vdsd223',
+          landmark_image_url:
+            'landmark/1/2024_08_31/mHEdBXCT_gDrQpbPP_mkNyAjmd_PPsQuqLB_image.jpeg',
+          x_coordinates: '123.000000',
+          y_coordinates: '123.000000',
+        },
+        {
+          landmark_id: 172,
+          landmark_name: 'asfewr3',
+          landmark_image_url:
+            'landmark/1/2024_08_31/sWfQuGLH_IANIbeMk_NjjHDdOD_AsiiIXiz_image.jpeg',
+          x_coordinates: '232.300000',
+          y_coordinates: '235.300000',
+        },
+        {
+          landmark_id: 176,
+          landmark_name: 'landmark 25',
+          landmark_image_url: 'landmark/1/2024_09_01/mWrrfEof_image.jpeg',
+          x_coordinates: '1.349500',
+          y_coordinates: '240.930000',
+        },
+        {
+          landmark_id: 175,
+          landmark_name: 'asf',
+          landmark_image_url: 'landmark/1/2024_08_31/cOjBqzAZ_image.jpeg',
+          x_coordinates: '103.834800',
+          y_coordinates: '1.280400',
+        },
+        {
+          landmark_id: 171,
+          landmark_name: 'efwewfddd',
+          landmark_image_url:
+            'landmark/1/2024_08_31/gHUkirEY_bCCrlBPp_OHQidJEL_image.jpeg',
+          x_coordinates: '324.000000',
+          y_coordinates: '324.000000',
+        },
+      ],
+    },
+    landmark_image_url: 'landmark/1/2024_08_31/cOjBqzAZ_image.jpeg',
+  },
+]
 const Map = () => {
   Mapbox.setAccessToken(process.env.MAPBOX_PUBLIC_KEY)
   const [form, setForm] = useState({
@@ -31,7 +88,6 @@ const Map = () => {
       return updatedForm
     })
   }
-
   const handleSessionEnd = () => {
     setIsModalOpen(true)
   }
@@ -62,6 +118,7 @@ const Map = () => {
       return updatedForm
     })
   }
+  const geoJSON = getGeoJson(landmarksData)
 
   return (
     <SafeAreaView className="h-full">
@@ -71,8 +128,8 @@ const Map = () => {
             <Mapbox.MapView
               className="flex-1"
               styleURL="mapbox://styles/mapbox/streets-v12"
-              zoomEnabled={true}
               requestDisallowInterceptTouchEvent={true}
+              rotateEnabled={true}
             >
               <Mapbox.Camera
                 centerCoordinate={[103.8348, 1.2804]}
@@ -81,6 +138,21 @@ const Map = () => {
                 animationDuration={1000}
                 pitch={60}
               />
+              {geoJSON.features.map((feature, index) => (
+                <Mapbox.MarkerView
+                  key={index}
+                  id={`marker-${index}`}
+                  coordinate={feature.geometry.coordinates}
+                >
+                  <View className="w-28 h-28 justify-center items-center">
+                    <LottieView
+                      source={landmarkIcon}
+                      className="w-full h-full"
+                      autoPlay
+                    />
+                  </View>
+                </Mapbox.MarkerView>
+              ))}
             </Mapbox.MapView>
           </View>
         </ScrollView>
