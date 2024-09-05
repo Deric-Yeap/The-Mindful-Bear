@@ -3,7 +3,7 @@ import { SafeAreaView } from 'react-native-safe-area-context'
 import { View, ScrollView } from 'react-native'
 import Mapbox from '@rnmapbox/maps'
 import CustomButton from '../../../components/customButton'
-import { getCurrentFormattedDateTime } from '../../../common/getCurrentFormattedDateTime'
+import { getCurrentDateTime } from '../../../common/getCurrentFormattedDateTime'
 import ConfirmModal from '../../../components/confirmModal'
 import { createSession } from '../../../api/session'
 
@@ -21,31 +21,48 @@ const Map = () => {
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [isSessionStarted, setIsSessionStarted] = useState(false)
   const handleSessionStart = () => {
-    const currentStartDateTime = getCurrentFormattedDateTime()
-    console.log(currentStartDateTime)
-    setForm((prevForm) => ({
-      ...prevForm,
-      start_datetime: currentStartDateTime,
-    }))
-    setIsSessionStarted(true)
+    const currentStartDateTime = getCurrentDateTime()
+    setForm((prevForm) => {
+      const updatedForm = {
+        ...prevForm,
+        start_datetime: currentStartDateTime,
+      }
+      setIsSessionStarted(true)
+      return updatedForm
+    })
   }
+
   const handleSessionEnd = () => {
     setIsModalOpen(true)
   }
   const handleSessionConfirmEnd = async () => {
-    const currentEndDateTime = getCurrentFormattedDateTime()
-    setForm((prevForm) => ({
-      ...prevForm,
-      end_datetime: currentEndDateTime,
-    }))
-    try {
-      const response = await createSession(form)
-      setIsSessionStarted(false)
-      setIsModalOpen(false)
-    } catch (error) {
-      console.error(error.response.data.error_description)
-    }
+    const currentEndDateTime = getCurrentDateTime()
+    setForm((prevForm) => {
+      const updatedForm = {
+        ...prevForm,
+        end_datetime: currentEndDateTime,
+      }
+      createSession(updatedForm)
+        .then((response) => {
+          setIsSessionStarted(false)
+          setIsModalOpen(false)
+          setForm({
+            start_datetime: '',
+            end_datetime: '',
+            pss_before: 1,
+            pss_after: 1,
+            physical_tiredness_before: 1,
+            physical_tiredness_after: 1,
+            engagement_metrics: 1,
+          })
+        })
+        .catch((error) => {
+          console.error(error.response.data.error_description)
+        })
+      return updatedForm
+    })
   }
+
   return (
     <SafeAreaView className="h-full">
       <View className="flex-1 relative">
