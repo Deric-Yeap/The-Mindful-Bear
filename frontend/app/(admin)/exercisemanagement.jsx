@@ -80,7 +80,7 @@ const ExerciseManagement = () => {
             <Text className="text-mindful-brown-80 font-bold text-3xl">
               Exercises
             </Text>
-            <Link href="/" asChild>
+            <Link href="/exerciseCreator" asChild>
               <TouchableOpacity className="bg-mindful-brown-80 px-4 py-1 rounded-full">
                 <Text className="text-white font-bold text-base">
                   Create Exercises
