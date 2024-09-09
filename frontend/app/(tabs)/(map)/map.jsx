@@ -9,6 +9,7 @@ import { createSession } from '../../../api/session'
 import LottieView from 'lottie-react-native'
 import { landmarkIcon } from '../../../assets/image'
 import { getGeoJson } from '../../../common/getGeoJson'
+import { confirmModal } from '../../../assets/image'
 
 const landmarksData = [
   {
@@ -168,6 +169,9 @@ const Map = () => {
         <ConfirmModal
           isConfirmButton={true}
           isCancelButton={true}
+          imageSource={confirmModal}
+          confirmButtonTitle={'Confirm'}
+          cancelButtonTitle={'Cancel'}
           title={'Are you sure you want to end now'}
           subTitle={'test'}
           handleCancel={() => {
