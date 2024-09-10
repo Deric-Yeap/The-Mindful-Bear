@@ -20,7 +20,7 @@ const ConfirmModal = ({
       <View className="w-3/4 h-1/2 md:h-3/4  bg-white bg-opacity-90 rounded-3xl shadow-lg flex flex-col">
         <View className=" flex-1 justify-center items-center px-4">
           <Image
-            source={imageSource}
+            source={imageSource || confirmModal}
             className="w-full h-4/6 rounded-lg"
             contentFit="cover"
           />
