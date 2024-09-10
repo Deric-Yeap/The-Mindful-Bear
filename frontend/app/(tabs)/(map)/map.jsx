@@ -60,12 +60,12 @@ const Map = () => {
   }
 
   const handleSessionConfirmEnd = async () => {
-    const currentEndDateTime = getCurrentDateTime();
+    const currentEndDateTime = getCurrentDateTime()
     setForm((prevForm) => {
       const updatedForm = {
         ...prevForm,
         end_datetime: currentEndDateTime,
-      };
+      }
       createSession(updatedForm)
         .then(() => {
           resetForm()
@@ -146,22 +146,23 @@ const Map = () => {
           </ScrollView>
         )}
       </View>
-      {isModalOpen && ( // Use isModalOpen to conditionally render the modal
-        <CustomModal
-          isVisible={isModalOpen} // Pass the correct state variable
-          onClose={() => setIsModalOpen(false)} // Update the state to close the modal
+      {isModalOpen && (
+        <ConfirmModal
           isConfirmButton={true}
           isCancelButton={true}
-          confirmButtonTitle="Yes"
-          cancelButtonTitle="No"
-          imageSource={confirmModal} // Your image source
-          title="Confirm Action"
-          subTitle="Are you sure you want to proceed?"
+          imageSource={confirmModal}
+          confirmButtonTitle={'Confirm'}
+          cancelButtonTitle={'Cancel'}
+          title={'Are you sure you want to end now'}
+          subTitle={'test'}
+          handleCancel={() => {
+            setIsModalOpen(false)
+          }}
           handleConfirm={handleSessionConfirmEnd}
         />
       )}
     </SafeAreaView>
-  );
-};
+  )
+}
 
-export default Map;
+export default Map
