@@ -9,6 +9,7 @@ import StatusBarComponent from '../../components/darkThemStatusBar';
 import axiosInstance from '../../common/axiosInstance';
 import CustomButton from '../../components/customButton';
 import ConfirmModal from '../../components/confirmModal';
+import { router } from 'expo-router';
 
 const CreateScale = () => {
   const [loading, setLoading] = useState(false);
@@ -185,6 +186,7 @@ const CreateScale = () => {
           subTitle={successMessage}
           handleConfirm={() => {
             setIsModalOpen(false); // Close the modal
+            router.push('/form'); // Redirect to the desired route
           }}
         />
       )}
