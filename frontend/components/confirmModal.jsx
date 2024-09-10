@@ -7,6 +7,9 @@ import CustomButton from './customButton'
 const ConfirmModal = ({
   isConfirmButton,
   isCancelButton,
+  confirmButtonTitle,
+  cancelButtonTitle,
+  imageSource,
   title,
   subTitle,
   handleConfirm,
@@ -17,7 +20,7 @@ const ConfirmModal = ({
       <View className="w-3/4 h-1/2 md:h-3/4  bg-white bg-opacity-90 rounded-3xl shadow-lg flex flex-col">
         <View className=" flex-1 justify-center items-center px-4">
           <Image
-            source={confirmModal}
+            source={imageSource}
             className="w-full h-4/6 rounded-lg"
             contentFit="cover"
           />
@@ -34,7 +37,7 @@ const ConfirmModal = ({
         <View className="w-full flex flex-row justify-around px-4 pb-4">
           {isCancelButton && (
             <CustomButton
-              title={'Cancel'}
+              title={cancelButtonTitle}
               handlePress={handleCancel}
               buttonStyle={`w-32 z-10 bg-red-500 rounded-full`}
               textStyle="text-white"
@@ -43,7 +46,7 @@ const ConfirmModal = ({
           )}
           {isConfirmButton && (
             <CustomButton
-              title={'Confirm'}
+              title={confirmButtonTitle}
               handlePress={handleConfirm}
               buttonStyle={`z-10 ${!isCancelButton ? 'w-full' : 'w-32'}`}
               textStyle="text-white"
