@@ -10,6 +10,18 @@ import LottieView from 'lottie-react-native'
 import { landmarkIcon } from '../../../assets/image'
 import { getGeoJson } from '../../../common/getGeoJson'
 import { confirmModal } from '../../../assets/image'
+import Loading from '../../../components/loading'
+import { useRouter } from 'expo-router';
+
+const initialFormState = {
+  start_datetime: '',
+  end_datetime: '',
+  pss_before: 1,
+  pss_after: 1,
+  physical_tiredness_before: 1,
+  physical_tiredness_after: 1,
+  engagement_metrics: 1,
+}
 
 const landmarksData = [
   {
@@ -67,27 +79,18 @@ const landmarksData = [
 ]
 const Map = () => {
   Mapbox.setAccessToken(process.env.MAPBOX_PUBLIC_KEY)
-  const [form, setForm] = useState({
-    start_datetime: '',
-    end_datetime: '',
-    pss_before: 1,
-    pss_after: 1,
-    physical_tiredness_before: 1,
-    physical_tiredness_after: 1,
-    engagement_metrics: 1,
-  })
+  const router = useRouter();
+  const [form, setForm] = useState(initialFormState)
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [isSessionStarted, setIsSessionStarted] = useState(false)
   const handleSessionStart = () => {
     const currentStartDateTime = getCurrentDateTime()
-    setForm((prevForm) => {
-      const updatedForm = {
-        ...prevForm,
-        start_datetime: currentStartDateTime,
-      }
-      setIsSessionStarted(true)
-      return updatedForm
-    })
+    setForm((prevForm) => ({
+      ...prevForm,
+      start_datetime: currentStartDateTime,
+    }))
+    setIsSessionStarted(true)
+    router.push('/form')  
   }
   const handleSessionEnd = () => {
     setIsModalOpen(true)
