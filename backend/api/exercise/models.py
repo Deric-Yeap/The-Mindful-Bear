@@ -8,7 +8,7 @@ class Exercise(models.Model):
     exercise_id = models.AutoField(primary_key=True)
     exercise_name = models.CharField(max_length=250, default="testExercise")
     audio_url = models.URLField()
-    description = models.CharField(max_length=250)
+    description = models.TextField(default="null")
 
     # class Meta:
     #     constraints = [
