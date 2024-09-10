@@ -12,6 +12,7 @@ import { landmarkIcon } from '../../../assets/image'
 import { getLandmarks } from '../../../api/landmark'
 import { confirmModal } from '../../../assets/image'
 import Loading from '../../../components/loading'
+import { useRouter } from 'expo-router';
 
 const initialFormState = {
   start_datetime: '',
@@ -25,6 +26,7 @@ const initialFormState = {
 
 const Map = () => {
   Mapbox.setAccessToken(process.env.MAPBOX_PUBLIC_KEY)
+  const router = useRouter();
   const [form, setForm] = useState(initialFormState)
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [isSessionStarted, setIsSessionStarted] = useState(false)
@@ -53,6 +55,7 @@ const Map = () => {
       start_datetime: currentStartDateTime,
     }))
     setIsSessionStarted(true)
+    router.push('/form')  
   }
 
   const handleSessionEnd = () => {
