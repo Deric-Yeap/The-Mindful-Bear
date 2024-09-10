@@ -15,6 +15,8 @@ const BottomSheetModal = ({
     landmark_id: 175,
     landmark_name: 'asf',
     landmark_image_url: 'landmark/1/2024_08_31/cOjBqzAZ_image.jpeg',
+    landmark_description:
+      'lorem ipsum lorem ipsum lorem ipsum lorem ipsum lorem ipsum lorem ipsum lorem ipsum lorem ipsum lorem ipsum lorem ipsum lorem ipsum lorem ipsum lorem ipsum lorem ipsum lorem ipsum lorem ipsum lorem ipsum lorem ipsum lorem ipsum lorem ipsum',
     x_coordinates: '103.834800',
     y_coordinates: '1.280400',
     exercise: {
@@ -63,7 +65,7 @@ const BottomSheetModal = ({
   return (
     <SafeAreaView className="absolute flex-1 left-0 bg-black/50 w-full h-full justify-end">
       <View
-        className={`w-full  ${isExpanded ? 'h-full' : 'h-[65%]'} bg-mindful-brown-80 rounded-tl-lg rounded-tr-lg px-4 py-5 `}
+        className={`w-full  ${isExpanded ? 'h-full' : 'h-3/5 sm:h-[65%] md:h-4/5'} bg-mindful-brown-80 rounded-tl-lg rounded-tr-lg px-4 py-5 `}
       >
         <View className="flex-row items-center" id="landmark-overview-frame">
           <TouchableOpacity onPress={handleModalOpen}>
@@ -113,7 +115,7 @@ const BottomSheetModal = ({
         <Image
           id="landmark-image-frame"
           source={landmarksData.image_file_url}
-          className={`w-full ${isExpanded ? 'h-1/4' : 'h-1/2'} rounded-lg mt-2`}
+          className={`w-full ${isExpanded ? 'h-1/4' : 'h-[45%]'} rounded-lg mt-2`}
           contentFit="cover"
         />
         {isExpanded && (
@@ -124,24 +126,26 @@ const BottomSheetModal = ({
             <Text className="text-xl text-white font-urbanist-semi-bold">
               Description
             </Text>
-            <Text className="text-lg text-white font-urbanist-regular"></Text>
+            <Text className="text-lg text-white font-urbanist-regular">
+              {landmarksData.landmark_description}
+            </Text>
           </View>
         )}
         <View
           id="landmark-button-frame"
-          className="flex-row mt-3 justify-between items-center"
+          className="absolute bottom-20 left-2 right-2 flex-row mt-3 mb-1 justify-between"
         >
           <CustomButton
             title={'Travel'}
             handlePress={handleTravel}
-            buttonStyle={`w-[48%] z-10 bg-[#24211E] rounded-full items-center mr-1`}
+            buttonStyle={`w-[48%] z-10 bg-[#24211E] rounded-full items-center`}
             textStyle="text-white"
           />
           <CustomButton
             title={isExpanded ? 'Minimise' : 'See More'}
             handlePress={handleSeeMore}
-            buttonStyle={`w-[48%] z-10 bg-[#24211E] rounded-full items-center ml-1`}
-            textStyle="text-white"
+            buttonStyle={`w-[48%] z-10 bg-[#24211E] rounded-full items-center`}
+            textStyle="text-white mr-0"
           />
         </View>
       </View>

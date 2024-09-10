@@ -31,7 +31,7 @@ const Map = () => {
   const [isSessionStarted, setIsSessionStarted] = useState(false)
   const [landmarksData, setLandmarksData] = useState([])
   const [loading, setLoading] = useState(true)
-  const [isBottomSheetOpen, setIsBottomSheetOpen] = useState(false)
+  const [isBottomSheetOpen, setIsBottomSheetOpen] = useState(true)
 
   useEffect(() => {
     const fetchData = async () => {
