@@ -4,4 +4,4 @@ from .models import Option
 class OptionSerializer(serializers.ModelSerializer):
     class Meta:
         model = Option
-        fields = ['description', 'value', 'OptionSetID'] 
+        fields = ['description', 'value', 'OptionSetID','id'] 
