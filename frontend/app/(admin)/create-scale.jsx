@@ -139,7 +139,7 @@ const CreateScale = () => {
               <View key={index} className="mb-4">
                 <View className="flex-row items-center">
                   <Text className="text-mindful-brown-80 font-bold text-lg mr-2">
-                    {index + 1}
+                    {index}
                   </Text>
                   <FormField
                     value={formName}
