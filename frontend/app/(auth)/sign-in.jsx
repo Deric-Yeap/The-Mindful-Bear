@@ -1,15 +1,17 @@
 import { View, Text, ScrollView, StatusBar } from 'react-native'
 import { useState } from 'react'
 import { SafeAreaView } from 'react-native-safe-area-context'
+import { setTokens } from '../../redux/slices/authSlice'
+import { useDispatch, useSelector } from 'react-redux'
+import { router } from 'expo-router'
+
 import CustomButton from '../../components/customButton'
 import FormField from '../../components/formField'
 import { login, getMe } from '../../api/user'
-import { useDispatch, useSelector } from 'react-redux'
-import { setTokens } from '../../redux/slices/authSlice'
-import { router } from 'expo-router'
-import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons'
+import Loading from '../../components/loading'
 
 const SignIn = () => {
+  const [isLoading, setIsLoading] = useState(false)
   const [form, setForm] = useState({
     email: '',
     password: '',
@@ -20,10 +22,12 @@ const SignIn = () => {
   const auth = useSelector((state) => state.auth)
   const handleLogin = async () => {
     try {
+      setIsLoading(true)
       const response = await login({
         email: form.email,
         password: form.password,
-      })      
+      })    
+      setIsLoading(false)  
       dispatch(
         setTokens({
           token: response.access,
@@ -39,6 +43,7 @@ const SignIn = () => {
       }
       
     } catch (error) {
+      setIsLoading(false)
       console.error(error.response.data.error_description)
     }
   }
@@ -50,6 +55,11 @@ const SignIn = () => {
       <View className="absolute top-[-500px] left-0 right-0 items-center z-10">
         <View className="bg-mindful-brown-80 h-[150vw] w-[150vw] rounded-full"></View>
       </View>
+      {isLoading && (
+        <View className="absolute top-0 left-0 right-0 bottom-0 flex justify-center items-center z-10 bg-optimistic-gray-80/90">
+          <Loading />
+        </View>
+      )}
       <View className="min-h-[78vh] mt-[25vh] items-center mx-5">
         <Text className="font-urbanist-extra-bold text-3xl text-mindful-brown-80 pb-10">
           Sign In
