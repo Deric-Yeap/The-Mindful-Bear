@@ -14,6 +14,8 @@ import { getLandmarks } from '../../api/landmark';
 import ConfirmModal from '../../components/confirmModal';
 import { useRoute } from '@react-navigation/native';
 import { useRouter } from 'expo-router';
+import * as DocumentPicker from 'expo-document-picker';
+import { Audio } from 'expo-av';
 
 const ExerciseCreator = () => {
   const route = useRoute();
@@ -32,7 +34,8 @@ const ExerciseCreator = () => {
   const [description, setDescription] = useState(exercise?.description || '');
   // const [audioURL, setaudioURL] = useState({uri: exercise?.audio_url || "https://cdn.builder.io/api/v1/image/assets/TEMP/4b116fb504bae4e96910a8019ffd8338d6215db8183025d8130d5d03956a6e90?apiKey=004e7e3501424a9a9c0fe2fe31f6ca4a&",
   // });
-  const [audioURL, setaudioURL] = useState("https://cdn.builder.io/api/v1/image/assets/TEMP/4b116fb504bae4e96910a8019ffd8338d6215db8183025d8130d5d03956a6e90?apiKey=004e7e3501424a9a9c0fe2fe31f6ca4a&")
+  const [audioURL, setaudioURL] = useState("");
+  const [audioFileName, setAudioFileName] = useState("");
 
   //for dropdown list of landmarks and selection of landmark (if any)
   const [landmarkId, setLandmarkId] = useState(exercise?.landmark?.landmark_id || '');
@@ -84,6 +87,7 @@ const ExerciseCreator = () => {
       } else {
         await createExercise(exerciseData); 
         setShowSuccess(true); 
+        console.log("submitted data" , exerciseData)
         setTimeout(() => {
           setShowSuccess(false);
           
@@ -105,9 +109,32 @@ const ExerciseCreator = () => {
     setaudioURL('');
   };
 
-  const truncateURL = (url) => {
-    const maxLength = 30;
-    return url.length > maxLength ? `${url.substring(0, maxLength)}...` : url;
+  const truncateFileName = (fileName) => {
+    const maxLength = 20;
+    return fileName.length > maxLength ? `${fileName.substring(0, maxLength)}...` : fileName;
+  };
+
+  const handleAudioUpload = async () => {
+    try {
+      console.log("upload button clicked")
+      const result = await DocumentPicker.getDocumentAsync({
+        type: 'audio/*',
+        copyToCacheDirectory: true,
+      });
+
+      console.log("DocumentPicker result:", result);
+
+      if (!result.canceled && result.assets && result.assets.length > 0) {
+        const selectedFile = result.assets[0];
+        setaudioURL(selectedFile.uri);
+        setAudioFileName(truncateFileName(selectedFile.name));
+        console.log("Selected audio file URI:", selectedFile.uri);
+      } else {
+        console.log("DocumentPicker result canceled or no assets found");
+      }
+    } catch (error) {
+      console.error('Error picking audio file:', error);
+    }
   };
 
  
@@ -152,12 +179,12 @@ const ExerciseCreator = () => {
 
             {/* Audio upload section */}
 
-          <View className="flex-row justify-between items-center mb-6 mx-4">
-                    <View className="flex-1 flex-row justify-center items-center bg-serenity-green-50 rounded-full py-3 mr-4 shadow-lg">
-                      <Text className="text-white text-lg">Upload Audio</Text>
-                    </View>
-                    <Text className="text-mindful-brown-100 text-lg">{truncateURL(audioURL)}</Text>
-                  </View>
+          <View className="flex-row items-center my-4 px-4 w-full">
+              <TouchableOpacity className="bg-serenity-green-50 rounded-full py-2 px-4 mr-4 shadow-lg" onPress={handleAudioUpload}>
+                <Text className="text-white text-lg">Upload Audio</Text>
+              </TouchableOpacity>
+              <Text className="underline text-mindful-brown-100 text-lg">{audioFileName}</Text>
+            </View>
       
 
             {/* Dropdown List for Assigned Landmark */}
@@ -178,9 +205,9 @@ const ExerciseCreator = () => {
           }
           />
           )}
-          <View className="mb-4">
+          <View className="mb-4 px-4 w-full">
             <CustomButton
-              className="mt-2"
+              className="mt-2 w-full"
               handlePress={handleSubmit}
               title={exercise ? "Update Exercise" : "Create Exercise"}
             />
