@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, ScrollView, Alert } from 'react-native';
+import { View, Text, ScrollView, Alert, KeyboardAvoidingView, Platform } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import FormField from '../../../components/formField';
 import BrownPageTitlePortion from '../../../components/brownPageTitlePortion';
@@ -8,7 +8,7 @@ import axiosInstance from '../../../common/axiosInstance';
 import { useLocalSearchParams } from 'expo-router';
 import CustomButton from '../../../components/customButton';
 import { colors } from '../../../common/styles';
-import Loading from '../../../components/loading'; 
+import Loading from '../../../components/loading';
 
 const UpdateScale = () => {
   const { scaleID } = useLocalSearchParams();
@@ -17,36 +17,57 @@ const UpdateScale = () => {
   const [options, setOptions] = useState([]);
   const [error, setError] = useState(null);
   const [description, setDescription] = useState({ description: '' });
-  const [optionSetID, setOptionSetID] = useState(null);
+
+  // Store previous values for comparison
+  const [previousDescription, setPreviousDescription] = useState('');
+  const [previousOptions, setPreviousOptions] = useState([]);
 
   const handleInputChange = (id, value) => {
     const newOptions = options.map((option) => {
       if (option.id === id) {
-        return { ...option, description: value }; 
+        return { ...option, description: value };
       }
-      return option; 
+      return option;
     });
 
-    setOptions(newOptions); 
+    setOptions(newOptions);
   };
 
   const handleSave = async () => {
     setLoading(true);
     try {
+      // Check if the description has changed
+      if (previousDescription !== description.description) {
+        const url = `/option_set/update/${scaleID}/`; // Update the scale name
+        console.log(`Updating scale ID: ${scaleID} with new description: ${description.description}`);
+        await axiosInstance.put(url, {
+          description: description.description,
+        });
+      }
+
       await Promise.all(
         options.map(async (option) => {
-          const url = `/option/update/${option.id}/`;
-          return await axiosInstance.put(url, {
-            description: option.description,
-            value: option.value,
-            OptionSetID: optionSetID,
-          });
+          // Check if the value has changed
+          const previousOption = previousOptions.find(prev => prev.id === option.id);
+          if (previousOption && previousOption.description !== option.description) {
+            const url = `/option/update/${option.id}/`;
+            console.log(`Updating option ID: ${option.id} with new value: ${option.description}`);
+            return await axiosInstance.put(url, {
+              description: option.description,
+              value: option.value,
+              OptionSetID: option.OptionSetID,
+            });
+          }
         })
       );
+
       Alert.alert('Success', 'Options updated successfully');
+      // Update previous values after saving
+      setPreviousDescription(description.description);
+      setPreviousOptions(options);
     } catch (error) {
       console.error('Error saving options:', error);
-      setError('Error saving options');
+      setError('Error saving options. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -61,8 +82,6 @@ const UpdateScale = () => {
     try {
       const url = `/option_set/delete/${scaleID}/`;
       const response = await axiosInstance.delete(url);
-      console.log('Delete response:', response);
-
       if (response.status === 204) {
         Alert.alert('Success', 'Scale deleted successfully');
         setOptions([]);
@@ -72,7 +91,7 @@ const UpdateScale = () => {
       }
     } catch (error) {
       console.error('Error deleting scale:', error);
-      setError('Error deleting scale');
+      setError('Error deleting scale. Please try again.');
     }
   };
 
@@ -87,10 +106,12 @@ const UpdateScale = () => {
 
       try {
         const url = `/option_set/get/${scaleID}`;
-        console.log('Fetching from URL:', url);
         const response = await axiosInstance.get(url);
-        console.log('Full Axios response:', response);
         setDescription({ description: response.description || '' });
+        setPreviousDescription(response.description || ''); // Initialize previous description
+      } catch (error) {
+        console.error('Error fetching forms:', error);
+        setError('Error fetching forms. Please try again.');
       } finally {
         setLoading(false);
       }
@@ -102,7 +123,6 @@ const UpdateScale = () => {
   useEffect(() => {
     const fetchOptions = async () => {
       setLoading(true);
-
       if (!scaleID) {
         console.warn('scaleID is undefined. Cannot fetch options.');
         setLoading(false);
@@ -111,14 +131,12 @@ const UpdateScale = () => {
 
       try {
         const url = `/option/getOptions/${scaleID}`;
-        console.log('Fetching from URL:', url);
         const response = await axiosInstance.get(url);
-        console.log('Full Axios response:', response);
         setOptions(response);
-        setOptionSetID(response.OptionSetID);
+        setPreviousOptions(response); // Initialize previous options
       } catch (error) {
         console.error('Error fetching options:', error);
-        setError('Error fetching options');
+        setError('Error fetching options. Please try again.');
       } finally {
         setLoading(false);
       }
@@ -127,16 +145,23 @@ const UpdateScale = () => {
     fetchOptions();
   }, [scaleID]);
 
-  // Use the custom Loading component
   if (loading) {
     return (
-      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: colors.optimisticGray10 }}>
-        <Loading /> 
+      <View
+        style={{
+          flex: 1,
+          justifyContent: 'center',
+          alignItems: 'center',
+          backgroundColor: colors.optimisticGray10,
+        }}
+      >
+        <Loading />
       </View>
     );
   }
 
   const trimmedDescription = description.description.slice(15);
+
   return (
     <SafeAreaView className="flex-1 bg-optimistic-gray-10">
       <StatusBarComponent
@@ -144,57 +169,63 @@ const UpdateScale = () => {
         backgroundColor={colors.mindfulBrown100}
       />
       <BrownPageTitlePortion title="Form Management" />
-      <ScrollView contentContainerStyle={{ paddingBottom: 20 }}>
-        <FormField
-          title="Scale Name"
-          iconName="form-select"
-          value={`Likert Scale - ${trimmedDescription}`}
-          handleChange={(value) =>
-            setDescription({ ...description, description: value })
-          }
-          customStyles="mb-4 m-4"
-          editable={true}
-        />
+      <KeyboardAvoidingView
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        style={{ flex: 1 }}
+      >
+        <ScrollView contentContainerStyle={{ paddingBottom: 20 }}>
+          <FormField
+            title="Scale Name"
+            iconName="form-select"
+            value={`Likert Scale - ${trimmedDescription}`}
+            handleChange={(value) => {
+              setDescription({ description: value }); // Update description directly
+            }}
+            customStyles="mb-4 m-4"
+            editable={true}
+            multiline={true} // Enable multiline for Scale Name
+          />
 
-        <View className="mx-4">
-          {options
-            .slice() 
-            .sort((a, b) => a.value - b.value) 
-            .map((option) => (
-              <View
-                key={option.id}
-                className="flex-row items-center mt-0"
-              >
-                <Text className="text-mindful-brown-80 font-bold text-lg mr-2">
-                  {option.value}
-                </Text>
-                <FormField
-                  value={option.description} 
-                  handleChange={(value) => handleInputChange(option.id, value)} 
-                  customStyles="mb-4 m-4 w-1/2"
-                  editable={true}
-                />
-              </View>
-            ))}
-        </View>
-
-        {/* Save Button */}
-        <CustomButton
-          title="Save"
-          handlePress={handleSave}
-          buttonStyle="mx-4"
-        />
-        <CustomButton
-          title="Delete"
-          handlePress={deleteScale}
-          buttonStyle="mx-4 mt-2"
-        />
-        {error && (
-          <Text style={{ color: 'red', textAlign: 'center', marginTop: 10 }}>
-            {error}
-          </Text>
-        )}
-      </ScrollView>
+          <View className="mx-4">
+            {options
+              .slice()
+              .sort((a, b) => a.value - b.value)
+              .map((option) => (
+                <View
+                  key={option.id} // Use unique ID as key
+                  className="flex-row items-center mt-0"
+                >
+                  <Text className="text-mindful-brown-80 font-bold text-lg mr-2">
+                    {option.value}
+                  </Text>
+                  <FormField
+                    value={option.description}
+                    handleChange={(value) => handleInputChange(option.id, value)}
+                    customStyles="mb-4 m-4 w-1/2"
+                    editable={true}
+                    multiline={true} // Enable multiline for option descriptions
+                  />
+                </View>
+              ))}
+          </View>
+          {/* Save Button */}
+          <CustomButton
+            title="Save"
+            handlePress={handleSave}
+            buttonStyle="mx-4"
+          />
+          <CustomButton
+            title="Delete"
+            handlePress={deleteScale}
+            buttonStyle="mx-4 mt-2"
+          />
+          {error && (
+            <Text style={{ color: 'red', textAlign: 'center', marginTop: 10 }}>
+              {error}
+            </Text>
+          )}
+        </ScrollView>
+      </KeyboardAvoidingView>
     </SafeAreaView>
   );
 };
