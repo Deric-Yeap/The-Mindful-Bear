@@ -4,12 +4,13 @@ import { View, ScrollView } from 'react-native'
 import Mapbox from '@rnmapbox/maps'
 import CustomButton from '../../../components/customButton'
 import { getCurrentDateTime } from '../../../common/getCurrentFormattedDateTime'
-import ConfirmModal from '../../../components/confirmModal'
+// import ConfirmModal from '../../../components/confirmModal'
 import { createSession } from '../../../api/session'
 import LottieView from 'lottie-react-native'
 import { landmarkIcon } from '../../../assets/image'
 import { getGeoJson } from '../../../common/getGeoJson'
 import { confirmModal } from '../../../assets/image'
+import CustomModal from '../../../components/customModal';
 
 const landmarksData = [
   {
@@ -66,7 +67,8 @@ const landmarksData = [
   },
 ]
 const Map = () => {
-  Mapbox.setAccessToken(process.env.MAPBOX_PUBLIC_KEY)
+  Mapbox.setAccessToken(process.env.MAPBOX_PUBLIC_KEY);
+  
   const [form, setForm] = useState({
     start_datetime: '',
     end_datetime: '',
@@ -75,34 +77,35 @@ const Map = () => {
     physical_tiredness_before: 1,
     physical_tiredness_after: 1,
     engagement_metrics: 1,
-  })
-  const [isModalOpen, setIsModalOpen] = useState(false)
-  const [isSessionStarted, setIsSessionStarted] = useState(false)
+  });
+
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isSessionStarted, setIsSessionStarted] = useState(false);
+
   const handleSessionStart = () => {
-    const currentStartDateTime = getCurrentDateTime()
-    setForm((prevForm) => {
-      const updatedForm = {
-        ...prevForm,
-        start_datetime: currentStartDateTime,
-      }
-      setIsSessionStarted(true)
-      return updatedForm
-    })
-  }
+    const currentStartDateTime = getCurrentDateTime();
+    setForm((prevForm) => ({
+      ...prevForm,
+      start_datetime: currentStartDateTime,
+    }));
+    setIsSessionStarted(true);
+  };
+
   const handleSessionEnd = () => {
-    setIsModalOpen(true)
-  }
+    setIsModalOpen(true); // Open the modal when ending the session
+  };
+
   const handleSessionConfirmEnd = async () => {
-    const currentEndDateTime = getCurrentDateTime()
+    const currentEndDateTime = getCurrentDateTime();
     setForm((prevForm) => {
       const updatedForm = {
         ...prevForm,
         end_datetime: currentEndDateTime,
-      }
+      };
       createSession(updatedForm)
         .then((response) => {
-          setIsSessionStarted(false)
-          setIsModalOpen(false)
+          setIsSessionStarted(false);
+          setIsModalOpen(false); // Close the modal after confirming
           setForm({
             start_datetime: '',
             end_datetime: '',
@@ -111,15 +114,16 @@ const Map = () => {
             physical_tiredness_before: 1,
             physical_tiredness_after: 1,
             engagement_metrics: 1,
-          })
+          });
         })
         .catch((error) => {
-          console.error(error.response.data.error_description)
-        })
-      return updatedForm
-    })
-  }
-  const geoJSON = getGeoJson(landmarksData)
+          console.error(error.response.data.error_description);
+        });
+      return updatedForm;
+    });
+  };
+
+  const geoJSON = getGeoJson(landmarksData);
 
   return (
     <SafeAreaView className="h-full">
@@ -165,23 +169,22 @@ const Map = () => {
           isLoading={false}
         />
       </View>
-      {isModalOpen && (
-        <ConfirmModal
+      {isModalOpen && ( // Use isModalOpen to conditionally render the modal
+        <CustomModal
+          isVisible={isModalOpen} // Pass the correct state variable
+          onClose={() => setIsModalOpen(false)} // Update the state to close the modal
           isConfirmButton={true}
           isCancelButton={true}
-          imageSource={confirmModal}
-          confirmButtonTitle={'Confirm'}
-          cancelButtonTitle={'Cancel'}
-          title={'Are you sure you want to end now'}
-          subTitle={'test'}
-          handleCancel={() => {
-            setIsModalOpen(false)
-          }}
+          confirmButtonTitle="Yes"
+          cancelButtonTitle="No"
+          imageSource={confirmModal} // Your image source
+          title="Confirm Action"
+          subTitle="Are you sure you want to proceed?"
           handleConfirm={handleSessionConfirmEnd}
         />
       )}
     </SafeAreaView>
-  )
-}
+  );
+};
 
-export default Map
+export default Map;
