@@ -133,14 +133,16 @@ const Map = () => {
                 ))}
               </Mapbox.MapView>
             </View>
-            <CustomButton
-              title={isSessionStarted ? 'End Session' : 'Start Session'}
-              handlePress={
-                isSessionStarted ? handleSessionEnd : handleSessionStart
-              }
-              buttonStyle={`w-11/12 z-10 absolute bottom-12 mb-1  self-center ${isSessionStarted ? 'bg-red-500' : ''} md:bottom-16`}
-              textStyle="text-white"
-            />
+            {!isModalOpen && (
+              <CustomButton
+                title={isSessionStarted ? 'End Session' : 'Start Session'}
+                handlePress={
+                  isSessionStarted ? handleSessionEnd : handleSessionStart
+                }
+                buttonStyle={`w-11/12 z-10 absolute bottom-10 mb-1  self-center ${isSessionStarted ? 'bg-red-500' : ''} md:bottom-16`}
+                textStyle="text-white"
+              />
+            )}
           </ScrollView>
         )}
       </View>
