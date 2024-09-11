@@ -2,10 +2,11 @@ from rest_framework import serializers
 from .models import Journal
 from django.conf import settings
 from ..common.s3 import create_presigned_url, upload_fileobj, make_file_upload_path, delete_s3_object
-
+from ..emotion.serializer import EmotionSerializer
 class JournalGetSerializer(serializers.ModelSerializer):
     file_url = serializers.SerializerMethodField()
-
+    emotion_id = EmotionSerializer()
+    
     class Meta:
         model = Journal
         fields = ['id', 'user_id', 'emotion_id', 'audio_file_path', 'journal_text', 'sentiment_analysis_result', 'file_url', 'upload_date']   
