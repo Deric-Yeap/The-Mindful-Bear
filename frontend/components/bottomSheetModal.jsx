@@ -334,12 +334,22 @@ const BottomSheetModal = ({ isExercise, handleModalOpen }) => {
           id="landmark-button-frame"
           className="flex-row mt-3  justify-between"
         >
-          <CustomButton
-            title={'Travel'}
-            handlePress={() => console.log('Travel')}
-            buttonStyle={`w-full z-10 bg-[#24211E] rounded-full items-center`}
-            textStyle="text-white mr-0"
-          />
+          {currentSnapIndex === 0 && (
+            <CustomButton
+              title={'Travel'}
+              handlePress={() => console.log('Travel')}
+              buttonStyle={`w-full z-10 bg-[#24211E] rounded-full items-center`}
+              textStyle="text-white mr-0"
+            />
+          )}
+          {currentSnapIndex === 1 && (
+            <CustomButton
+              title={'View Exercise'}
+              handlePress={() => console.log('View Exercise')}
+              buttonStyle={`w-full z-10 bg-[#24211E] rounded-full items-center`}
+              textStyle="text-white mr-0"
+            />
+          )}
         </View>
       </BottomSheetView>
     </BottomSheet>
