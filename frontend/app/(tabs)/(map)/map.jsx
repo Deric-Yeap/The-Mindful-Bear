@@ -62,10 +62,10 @@ const Map = () => {
         ...prevForm,
         start_datetime: currentStartDateTime,
       };
-      
+      //Start Session Survey
       router.push({
         pathname: '/questionaire',
-        params: { sessionStarted: true, formData: JSON.stringify(updatedForm) }, // Pass updatedForm instead of stale form
+        params: { sessionStarted: true, formData: JSON.stringify(updatedForm), start: "true" }, 
       });
   
       return updatedForm;
@@ -95,6 +95,11 @@ const Map = () => {
 
       return updatedForm
     })
+    //End Session Survey
+    router.push({
+      pathname: '/questionaire',
+      params: { sessionStarted: true, formData: JSON.stringify(form), start: "false" }, 
+    });
   }
 
   const resetForm = () => {
