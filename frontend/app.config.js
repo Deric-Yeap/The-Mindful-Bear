@@ -4,7 +4,7 @@ export default () => ({
   expo: {
     name: 'TheMindfulBear',
     slug: 'TheMindfulBear',
-    scheme: 'TheMindfulBear',
+    scheme: 'themindfulbear',
     version: '1.0.0',
     orientation: 'portrait',
     icon: './assets/icon.png',
@@ -24,6 +24,25 @@ export default () => ({
         backgroundColor: '#ffffff',
       },
       package: 'com.anonymous.frontend',
+      intentFilters: [
+        {
+          action: 'VIEW',
+          autoVerify: true,
+          data: [
+            {
+              scheme: 'http',
+              host: 'themindfulbear.com',
+              pathPrefix: '/password-confirm',
+            },
+            {
+              scheme: 'themindfulbear',
+              host: '',
+              pathPrefix: '/password-confirm',
+            },
+          ],
+          category: ['BROWSABLE', 'DEFAULT'],
+        },
+      ],
     },
     web: {
       favicon: './assets/favicon.png',

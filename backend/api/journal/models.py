@@ -3,7 +3,7 @@ from django.db import models
 # Create your models here.
 class Journal(models.Model):
     user_id = models.ForeignKey('user.CustomUser', on_delete=models.CASCADE)
-    emotion_id = models.IntegerField()
+    emotion_id = models.ForeignKey('emotion.Emotion', on_delete=models.CASCADE)
     audio_file_path = models.CharField(max_length=255)
     journal_text = models.TextField()
     sentiment_analysis_result = models.TextField()

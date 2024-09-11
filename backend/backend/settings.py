@@ -61,9 +61,11 @@ INSTALLED_APPS = [
     "api.journal",
     "api.gender",
     "api.department",
+    "api.emotion",
     "api.response",
     "api.optionSet",
-    "api.option"
+    "api.option",
+    "api.color"
 ]
 
 REST_FRAMEWORK = {

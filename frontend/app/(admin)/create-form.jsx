@@ -15,6 +15,9 @@ const CreateForm = () => {
   const [request, setRequest] = useState({
     form_name: '',
     store_responses: false,
+    is_compulsory: false,
+    is_presession: false,
+    is_postsession: false,
     questions: [
       {
         question: '',
@@ -23,13 +26,13 @@ const CreateForm = () => {
     ],
   })
 
-  // State for error messages
+
   const [errors, setErrors] = useState({
     form_name: '',
     questions: [],
   })
 
-  // Fetch option sets on component mount
+
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -43,7 +46,7 @@ const CreateForm = () => {
     fetchData()
   }, [])
 
-  // Function to add a new question
+
   const addQuestion = () => {
     setRequest((prevRequest) => ({
       ...prevRequest,
@@ -57,7 +60,7 @@ const CreateForm = () => {
     }))
     setErrors((prevErrors) => ({
       ...prevErrors,
-      questions: [...prevErrors.questions, ''], // Add an empty error message for the new question
+      questions: [...prevErrors.questions, ''],
     }))
   }
 
@@ -68,13 +71,13 @@ const CreateForm = () => {
       questions: [],
     }
 
-    // Check form name
+   
     if (!request.form_name) {
       newErrors.form_name = 'Form name is required.'
       valid = false
     }
 
-    // Check questions and response types
+  
     request.questions.forEach((question, index) => {
       if (!question.question) {
         newErrors.questions[index] = 'Question is required.'
@@ -105,13 +108,13 @@ const CreateForm = () => {
       })
       request.questions = request_with_order
       const response = await CreateFormAndQuestion(request)
-      // Handle success response (e.g., navigate or show success message)
+     
     } catch (error) {
       console.error(error.response.data.error_description)
     }
   }
 
-  // Function to handle text input change
+  
   const handleTextChange = (index, value) => {
     const newQuestions = [...request.questions]
     newQuestions[index].question = value
@@ -126,7 +129,7 @@ const CreateForm = () => {
     })
   }
 
-  // Function to handle response type change
+  
   const handleResponseTypeChange = (index, value) => {
     const newQuestions = [...request.questions]
     newQuestions[index].option_set_id = value
@@ -139,12 +142,12 @@ const CreateForm = () => {
       newQuestionsErrors[index] = newQuestionsErrors[index]?.replace(
         'Response type is required.',
         ''
-      ) // Clear response type error on change
+      ) 
       return { ...prevErrors, questions: newQuestionsErrors }
     })
   }
 
-  // Function to delete a question
+
   const deleteQuestion = (index) => {
     if (request.questions.length <= 1) {
       Alert.alert('You need to have at least one question')
@@ -157,7 +160,7 @@ const CreateForm = () => {
     }))
     setErrors((prevErrors) => {
       const newQuestionsErrors = [...prevErrors.questions]
-      newQuestionsErrors.splice(index, 1) // Remove the error message for the deleted question
+      newQuestionsErrors.splice(index, 1)
       return { ...prevErrors, questions: newQuestionsErrors }
     })
   }
@@ -177,7 +180,7 @@ const CreateForm = () => {
           value={request.form_name}
           handleChange={(value) => {
             setRequest({ ...request, form_name: value })
-            setErrors((prev) => ({ ...prev, form_name: '' })) // Clear error on change
+            setErrors((prev) => ({ ...prev, form_name: '' })) 
           }}
           customStyles="mb-4 m-4"
         />
@@ -208,6 +211,72 @@ const CreateForm = () => {
           </TouchableOpacity>
         </View>
 
+        {/* Is Compulsory Checkbox */}
+        <View className="flex flex-row items-center mb-4 mx-4">
+          <Text className="text-mindful-brown-80 font-bold text-[18px]">
+            Is the form compulsory?
+          </Text>
+          <TouchableOpacity
+            className="flex-1 flex-row items-center justify-end"
+            onPress={() =>
+              setRequest({
+                ...request,
+                is_compulsory: !request.is_compulsory,
+              })
+            }
+          >
+            <View
+              className={`w-6 h-6 rounded border-2 border-mindful-brown-80 ${
+                request.is_compulsory ? 'bg-mindful-brown-80' : ''
+              }`}
+            />
+          </TouchableOpacity>
+        </View>
+
+        {/* Is Pre-Session Checkbox */}
+        <View className="flex flex-row items-center mb-4 mx-4">
+          <Text className="text-mindful-brown-80 font-bold text-[18px]">
+            Is the form pre-session?
+          </Text>
+          <TouchableOpacity
+            className="flex-1 flex-row items-center justify-end"
+            onPress={() =>
+              setRequest({
+                ...request,
+                is_presession: !request.is_presession,
+              })
+            }
+          >
+            <View
+              className={`w-6 h-6 rounded border-2 border-mindful-brown-80 ${
+                request.is_presession ? 'bg-mindful-brown-80' : ''
+              }`}
+            />
+          </TouchableOpacity>
+        </View>
+
+        {/* Is Post-Session Checkbox */}
+        <View className="flex flex-row items-center mb-4 mx-4">
+          <Text className="text-mindful-brown-80 font-bold text-[18px]">
+            Is the form post-session?
+          </Text>
+          <TouchableOpacity
+            className="flex-1 flex-row items-center justify-end"
+            onPress={() =>
+              setRequest({
+                ...request,
+                is_postsession: !request.is_postsession,
+              })
+            }
+          >
+            <View
+              className={`w-6 h-6 rounded border-2 border-mindful-brown-80 ${
+                request.is_postsession ? 'bg-mindful-brown-80' : ''
+              }`}
+            />
+          </TouchableOpacity>
+        </View>
+
         {/* Horizontal Line */}
         <View
           style={{ height: 1, backgroundColor: '#A0A0A0', marginVertical: 10 }}
@@ -220,7 +289,7 @@ const CreateForm = () => {
                 Question {index + 1}
               </Text>
 
-              {/* Delete Question Button */}
+          
               <TouchableOpacity
                 onPress={() => deleteQuestion(index)}
                 className="flex-row items-center"
@@ -229,7 +298,7 @@ const CreateForm = () => {
               </TouchableOpacity>
             </View>
 
-            {/* Text Input for Question */}
+         
             <FormField
               iconName="text-box-outline"
               value={request.questions[index].question}
@@ -242,7 +311,7 @@ const CreateForm = () => {
               </Text>
             ) : null}
 
-            {/* Dropdown List for Response Type */}
+         
             <Dropdown
               title="Question Response Type"
               data={responseTypeList.map((opt) => ({
@@ -261,14 +330,14 @@ const CreateForm = () => {
           </View>
         ))}
 
-        {/* Add Question Button */}
+     
         <CustomButton
           title="Add Question"
           handlePress={addQuestion}
           buttonStyle="mx-4 mb-2"
         />
 
-        {/* Save Button */}
+      
         <CustomButton
           title="Save"
           handlePress={handleSave}

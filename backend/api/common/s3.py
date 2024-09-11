@@ -3,6 +3,7 @@ import logging
 import random
 import string
 import boto3
+import mimetypes
 from botocore.exceptions import ClientError
 import os
 from cryptography.hazmat.backends import default_backend
@@ -16,6 +17,10 @@ def upload_fileobj(fileobj, bucket, object_path=None):
     if object_path is None:
         object_path = fileobj.name
 
+    mime_type, _ = mimetypes.guess_type(object_path)
+    if mime_type is None:
+        mime_type = 'application/octet-stream'
+
     s3_client = boto3.client('s3',
                             aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
                             aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY,
@@ -27,7 +32,7 @@ def upload_fileobj(fileobj, bucket, object_path=None):
                                  bucket, 
                                  object_path,                             
                                  ExtraArgs={
-                                    "ContentType": "image/png"
+                                    "ContentType": mime_type,
                                     }     
                                 )
     except ClientError as e:

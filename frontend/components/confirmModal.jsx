@@ -1,7 +1,6 @@
 import React from 'react'
 import { View, Text } from 'react-native'
 import { Image } from 'expo-image'
-import { confirmModal } from '../assets/image'
 import CustomButton from './customButton'
 
 const ConfirmModal = ({
@@ -16,11 +15,11 @@ const ConfirmModal = ({
   handleCancel,
 }) => {
   return (
-    <View className="absolute top-0 left-0 right-0 bottom-0 flex justify-center items-center z-50 bg-opacity-40 bg-optimistic-gray-80">
-      <View className="w-3/4 h-1/2 md:h-3/4  bg-white bg-opacity-90 rounded-3xl shadow-lg flex flex-col">
+    <View className="absolute top-0 left-0 right-0 bottom-0 flex justify-center items-center z-50 bg-black/70 ">
+      <View className="w-11/12 h-1/2 md:h-3/5  bg-white bg-opacity-90 rounded-3xl shadow-lg flex flex-col">
         <View className=" flex-1 justify-center items-center px-4">
           <Image
-            source={imageSource}
+            source={imageSource || confirmModal}
             className="w-full h-4/6 rounded-lg"
             contentFit="cover"
           />
@@ -41,7 +40,6 @@ const ConfirmModal = ({
               handlePress={handleCancel}
               buttonStyle={`w-32 z-10 bg-red-500 rounded-full`}
               textStyle="text-white"
-              isLoading={false}
             />
           )}
           {isConfirmButton && (
@@ -50,7 +48,6 @@ const ConfirmModal = ({
               handlePress={handleConfirm}
               buttonStyle={`z-10 ${!isCancelButton ? 'w-full' : 'w-32'}`}
               textStyle="text-white"
-              isLoading={false}
             />
           )}
         </View>
