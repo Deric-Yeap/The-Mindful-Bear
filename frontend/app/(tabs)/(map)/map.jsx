@@ -11,7 +11,7 @@ import { landmarkIcon } from '../../../assets/image'
 import { getGeoJson } from '../../../common/getGeoJson'
 import { confirmModal } from '../../../assets/image'
 import Loading from '../../../components/loading'
-import { useRouter } from 'expo-router';
+import { useRouter, useLocalSearchParams } from 'expo-router';
 
 const initialFormState = {
   start_datetime: '',
@@ -80,18 +80,51 @@ const landmarksData = [
 const Map = () => {
   Mapbox.setAccessToken(process.env.MAPBOX_PUBLIC_KEY)
   const router = useRouter();
+  const { sessionStarted, formData } = useLocalSearchParams(); // Get sessionStarted and formData from the params
   const [form, setForm] = useState(initialFormState)
   const [isModalOpen, setIsModalOpen] = useState(false)
-  const [isSessionStarted, setIsSessionStarted] = useState(false)
+  const [isSessionStarted, setIsSessionStarted] = useState(sessionStarted)
+  const [landmarksData, setLandmarksData] = useState([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    if (formData) {
+      setForm(JSON.parse(formData)); // Parse the formData and set it to the form state
+    }
+  }, [formData]);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await getLandmarks()
+        setLandmarksData(response)
+      } catch (error) {
+        console.error('Error fetching landmarks:', error)
+      } finally {
+        setLoading(false)
+      }
+    }    
+
+    fetchData()
+  }, [])
+
   const handleSessionStart = () => {
-    const currentStartDateTime = getCurrentDateTime()
-    setForm((prevForm) => ({
-      ...prevForm,
-      start_datetime: currentStartDateTime,
-    }))
-    setIsSessionStarted(true)
-    router.push('/form')  
-  }
+    const currentStartDateTime = getCurrentDateTime();
+    setForm((prevForm) => {
+      const updatedForm = {
+        ...prevForm,
+        start_datetime: currentStartDateTime,
+      };
+      
+      router.push({
+        pathname: '/questionaire',
+        params: { sessionStarted: true, formData: JSON.stringify(updatedForm) }, // Pass updatedForm instead of stale form
+      });
+  
+      return updatedForm;
+    });
+  };
+
   const handleSessionEnd = () => {
     setIsModalOpen(true)
   }
