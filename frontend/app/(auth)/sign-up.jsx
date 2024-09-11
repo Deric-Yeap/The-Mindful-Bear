@@ -9,8 +9,10 @@ import DatePicker from '../../components/datePicker'
 import { create } from '../../api/user'
 import { listGender } from '../../api/gender'
 import { listDepartment } from '../../api/department'
+import Loading from '../../components/loading'
 
 const SignUp = () => {
+  const [isLoading, setIsLoading] = useState(false)
   const [form, setForm] = useState({
     email: '',
     name: '',
@@ -42,9 +44,13 @@ const SignUp = () => {
 
   const handleSignUp = async () => {
     try {
+      setIsLoading(true)
+      setErrorMessage({})
       const response = await create(form)
+      setIsLoading(false)
       router.push('/sign-in')
     } catch (error) {
+      setIsLoading(false)
       setErrorMessage(error.response.data.error_description)
     }
   }
@@ -54,6 +60,11 @@ const SignUp = () => {
       <View className="absolute top-[-500px] left-0 right-0 items-center z-10">
         <View className="bg-mindful-brown-80 h-[150vw] w-[150vw] rounded-full"></View>
       </View>
+      {isLoading && (
+        <View className="absolute top-0 left-0 right-0 bottom-0 flex justify-center items-center z-10 bg-optimistic-gray-80/90">
+          <Loading />
+        </View>
+      )}
       <View className="min-h-[78vh] mt-[25vh] items-center mx-5">
         <Text className="font-urbanist-extra-bold text-3xl text-mindful-brown-80 pb-10">
           Sign Up

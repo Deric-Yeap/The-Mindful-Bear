@@ -18,8 +18,8 @@ def password_reset_token_created(sender, instance, reset_password_token, *args, 
     :param kwargs:
     :return:
     """
-    reset_password_url = "{}?token={}".format(
-        instance.request.build_absolute_uri(reverse('password_reset:reset-password-confirm')), #change to frontend url later, using deeplink
+
+    reset_password_url = "https://themindfulbear.github.io/themindfulbear_redirect?token={}".format(
         reset_password_token.key
     )
 
@@ -33,11 +33,23 @@ def password_reset_token_created(sender, instance, reset_password_token, *args, 
         f"The Mindful Bear Team"
     )
 
+    html_body = f"""
+        <p>Hi {reset_password_token.user.email},</p>
+        <p>You requested a password reset. Click the link below to reset your password:</p>
+        <a href='{reset_password_url}'>Reset your password</a>
+        <p>If you didn't request this, please ignore this email.</p>
+        <p>Best regards,<br>The Mindful Bear Team</p>
+    """
+
+
     msg = EmailMultiAlternatives(
         email_subject,
         email_body,
-        settings.EMAIL_HOST_USER ,
+        settings.EMAIL_HOST_USER,
         [reset_password_token.user.email]
     )
 
+    msg.attach_alternative(html_body, "text/html")
+
     msg.send()
+

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react'
 import { View, TouchableOpacity } from 'react-native'
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons'
 import { colors } from '../common/styles'
@@ -10,28 +10,30 @@ const TabBar = ({ state, descriptors, navigation }) => {
     '(map)': (props) => <MaterialCommunityIcons name="map" {...props} />,
     stats: (props) => <MaterialCommunityIcons name="poll" {...props} />,
     settings: (props) => <MaterialCommunityIcons name="account" {...props} />,
-    admin: (props) => <MaterialCommunityIcons name="cog" {...props} />,    
+    admin: (props) => <MaterialCommunityIcons name="cog" {...props} />,
   }
-    //add into this list the routes that you do not want in the navbar  
-  const [notIncludedRoutes, setNotIncludedRoutes] = useState(['_sitemap', '+not-found']);
-    useEffect(() => {
-      const fetchUser = async () => {
-        try {
-          const data = await getMe();
-          if (!data.is_staff) {
-            setNotIncludedRoutes(prevRoutes => [...prevRoutes, 'admin']);
-          }                           
-        } catch (error) {
-          console.error(error);
+  //add into this list the routes that you do not want in the navbar
+  const [notIncludedRoutes, setNotIncludedRoutes] = useState([
+    '_sitemap',
+    '+not-found',
+  ])
+  useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        const data = await getMe()
+        if (!data.is_staff) {
+          setNotIncludedRoutes((prevRoutes) => [...prevRoutes, 'admin'])
         }
-      };
-  
-      fetchUser();
-    }, []);
-  
+      } catch (error) {
+        console.error(error)
+      }
+    }
+
+    fetchUser()
+  }, [])
 
   return (
-    <View className="absolute bottom-5 left-0 right-0 z-20">
+    <View className="absolute bottom-5 left-0 right-0 z-0">
       <View className="flex-row justify-between items-center py-3 bg-white rounded-full shadow-md shadow-black">
         {state.routes.map((route, index) => {
           const { options } = descriptors[route.key]
