@@ -5,6 +5,8 @@ from .models import FormQuestion
 from api.question.models import Question
 from .serializer import FormQuestionSerializer
 from rest_framework.exceptions import ValidationError
+from .serializer import BulkFormQuestionSerializer
+from api.session.models import Session
 
 class FormQuestionList(generics.ListAPIView):
     serializer_class = FormQuestionSerializer
@@ -26,24 +28,24 @@ class FormQuestionCreate(generics.CreateAPIView):
     serializer_class = FormQuestionSerializer
 
     def perform_create(self, serializer):
-        session_id = self.request.data.get('session_id')
-        question_id = self.request.data.get('question_id')
+        session_id = self.request.data.get('SessionID')
+        question_id = self.request.data.get('QuestionID')
 
         if not session_id or not question_id:
-            raise ValidationError({"error": "session_id and question_id are required."})
+            raise ValidationError({"error": "SessionID and QuestionID are required."})
 
         try:
             question = Question.objects.get(pk=question_id)
         except Question.DoesNotExist:
             raise ValidationError({"error": "Question not found."})
 
-        # Check if the associated form allows storing responses
-        form = question.form_id  # Assuming the Question model has a ForeignKey to Form
+        form = question.formID  # Assuming the Question model has a ForeignKey to Form
         if not form.store_responses:
             raise ValidationError({"error": "Responses cannot be stored for this form."})
 
-        # Save the FormQuestion instance
-        serializer.save(question=question)
+        # Save the FormQuestion instance, setting the QuestionID correctly
+        serializer.save(QuestionID=question)
+
 
 
 class FormQuestionUpdate(generics.UpdateAPIView):
@@ -65,3 +67,31 @@ class FormQuestionUpdate(generics.UpdateAPIView):
 
         serializer = self.get_serializer(form_question)
         return Response(serializer.data, status=status.HTTP_200_OK)
+    
+class BulkFormQuestionCreate(generics.CreateAPIView):
+    serializer_class = BulkFormQuestionSerializer
+
+    def create(self, request, *args, **kwargs):
+        session_id = request.data.get('SessionID')
+        questions_data = request.data.get('data')
+
+        if not session_id:
+            return Response({"error": "SessionID is required."}, status=status.HTTP_400_BAD_REQUEST)
+        
+        if not questions_data:
+            return Response({"error": "Data for questions is required."}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            session = Session.objects.get(pk=session_id)
+        except Session.DoesNotExist:
+            return Response({"error": "Session not found."}, status=status.HTTP_404_NOT_FOUND)
+
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        try:
+            serializer.save()
+        except ValidationError as e:
+            return Response(e.detail, status=status.HTTP_400_BAD_REQUEST)
+
+        return Response("", status=status.HTTP_201_CREATED)

@@ -14,7 +14,7 @@ class FormAndQuestionCreateSerializer(serializers.ModelSerializer):
     questions = serializers.ListSerializer(child=serializers.DictField(), write_only=True)
     class Meta:
         model = Form
-        fields = ['form_name', 'store_responses', 'questions']
+        fields = ['form_name', 'store_responses', 'is_compulsory', 'is_presession', 'is_postsession', 'questions']
 
     def create(self, validated_data):
         questions_data = validated_data.pop('questions')
@@ -46,7 +46,7 @@ class FormAndQustionViewSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Form
-        fields = ['id', 'form_name', 'store_responses', 'questions']
+        fields = ['form_name', 'store_responses', 'is_compulsory', 'is_presession', 'is_postsession', 'questions']
     
     def to_representation(self, instance):
         data = super().to_representation(instance)

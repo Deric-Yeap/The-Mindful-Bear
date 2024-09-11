@@ -10,7 +10,7 @@ class FormGetQuestions(generics.ListAPIView):
 
     def get_queryset(self):
         form_id = self.kwargs.get('pk')
-        return Question.objects.filter(FormID=form_id)
+        return Question.objects.filter(formID=form_id)
     
 # Admin Side
 # Admin can create more questions
