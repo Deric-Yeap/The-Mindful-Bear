@@ -1,5 +1,6 @@
 from rest_framework import serializers
 from .models import Journal
+from ..emotion.models import Emotion
 from django.conf import settings
 from ..common.s3 import create_presigned_url, upload_fileobj, make_file_upload_path, delete_s3_object
 from ..emotion.serializer import EmotionSerializer
@@ -37,6 +38,7 @@ class JournalCreateSerializer(serializers.ModelSerializer):
 class JournalUploadFileSerializer(serializers.Serializer):
     audio_file = serializers.FileField()
     id = serializers.IntegerField(required=False)
+    emotion_id = serializers.IntegerField(required=False)
 
     def validate_audio_file(self, value):
         if not value.name.endswith('.mp3'):
@@ -47,6 +49,7 @@ class JournalUploadFileSerializer(serializers.Serializer):
         file = self.validated_data['audio_file']
         user = self.context['request'].user
         id = self.validated_data['id'] if 'id' in self.validated_data else None
+        emotion_id = self.validated_data['emotion_id'] if 'emotion_id' in self.validated_data else None
 
         file_name, object_path = make_file_upload_path("journals", user, file.name)
         bucket = settings.AWS_STORAGE_BUCKET_NAME
@@ -66,9 +69,10 @@ class JournalUploadFileSerializer(serializers.Serializer):
             except Exception as e:
                 raise serializers.ValidationError(e)
         else:
+            emotion = Emotion.objects.get(id=emotion_id)
             journal_entry = Journal.objects.create(
                 audio_file_path=object_path,
-                emotion_id=1,  # hardcoded for now, can be changed later
+                emotion_id=emotion,  
                 user_id=user
             )
         
