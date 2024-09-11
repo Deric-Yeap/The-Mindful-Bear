@@ -8,6 +8,7 @@ import CustomButton from '../../components/customButton';
 import { createLandmark, updateLandmark } from '../../api/landmark';
 import { getExercises } from '../../api/exercise';
 import ConfirmModal from '../../components/confirmModal';
+import { confirmModal } from '../../assets/image'
 import { useRouter } from 'expo-router';
 
 const LandmarkCreator = () => {
@@ -23,6 +24,7 @@ const LandmarkCreator = () => {
     }
   }
   const [landmarkName, setLandmarkName] = useState(landmark?.landmark_name || '');
+  const [landmarkDescription, setLandmarkDescription] = useState(landmark?.landmark_description || '');
   const [exerciseId, setExerciseId] = useState(landmark?.exercise?.exercise_id || '');
   const [xCoordinates, setXCoordinates] = useState(landmark?.x_coordinates || '');
   const [yCoordinates, setYCoordinates] = useState(landmark?.y_coordinates || '');
@@ -40,6 +42,7 @@ const LandmarkCreator = () => {
     const fetchExercises = async () => {
       try {
         const data = await getExercises();
+        console.log(data)
         setExerciseList(data);
         if (exerciseId) {
           const selectedExercise = data.find(exercise => exercise.exercise_id === exerciseId);          
@@ -73,6 +76,7 @@ const LandmarkCreator = () => {
 
     const landmarkData = {
       landmark_name: landmarkName,
+      landmark_description: landmarkDescription, 
       exercise: exerciseId,
       x_coordinates: xCoordinates,
       y_coordinates: yCoordinates,
@@ -109,6 +113,7 @@ const LandmarkCreator = () => {
 
   const resetForm = () => {
     setLandmarkName('');
+    setLandmarkDescription(''); 
     setExerciseId(null);
     setXCoordinates('');
     setYCoordinates('');
@@ -145,6 +150,17 @@ const LandmarkCreator = () => {
             placeholder="Landmark Name"
             value={landmarkName}
             onChangeText={setLandmarkName}
+          />
+          <View className="flex-row justify-start w-full mb-4">
+            <Text className="self-start text-mindful-brown-80 text-lg font-urbanist-extra-bold">Landmark Description</Text>
+          </View>
+          <TextInput
+            className="px-4 py-3 text-black rounded-3xl bg-zinc-300 w-[95%] mb-4"
+            placeholder="Landmark Description"
+            value={landmarkDescription}
+            onChangeText={setLandmarkDescription}
+            multiline={true}
+            numberOfLines={3}
           />
           <View className="flex-row gap-3.5 items-start w-full justify-center mb-4">
             <View className="flex flex-col w-[45%]">
@@ -194,11 +210,24 @@ const LandmarkCreator = () => {
       </View>
        {/* Success Modal */}
        {showSuccess && (
+        // <ConfirmModal
+        //   title="Success!"
+        //   subTitle={`Landmark ${landmark ? 'updated' : 'created'} successfully.`}
+        //   isConfirmButton={true}
+        //   isCancelButton={false}
+        // />
         <ConfirmModal
-          title="Success!"
-          subTitle={`Landmark ${landmark ? 'updated' : 'created'} successfully.`}
           isConfirmButton={true}
           isCancelButton={false}
+          imageSource={confirmModal}
+          confirmButtonTitle={'Confirm'}
+          cancelButtonTitle={'Cancel'}
+          title={'Success!'}
+          subTitle={`Landmark ${landmark ? 'updated' : 'created'} successfully.`}
+          handleCancel={() => {
+            setIsModalOpen(false)
+          }}
+          handleConfirm={handleSessionConfirmEnd}
         />
       )}
     </ScrollView>
