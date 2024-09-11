@@ -5,7 +5,7 @@ from ..common.s3 import create_presigned_url, upload_fileobj, make_file_upload_p
 
 class JournalGetSerializer(serializers.ModelSerializer):
     file_url = serializers.SerializerMethodField()
-
+ 
     class Meta:
         model = Journal
         fields = ['id', 'user_id', 'emotion_id', 'audio_file_path', 'journal_text', 'sentiment_analysis_result', 'file_url', 'upload_date']   

@@ -7,7 +7,7 @@ models.CharField.register_lookup(Length)
 class Exercise(models.Model):
     exercise_id = models.AutoField(primary_key=True)
     exercise_name = models.CharField(max_length=250, default="testExercise")
-    audio_url = models.URLField()
+    audio_url = models.CharField(max_length=250)
     description = models.CharField(max_length=250)
 
     # class Meta:

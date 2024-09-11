@@ -4,7 +4,29 @@ from .models import Exercise
 from .serializer import *
 from ..common.permission import CustomDjangoModelPermissions
 from rest_framework.response import Response
+from rest_framework.decorators import action
+from rest_framework.views import APIView
+
+
 from rest_framework import status
+from rest_framework import viewsets
+ 
+
+class ExerciseViewSet(viewsets.ModelViewSet):
+    queryset = Exercise.objects.all()
+
+    def get_serializer_class(self):
+        if self.action == 'create':
+            return ExerciseCreateSerializer
+        return ExerciseSerializer
+    
+    # @action(detail=False, methods=['post'], url_path='upload-audio')
+    # def upload_audio(self, request):
+    #     serializer = ExerciseUploadFileSerializer(data=request.data, context={'request': request})
+    #     if serializer.is_valid():
+    #         exercise_entry = serializer.save()
+    #         return Response({'message': 'File uploaded successfully', 'exercise_id': exercise_entry.id}, status=status.HTTP_200_OK)
+    #     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 # Create your views here.
 
 # Create  View
@@ -24,10 +46,16 @@ class ExerciseCreateView(generics.CreateAPIView):
         return Response(exerciseSerializer.data, status=status.HTTP_201_CREATED)
 # get all view
 class ExerciseListView(generics.ListAPIView):
-    serializer_class = ExerciseSerializer
+    serializer_class = ExerciseGetSerializer  # Use the desired serializer
+
     def list(self, request):
+        # Get all Exercise objects
         queryset = Exercise.objects.all()
+        
+        # Serialize the queryset using ExerciseGetSerializer
         serializer = self.get_serializer(queryset, many=True)
+        
+        # Return the serialized data with 200 OK status
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 # get by Id view
@@ -80,5 +108,28 @@ class ExerciseUpdateDestroyView(generics.UpdateAPIView, generics.DestroyAPIView)
 
 
 
+class ExerciseUploadAudioView(APIView):
+    def post(self, request, *args, **kwargs):
+        serializer = ExerciseUploadFileSerializer(data=request.data, context={'request': request})
+        if serializer.is_valid():
+            exercise_entry = serializer.save()
+            return Response({'message': 'File uploaded successfully', 'exercise_id': exercise_entry.id}, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
 
+class ExerciseCreateView(APIView):
+    def post(self, request, *args, **kwargs):
+        serializer = ExerciseCreateSerializer(data=request.data, context={'request': request})
+        
+        if serializer.is_valid():
+            try:
+                exercise = serializer.save()
+                return Response(
+                    {"message": "Exercise created successfully!", "data": serializer.data},
+                    status=status.HTTP_201_CREATED
+                )
+            except Exception as e:
+                return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
