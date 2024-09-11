@@ -15,6 +15,9 @@ const CreateForm = () => {
   const [request, setRequest] = useState({
     form_name: '',
     store_responses: false,
+    is_compulsory: false,
+    is_presession: false,
+    is_postsession: false,
     questions: [
       {
         question: '',
@@ -208,7 +211,73 @@ const CreateForm = () => {
           </TouchableOpacity>
         </View>
 
-    
+        {/* Is Compulsory Checkbox */}
+        <View className="flex flex-row items-center mb-4 mx-4">
+          <Text className="text-mindful-brown-80 font-bold text-[18px]">
+            Is the form compulsory?
+          </Text>
+          <TouchableOpacity
+            className="flex-1 flex-row items-center justify-end"
+            onPress={() =>
+              setRequest({
+                ...request,
+                is_compulsory: !request.is_compulsory,
+              })
+            }
+          >
+            <View
+              className={`w-6 h-6 rounded border-2 border-mindful-brown-80 ${
+                request.is_compulsory ? 'bg-mindful-brown-80' : ''
+              }`}
+            />
+          </TouchableOpacity>
+        </View>
+
+        {/* Is Pre-Session Checkbox */}
+        <View className="flex flex-row items-center mb-4 mx-4">
+          <Text className="text-mindful-brown-80 font-bold text-[18px]">
+            Is the form pre-session?
+          </Text>
+          <TouchableOpacity
+            className="flex-1 flex-row items-center justify-end"
+            onPress={() =>
+              setRequest({
+                ...request,
+                is_presession: !request.is_presession,
+              })
+            }
+          >
+            <View
+              className={`w-6 h-6 rounded border-2 border-mindful-brown-80 ${
+                request.is_presession ? 'bg-mindful-brown-80' : ''
+              }`}
+            />
+          </TouchableOpacity>
+        </View>
+
+        {/* Is Post-Session Checkbox */}
+        <View className="flex flex-row items-center mb-4 mx-4">
+          <Text className="text-mindful-brown-80 font-bold text-[18px]">
+            Is the form post-session?
+          </Text>
+          <TouchableOpacity
+            className="flex-1 flex-row items-center justify-end"
+            onPress={() =>
+              setRequest({
+                ...request,
+                is_postsession: !request.is_postsession,
+              })
+            }
+          >
+            <View
+              className={`w-6 h-6 rounded border-2 border-mindful-brown-80 ${
+                request.is_postsession ? 'bg-mindful-brown-80' : ''
+              }`}
+            />
+          </TouchableOpacity>
+        </View>
+
+        {/* Horizontal Line */}
         <View
           style={{ height: 1, backgroundColor: '#A0A0A0', marginVertical: 10 }}
         />

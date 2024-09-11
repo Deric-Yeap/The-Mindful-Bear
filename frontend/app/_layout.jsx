@@ -3,6 +3,7 @@ import { Slot } from 'expo-router'
 import { store } from '../redux/store'
 import { Provider } from 'react-redux'
 import * as SplashScreen from 'expo-splash-screen'
+import * as Linking from 'expo-linking'
 import {
   useFonts,
   Urbanist_100Thin,
@@ -55,9 +56,29 @@ const RootLayout = () => {
     }
   }, [loaded, error])
 
-  if (!loaded && !error) {
-    return null
-  }
+  // if (!loaded && !error) {
+  //   return null
+  // }
+
+  useEffect(() => {
+    const handleDeepLink = (event) => {
+      const { url } = event
+      const { path, queryParams } = Linking.parse(url)
+
+      if (path === 'password-confirm') {
+        const token = queryParams?.token
+        if (token) {
+          router.push(`/password-confirm?token=${token}`)
+        }
+      }
+    }
+
+    const listener = Linking.addEventListener('url', handleDeepLink)
+
+    return () => {
+      listener.remove()
+    }
+  }, [])
 
   return (
     <Provider store={store}>
