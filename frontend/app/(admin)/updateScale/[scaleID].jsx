@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, ScrollView, Alert, KeyboardAvoidingView, Platform } from 'react-native';
+import { View, Text, ScrollView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import FormField from '../../../components/formField';
 import BrownPageTitlePortion from '../../../components/brownPageTitlePortion';
@@ -9,6 +9,8 @@ import { useLocalSearchParams } from 'expo-router';
 import CustomButton from '../../../components/customButton';
 import { colors } from '../../../common/styles';
 import Loading from '../../../components/loading';
+import ConfirmModal from '../../../components/confirmModal';
+import { confirmModal } from '../../../assets/image';
 
 const UpdateScale = () => {
   const { scaleID } = useLocalSearchParams();
@@ -17,8 +19,12 @@ const UpdateScale = () => {
   const [options, setOptions] = useState([]);
   const [error, setError] = useState(null);
   const [description, setDescription] = useState({ description: '' });
+  const [errors, setErrors] = useState({ description: '', options: [] });
+  const [hasChanges, setHasChanges] = useState(false);
+  const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);
+  const [isNoChangesModalOpen, setIsNoChangesModalOpen] = useState(false);
+  const [successMessage, setSuccessMessage] = useState('');
 
-  // Store previous values for comparison
   const [previousDescription, setPreviousDescription] = useState('');
   const [previousOptions, setPreviousOptions] = useState([]);
 
@@ -31,14 +37,46 @@ const UpdateScale = () => {
     });
 
     setOptions(newOptions);
+    setErrors((prev) => ({ ...prev, options: prev.options.map((err, index) => (index === id ? '' : err)) }));
+    setHasChanges(true);
+  };
+
+  const validateForm = () => {
+    let valid = true;
+    const newErrors = { description: '', options: [] };
+
+    if (!description.description.trim()) {
+      newErrors.description = 'Scale name cannot be empty.';
+      valid = false;
+    }
+
+    options.forEach((option, index) => {
+      if (!option.description.trim()) {
+        newErrors.options[index] = `Option ${option.value} cannot be empty.`;
+        valid = false;
+      } else {
+        newErrors.options[index] = ''; 
+      }
+    });
+
+    setErrors(newErrors);
+    return valid;
   };
 
   const handleSave = async () => {
+    if (!validateForm()) {
+      return; 
+    }
+
+    if (!hasChanges) {
+      setIsNoChangesModalOpen(true); 
+      return;
+    }
+
     setLoading(true);
     try {
-      // Check if the description has changed
       if (previousDescription !== description.description) {
-        const url = `/option_set/update/${scaleID}/`; // Update the scale name
+        const url = `/option_set/update/${scaleID}/`;
         console.log(`Updating scale ID: ${scaleID} with new description: ${description.description}`);
         await axiosInstance.put(url, {
           description: description.description,
@@ -47,7 +85,6 @@ const UpdateScale = () => {
 
       await Promise.all(
         options.map(async (option) => {
-          // Check if the value has changed
           const previousOption = previousOptions.find(prev => prev.id === option.id);
           if (previousOption && previousOption.description !== option.description) {
             const url = `/option/update/${option.id}/`;
@@ -61,10 +98,13 @@ const UpdateScale = () => {
         })
       );
 
-      Alert.alert('Success', 'Options updated successfully');
-      // Update previous values after saving
+
+      setSuccessMessage('Options updated successfully!');
+      setIsSuccessModalOpen(true);
+
       setPreviousDescription(description.description);
       setPreviousOptions(options);
+      setHasChanges(false);
     } catch (error) {
       console.error('Error saving options:', error);
       setError('Error saving options. Please try again.');
@@ -83,9 +123,10 @@ const UpdateScale = () => {
       const url = `/option_set/delete/${scaleID}/`;
       const response = await axiosInstance.delete(url);
       if (response.status === 204) {
-        Alert.alert('Success', 'Scale deleted successfully');
         setOptions([]);
         setDescription({ description: '' });
+        setSuccessMessage('Scale deleted successfully!');
+        setIsSuccessModalOpen(true); 
       } else {
         setError('Error: Unexpected response from server.');
       }
@@ -108,7 +149,7 @@ const UpdateScale = () => {
         const url = `/option_set/get/${scaleID}`;
         const response = await axiosInstance.get(url);
         setDescription({ description: response.description || '' });
-        setPreviousDescription(response.description || ''); // Initialize previous description
+        setPreviousDescription(response.description || '');
       } catch (error) {
         console.error('Error fetching forms:', error);
         setError('Error fetching forms. Please try again.');
@@ -133,7 +174,7 @@ const UpdateScale = () => {
         const url = `/option/getOptions/${scaleID}`;
         const response = await axiosInstance.get(url);
         setOptions(response);
-        setPreviousOptions(response); // Initialize previous options
+        setPreviousOptions(response);
       } catch (error) {
         console.error('Error fetching options:', error);
         setError('Error fetching options. Please try again.');
@@ -169,63 +210,102 @@ const UpdateScale = () => {
         backgroundColor={colors.mindfulBrown100}
       />
       <BrownPageTitlePortion title="Form Management" />
-      <KeyboardAvoidingView
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        style={{ flex: 1 }}
-      >
-        <ScrollView contentContainerStyle={{ paddingBottom: 20 }}>
+      <ScrollView contentContainerStyle={{ paddingBottom: 20 }}>
+        <View className="mx-4">
           <FormField
             title="Scale Name"
             iconName="form-select"
             value={`Likert Scale - ${trimmedDescription}`}
             handleChange={(value) => {
-              setDescription({ description: value }); // Update description directly
+              setDescription({ description: value });
+              setErrors((prev) => ({ ...prev, description: '' }));
+              setHasChanges(true);
             }}
-            customStyles="mb-4 m-4"
+            customStyles={`mb-1 ${errors.description ? 'border-red-500' : ''}`} 
             editable={true}
-            multiline={true} // Enable multiline for Scale Name
           />
-
-          <View className="mx-4">
-            {options
-              .slice()
-              .sort((a, b) => a.value - b.value)
-              .map((option) => (
-                <View
-                  key={option.id} // Use unique ID as key
-                  className="flex-row items-center mt-0"
-                >
-                  <Text className="text-mindful-brown-80 font-bold text-lg mr-2">
-                    {option.value}
-                  </Text>
-                  <FormField
-                    value={option.description}
-                    handleChange={(value) => handleInputChange(option.id, value)}
-                    customStyles="mb-4 m-4 w-1/2"
-                    editable={true}
-                    multiline={true} // Enable multiline for option descriptions
-                  />
-                </View>
-              ))}
-          </View>
-          {/* Save Button */}
-          <CustomButton
-            title="Save"
-            handlePress={handleSave}
-            buttonStyle="mx-4"
-          />
-          <CustomButton
-            title="Delete"
-            handlePress={deleteScale}
-            buttonStyle="mx-4 mt-2"
-          />
-          {error && (
-            <Text style={{ color: 'red', textAlign: 'center', marginTop: 10 }}>
-              {error}
+          {errors.description && (
+            <Text style={{ color: 'red', marginLeft: 16 }}>
+              {errors.description}
             </Text>
           )}
-        </ScrollView>
-      </KeyboardAvoidingView>
+        </View>
+
+        <View className="mx-4 mt-4">
+          {options
+            .slice()
+            .sort((a, b) => a.value - b.value)
+            .map((option, index) => {
+              const hasError = !!errors.options[index];
+              return (
+                <View key={option.id} className="mb-4">
+                  <View className="flex-row items-center">
+                    <Text className="text-mindful-brown-80 font-bold text-lg mr-2">
+                      {option.value}
+                    </Text>
+                    <FormField
+                      value={option.description}
+                      handleChange={(value) => handleInputChange(option.id, value)}
+                      customStyles={`mb-1 m-4 w-1/2 ${hasError ? 'border-red-500' : ''}`} 
+                      editable={true}
+                    />
+                  </View>
+                  {hasError && (
+                    <Text style={{ color: 'red', marginLeft: '10%' }}>
+                      {errors.options[index]}
+                    </Text>
+                  )}
+                </View>
+              );
+            })}
+        </View>
+
+        <CustomButton
+          title="Save"
+          handlePress={handleSave}
+          buttonStyle="mx-4"
+          loading={loading}
+        />
+        <CustomButton
+          title="Delete"
+          handlePress={deleteScale}
+          buttonStyle="mx-4 mt-2"
+        />
+        {error && (
+          <Text style={{ color: 'red', textAlign: 'center', marginTop: 10 }}>
+            {error}
+          </Text>
+        )}
+      </ScrollView>
+
+      {isNoChangesModalOpen && (
+        <ConfirmModal
+          isConfirmButton={true}
+          isCancelButton={false}
+          imageSource={confirmModal}
+          confirmButtonTitle={'OK'}
+          title={'No Changes'}
+          subTitle={'There are no changes to save.'}
+          handleConfirm={() => {
+            setIsNoChangesModalOpen(false);
+          }}
+        />
+      )}
+
+
+      {isSuccessModalOpen && (
+        <ConfirmModal
+          isConfirmButton={true}
+          isCancelButton={false}
+          imageSource={confirmModal}
+          confirmButtonTitle={'Exit'}
+          title={'Success'}
+          subTitle={successMessage}
+          handleConfirm={() => {
+            setIsSuccessModalOpen(false); 
+          }}
+        />
+      )}
     </SafeAreaView>
   );
 };
