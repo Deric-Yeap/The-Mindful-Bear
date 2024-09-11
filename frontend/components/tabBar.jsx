@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { View, TouchableOpacity } from 'react-native'
+import { View, TouchableOpacity, StyleSheet } from 'react-native'
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons'
 import { colors } from '../common/styles'
 import { getMe } from '../api/user'
@@ -33,7 +33,7 @@ const TabBar = ({ state, descriptors, navigation }) => {
   }, [])
 
   return (
-    <View className="absolute bottom-5 left-0 right-0 z-0">
+    <View className="absolute bottom-5 left-0 right-0">
       <View className="flex-row justify-between items-center py-3 bg-white rounded-full shadow-md shadow-black">
         {state.routes.map((route, index) => {
           const { options } = descriptors[route.key]

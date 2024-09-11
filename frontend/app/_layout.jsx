@@ -1,9 +1,10 @@
-import React, {useEffect} from 'react'
+import React, { useEffect } from 'react'
 import { Slot } from 'expo-router'
 import { store } from '../redux/store'
 import { Provider } from 'react-redux'
 import * as SplashScreen from 'expo-splash-screen'
 import * as Linking from 'expo-linking'
+import { GestureHandlerRootView } from 'react-native-gesture-handler'
 import {
   useFonts,
   Urbanist_100Thin,
@@ -81,9 +82,11 @@ const RootLayout = () => {
   }, [])
 
   return (
-    <Provider store={store}>
-      <Slot />
-    </Provider>
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <Provider store={store}>
+        <Slot />
+      </Provider>
+    </GestureHandlerRootView>
   )
 }
 

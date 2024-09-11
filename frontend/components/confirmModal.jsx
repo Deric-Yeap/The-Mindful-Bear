@@ -38,16 +38,16 @@ const ConfirmModal = ({
             <CustomButton
               title={cancelButtonTitle}
               handlePress={handleCancel}
-              buttonStyle={`w-32 z-10 bg-red-500 rounded-full`}
-              textStyle="text-white"
+              buttonStyle={`${!isConfirmButton ? 'w-full' : 'w-32'} z-10  mr-0`}
+              textStyle="text-white mr-0"
             />
           )}
           {isConfirmButton && (
             <CustomButton
               title={confirmButtonTitle}
               handlePress={handleConfirm}
-              buttonStyle={`z-10 ${!isCancelButton ? 'w-full' : 'w-32'}`}
-              textStyle="text-white"
+              buttonStyle={`z-10 bg-red-500 mr-0 rounded-full w-32`}
+              textStyle="text-white mr-0"
             />
           )}
         </View>
