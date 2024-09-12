@@ -40,6 +40,7 @@ const Map = () => {
   const [landmarksData, setLandmarksData] = useState([])
   const [loading, setLoading] = useState(true)
   const [isBottomSheetOpen, setIsBottomSheetOpen] = useState(false)
+  const [selectedLandmark, setSelectedLandmark] = useState(null)
   const dispatch = useDispatch()
 
   useEffect(() => {
@@ -56,7 +57,6 @@ const Map = () => {
       } catch (error) {
         console.error('Error fetching landmarks:', error)
       } finally {
-        console.log(landmarksData)
         setLoading(false)
       }
     }
@@ -67,8 +67,9 @@ const Map = () => {
     }
   }, [])
 
-  const handleBottomSheetModalOpen = () => {
+  const handleBottomSheetModalOpen = (index) => {
     if (!isBottomSheetOpen) {
+      setSelectedLandmark(geoJSON.features[index])
       setIsBottomSheetOpen(true)
       dispatch(setIsShownNav())
     } else {
@@ -76,6 +77,7 @@ const Map = () => {
       dispatch(setIsShownNav())
     }
   }
+
   const handleSessionStart = () => {
     const currentStartDateTime = getCurrentDateTime()
     setForm((prevForm) => {
@@ -86,7 +88,7 @@ const Map = () => {
 
       router.push({
         pathname: '/questionaire',
-        params: { sessionStarted: true, formData: JSON.stringify(updatedForm) }, // Pass updatedForm instead of stale form
+        params: { sessionStarted: true, formData: JSON.stringify(updatedForm) },
       })
 
       return updatedForm
@@ -122,7 +124,6 @@ const Map = () => {
     setForm(initialFormState)
   }
   const geoJSON = getGeoJson(landmarksData)
-  console.log(geoJSON.features[1])
 
   return (
     <SafeAreaView className="h-full">
@@ -148,10 +149,6 @@ const Map = () => {
                   pitch={60}
                 />
                 {geoJSON?.features?.map((feature, index) => {
-                  console.log(
-                    `Feature ${index} coordinates:`,
-                    feature.geometry.coordinates
-                  )
                   return (
                     <Mapbox.MarkerView
                       key={index}
@@ -159,7 +156,7 @@ const Map = () => {
                       coordinate={feature.geometry.coordinates}
                     >
                       <TouchableOpacity
-                        onPress={handleBottomSheetModalOpen}
+                        onPress={() => handleBottomSheetModalOpen(index)}
                         className="rounded-3xl"
                       >
                         <View className="w-8 h-8 items-center justify-center p-5">
@@ -202,8 +199,11 @@ const Map = () => {
             handleConfirm={handleSessionConfirmEnd}
           />
         )}
-        {isBottomSheetOpen && (
-          <BottomSheetModal handleModalOpen={handleBottomSheetModalOpen} />
+        {isBottomSheetOpen && selectedLandmark && (
+          <BottomSheetModal
+            handleModalOpen={handleBottomSheetModalOpen}
+            landmarkData={selectedLandmark}
+          />
         )}
       </View>
     </SafeAreaView>
