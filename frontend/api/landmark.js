@@ -8,6 +8,7 @@ export const getLandmarks = () => {
 export const createLandmark = async (landmarkData) => {
     const formData = new FormData();
     formData.append('landmark_name', landmarkData.landmark_name);
+    formData.append('landmark_description', landmarkData.landmark_description);
     formData.append('landmark_image_url', { 
         uri: landmarkData.image_file.uri,
         name: landmarkData.image_file.fileName,
@@ -33,6 +34,7 @@ export const createLandmark = async (landmarkData) => {
 export const updateLandmark = async (landmarkId, landmarkData) => {
     const formData = new FormData();
     formData.append('landmark_name', landmarkData.landmark_name);
+    formData.append('landmark_description', landmarkData.landmark_description);
     formData.append('landmark_image_url', {
         uri: landmarkData.image_file.uri,
         name: landmarkData.image_file.fileName,
