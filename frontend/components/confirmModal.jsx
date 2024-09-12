@@ -2,6 +2,7 @@ import React from 'react'
 import { View, Text } from 'react-native'
 import { Image } from 'expo-image'
 import CustomButton from './customButton'
+import confirmModal from '../assets/confirmModalImage.png'
 
 const ConfirmModal = ({
   isConfirmButton,
