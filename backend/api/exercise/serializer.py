@@ -10,9 +10,10 @@ class MinimalLandmarkSerializer(serializers.ModelSerializer):
 # general serializer with no validation
 class ExerciseSerializer(serializers.ModelSerializer):
     landmarks = MinimalLandmarkSerializer(many=True, read_only=True)
+    start_datetime = serializers.ReadOnlyField() 
     class Meta:
         model = Exercise
-        fields = ['exercise_id','exercise_name', 'audio_url', 'description', 'landmarks']
+        fields = ['exercise_id','exercise_name', 'audio_url', 'description', 'landmarks', 'start_datetime']
 
 class ExerciseCreateSerializer(serializers.ModelSerializer):
     audio_url = serializers.URLField(validators=[is_field_empty], required = False)

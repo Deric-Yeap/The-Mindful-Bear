@@ -63,7 +63,8 @@ INSTALLED_APPS = [
     "api.department",
     "api.response",
     "api.optionSet",
-    "api.option"
+    "api.option",
+    "api.userSession",
 ]
 
 REST_FRAMEWORK = {

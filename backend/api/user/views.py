@@ -12,6 +12,9 @@ from ..common.jwt import getMe
 from ..gender.serializer import GenderSerializer
 from ..department.serializer import DepartmentSerializer
 from datetime import datetime, timedelta
+from ..exercise.serializer import ExerciseSerializer
+from ..exercise.models import Exercise
+from django.db.models import F
 
 # Create your views here.
 class UserCreateView(generics.CreateAPIView):
@@ -102,3 +105,19 @@ class CustomRefreshToken(RefreshToken):
         refresh['gender'] = gender_serializer.data
         refresh['department'] = department_serializer.data
         return refresh
+    
+
+class UserExercisesView(generics.ListAPIView):
+    serializer_class = ExerciseSerializer
+
+    def get_queryset(self):
+        user_id = self.kwargs['user_id']
+
+        # Join with UserSession and annotate the start_datetime
+        exercises = Exercise.objects.filter(
+            landmarks__usersessions__user_id=user_id
+        ).annotate(
+            start_datetime=F('landmarks__usersessions__start_datetime')  # Annotate start_datetime from UserSession
+        ).distinct()
+
+        return exercises
