@@ -7,3 +7,7 @@ export const journalCalendarSumary = (data) => {
 export const journalCountByYear = (params) => {
   return axiosInstance.get('journal/journal_count_year/', { params })
 }
+
+export const createJournal = (data) => {
+  return axiosInstance.post('journal/create/', data)
+}
