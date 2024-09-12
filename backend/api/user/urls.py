@@ -8,5 +8,5 @@ urlpatterns = [
     path('update-delete', UserUpdateDestroyView.as_view(), name='user-update-destroy'),
     path('getMe', UserGetMeView.as_view(), name='user-get-me'),
     path('token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
-    path('<int:user_id>/exercises/', UserExercisesView.as_view(), name='user-exercises'),
+    path('exercises/', UserExercisesView.as_view(), name='user-exercises'),
 ] 

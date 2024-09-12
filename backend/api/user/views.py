@@ -110,12 +110,11 @@ class CustomRefreshToken(RefreshToken):
 class UserExercisesView(generics.ListAPIView):
     serializer_class = ExerciseSerializer
 
-    def get_queryset(self):
-        user_id = self.kwargs['user_id']
-
+    def get_queryset(self):        
+        user = self.request.user
         # Join with UserSession and annotate the start_datetime
         exercises = Exercise.objects.filter(
-            landmarks__usersessions__user_id=user_id
+            landmarks__usersessions__user_id=user.user_id
         ).annotate(
             start_datetime=F('landmarks__usersessions__start_datetime')  # Annotate start_datetime from UserSession
         ).distinct()

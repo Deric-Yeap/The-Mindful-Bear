@@ -3,8 +3,6 @@ import { View, Text, ScrollView, TouchableOpacity, SafeAreaView } from 'react-na
 import { Link } from 'expo-router'
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons'
 import { colors } from '../../common/styles'
-import BackButton from '../../components/backButton';
-import SearchBar from '../../components/searchBar';
 import TopBrownSearchBar from '../../components/topBrownSearchBar'
 import StatusBarComponent from '../../components/darkThemStatusBar';
 export default function Admin() {
@@ -134,7 +132,7 @@ export default function Admin() {
           Mindfulness Tracker
         </Text>
         <View>
-          <Link href="/admin/mindfulness-exercises" asChild>
+          <Link href="/mindfulness-exercises" asChild>
             <TouchableOpacity className="bg-white p-4 rounded-2xl mb-4">
               <View className="flex-row items-center justify-between">
                 <View className="w-16 h-16 rounded-full bg-serenity-green-20 flex items-center justify-center">

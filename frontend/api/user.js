@@ -12,3 +12,6 @@ export const create = (data) => {
   return axiosInstance.post('users/create', data)
 }
 
+export const getExercises = async () => {
+  return axiosInstance.get('users/exercises/')
+}
