@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, Pressable, ScrollView } from 'react-native';
+import { View, Text, Pressable, ScrollView, TextInput } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { getFormQuestions } from '../../../api/form';
 import LoadingPage from '../../../components/loading'; 
@@ -20,25 +20,37 @@ const CustomRadioButton = ({ selected, onPress }) => {
 
 const QuestionPage = () => {
   const router = useRouter();
-  const { sessionStarted, formData, sessionID, id } = useLocalSearchParams();
+  const { sessionStarted, formData, sessionID, id, completedForms: initialCompletedForms, start } = useLocalSearchParams();  
+  const [completedForms, setCompletedForms] = useState(() => {
+    try {
+      return initialCompletedForms ? JSON.parse(initialCompletedForms) : [];
+    } catch (error) {
+      console.error("Failed to parse initialCompletedForms:", error);
+      return [];
+    }
+  });
   const [sessionData, setSessionData] = useState({});
   const [formTitle, setFormTitle] = useState('Survey');
   const [questions, setQuestions] = useState([]);
   const [answers, setAnswers] = useState({});
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [loading, setLoading] = useState(true);
+  
+  let formName = "";
+  let enhancedData = [];
 
   useEffect(() => {
     if (formData) {
       setSessionData(JSON.parse(formData)); // Parse the formData and set it to the form state
-      console.log(formData)
+      console.log(formData);
     }
   }, [formData]);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const { formName, enhancedData } = await getFormQuestions(id);
+        ({ formName, enhancedData } = await getFormQuestions(id));
+        console.log(enhancedData);
         setQuestions(enhancedData);
         setFormTitle(formName);
         setLoading(false); // Set loading to false after data is returned
@@ -54,7 +66,7 @@ const QuestionPage = () => {
   const handleAnswerChange = (questionID, value) => {
     setAnswers((prev) => ({
       ...prev,
-      [questionID]: value, // Use questionID instead of id
+      [questionID]: value, 
     }));
   };
 
@@ -62,12 +74,17 @@ const QuestionPage = () => {
     if (currentQuestionIndex < questions.length - 1) {
       setCurrentQuestionIndex(currentQuestionIndex + 1);
     } else {
-        try {      
-          console.log(answers);                
-          await setFormQuestion(sessionID, answers);                  
+        try {                
+          await setFormQuestion(sessionID, answers);   
+          const updatedCompletedForms = [...completedForms, enhancedData.formID];               
+          console.log(updatedCompletedForms)
           router.push({
-            pathname: `/questionaire/${form.id}`,
-            params: { sessionStarted: true, formData: JSON.stringify(sessionData) },
+            pathname: `/questionaire`,
+            params: { sessionStarted: true, 
+              formData: JSON.stringify(sessionData), 
+              completedForms: JSON.stringify(updatedCompletedForms),
+              start: start
+            },
           });
         } catch (error) {
           console.error('Error submitting answers:', error);
@@ -87,14 +104,14 @@ const QuestionPage = () => {
     <ScrollView className="flex-1 p-4 bg-mindful-brown-10">
       <View className="mb-4 flex flex-row justify-between items-center">
         <Text className="text-mindful-brown-100 text-xl font-urbanist-bold">
-          {formTitle}
+          {formTitle + " Assessment"}
         </Text>
         <Text className="text-mindful-brown-60 text-xl font-urbanist-bold px-2 py-1 rounded-3xl bg-present-red-10">
           {currentQuestionIndex + 1} of {questions.length}
         </Text>
       </View>
 
-      {currentQuestion && (
+      {/* {currentQuestion && (
         <View className="mb-6">
           <Text className="text-mindful-brown-100 text-xl font-urbanist-extra-bold mb-6">
             {currentQuestion.question}
@@ -122,7 +139,55 @@ const QuestionPage = () => {
             </Pressable>
           ))}
         </View>
+      )} */}
+      {currentQuestion && (
+        <View className="mb-6">
+          <Text className="text-mindful-brown-100 text-xl font-urbanist-extra-bold mb-6">
+            {currentQuestion.question}
+          </Text>
+
+          {/* Check if there are optionValues, otherwise display a text input */}
+          {currentQuestion.optionValues.length > 0 ? (
+            currentQuestion.optionValues.map((option) => (
+              <Pressable
+                key={option.id}
+                onPress={() => handleAnswerChange(currentQuestion.questionID, option.value)} 
+                className={`flex flex-row justify-between items-center p-4 mb-2 rounded-xl bg-white ${
+                  answers[currentQuestion.questionID] === option.value ? 'bg-serenity-green-50' : ''
+                }`}
+              >
+                <Text
+                  className={`font-urbanist-bold ${
+                    answers[currentQuestion.questionID] === option.value ? 'text-white' : 'text-mindful-brown-100'
+                  }`}
+                >
+                  {option.description}
+                </Text>
+                <CustomRadioButton
+                  selected={answers[currentQuestion.questionID] === option.value}
+                  onPress={() => handleAnswerChange(currentQuestion.questionID, option.value)} 
+                />
+              </Pressable>
+            ))
+          ) : (
+            <TextInput
+              className="bg-white p-4 m-2 border border-gray-300 rounded-md text-base"
+              placeholder="Type your response here"
+              value={answers[currentQuestion.questionID] || ''}
+              onChangeText={(text) => handleAnswerChange(currentQuestion.questionID, text)}
+              multiline={true}  
+              style={{
+                minHeight: 40,  
+                textAlignVertical: 'top',
+                flexGrow: 1,  
+                paddingHorizontal: 15,
+              }}
+              
+            />
+          )}
+        </View>
       )}
+
 
       <Pressable
         onPress={handleNextQuestion}

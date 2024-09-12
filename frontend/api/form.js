@@ -26,22 +26,17 @@ export const getFormQuestions = async (formId) => {
   return {formName, enhancedData};
 }
 
-// export const setFormQuestion = async (sessionId, questionId, response) => {
-//   const data = {
-//     SessionID: sessionId,
-//     QuestionID: questionId,
-//     Response: response,
-//   };
-//   console.log(data)
-//   return await axiosInstance.post('formQuestion/create/', data);  
-// }
-
 export const setFormQuestion = async (sessionId, answers) => {  
-  return await axiosInstance.post('formQuestion/create/', 
+  const formattedAnswers = Object.keys(answers).map(questionId => ({
+    QuestionID: parseInt(questionId),        
+    Response: answers[questionId]
+  }));
+
+  return await axiosInstance.post('formQuestion/bulk_create/', 
     {
-    SessionID: sessionId,
-    data : answers
+      // SessionID: sessionId,
+      SessionID: 58,
+      data: formattedAnswers
     }
   );  
 }
-
