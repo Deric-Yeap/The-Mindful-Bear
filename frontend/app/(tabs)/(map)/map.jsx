@@ -14,7 +14,6 @@ import { confirmModal } from '../../../assets/image'
 import Loading from '../../../components/loading'
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import BottomSheetModal from '../../../components/bottomSheetModal'
-import { useRouter, useLocalSearchParams } from 'expo-router'
 
 const initialFormState = {
   start_datetime: '',
