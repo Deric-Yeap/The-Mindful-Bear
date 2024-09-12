@@ -1,0 +1,134 @@
+import React, { useEffect, useState } from 'react'
+import { View, Text, TouchableOpacity, ScrollView } from 'react-native'
+import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons'
+import { router } from 'expo-router'
+
+import { journalCalendarSumary, journalCountByYear } from '../../api/journal'
+import { monthNames, daysOfWeek } from '../../common/constants'
+
+const JournalHome = () => {
+  const [calendarData, setCalendarData] = useState([])
+  const [journalCount, setJournalCount] = useState(0)
+  const currentMonth = new Date().getMonth() + 1
+  const currentYear = new Date().getFullYear()
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const journalCountResponse = await journalCountByYear({
+          year: currentYear,
+        })
+        setJournalCount(journalCountResponse.count)
+        const response = await journalCalendarSumary({
+          year: currentYear,
+          month: currentMonth,
+        })
+        setCalendarData(response.weeks)
+      } catch (error) {
+        console.error(error)
+      }
+    }
+
+    fetchData()
+  }, [])
+
+  const getColor = (sentiment) => {
+    if (sentiment === 'Positive') return 'bg-serenity-green-40'
+    if (sentiment === 'Negative') return 'bg-empathy-orange-40'
+    return 'bg-mindful-brown-20'
+  }
+
+  let dayCounter = 1
+
+  return (
+    <ScrollView>
+      <View>
+        <View className="bg-mindful-brown-60 p-4 h-[45vh] items-center pt-[5vh]">
+          <Text className="font-urbanist-extra-bold text-white text-xl">
+            Journal
+          </Text>
+          <View className="flex items-center justify-center mt-11 space-y-2">
+            <Text className="font-urbanist-extra-bold text-white text-9xl">
+              {journalCount}
+            </Text>
+            <Text className="font-urbanist-semi-bold text-white text-3xl">
+              Journals this year.
+            </Text>
+          </View>
+        </View>
+        <View className="bg-optimistic-gray-10 p-4 h-full items-center -mt-16 rounded-t-full w-[250vw] -left-[75vw]">
+          <TouchableOpacity
+            className="-mt-10 mb-3"
+            onPress={() => router.push('/(journal)/journal-type-select')}
+          >
+            <View className="rounded-full h-20 w-20 bg-mindful-brown-80 items-center justify-center shadow-mindful-brown-50">
+              <MaterialCommunityIcons name="plus" size={30} color={'white'} />
+            </View>
+          </TouchableOpacity>
+
+          {/* calendar stuff */}
+          <View className="flex flex-row justify-center items-center">
+            <Text className="font-urbanist-extra-bold text-black text-2xl">
+              {monthNames[currentMonth]} {currentYear}
+            </Text>
+          </View>
+          <View className="w-[100vw] px-4">
+            <View className="flex flex-row justify-between mb-4">
+              {daysOfWeek.map((day) => (
+                <Text
+                  key={day}
+                  className="font-urbanist-semi-bold text-black text-lg w-[10vw] text-center"
+                >
+                  {day}
+                </Text>
+              ))}
+            </View>
+            {calendarData.map((week, weekIndex) => (
+              <View key={weekIndex} className="flex flex-row mb-2">
+                {week.map((day, dayIndex) => {
+                  const date = day ? dayCounter++ : null
+                  return (
+                    <View
+                      key={dayIndex}
+                      className={`h-[12vw] w-[12vw] rounded-full items-center justify-center mx-[0.8vw] ${
+                        day
+                          ? getColor(day.sentiment_analysis_result)
+                          : 'transparent'
+                      }`}
+                    >
+                      {date && (
+                        <Text className="text-mindful-brown-100">{date}</Text>
+                      )}
+                    </View>
+                  )
+                })}
+              </View>
+            ))}
+          </View>
+
+          <View className="flex flex-row justify-center items-center mt-4">
+            <View className="flex flex-row items-center mr-4">
+              <View className="h-4 w-4 bg-mindful-brown-20 rounded-full mr-2"></View>
+              <Text className="font-urbanist-semi-bold text-black text-lg">
+                Skipped
+              </Text>
+            </View>
+            <View className="flex flex-row items-center mr-4">
+              <View className="h-4 w-4 bg-serenity-green-40 rounded-full mr-2"></View>
+              <Text className="font-urbanist-semi-bold text-black text-lg">
+                Positive
+              </Text>
+            </View>
+            <View className="flex flex-row items-center">
+              <View className="h-4 w-4 bg-empathy-orange-40 rounded-full mr-2"></View>
+              <Text className="font-urbanist-semi-bold text-black text-lg">
+                Negative
+              </Text>
+            </View>
+          </View>
+        </View>
+      </View>
+    </ScrollView>
+  )
+}
+
+export default JournalHome

@@ -2,6 +2,8 @@ import { View, Text, TextInput, TouchableOpacity } from 'react-native'
 import React, { useState } from 'react'
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons'
 
+import { colors } from '../common/styles'
+
 const FormField = ({
   title,
   value,
@@ -25,7 +27,7 @@ const FormField = ({
         <MaterialCommunityIcons
           name={iconName}
           size={24}
-          className="bg-mindful-brown-80"
+          color={colors.mindfulBrown80}
         />
         <TextInput
           className="flex-1 text-optimistic-gray-80 font-urbanist-semi-bold"
