@@ -11,3 +11,11 @@ export const journalCountByYear = (params) => {
 export const createJournal = (data) => {
   return axiosInstance.post('journal/create/', data)
 }
+
+export const audioUpload = (formData) => {
+  return axiosInstance.post('journal/upload/', formData, {
+    headers: {
+      'Content-Type': 'multipart/form-data',
+    },
+  })
+}

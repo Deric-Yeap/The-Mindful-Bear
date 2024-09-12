@@ -20,7 +20,9 @@ const JournalTypeSelect = () => {
         </Text>
       </View>
 
-      <TouchableOpacity className="bg-white h-[25vh] p-4 rounded-3xl shadow-2xl mb-4 justify-center">
+      <TouchableOpacity className="bg-white h-[25vh] p-4 rounded-3xl shadow-2xl mb-4 justify-center" 
+      onPress={() => router.push('/(journal)/voice-journal')}
+      >
         <View className="flex flex-row justify-between items-center">
           <View>
             <View
