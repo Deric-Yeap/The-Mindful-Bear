@@ -241,7 +241,7 @@ const BottomSheetModal = ({ isExercise, handleModalOpen }) => {
   ]
 
   const bottomSheetRef = useRef(null)
-  const snapPoints = useMemo(() => ['67%', '100%'], [])
+  const snapPoints = useMemo(() => ['60%', '100%'], [])
   const [currentSnapIndex, setCurrentSnapIndex] = useState(0)
   const [isFavorite, setIsFavorite] = useState(false)
 
