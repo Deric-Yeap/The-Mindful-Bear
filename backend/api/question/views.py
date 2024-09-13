@@ -28,14 +28,13 @@ class CreateQuestion(generics.CreateAPIView):
             raise ValidationError(f"Form with ID {form_id} does not exist.")
         serializer.save()
 
-# Admin can Edit questions
+# Admin can Edit and Delete questions
 class UpdateQuestion(generics.UpdateAPIView):
     queryset = Question.objects.all()
     serializer_class = QuestionSerializer
-    lookup_field = "pk"
+    lookup_field = "QuestionID"  # Change to the primary key field in your model
 
-# Admin can Delete questions
 class DeleteQuestion(generics.DestroyAPIView):
     queryset = Question.objects.all()
     serializer_class = QuestionSerializer
-    lookup_field = "pk"
+    lookup_field = "QuestionID"  # Change to the primary key field in your model

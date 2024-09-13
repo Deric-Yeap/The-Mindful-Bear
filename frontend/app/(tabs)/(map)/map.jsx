@@ -76,16 +76,16 @@ const Map = () => {
       const updatedForm = {
         ...prevForm,
         start_datetime: currentStartDateTime,
-      }
-
+      };
+      //Start Session Survey
       router.push({
         pathname: '/questionaire',
-        params: { sessionStarted: true, formData: JSON.stringify(updatedForm) }, // Pass updatedForm instead of stale form
-      })
-
-      return updatedForm
-    })
-  }
+        params: { sessionStarted: true, formData: JSON.stringify(updatedForm), start: "true" }, 
+      });
+  
+      return updatedForm;
+    });
+  };
 
   const handleSessionEnd = () => {
     setIsModalOpen(true)
@@ -110,6 +110,11 @@ const Map = () => {
 
       return updatedForm
     })
+    //End Session Survey
+    router.push({
+      pathname: '/questionaire',
+      params: { sessionStarted: true, formData: JSON.stringify(form), start: "false" }, 
+    });
   }
 
   const resetForm = () => {

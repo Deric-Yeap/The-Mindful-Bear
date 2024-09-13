@@ -7,8 +7,8 @@ class FormQuestion(models.Model):
     QuestionID = models.ForeignKey(Question, blank=True, null=True, on_delete=models.CASCADE)
     Response = models.CharField('Response', max_length=125)
 
-    class Meta:
-        unique_together = ('SessionID', 'QuestionID')
+    # class Meta:
+    #     unique_together = ('SessionID', 'QuestionID')
 
     def __str__(self):
         return f"Session Id: {self.SessionID} - QuestionId:{self.QuestionID}"
