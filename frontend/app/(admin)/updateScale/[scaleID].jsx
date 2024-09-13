@@ -346,7 +346,6 @@ useEffect(() => {
           subTitle={successMessage}
           handleConfirm={() => {
             setIsSuccessModalOpen(false)
-            router.push('/form'); 
           }}
         />
       )}
