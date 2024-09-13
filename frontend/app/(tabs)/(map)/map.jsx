@@ -14,11 +14,12 @@ import { confirmModal } from '../../../assets/image'
 import Loading from '../../../components/loading'
 import BottomSheetModal from '../../../components/bottomSheetModal'
 import { useLocalSearchParams, useRouter } from 'expo-router'
-import { useDispatch, useSelector } from 'react-redux'
+import { useDispatch } from 'react-redux'
 import {
   setIsShownNav,
   clearIsShownNav,
 } from '../../../redux/slices/isShownNavSlice'
+import UserLocationCustom from '../../../components/userLocation'
 
 const initialFormState = {
   start_datetime: '',
@@ -41,6 +42,7 @@ const Map = () => {
   const [loading, setLoading] = useState(true)
   const [isBottomSheetOpen, setIsBottomSheetOpen] = useState(false)
   const [selectedLandmark, setSelectedLandmark] = useState(null)
+  const [location, setLocation] = useState(null)
   const dispatch = useDispatch()
 
   useEffect(() => {
@@ -147,6 +149,11 @@ const Map = () => {
                   animationMode="flyto"
                   animationDuration={1000}
                   pitch={60}
+                />
+                <UserLocationCustom
+                  animated={true}
+                  visible={true}
+                  showsUserHeadingIndicator={true}
                 />
                 {geoJSON?.features?.map((feature, index) => {
                   return (
