@@ -10,6 +10,7 @@ import axiosInstance from '../../common/axiosInstance';
 import { colors } from '../../common/styles';
 import Icon from 'react-native-vector-icons/FontAwesome'; // Import the icon
 import Loading from '../../components/loading'; 
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const Forms = () => {
   const [loading, setLoading] = useState(true); // Loading state // Loading state
@@ -19,10 +20,23 @@ const Forms = () => {
   const [selectedOption, setSelectedOption] = useState(1); // State to handle toggle selection
 
   const onSelectSwitch = (index) => {
-    setSelectedOption(index); // Update the selected option based on toggle switch
+    setSelectedOption(index);
+    AsyncStorage.setItem('selectedOption', index.toString()); // Save the selected option
   };
 
   useEffect(() => {
+    const loadSelectedOption = async () => {
+      const savedOption = await AsyncStorage.getItem('selectedOption');
+      if (savedOption !== null) {
+        setSelectedOption(Number(savedOption)); // Load saved option
+      } else {
+        setSelectedOption(1); // Default to 1 if no saved option
+      }
+    };
+  
+    loadSelectedOption(); // Load the selected option when component mounts
+    
+
     const fetchForms = async () => {
       setLoading(true); // Set loading to true before fetching
       try {
