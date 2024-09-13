@@ -11,6 +11,8 @@ import { colors } from '../../../common/styles'
 import Loading from '../../../components/loading'
 import ConfirmModal from '../../../components/confirmModal' // Ensure this component exists
 import { confirmModal } from '../../../assets/image'
+import { router } from 'expo-router';
+
 
 const UpdateScale = () => {
   const { scaleID } = useLocalSearchParams()
@@ -131,23 +133,50 @@ const UpdateScale = () => {
 
   const confirmDeleteScale = async () => {
     try {
-      const url = `/option_set/delete/${scaleID}/`
-      const response = await axiosInstance.delete(url)
-      if (response.status === 204) {
-        setOptions([])
-        setDescription({ description: '' })
-        setSuccessMessage('Scale deleted successfully!')
-        setIsSuccessModalOpen(true)
-      } else {
-        setError('Error: Unexpected response from server.')
-      }
+        const url = `/option_set/delete/${scaleID}/`;
+        console.log('Attempting to delete scale with URL:', url);
+        
+        const response = await axiosInstance.delete(url);
+        
+        // Log the response for debugging
+        console.log('Delete response:', response);
+
+            setOptions([]);
+            setDescription({ description: '' });
+            setSuccessMessage('Scale deleted successfully!');
+            setIsSuccessModalOpen(true);
+      
     } catch (error) {
-      console.error('Error deleting scale:', error)
-      setError('Error deleting scale. Please try again.')
+        console.error('Error deleting scale:', error);
+        
+        if (error.response) {
+            // Server responded with a status other than 2xx
+            setError(`Error deleting scale: ${error.response.data.message || 'Please try again.'}`);
+        } else if (error.request) {
+            // Request was made but no response received
+            console.error('Request details:', error.request);
+            setError('Error: No response from server. Please check your network connection.');
+        } else {
+            // Something else happened
+            setError(`Error: ${error.message}`);
+        }
     } finally {
-      setDeleteConfirmationModalOpen(false)
+        setDeleteConfirmationModalOpen(false);
+        setLoading(false);
     }
-  }
+};
+
+useEffect(() => {
+    const fetchForms = async () => {
+        setLoading(true);
+        if (!scaleID) {
+            return;
+        }
+        // Fetch logic here
+    };
+
+    fetchForms();
+}, [scaleID]);
 
   useEffect(() => {
     const fetchForms = async () => {
@@ -317,6 +346,7 @@ const UpdateScale = () => {
           subTitle={successMessage}
           handleConfirm={() => {
             setIsSuccessModalOpen(false)
+            router.push('/form'); 
           }}
         />
       )}
