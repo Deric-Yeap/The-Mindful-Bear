@@ -65,6 +65,7 @@ INSTALLED_APPS = [
     "api.response",
     "api.optionSet",
     "api.option",
+    "api.userSession",
     "api.color",
 ]
 

@@ -13,6 +13,7 @@ import { getLandmarks } from '../../../api/landmark'
 import { confirmModal } from '../../../assets/image'
 import Loading from '../../../components/loading'
 import { useRouter, useLocalSearchParams } from 'expo-router';
+import BottomSheetModal from '../../../components/bottomSheetModal'
 
 const initialFormState = {
   start_datetime: '',
@@ -26,13 +27,20 @@ const initialFormState = {
 
 const Map = () => {
   Mapbox.setAccessToken(process.env.MAPBOX_PUBLIC_KEY)
-  const router = useRouter();
-  const { sessionStarted, formData } = useLocalSearchParams(); // Get sessionStarted and formData from the params
+  const router = useRouter()
+  const { sessionStarted, formData } = useLocalSearchParams() // Get sessionStarted and formData from the params
   const [form, setForm] = useState(initialFormState)
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [isSessionStarted, setIsSessionStarted] = useState(sessionStarted)
   const [landmarksData, setLandmarksData] = useState([])
   const [loading, setLoading] = useState(true)
+  const [isBottomSheetOpen, setIsBottomSheetOpen] = useState(false)
+
+  useEffect(() => {
+    if (formData) {
+      setForm(JSON.parse(formData)) // Parse the formData and set it to the form state
+    }
+  }, [formData])
 
   useEffect(() => {
     if (formData) {
@@ -55,8 +63,15 @@ const Map = () => {
     fetchData()
   }, [])
 
+  const handleBottomSheetModalOpen = () => {
+    if (!isBottomSheetOpen) {
+      setIsBottomSheetOpen(true)
+    } else {
+      setIsBottomSheetOpen(false)
+    }
+  }
   const handleSessionStart = () => {
-    const currentStartDateTime = getCurrentDateTime();
+    const currentStartDateTime = getCurrentDateTime()
     setForm((prevForm) => {
       const updatedForm = {
         ...prevForm,
@@ -106,9 +121,6 @@ const Map = () => {
     setForm(initialFormState)
   }
 
-  const handleMarkerPress = () => {
-    console.log('Marker pressed')
-  }
   const geoJSON = getGeoJson(landmarksData)
   return (
     <SafeAreaView className="h-full">
@@ -140,7 +152,7 @@ const Map = () => {
                     coordinate={feature.geometry.coordinates}
                   >
                     <TouchableOpacity
-                      onPress={handleMarkerPress}
+                      onPress={handleBottomSheetModalOpen}
                       className="rounded-3xl"
                     >
                       <View className="w-8 h-8 items-center justify-center p-5">
@@ -161,28 +173,31 @@ const Map = () => {
                 handlePress={
                   isSessionStarted ? handleSessionEnd : handleSessionStart
                 }
-                buttonStyle={`w-11/12 z-10 absolute bottom-10 mb-1  self-center ${isSessionStarted ? 'bg-red-500' : ''} md:bottom-16`}
+                buttonStyle={`w-11/12 z-10 absolute bottom-12 mb-1  self-center ${isSessionStarted ? 'bg-red-500' : ''} md:bottom-16`}
                 textStyle="text-white"
               />
             )}
           </ScrollView>
         )}
+        {isModalOpen && (
+          <ConfirmModal
+            isConfirmButton={true}
+            isCancelButton={true}
+            imageSource={confirmModal}
+            confirmButtonTitle={'Confirm'}
+            cancelButtonTitle={'Cancel'}
+            title={'Are you sure you want to end now'}
+            subTitle={'test'}
+            handleCancel={() => {
+              setIsModalOpen(false)
+            }}
+            handleConfirm={handleSessionConfirmEnd}
+          />
+        )}
+        {isBottomSheetOpen && (
+          <BottomSheetModal handleModalOpen={handleBottomSheetModalOpen} />
+        )}
       </View>
-      {isModalOpen && (
-        <ConfirmModal
-          isConfirmButton={true}
-          isCancelButton={true}
-          imageSource={confirmModal}
-          confirmButtonTitle={'Confirm'}
-          cancelButtonTitle={'Cancel'}
-          title={'Are you sure you want to end now'}
-          subTitle={'test'}
-          handleCancel={() => {
-            setIsModalOpen(false)
-          }}
-          handleConfirm={handleSessionConfirmEnd}
-        />
-      )}
     </SafeAreaView>
   )
 }

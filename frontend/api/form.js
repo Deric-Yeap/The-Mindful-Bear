@@ -12,6 +12,10 @@ async function fetchOptionSet(optionSetId) {
   return axiosInstance.get(`option/getOptions/${optionSetId}`);  
 }
 
+async function fetchOptionSetName(optionSetId) {
+  return axiosInstance.get(`option_set/get/${optionSetId}`);  
+}
+
 export const getFormQuestions = async (formId) => {
   response = await axiosInstance.get(`form/get-form-and-questions/${formId}`);
   const formName = response.form_name
@@ -19,10 +23,10 @@ export const getFormQuestions = async (formId) => {
   const enhancedData = await Promise.all(
     response.map(async (item) => {
       const optionSet = await fetchOptionSet(item.optionSet);  
-      return { ...item, optionValues: optionSet };  
+      const optionSetName = await fetchOptionSetName(item.optionSet)
+      return { ...item, optionValues: optionSet, optionSetName: optionSetName.description };  
     })
-  );
-  console.log(enhancedData)
+  );  
   return {formName, enhancedData};
 }
 

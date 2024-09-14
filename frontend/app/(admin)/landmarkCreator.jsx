@@ -87,21 +87,10 @@ const LandmarkCreator = () => {
       if (landmark) {
         await updateLandmark(landmark.landmark_id, landmarkData); 
         setShowSuccess(true); 
-        setTimeout(() => {
-          setShowSuccess(false);
-          router.push('/landmark')  
-        }, 3000);
-        
-        
 
       } else {
         await createLandmark(landmarkData); 
-        setShowSuccess(true); 
-        setTimeout(() => {
-          setShowSuccess(false);
-          
-        }, 3000);
-        
+        setShowSuccess(true);                 
         resetForm(); 
       }
 
@@ -122,6 +111,13 @@ const LandmarkCreator = () => {
       fileName: "image.jpeg",
       type: "image/jpeg",
     });
+  };
+
+  const handleConfirm = () => {
+    setShowSuccess(false);  // Hide modal when confirm is clicked
+    if(landmark){
+      router.push('/landmark');  
+    }    
   };
 
   return (
@@ -207,29 +203,19 @@ const LandmarkCreator = () => {
             />
           </View>
         </View>
-      </View>
+      </View>      
        {/* Success Modal */}
-       {showSuccess && (
-        // <ConfirmModal
-        //   title="Success!"
-        //   subTitle={`Landmark ${landmark ? 'updated' : 'created'} successfully.`}
-        //   isConfirmButton={true}
-        //   isCancelButton={false}
-        // />
+       {showSuccess && (       
         <ConfirmModal
           isConfirmButton={true}
           isCancelButton={false}
           imageSource={confirmModal}
-          confirmButtonTitle={'Confirm'}
-          cancelButtonTitle={'Cancel'}
+          confirmButtonTitle={'Confirm'}          
           title={'Success!'}
           subTitle={`Landmark ${landmark ? 'updated' : 'created'} successfully.`}
-          handleCancel={() => {
-            setIsModalOpen(false)
-          }}
-          handleConfirm={handleSessionConfirmEnd}
-        />
-      )}
+          handleConfirm={handleConfirm}          
+        />)}
+      
     </ScrollView>
   );
 };

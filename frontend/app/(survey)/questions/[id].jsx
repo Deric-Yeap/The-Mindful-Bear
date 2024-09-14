@@ -4,6 +4,7 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import { getFormQuestions } from '../../../api/form';
 import LoadingPage from '../../../components/loading'; 
 import { setFormQuestion } from '../../../api/form';
+import { FontAwesome } from '@expo/vector-icons';
 
 const CustomRadioButton = ({ selected, onPress }) => {
   return (
@@ -52,6 +53,7 @@ const QuestionPage = () => {
         ({ formName, enhancedData } = await getFormQuestions(id));
         console.log(enhancedData);
         setQuestions(enhancedData);
+        
         setFormTitle(formName);
         setLoading(false); // Set loading to false after data is returned
       } catch (error) {
@@ -111,47 +113,16 @@ const QuestionPage = () => {
         </Text>
       </View>
 
-      {/* {currentQuestion && (
-        <View className="mb-6">
-          <Text className="text-mindful-brown-100 text-xl font-urbanist-extra-bold mb-6">
-            {currentQuestion.question}
-          </Text>
-
-          {currentQuestion.optionValues.map((option) => (
-            <Pressable
-              key={option.id}
-              onPress={() => handleAnswerChange(currentQuestion.questionID, option.value)} 
-              className={`flex flex-row justify-between items-center p-4 mb-2 rounded-xl bg-white ${
-                answers[currentQuestion.questionID] === option.value ? 'bg-serenity-green-50' : ''
-              }`}
-            >
-              <Text
-                className={`font-urbanist-bold ${
-                  answers[currentQuestion.questionID] === option.value ? 'text-white' : 'text-mindful-brown-100'
-                }`}
-              >
-                {option.description}
-              </Text>
-              <CustomRadioButton
-                selected={answers[currentQuestion.questionID] === option.value}
-                onPress={() => handleAnswerChange(currentQuestion.questionID, option.value)} 
-              />
-            </Pressable>
-          ))}
-        </View>
-      )} */}
       {currentQuestion && (
         <View className="mb-6">
           <Text className="text-mindful-brown-100 text-xl font-urbanist-extra-bold mb-6">
             {currentQuestion.question}
           </Text>
-
-          {/* Check if there are optionValues, otherwise display a text input */}
-          {currentQuestion.optionValues.length > 0 ? (
+          {currentQuestion.optionSetName === "Likert" || currentQuestion.optionValues.length > 0 ? (
             currentQuestion.optionValues.map((option) => (
               <Pressable
                 key={option.id}
-                onPress={() => handleAnswerChange(currentQuestion.questionID, option.value)} 
+                onPress={() => handleAnswerChange(currentQuestion.questionID, option.value)}
                 className={`flex flex-row justify-between items-center p-4 mb-2 rounded-xl bg-white ${
                   answers[currentQuestion.questionID] === option.value ? 'bg-serenity-green-50' : ''
                 }`}
@@ -165,26 +136,42 @@ const QuestionPage = () => {
                 </Text>
                 <CustomRadioButton
                   selected={answers[currentQuestion.questionID] === option.value}
-                  onPress={() => handleAnswerChange(currentQuestion.questionID, option.value)} 
+                  onPress={() => handleAnswerChange(currentQuestion.questionID, option.value)}
                 />
               </Pressable>
             ))
+          ) : currentQuestion.optionSetName === "Rating" ? (
+            <View className="flex flex-row justify-between items-center p-4 mx-6">
+              {[1, 2, 3, 4, 5].map((rating) => (
+                <Pressable
+                  key={rating}
+                  onPress={() => handleAnswerChange(currentQuestion.questionID, rating)}
+                  className="mx-1"
+                >
+                  <FontAwesome
+                    name="star"
+                    size={40} 
+                    color={answers[currentQuestion.questionID] >= rating ? '#F4C430' : '#E0E0E0'} // Highlight selected stars in gold, others in grey
+                  />
+                </Pressable>
+              ))}
+              </View>
           ) : (
             <TextInput
               className="bg-white p-4 m-2 border border-gray-300 rounded-md text-base"
               placeholder="Type your response here"
               value={answers[currentQuestion.questionID] || ''}
               onChangeText={(text) => handleAnswerChange(currentQuestion.questionID, text)}
-              multiline={true}  
+              multiline={true}
               style={{
-                minHeight: 40,  
+                minHeight: 40,
                 textAlignVertical: 'top',
-                flexGrow: 1,  
+                flexGrow: 1,
                 paddingHorizontal: 15,
               }}
-              
             />
           )}
+
         </View>
       )}
 
