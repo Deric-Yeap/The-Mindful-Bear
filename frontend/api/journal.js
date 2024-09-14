@@ -19,3 +19,11 @@ export const audioUpload = (formData) => {
     },
   })
 }
+
+export const speechToText = (formData) => {
+  return axiosInstance.post('journal/speech_to_text/', formData, {
+    headers: {
+      'Content-Type': 'multipart/form-data',
+    },
+  })
+}

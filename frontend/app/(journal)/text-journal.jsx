@@ -6,14 +6,16 @@ import {
   TouchableOpacity,
 } from 'react-native'
 import { useEffect, useState } from 'react'
+import { router } from 'expo-router'
 
 import BackButton from '../../components/backButton'
 import CustomButton from '../../components/customButton'
 import FormField from '../../components/formField'
-import Dropdown from '../../components/dropdown'
 import TextBox from '../../components/textBox'
 import { createJournal } from '../../api/journal'
 import { listEmotion } from '../../api/emotion'
+import Loading from '../../components/loading'
+import ConfirmModal from '../../components/confirmModal'
 
 const TextJournal = () => {
   const [form, setForm] = useState({
@@ -22,7 +24,8 @@ const TextJournal = () => {
     emotion_id: [],
   })
 
-  const [loading, setLoading] = useState(false)
+  const [isLoading, setIsLoading] = useState(false)
+  const [isModalVisible, setIsModalVisible] = useState(false)
   const [emotions, setEmotions] = useState([])
   const [selectedEmotion, setSelectedEmotion] = useState(1)
   const [selectedFeelings, setSelectedFeelings] = useState([])
@@ -40,18 +43,22 @@ const TextJournal = () => {
   }, [])
 
   const handleCreateJournal = async () => {
+    setIsLoading(true)
     let emotionList = [...selectedFeelings]
     emotionList.push(selectedEmotion)
     setForm({ ...form, emotion_id: emotionList })
     try {
       const response = await createJournal(form)
+      setIsLoading(false)
+      setIsModalVisible(true)
     } catch (error) {
       console.error(error)
+      setIsLoading(false)
     }
   }
 
   return (
-    <View className="flex-1 space-y-2">
+    <View className="flex-1">
       <StatusBar barStyle="light-content" />
       <View className="h-[20vh] bg-mindful-brown-70 justify-center p-4 pt-6">
         <BackButton buttonStyle="mb-4" />
@@ -59,6 +66,23 @@ const TextJournal = () => {
           Add New Journal
         </Text>
       </View>
+      {isLoading && (
+        <View className="absolute top-0 left-0 right-0 bottom-0 flex justify-center items-center z-10 bg-optimistic-gray-80/90">
+          <Loading />
+        </View>
+      )}
+      {isModalVisible && (
+        <ConfirmModal
+          title="Journal Created!"
+          subTitle={`You’ve completed your journal entry. Congratulations!`}
+          confirmButtonTitle="Ok, Thanks!"
+          isConfirmButton={true}
+          handleConfirm={() => {
+            setIsModalVisible(false)
+            router.push('/journal-home')
+          }}
+        />
+      )}
       <ScrollView className="p-4 flex-1 py-5">
         <FormField
           title="Journal Title"
@@ -146,12 +170,13 @@ const TextJournal = () => {
             </View>
           </View>
         )}
-
-        <CustomButton
-          title="Create Journal"
-          buttonStyle="mb-4 mt-2"
-          handlePress={handleCreateJournal}
-        />
+        <View className="pb-5">
+          <CustomButton
+            title="Create Journal"
+            buttonStyle="mb-4 mt-2"
+            handlePress={handleCreateJournal}
+          />
+        </View>
       </ScrollView>
     </View>
   )
