@@ -3,6 +3,7 @@ import { View, TouchableOpacity, StyleSheet } from 'react-native'
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons'
 import { colors } from '../common/styles'
 import { getMe } from '../api/user'
+import { useSelector } from 'react-redux'
 
 const TabBar = ({ state, descriptors, navigation }) => {
   const icons = {
@@ -17,6 +18,8 @@ const TabBar = ({ state, descriptors, navigation }) => {
     '_sitemap',
     '+not-found',
   ])
+  const isShownNav = useSelector((state) => state.isShownNav).isShownNav
+
   useEffect(() => {
     const fetchUser = async () => {
       try {
@@ -34,7 +37,9 @@ const TabBar = ({ state, descriptors, navigation }) => {
 
   return (
     <View className="absolute bottom-5 left-0 right-0">
-      <View className="flex-row justify-between items-center py-3 bg-white rounded-full shadow-md shadow-black">
+      <View
+        className={`flex-row justify-between items-center py-3 bg-white rounded-full shadow-md shadow-black ${isShownNav ? '' : 'hidden'}`}
+      >
         {state.routes.map((route, index) => {
           const { options } = descriptors[route.key]
           const label =
