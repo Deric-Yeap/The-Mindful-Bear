@@ -1,4 +1,4 @@
-import React, { useState, useRef, useMemo } from 'react'
+import React, { useState, useRef, useMemo, useEffect } from 'react'
 import {
   View,
   Text,
@@ -11,9 +11,9 @@ import { colors } from '../common/styles'
 import { Image } from 'expo-image'
 import CustomButton from './customButton'
 import BottomSheet, { BottomSheetView } from '@gorhom/bottom-sheet'
-import { Audio } from 'expo-av'
+import { Video, Audio } from 'expo-av'; 
 
-const BottomSheetModal = ({ handleModalOpen, landmarkData }) => {
+const BottomSheetModal = ({ handleModalOpen, landmarkData, openCompletedModal }) => {  
   const landmarkIcons = [
     {
       icon: 'eye',
@@ -48,43 +48,50 @@ const BottomSheetModal = ({ handleModalOpen, landmarkData }) => {
       color: '#4C72AB',
     },
   ]
+  const [isReached, setIsReached] = useState(false);//to set to true on reach and after an alert
   const [sound, setSound] = useState();
-  const [isLoading, setIsLoading] = useState(false); // Track loading state
+  const [isLoading, setIsLoading] = useState(false); 
   const data = landmarkData?.properties;
+  const [isPlaying, setIsPlaying] = useState(false);
 
-  const playAudio = async () => {
-    if (!data?.exercise_audio_url) {
-      console.error('No audio URL provided');
-      return;
-    }
 
-    setIsLoading(true); // Start loading
 
-    try {
-      const { sound } = await Audio.Sound.createAsync(
-        { uri: data.exercise_audio_url },
-        { shouldPlay: true } // Auto-play when loaded
-      );
-      setSound(sound);
+const playAudio = async () => {
+  if (!isReached || !data?.exercise_audio_url) {
+    return; 
+  }
 
-      // Play the sound
-      await sound.playAsync();
-    } catch (error) {
-      console.error('Error playing audio:', error);
-    } finally {
-      setIsLoading(false); // Stop loading
-    }
-  };
+  setIsLoading(true);
 
-  // Unload the audio when the component is unmounted to prevent memory leaks
-  React.useEffect(() => {
-    return sound
-      ? () => {
-          sound.unloadAsync();
-        }
-      : undefined;
-  }, [sound]);
+  try {
+    const { sound } = await Audio.Sound.createAsync(
+      { uri: data.exercise_audio_url }
+    );
+    setSound(sound);
+  
+    sound.setOnPlaybackStatusUpdate((status) => {
+      if (status.didJustFinish) {
+        handleClose(); 
+        setIsPlaying(false); 
+      }
+    });
 
+    await sound.playAsync();
+    setIsPlaying(true); 
+    
+  } catch (error) {
+    console.error('Error playing audio:', error);
+  } finally {
+    setIsLoading(false); 
+  }
+};
+
+useEffect(() => {
+  if (isReached) {
+    playAudio();
+  }
+}, [isReached]);
+  
   const bottomSheetRef = useRef(null)
   const snapPoints = useMemo(() => ['60%', '100%'], [])
   const [currentSnapIndex, setCurrentSnapIndex] = useState(0)
@@ -92,8 +99,9 @@ const BottomSheetModal = ({ handleModalOpen, landmarkData }) => {
   const [isExercise, setIsExercise] = useState(false)
 
   const handleClose = () => {
-    setIsExercise(false)
+    setIsExercise(false)    
     handleModalOpen(false)
+    openCompletedModal(true)    
   }
   const handleSheetChange = (index) => {
     setCurrentSnapIndex(index)
@@ -102,6 +110,7 @@ const BottomSheetModal = ({ handleModalOpen, landmarkData }) => {
     }
   }
   const toggleHeartColor = () => {
+    setIsReached(true)//temp way to trigger isReached
     setIsFavorite(!isFavorite)
   }
   const handleExerciseButton = () => {
@@ -110,9 +119,6 @@ const BottomSheetModal = ({ handleModalOpen, landmarkData }) => {
     } else {
       setIsExercise(true)
     }
-  }
-  if (!data) {
-    return <Text>Loading...</Text>; // Fallback for missing data
   }
 
   return (
@@ -182,12 +188,22 @@ const BottomSheetModal = ({ handleModalOpen, landmarkData }) => {
           ))}
         </View>
         {isExercise ? (
-          // Show audio player button for exercise
-          <TouchableOpacity onPress={playAudio}>
-            <View className="bg-serenity-green-50 w-full rounded-lg mt-2 py-4 items-center justify-center">
-              <Text className="text-white font-urbanist-bold">Play Audio</Text>
+              <View className="relative w-full h-48 justify-center items-center">
+              <Video
+                source={require('../assets/exercise.mp4')}                 
+                className="w-full h-full"
+                resizeMode="cover"
+                isLooping 
+                shouldPlay={isPlaying}                
+                isMuted={true}
+              />
+                      
+              {!isPlaying && (
+                <TouchableOpacity onPress={playAudio} className="absolute justify-center items-center">
+                  <MaterialCommunityIcons name="play-circle-outline" size={60} color="white" />
+                </TouchableOpacity>
+              )}
             </View>
-          </TouchableOpacity>
         ) : (
           // Show image for landmarks
           <Image
