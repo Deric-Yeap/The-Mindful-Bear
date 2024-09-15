@@ -6,11 +6,10 @@ const TabsLayout = () => {
     home: 'Home',
     '(map)': 'Map',
     stats: 'Stats',
-    settings: 'Settings',   
-    admin: 'Admin', 
+    settings: 'Settings',
+    admin: 'Admin',
   }
 
-  
   return (
     <Tabs
       tabBar={(props) => <TabBar {...props} />}

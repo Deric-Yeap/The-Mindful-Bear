@@ -16,7 +16,8 @@ export default () => ({
     },
     ios: {
       supportsTablet: true,
-      bundleIdentifier: 'com.anonymous.frontend',
+      bundleIdentifier: 'com.anonymous.frontend1',
+      deploymentTarget: '13.0',
     },
     android: {
       adaptiveIcon: {
@@ -43,6 +44,12 @@ export default () => ({
           category: ['BROWSABLE', 'DEFAULT'],
         },
       ],
+
+      permissions: [
+        'android.permission.ACCESS_FINE_LOCATION',
+        'android.permission.ACCESS_COARSE_LOCATION',
+        'android.permission.ACCESS_BACKGROUND_LOCATION',
+      ],
     },
     web: {
       favicon: './assets/favicon.png',
@@ -54,6 +61,15 @@ export default () => ({
         '@rnmapbox/maps',
         {
           RNMapboxMapsDownloadToken: process.env.RNMapboxMapsDownloadToken,
+        },
+      ],
+      [
+        'expo-location',
+        {
+          locationAlwaysAndWhenInUsePermission:
+            'Allow $(PRODUCT_NAME) to use your location.',
+          isAndroidBackgroundLocationEnabled: true,
+          isIosBackgroundLocationEnabled: true,
         },
       ],
     ],

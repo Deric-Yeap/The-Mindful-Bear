@@ -66,6 +66,7 @@ INSTALLED_APPS = [
     "api.optionSet",
     "api.option",
     "api.color"
+    "api.userSession",
 ]
 
 REST_FRAMEWORK = {

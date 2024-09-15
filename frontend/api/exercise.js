@@ -1,12 +1,11 @@
 import axiosInstance from '../common/axiosInstance';
 
-// Function to fetch exercises (no changes needed here)
 export const fetchExercises = async () => {
   try {
     const response = await axiosInstance.get('exercise/get');
-    return response; // Return the fetched exercises
+    return response;
   } catch (error) {
-    throw error; // Throw error to be handled in the calling function
+    throw error; 
   }
 };
 
@@ -77,4 +76,10 @@ export const deleteExercise = async (id) => {
   } catch (error) {
     throw error; // Throw error to be handled in the calling function
   }
+}
+
+export const getExercises = async () => {
+
+  return axiosInstance.get('exercise/get');
+
 };

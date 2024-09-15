@@ -13,6 +13,7 @@ class MinimalLandmarkSerializer(serializers.ModelSerializer):
 # general serializer with no validation
 class ExerciseSerializer(serializers.ModelSerializer):
     landmarks = MinimalLandmarkSerializer(many=True, read_only=True)
+    start_datetime = serializers.ReadOnlyField() 
     class Meta:
         model = Exercise
         fields = ['exercise_id','exercise_name', 'audio_url', 'description', 'landmarks']

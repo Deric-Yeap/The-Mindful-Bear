@@ -14,7 +14,7 @@ class LandmarkSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Landmark
-        fields = ['landmark_id', 'landmark_name', 'landmark_image_url', 'x_coordinates', 'y_coordinates', 'exercise', 'image_file_url']
+        fields = ['landmark_id', 'landmark_name', 'landmark_image_url','landmark_description', 'x_coordinates', 'y_coordinates', 'exercise', 'image_file_url']
 
     def get_image_file_url(self, obj):
         if obj.landmark_image_url:
@@ -26,7 +26,7 @@ class LandmarkCreateSerializer(serializers.ModelSerializer):
 
     class Meta: 
         model = Landmark
-        fields = ['landmark_id', 'landmark_name', 'landmark_image_url', 'x_coordinates', 'y_coordinates', 'exercise']
+        fields = ['landmark_id', 'landmark_name', 'landmark_image_url', 'landmark_description', 'x_coordinates', 'y_coordinates', 'exercise']
 
     def validate_landmark_image_url(self, value):
         if not value.name.endswith(('.jpg', '.jpeg', '.png')):
@@ -45,6 +45,7 @@ class LandmarkCreateSerializer(serializers.ModelSerializer):
         landmark = Landmark.objects.create(
             landmark_name=validated_data['landmark_name'],
             landmark_image_url=object_path,
+            landmark_description=validated_data['landmark_description'],
             x_coordinates=validated_data['x_coordinates'],
             y_coordinates=validated_data['y_coordinates'],
             exercise=validated_data['exercise']
@@ -63,7 +64,7 @@ class LandmarkUpdateSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Landmark
-        fields = ['landmark_name', 'landmark_image_url', 'x_coordinates', 'y_coordinates', 'exercise']
+        fields = ['landmark_name', 'landmark_image_url', 'landmark_description', 'x_coordinates', 'y_coordinates', 'exercise']
 
     def validate_landmark_image_url(self, value):
         if not value.name.endswith(('.jpg', '.jpeg', '.png')):
@@ -83,6 +84,7 @@ class LandmarkUpdateSerializer(serializers.ModelSerializer):
             instance.landmark_image_url = object_path
         
         instance.landmark_name = validated_data.get('landmark_name', instance.landmark_name)
+        instance.landmark_description = validated_data.get('landmark_description', instance.landmark_description)
         instance.x_coordinates = validated_data.get('x_coordinates', instance.x_coordinates)
         instance.y_coordinates = validated_data.get('y_coordinates', instance.y_coordinates)
         instance.exercise = validated_data.get('exercise', instance.exercise)
