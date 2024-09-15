@@ -38,35 +38,63 @@ export const createExercise = async (exerciseData) => {
 };
 
 // Function to update an exercise with FormData
-export const updateExercise = async (exerciseData) => {
-  const formData = new FormData();
-  formData.append('exercise_name', exerciseData.exercise_name);
-  f// Ensure `audio_file` is appended as a `File` object
-  if (exerciseData.audio_file && exerciseData.audio_file.uri) {
-    const file = {
-      uri: exerciseData.audio_file.uri,
-      name: exerciseData.audio_file.name,
-      type: exerciseData.audio_file.type,
-    };
-    formData.append('audio_file', file);
-  }
-  console.log(file)
-  formData.append('description', exerciseData.description);
+// export const updateExercise = async (exerciseData) => {
+//   const formData = new FormData();
+//   formData.append('exercise_name', exerciseData.exercise_name);
+//   f// Ensure `audio_file` is appended as a `File` object
+//   if (exerciseData.audio_file && exerciseData.audio_file.uri) {
+//     const file = {
+//       uri: exerciseData.audio_file.uri,
+//       name: exerciseData.audio_file.name,
+//       type: exerciseData.audio_file.type,
+//     };
+//     formData.append('audio_file', file);
+//   }
+//   console.log(file)
+//   formData.append('description', exerciseData.description);
   
-  // Adding foreign key: landmark_id from the landmarks table
-  formData.append('landmark_id', exerciseData.landmark_id);
+//   // Adding foreign key: landmark_id from the landmarks table
+//   formData.append('landmark_id', exerciseData.landmark_id);
 
+//   try {
+//     const response = await axiosInstance.put('exercise/update', formData, {
+//       headers: {
+//         'Content-Type': 'multipart/form-data',
+//       },
+//     });
+//     return response; // Return the updated exercise
+//   } catch (error) {
+//     throw error; // Throw error to be handled in the calling function
+//   }
+// };
+
+export const updateExercise = async (exercise_id, exerciseData) => {
   try {
-    const response = await axiosInstance.put('exercise/update', formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data',
-      },
+    const formData = new FormData();
+
+    formData.append('exercise_name', exerciseData.exercise_name);
+    formData.append('description', exerciseData.description);
+
+    if (exerciseData.audio_file) {
+      formData.append('audio_file', {
+        uri: exerciseData.audio_file.uri,
+        name: exerciseData.audio_file.name,
+        type: exerciseData.audio_file.type,
+      });
+    }
+
+    if (exerciseData.landmark_id) {
+      formData.append('landmark_id', exerciseData.landmark_id);
+    }
+
+    return await axiosInstance.put(`exercise/update/${exercise_id}`, formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
     });
-    return response; // Return the updated exercise
   } catch (error) {
-    throw error; // Throw error to be handled in the calling function
+    throw error;
   }
 };
+
 
 // Function to delete an exercise (no need for FormData)
 export const deleteExercise = async (id) => {

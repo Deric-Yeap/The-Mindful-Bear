@@ -16,7 +16,7 @@ class ExerciseSerializer(serializers.ModelSerializer):
     start_datetime = serializers.ReadOnlyField() 
     class Meta:
         model = Exercise
-        fields = ['exercise_id','exercise_name', 'audio_url', 'description', 'landmarks']
+        fields = ['exercise_id','exercise_name', 'audio_url', 'description', 'landmarks', 'start_datetime']
 class ExerciseGetSerializer(serializers.ModelSerializer):
     file_url = serializers.SerializerMethodField()
 
@@ -65,16 +65,47 @@ class ExerciseCreateSerializer(serializers.ModelSerializer):
         }
 
 
-# update serialiser to validate empty fields, with arguments optional
 class ExerciseUpdateSerializer(serializers.ModelSerializer):
+    audio_url = serializers.URLField(validators=[is_field_empty], required=False)
+    landmarks = MinimalLandmarkSerializer(many=True, required=False)
+    audio_file = serializers.FileField(write_only=True, required=False)
+
+    def validate_audio_file(self, value):
+        if value and not value.name.endswith('.mp3'):
+            raise serializers.ValidationError("Audio file must be an MP3 file.")
+        return value
+
+    def update(self, instance, validated_data):
+        # If a new audio file is uploaded, process it
+        if 'audio_file' in validated_data:
+            file = validated_data.pop('audio_file')
+            user = self.context['request'].user
+            file_name, object_path = make_file_upload_path("exercises", user, quote(file.name))
+            bucket = settings.AWS_STORAGE_BUCKET_NAME
+
+            if not upload_fileobj(file, bucket, object_path):
+                raise serializers.ValidationError("File upload to S3 failed")
+            
+            instance.audio_url = object_path  # Update the audio URL
+
+        # Update other fields
+        instance.exercise_name = validated_data.get('exercise_name', instance.exercise_name)
+        instance.description = validated_data.get('description', instance.description)
+
+        # Handle landmarks if provided
+        if 'landmarks' in validated_data:
+            instance.landmarks.set(validated_data['landmarks'])
+
+        instance.save()
+        return instance
+
     class Meta:
         model = Exercise
-        fields = ['exercise_name','audio_url', 'description', 'landmarks']
+        fields = ['exercise_id', 'exercise_name', 'audio_url', 'description', 'landmarks', 'audio_file']
         extra_kwargs = {
-            'exercise_name': {'required':False},
-            'audio_url': {'required': False},
-            'description': {'required': False},
+            'audio_file': {'write_only': True},  # Don't return this field in the response
         }
+
 
 class ExerciseUploadFileSerializer(serializers.Serializer):
     audio_file = serializers.FileField()

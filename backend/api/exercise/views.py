@@ -74,6 +74,19 @@ class ExerciseGetExerciseByIdView(generics.RetrieveAPIView):
             return Response({'detail': str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
 # update or delete view
+class ExerciseUpdateView(generics.UpdateAPIView):
+    queryset = Exercise.objects.all()
+    serializer_class = ExerciseUpdateSerializer
+
+    def get_serializer(self, *args, **kwargs):
+        kwargs['context'] = self.get_serializer_context()
+        return super().get_serializer(*args, **kwargs)
+
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        context['request'] = self.request
+        return context
+    
 class ExerciseUpdateDestroyView(generics.UpdateAPIView, generics.DestroyAPIView):
     permission_classes = [CustomDjangoModelPermissions]
     queryset=Exercise.objects.all()
