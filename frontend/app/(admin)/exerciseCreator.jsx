@@ -1,8 +1,7 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, TouchableOpacity, ScrollView, Alert, Image } from 'react-native';
+import { View, Text, TouchableOpacity, ScrollView, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import FormField from '../../components/formField';
-import Dropdown from '../../components/dropdown';
 import BrownPageTitlePortion from '../../components/brownPageTitlePortion';
 import StatusBarComponent from '../../components/darkThemStatusBar';
 import CustomButton from '../../components/customButton';
@@ -13,6 +12,7 @@ import { confirmModal } from '../../assets/image';
 import { useRoute } from '@react-navigation/native';
 import { useRouter } from 'expo-router';
 import * as DocumentPicker from 'expo-document-picker';
+import MultiselectDropdown from '../../components/multiselectDropdown';
 
 const ExerciseCreator = () => {
   const route = useRoute();
@@ -38,19 +38,32 @@ const ExerciseCreator = () => {
     } : {}
   );  
   const [landmarkList, setLandmarkList] = useState([]);
+  const [selectedLandmarks, setSelectedLandmarks] = useState([]);
+  
   const [showSuccess, setShowSuccess] = useState(false);
 
   useEffect(() => {
     const fetchLandmarks = async () => {
       try {
         const data = await getLandmarks();
-        setLandmarkList(data);
-        console.log(data);
+        const formattedData = data.map(item => ({ key: item.landmark_id, value: item.landmark_name })); 
+        setLandmarkList(formattedData);
+  
+        if (exercise?.landmarks) {
+          setSelectedLandmarks(exercise.landmarks
+            .map(key => {
+              const foundLandmark = formattedData.find(item => item.key === key);
+              return foundLandmark ? foundLandmark.value : null;
+            })
+            .filter(value => value !== null)
+          )
+          console.log(selectedLandmarks);
+        }
       } catch (error) {
         console.error(error);
       }
     };
-
+  
     fetchLandmarks();    
   }, []);
 
@@ -63,7 +76,8 @@ const ExerciseCreator = () => {
     const exerciseData = {
       exercise_name: exerciseName,
       description: description,
-      audio_file: audioFile,      
+      audio_file: audioFile,
+      landmarks: landmarkList.map(item => item.key),
     };    
     
     try {
@@ -73,11 +87,10 @@ const ExerciseCreator = () => {
       } else {
         await createExercise(exerciseData); 
         setShowSuccess(true); 
-        console.log("submitted data", exerciseData);
         resetForm(); 
       }
     } catch (error) {
-      console.log(error);
+      console.error(error);
       Alert.alert(`Error ${exercise ? 'updating' : 'creating'} exercise:`, error.message);
     }
   };
@@ -86,6 +99,7 @@ const ExerciseCreator = () => {
     setExerciseName('');    
     setDescription('');
     setAudioFile({});
+    setSelectedLandmarks([]);
   };
 
   const truncateFileName = (fileName) => {
@@ -124,6 +138,10 @@ const ExerciseCreator = () => {
     }    
   };
 
+  const handleLandmarkSelect = (newSelectedItems) => {
+    setSelectedLandmarks(newSelectedItems);
+  };
+
   return (
     <SafeAreaView className="flex-1 bg-optimistic-gray-10">
       <StatusBarComponent barStyle="light-content" backgroundColor="#251404" />
@@ -153,6 +171,16 @@ const ExerciseCreator = () => {
           </TouchableOpacity>
           <Text className="underline text-mindful-brown-100 text-lg">{truncateFileName(audioFile.name)}</Text>
         </View>  
+        <View className="flex-row items-center my-4 px-4 w-full">
+          <MultiselectDropdown            
+            title="Assigned Landmarks"
+            data={landmarkList}
+            placeHolder="Select Landmarks"
+            handleSelect={handleLandmarkSelect}
+            selectedItems={selectedLandmarks}
+            disabled={false}
+          />
+        </View>
         <View className="mb-4 px-4 w-full">
           <CustomButton
             className="mt-2 w-full"

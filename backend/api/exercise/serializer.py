@@ -5,6 +5,7 @@ from django.conf import settings
 from ..common.validators import is_field_empty
 from ..common.s3 import create_presigned_url, upload_fileobj, make_file_upload_path, delete_s3_object
 from urllib.parse import quote
+import json
 
 class MinimalLandmarkSerializer(serializers.ModelSerializer):
     class Meta:
@@ -64,48 +65,65 @@ class ExerciseCreateSerializer(serializers.ModelSerializer):
             'audio_file': {'write_only': True},  # Don't return this field in the response
         }
 
-
 class ExerciseUpdateSerializer(serializers.ModelSerializer):
-    audio_url = serializers.URLField(validators=[is_field_empty], required=False)
-    landmarks = MinimalLandmarkSerializer(many=True, required=False)
+    audio_url = serializers.URLField(validators=[is_field_empty], required=False)    
+    landmarks = serializers.CharField(required=False)
     audio_file = serializers.FileField(write_only=True, required=False)
 
     def validate_audio_file(self, value):
         if value and not value.name.endswith('.mp3'):
             raise serializers.ValidationError("Audio file must be an MP3 file.")
         return value
+    
+    def validate_landmarks(self, value):
 
-    def update(self, instance, validated_data):
-        # If a new audio file is uploaded, process it
+        if value == "[]":
+            return value
+        try:                        
+            landmark_ids = json.loads(value)                                 
+            if not isinstance(landmark_ids, list):
+                raise serializers.ValidationError("Landmarks should be a list of IDs.")
+            if not all(isinstance(landmark_id, int) for landmark_id in landmark_ids):
+                raise serializers.ValidationError("Each landmark ID must be an integer.")        
+            if not Landmark.objects.filter(landmark_id__in=landmark_ids).exists():
+                raise serializers.ValidationError("One or more landmark IDs are invalid.")                    
+            return value  
+        except json.JSONDecodeError:
+            raise serializers.ValidationError("Invalid JSON format for landmarks.")
+
+    def update(self, instance, validated_data):        
         if 'audio_file' in validated_data:
             file = validated_data.pop('audio_file')
             user = self.context['request'].user
             file_name, object_path = make_file_upload_path("exercises", user, quote(file.name))
             bucket = settings.AWS_STORAGE_BUCKET_NAME
-
             if not upload_fileobj(file, bucket, object_path):
-                raise serializers.ValidationError("File upload to S3 failed")
-            
-            instance.audio_url = object_path  # Update the audio URL
+                raise serializers.ValidationError("File upload to S3 failed")            
+            instance.audio_url = object_path  
 
-        # Update other fields
         instance.exercise_name = validated_data.get('exercise_name', instance.exercise_name)
         instance.description = validated_data.get('description', instance.description)
-
-        # Handle landmarks if provided
+ 
         if 'landmarks' in validated_data:
-            instance.landmarks.set(validated_data['landmarks'])
+            landmark_ids = json.loads(validated_data['landmarks'])            
+            Landmark.objects.filter(exercise=instance).update(exercise=None)            
+            Landmark.objects.filter(landmark_id__in=landmark_ids).update(exercise=instance)                        
+            instance._landmarks_input = validated_data.get('landmarks', None)
 
         instance.save()
         return instance
-
+    
+    def to_representation(self, instance):        
+        ret = super().to_representation(instance)
+        ret['landmarks'] = instance._landmarks_input
+        return ret
+    
     class Meta:
         model = Exercise
         fields = ['exercise_id', 'exercise_name', 'audio_url', 'description', 'landmarks', 'audio_file']
         extra_kwargs = {
-            'audio_file': {'write_only': True},  # Don't return this field in the response
+            'audio_file': {'write_only': True},  
         }
-
 
 class ExerciseUploadFileSerializer(serializers.Serializer):
     audio_file = serializers.FileField()

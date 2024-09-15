@@ -73,7 +73,8 @@ export const updateExercise = async (exercise_id, exerciseData) => {
     const formData = new FormData();
 
     formData.append('exercise_name', exerciseData.exercise_name);
-    formData.append('description', exerciseData.description);
+    formData.append('description', exerciseData.description);    
+    formData.append('landmarks', JSON.stringify(exerciseData.landmarks));
 
     if (exerciseData.audio_file) {
       formData.append('audio_file', {
