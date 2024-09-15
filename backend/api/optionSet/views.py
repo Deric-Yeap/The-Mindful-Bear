@@ -67,7 +67,7 @@ class OptionSetDestroy(generics.DestroyAPIView):
         try:
             instance = self.get_object()
             self.perform_destroy(instance)
-            return Response(status=status.HTTP_204_NO_CONTENT)  # Ensure no body is sent
+            return Response(status=status.HTTP_201_CREATED)  # Ensure no body is sent
         except NotFound:
             return Response({"error": "OptionSet not found."}, status=status.HTTP_404_NOT_FOUND)
         except Exception as e:

@@ -204,8 +204,9 @@ const LandmarkCreator = () => {
             />
           </View>
         </View>
-      </View>
-      {showSuccess && (
+      </View>      
+       {/* Success Modal */}
+       {showSuccess && (       
         <ConfirmModal
           isConfirmButton={true}
           isCancelButton={false}
