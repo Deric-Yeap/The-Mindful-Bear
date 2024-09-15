@@ -11,6 +11,7 @@ import { colors } from '../common/styles'
 import { Image } from 'expo-image'
 import CustomButton from './customButton'
 import BottomSheet, { BottomSheetView } from '@gorhom/bottom-sheet'
+import { Audio } from 'expo-av'
 
 const BottomSheetModal = ({ handleModalOpen, landmarkData }) => {
   const landmarkIcons = [
@@ -30,7 +31,6 @@ const BottomSheetModal = ({ handleModalOpen, landmarkData }) => {
       color: '#4C72AB',
     },
   ]
-
   const exerciseIcons = [
     {
       icon: 'star',
@@ -48,6 +48,42 @@ const BottomSheetModal = ({ handleModalOpen, landmarkData }) => {
       color: '#4C72AB',
     },
   ]
+  const [sound, setSound] = useState();
+  const [isLoading, setIsLoading] = useState(false); // Track loading state
+  const data = landmarkData?.properties;
+
+  const playAudio = async () => {
+    if (!data?.exercise_audio_url) {
+      console.error('No audio URL provided');
+      return;
+    }
+
+    setIsLoading(true); // Start loading
+
+    try {
+      const { sound } = await Audio.Sound.createAsync(
+        { uri: data.exercise_audio_url },
+        { shouldPlay: true } // Auto-play when loaded
+      );
+      setSound(sound);
+
+      // Play the sound
+      await sound.playAsync();
+    } catch (error) {
+      console.error('Error playing audio:', error);
+    } finally {
+      setIsLoading(false); // Stop loading
+    }
+  };
+
+  // Unload the audio when the component is unmounted to prevent memory leaks
+  React.useEffect(() => {
+    return sound
+      ? () => {
+          sound.unloadAsync();
+        }
+      : undefined;
+  }, [sound]);
 
   const bottomSheetRef = useRef(null)
   const snapPoints = useMemo(() => ['60%', '100%'], [])
@@ -75,8 +111,9 @@ const BottomSheetModal = ({ handleModalOpen, landmarkData }) => {
       setIsExercise(true)
     }
   }
-
-  const data = landmarkData.properties
+  if (!data) {
+    return <Text>Loading...</Text>; // Fallback for missing data
+  }
 
   return (
     <BottomSheet
@@ -144,13 +181,22 @@ const BottomSheetModal = ({ handleModalOpen, landmarkData }) => {
             </View>
           ))}
         </View>
-        {/* no exercise image/video */}
-        <Image
-          id="landmark-image-frame"
-          source={data.landmark_image_url}
-          className={`w-full h-[32%] rounded-lg mt-2`}
-          contentFit="cover"
-        />
+        {isExercise ? (
+          // Show audio player button for exercise
+          <TouchableOpacity onPress={playAudio}>
+            <View className="bg-serenity-green-50 w-full rounded-lg mt-2 py-4 items-center justify-center">
+              <Text className="text-white font-urbanist-bold">Play Audio</Text>
+            </View>
+          </TouchableOpacity>
+        ) : (
+          // Show image for landmarks
+          <Image
+            id="landmark-image-frame"
+            source={{ uri: data.landmark_image_url }}
+            className={`w-full h-[32%] rounded-lg mt-2`}
+            contentFit="cover"
+          />
+        )}
 
         {currentSnapIndex === 1 && (
           <View
