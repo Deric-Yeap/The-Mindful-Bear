@@ -37,7 +37,7 @@ export const updateLandmark = async (landmarkId, landmarkData) => {
         uri: landmarkData.image_file.uri,
         name: landmarkData.image_file.fileName,
         type: landmarkData.image_file.type,
-    });
+    }); 
     formData.append('exercise', landmarkData.exercise);
     formData.append('x_coordinates', parseFloat(landmarkData.x_coordinates));
     formData.append('y_coordinates', parseFloat(landmarkData.y_coordinates));

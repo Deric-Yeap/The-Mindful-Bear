@@ -4,7 +4,7 @@ from ..landmark.models import Landmark
 from django.conf import settings
 from ..common.validators import is_field_empty
 from ..common.s3 import create_presigned_url, upload_fileobj, make_file_upload_path, delete_s3_object
-
+from urllib.parse import quote
 
 class MinimalLandmarkSerializer(serializers.ModelSerializer):
     class Meta:
@@ -47,7 +47,7 @@ class ExerciseCreateSerializer(serializers.ModelSerializer):
         user = self.context['request'].user
         id = self.validated_data['id'] if 'id' in self.validated_data else None
 
-        file_name, object_path = make_file_upload_path("exercises", user, file.name)
+        file_name, object_path = make_file_upload_path("exercises", user, quote(file.name))
         bucket = settings.AWS_STORAGE_BUCKET_NAME
 
         if not upload_fileobj(file, bucket, object_path):

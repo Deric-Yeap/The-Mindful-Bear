@@ -10,6 +10,7 @@ import { getExercises } from '../../api/exercise';
 import ConfirmModal from '../../components/confirmModal';
 import { useRouter } from 'expo-router';
 
+
 const LandmarkCreator = () => {
   const route = useRoute();
   const router = useRouter();

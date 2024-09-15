@@ -39,6 +39,7 @@ const ExerciseCreator = () => {
   // });
   const [audioURL, setaudioURL] = useState("");
   const [audioFileName, setAudioFileName] = useState("");
+  const [audioFile, setAudioFile] = useState({});
 
   //for dropdown list of landmarks and selection of landmark (if any)
   const [landmarkId, setLandmarkId] = useState(exercise?.landmark?.landmark_id || '');
@@ -65,7 +66,7 @@ const ExerciseCreator = () => {
   }, []);
 
   const handleSubmit = async () => {
-    if (!exerciseName || !description|| !audioURL) {
+    if (!exerciseName || !description|| !audioFile) {
       Alert.alert('Please fill in all fields and upload an audio file.');
       return;
     }
@@ -73,7 +74,8 @@ const ExerciseCreator = () => {
     const exerciseData = {
       exercise_name: exerciseName,
       description: description,
-      audio_url: audioURL,
+      audio_file: audioFile,
+      landmark_id: landmarkId,
     };    
     
     try {
@@ -111,6 +113,7 @@ const ExerciseCreator = () => {
     setDescription('');
     setaudioURL('');
     setAudioFileName('');
+    setAudioFile({});
   };
 
   const truncateFileName = (fileName) => {
@@ -120,8 +123,6 @@ const ExerciseCreator = () => {
 
  
   
-      
-      
   
 
   const handleAudioUpload = async () => {
@@ -134,51 +135,6 @@ const ExerciseCreator = () => {
 
       console.log("DocumentPicker result:", result);
 
-  //     if (!result.canceled && result.assets && result.assets.length > 0) {
-  //       const selectedFile = result.assets[0];
-  //       setaudioURL(selectedFile.uri);
-  //       setAudioFileName(truncateFileName(selectedFile.name));
-  //       console.log("Selected audio file URI:", selectedFile.uri);
-  //     } else {
-  //       console.log("DocumentPicker result canceled or no assets found");
-  //     }
-  //   } catch (error) {
-  //     console.error('Error picking audio file:', error);
-  //   }
-  // };
-//   if (!result.canceled && result.uri) {
-//     const selectedFile = result.uri;
-//     const fileName = result.name;
-//     const fileType = result.mimeType;
-
-//     // Step 1: Get signed URL from backend
-//     const response = await fetch(`https://the-mindful-bear.s3.ap-southeast-1.amazonaws.com/sign-s3?fileName=${fileName}&fileType=${fileType}`);
-//     const { signedRequest, url } = await response.json();
-
-//     // Step 2: Upload file directly to S3
-//     const fileUploadResponse = await fetch(signedRequest, {
-//       method: 'PUT',
-//       body: await fetch(selectedFile).then(res => res.blob()),
-//       headers: {
-//         'Content-Type': fileType,
-//       },
-//     });
-
-//     if (fileUploadResponse.ok) {
-//       // Successfully uploaded file to S3
-//       setaudioURL(url); // Store S3 URL
-//       setAudioFileName(truncateFileName(fileName));
-//       Alert.alert("File uploaded successfully");
-//     } else {
-//       throw new Error('Upload to S3 failed');
-//     }
-//   }
-// } catch (error) {
-//   console.error('Error uploading audio file:', error);
-//   Alert.alert('Error uploading file:', error.message);
-// }
-// };
-
 if (!result.canceled && result.assets && result.assets.length > 0) {
   const selectedFile = result.assets[0];
   console.log("Selected audio file:", selectedFile);
@@ -187,45 +143,21 @@ if (!result.canceled && result.assets && result.assets.length > 0) {
   console.log("File URI:", selectedFile.uri);
   console.log("File Name:", selectedFile.name);
   console.log("File Type:", selectedFile.mimeType);
-
-  // Now upload the file to your server or S3
-  const { uri, name, mimeType } = selectedFile;
   
-  const formData = new FormData();
-  formData.append('file', {
-    uri: uri,
-    name: name,
-    type: mimeType,
-  });
-
-  console.log("Form data created:", formData);
-
-  // Sending to the server
-  const response = await fetch('https://the-mindful-bear.s3.ap-southeast-1.amazonaws.com/sign-s3', {
-    method: 'PUT',
-    body: formData,
-    headers: {
-      'Content-Type': 'multipart/form-data',
-    },
-  });
-
-  console.log("Response from server:", response);
-
-  if (response.ok) {
-    const data = await response.json();
-    console.log("Server response data:", data);
 
     // Set the audio URL to the S3 URL returned from the server
-    setaudioURL(data.url);
-    setAudioFileName(truncateFileName(name));
+    setAudioFile({
+      uri: selectedFile.uri,    
+      name: selectedFile.name,
+      type: selectedFile.mimeType,
+    })
+    setaudioURL(selectedFile.uri);
+    setAudioFileName(truncateFileName(selectedFile.name));
 
-    console.log("Audio uploaded successfully, S3 URL:", data.url);
+    console.log("Audio uploaded successfully,  URL:", selectedFile.uri);
   } else {
-    console.error("Server returned an error:", response.statusText);
+    console.error("Server returned an error:", result.error);
   }
-  } else {
-    console.log("DocumentPicker result canceled or no assets found");
-   }
   } catch (error) {
   console.error("Error picking audio file:", error);
    }
