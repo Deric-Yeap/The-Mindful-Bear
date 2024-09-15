@@ -6,6 +6,7 @@ import {
   TouchableOpacity,
 } from 'react-native'
 import { useEffect, useState } from 'react'
+import { SafeAreaView } from 'react-native-safe-area-context'
 import { router } from 'expo-router'
 
 import BackButton from '../../components/backButton'
@@ -29,6 +30,7 @@ const TextJournal = () => {
   const [emotions, setEmotions] = useState([])
   const [selectedEmotion, setSelectedEmotion] = useState(1)
   const [selectedFeelings, setSelectedFeelings] = useState([])
+  const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     const fetchData = async () => {
@@ -37,6 +39,8 @@ const TextJournal = () => {
         setEmotions(emotionResponse)
       } catch (error) {
         console.error(error)
+      } finally {
+        setLoading(false)
       }
     }
     fetchData()
@@ -57,8 +61,19 @@ const TextJournal = () => {
     }
   }
 
+  if (loading) {
+    return (
+      <SafeAreaView className="flex-1 p-4 bg-optimistic-gray-10">
+        <StatusBar barStyle="dark-content" />
+        <View className="flex-1 justify-center items-center">
+          <Loading />
+        </View>
+      </SafeAreaView>
+    )
+  }
+
   return (
-    <View className="flex-1">
+    <View className="flex-1 bg-optimistic-gray-10">
       <StatusBar barStyle="light-content" />
       <View className="h-[20vh] bg-mindful-brown-70 justify-center p-4 pt-6">
         <BackButton buttonStyle="mb-4" />

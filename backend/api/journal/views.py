@@ -2,7 +2,7 @@ from datetime import datetime
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from .models import Journal
-from .serializer import JournalGetSerializer, JournalUploadFileSerializer, JournalCreateSerializer, JournalCalendarSerializer, JournalSummarySerializer
+from .serializer import JournalGetSerializer, JournalUploadFileSerializer, JournalCreateSerializer, JournalCalendarSerializer, JournalSummarySerializer, JournalEntriesByDateSerializer
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -85,3 +85,37 @@ class SpeechToTextView(APIView):
             return Response({'transcription': transcription}, status=status.HTTP_200_OK)
         except Exception as e:
             return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        
+class JournalEntriesByDateView(APIView):
+    def get(self, request, *args, **kwargs):
+        year = request.query_params.get('year')
+        month = request.query_params.get('month')
+
+        if not year or not month:
+            return Response({"error": "Year and month are required parameters."}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            year = int(year)
+            month = int(month)
+        except ValueError:
+            return Response({"error": "Year and month must be integers."}, status=status.HTTP_400_BAD_REQUEST)
+
+        serializer_context = {
+            'request': request,
+        }
+        serializer = JournalEntriesByDateSerializer(data={}, context=serializer_context)
+        if serializer.is_valid():
+            data = serializer.get_journal_entries_by_date(year, month)
+            return Response(data, status=status.HTTP_200_OK)
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        
+class JournalEntryByIdView(APIView):
+    def get(self, request, id):
+        try:
+            journal = Journal.objects.get(id=id)
+        except Journal.DoesNotExist:
+            return Response({'error': 'Journal entry not found.'}, status=status.HTTP_404_NOT_FOUND)
+        
+        serializer = JournalGetSerializer(journal)
+        return Response(serializer.data, status=status.HTTP_200_OK)

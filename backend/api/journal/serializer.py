@@ -169,3 +169,33 @@ class JournalCalendarSerializer(serializers.Serializer):
         }
         
         return data
+    
+class JournalEntriesByDateSerializer(serializers.Serializer):
+
+    def get_journal_entries_by_date(self, year, month):
+        start_date = datetime(year, month, 1)
+        end_date = (start_date + timedelta(days=31)).replace(day=1) - timedelta(days=1)
+
+        journals = Journal.objects.filter(upload_date__year=year, upload_date__month=month)
+        journal_dict = {}
+
+        current_date = start_date
+        while current_date <= end_date:
+            day_journals = journals.filter(upload_date__date=current_date.date()).order_by('-upload_date')
+            journal_dict[str(current_date.date())] = JournalGetSerializer(day_journals, many=True).data
+            current_date += timedelta(days=1)
+
+        return journal_dict
+
+    def to_representation(self, instance):
+        request = self.context.get('request')
+        year = request.data.get('year')
+        month = request.data.get('month')
+
+        journal_dict = self.get_journal_entries_by_date(int(year), int(month))
+        
+        data = {
+            'dates': journal_dict
+        }
+        
+        return data
