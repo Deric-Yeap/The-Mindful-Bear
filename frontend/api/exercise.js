@@ -16,15 +16,15 @@ export const createExercise = async (exerciseData) => {
   formData.append('exercise_name', exerciseData.exercise_name);
   formData.append('audio_file', {
     uri: exerciseData.audio_file.uri, 
-    name: exerciseData.audio_file.fileName,
+    name: exerciseData.audio_file.name,
     type: exerciseData.audio_file.type,
   });
-  console.log('audio_file', exerciseData.audio_file);
+  // console.log('audio_file', exerciseData.audio_file);
   formData.append('description', exerciseData.description);
   
   // Adding foreign key: landmark_id from the landmarks table
   formData.append('landmark_id', exerciseData.landmark_id);
-  console.log('formData', formData);
+  // console.log('formData', formData);
 
   try {
     const response = await axiosInstance.post('exercise/create', formData, {
