@@ -11,6 +11,8 @@ import { colors } from '../../common/styles'
 import { listEmotion } from '../../api/emotion'
 import Loading from '../../components/loading'
 import ConfirmModal from '../../components/confirmModal'
+import BackButton from '../../components/backButton'
+import emotionWheelImg from '../../assets/emotionWheel.jpg'
 
 const VoiceJournal = () => {
   const [recording, setRecording] = useState()
@@ -20,6 +22,7 @@ const VoiceJournal = () => {
 
   const [isLoading, setIsLoading] = useState(false)
   const [isModalVisible, setIsModalVisible] = useState(false)
+  const [isEmotionModalVisible, setIsEmotionModalVisible] = useState(false)
   const [title, setTitle] = useState('')
   const [transcribedText, setTranscribedText] = useState('')
   const [emotions, setEmotions] = useState([])
@@ -198,6 +201,11 @@ const VoiceJournal = () => {
             <Text className="font-urbanist-bold text-lg">
               Select your emotion
             </Text>
+            <TouchableOpacity onPress={() => setIsEmotionModalVisible(true)}>
+              <Text className="font-urbanist-semi-bold text-serenity-green-60">
+                View Wheel of Emotions
+              </Text>
+            </TouchableOpacity>
             <View className="flex flex-wrap flex-row">
               {emotions
                 .filter((emotion) => emotion.level === 'Inner')
@@ -297,6 +305,7 @@ const VoiceJournal = () => {
 
   return (
     <SafeAreaView className="bg-mindful-brown-10 h-full items-center">
+      {currentStep === 1 && <BackButton buttonStyle="mx-4 self-start" />}
       {isLoading && (
         <View className="absolute top-0 left-0 right-0 bottom-0 flex justify-center items-center z-10 bg-optimistic-gray-80/90">
           <Loading />
@@ -311,6 +320,18 @@ const VoiceJournal = () => {
           handleConfirm={() => {
             setIsModalVisible(false)
             router.push('/journal-home')
+          }}
+        />
+      )}
+      {isEmotionModalVisible && (
+        <ConfirmModal
+          title="Wheel of Emotions"
+          subTitle="How do you feel today?"
+          imageSource={emotionWheelImg}
+          confirmButtonTitle="Ok, Thanks!"
+          isConfirmButton={true}
+          handleConfirm={() => {
+            setIsEmotionModalVisible(false)
           }}
         />
       )}

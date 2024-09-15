@@ -40,8 +40,8 @@ export default function App() {
             isLoading={false}
           />
           <CustomButton
-            title="journal"
-            handlePress={() => router.push('/(journal)/voice-journal')} 
+            title="journal history"
+            handlePress={() => router.push('/(journal)/journal-history')} 
             buttonStyle="w-60"
             textStyle="text-white"
             isLoading={false}
