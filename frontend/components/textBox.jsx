@@ -18,9 +18,9 @@ const TextBox = ({
         </Text>
       )}
 
-      <View className="border-2 border-optimistic-gray-20 focus:border-serenity-green-50 w-full h-32 px-4 rounded-xl">
+      <View className="border-2 border-optimistic-gray-20 focus:border-serenity-green-50 w-full h-40 px-4 rounded-xl">
         <TextInput
-          className="flex-1 text-optimistic-gray-80 font-urbanist-semi-bold"
+          className="flex-1 text-mindful-brown-80 font-urbanist-semi-bold"
           value={value}
           placeholder={placeHolder}
           placeholderTextColor="optimistic-gray-50"

@@ -46,17 +46,22 @@ class JournalUploadFileSerializer(serializers.Serializer):
     audio_file = serializers.FileField()
     id = serializers.IntegerField(required=False)
     emotion_id = serializers.ListField(child=serializers.IntegerField(), required=False)
+    journal_text = serializers.CharField(required=True)
+    title = serializers.CharField(required=False)
 
-    def validate_audio_file(self, value):
-        if not value.name.endswith('.mp3'):
-            raise serializers.ValidationError("Audio file must be an MP3 file.")
-        return value
+    # def validate_audio_file(self, value):
+    #     if not value.name.endswith('.mp3'):
+    #         raise serializers.ValidationError("Audio file must be an MP3 file.")
+    #     return value
 
     def save(self):
         file = self.validated_data['audio_file']
         user = self.context['request'].user
         id = self.validated_data['id'] if 'id' in self.validated_data else None
         emotion_ids = self.validated_data['emotion_id'] if 'emotion_id' in self.validated_data else []
+        journal_text = self.validated_data['journal_text'] if 'journal_text' in self.validated_data else None
+        title = self.validated_data['title'] if 'title' in self.validated_data else None
+
 
         file_name, object_path = make_file_upload_path("journals", user, file.name)
         bucket = settings.AWS_STORAGE_BUCKET_NAME
@@ -82,7 +87,9 @@ class JournalUploadFileSerializer(serializers.Serializer):
             emotions = Emotion.objects.filter(id__in=emotion_ids)
             journal_entry = Journal.objects.create(
                 audio_file_path=object_path,
-                user_id=user
+                user_id=user,
+                journal_text = journal_text, 
+                title = title
             )
             journal_entry.emotion_id.set(emotions)
         

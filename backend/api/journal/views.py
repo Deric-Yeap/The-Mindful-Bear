@@ -8,7 +8,8 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.parsers import MultiPartParser, FormParser
 from .models import Journal
-from ..common.s3 import rsa_signer
+from ..common.audio import transcribe
+
 
 
 class JournalListView(APIView):
@@ -71,3 +72,16 @@ class CountYearJournalView(APIView):
 
         journals = Journal.objects.filter(user_id=request.user.user_id, upload_date__year=year)
         return Response({'count': journals.count()}, status=status.HTTP_200_OK)
+
+class SpeechToTextView(APIView):
+    def post(self, request):
+        if 'audio_file' not in request.FILES:
+            return Response({'error': 'No audio file provided.'}, status=status.HTTP_400_BAD_REQUEST)
+    
+        audio_file = request.FILES['audio_file']
+        
+        try:
+            transcription = transcribe(audio_file)
+            return Response({'transcription': transcription}, status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
