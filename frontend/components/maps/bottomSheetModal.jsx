@@ -7,9 +7,9 @@ import {
   StyleSheet,
 } from 'react-native'
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons'
-import { colors } from '../common/styles'
+import { colors } from '../../common/styles'
 import { Image } from 'expo-image'
-import CustomButton from './customButton'
+import CustomButton from '../customButton'
 import BottomSheet, { BottomSheetView } from '@gorhom/bottom-sheet'
 
 const BottomSheetModal = ({ handleModalOpen, landmarkData }) => {

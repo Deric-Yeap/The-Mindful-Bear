@@ -12,14 +12,14 @@ import { landmarkIcon } from '../../../assets/image'
 import { getLandmarks } from '../../../api/landmark'
 import { confirmModal } from '../../../assets/image'
 import Loading from '../../../components/loading'
-import BottomSheetModal from '../../../components/bottomSheetModal'
+import BottomSheetModal from '../../../components/maps/bottomSheetModal'
 import { useLocalSearchParams, useRouter } from 'expo-router'
 import { useDispatch } from 'react-redux'
 import {
   setIsShownNav,
   clearIsShownNav,
 } from '../../../redux/slices/isShownNavSlice'
-import UserLocationCustom from '../../../components/userLocation'
+import UserLocationCustom from '../../../components/maps/userLocation'
 
 const initialFormState = {
   start_datetime: '',
@@ -86,16 +86,20 @@ const Map = () => {
       const updatedForm = {
         ...prevForm,
         start_datetime: currentStartDateTime,
-      };
+      }
       //Start Session Survey
       router.push({
         pathname: '/questionaire',
-        params: { sessionStarted: true, formData: JSON.stringify(updatedForm), start: "true" }, 
-      });
-  
-      return updatedForm;
-    });
-  };
+        params: {
+          sessionStarted: true,
+          formData: JSON.stringify(updatedForm),
+          start: 'true',
+        },
+      })
+
+      return updatedForm
+    })
+  }
 
   const handleSessionEnd = () => {
     setIsModalOpen(true)
@@ -123,8 +127,12 @@ const Map = () => {
     //End Session Survey
     router.push({
       pathname: '/questionaire',
-      params: { sessionStarted: true, formData: JSON.stringify(form), start: "false" }, 
-    });
+      params: {
+        sessionStarted: true,
+        formData: JSON.stringify(form),
+        start: 'false',
+      },
+    })
   }
 
   const resetForm = () => {
