@@ -17,6 +17,7 @@ import { createJournal } from '../../api/journal'
 import { listEmotion } from '../../api/emotion'
 import Loading from '../../components/loading'
 import ConfirmModal from '../../components/confirmModal'
+import emotionWheelImg from '../../assets/emotionWheel.jpg'
 
 const TextJournal = () => {
   const [form, setForm] = useState({
@@ -27,6 +28,7 @@ const TextJournal = () => {
 
   const [isLoading, setIsLoading] = useState(false)
   const [isModalVisible, setIsModalVisible] = useState(false)
+  const [isEmotionModalVisible, setIsEmotionModalVisible] = useState(false)
   const [emotions, setEmotions] = useState([])
   const [selectedEmotion, setSelectedEmotion] = useState(1)
   const [selectedFeelings, setSelectedFeelings] = useState([])
@@ -98,6 +100,18 @@ const TextJournal = () => {
           }}
         />
       )}
+      {isEmotionModalVisible && (
+        <ConfirmModal
+          title="Wheel of Emotions"
+          subTitle="How do you feel today?"
+          imageSource={emotionWheelImg}
+          confirmButtonTitle="Ok, Thanks!"
+          isConfirmButton={true}
+          handleConfirm={() => {
+            setIsEmotionModalVisible(false)
+          }}
+        />
+      )}
       <ScrollView className="p-4 flex-1 py-5">
         <FormField
           title="Journal Title"
@@ -121,6 +135,11 @@ const TextJournal = () => {
               <Text className="font-urbanist-bold text-lg">
                 Select your emotion
               </Text>
+              <TouchableOpacity onPress={() => setIsEmotionModalVisible(true)}>
+                <Text className="font-urbanist-semi-bold text-serenity-green-60">
+                  View Wheel of Emotions
+                </Text>
+              </TouchableOpacity>
               <View className="flex flex-wrap flex-row">
                 {emotions
                   .filter((emotion) => emotion.level === 'Inner')

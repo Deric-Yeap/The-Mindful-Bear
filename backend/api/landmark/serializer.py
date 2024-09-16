@@ -24,7 +24,7 @@ class LandmarkSerializer(serializers.ModelSerializer):
 class LandmarkCreateSerializer(serializers.ModelSerializer):
     landmark_image_url = serializers.ImageField(write_only=True, required=True)
 
-    class Meta:
+    class Meta: 
         model = Landmark
         fields = ['landmark_id', 'landmark_name', 'landmark_image_url', 'landmark_description', 'x_coordinates', 'y_coordinates', 'exercise']
 

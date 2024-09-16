@@ -1,9 +1,15 @@
 import axios from 'axios'
 import { store } from '../redux/store'
+import { Platform } from 'react-native'
+
+const baseURL =
+  Platform.OS === 'ios'
+    ? 'http://localhost:8000/api/'
+    : 'http://10.0.2.2:8000/api/'
 
 const axiosInstance = axios.create({
-  baseURL: 'http://10.0.2.2:8000/api/',
-  timeout: 30000,
+  baseURL: baseURL,
+  timeout: 10000,
   headers: {
     'Content-Type': 'application/json',
   },
@@ -19,23 +25,27 @@ axiosInstance.interceptors.request.use(
     }
     return config
   },
-  (error) => {        
+  (error) => {
     return Promise.reject(error)
   }
 )
 
 axiosInstance.interceptors.response.use(
-  (response) => {    
+  (response) => {
     return response.data.data
   },
   (error) => {
-    if (error.response && error.response.data && error.response.data.error_description) {
-      console.log('Error Description:', error.response.data.error_description);
+    if (
+      error.response &&
+      error.response.data &&
+      error.response.data.error_description
+    ) {
+      console.log('Error Description:', error.response.data.error_description)
     } else {
-      console.log('Error:', error.message);
+      console.log('Error:', error.message)
     }
-    
-    return Promise.reject(error);
+
+    return Promise.reject(error)
   }
 )
 
