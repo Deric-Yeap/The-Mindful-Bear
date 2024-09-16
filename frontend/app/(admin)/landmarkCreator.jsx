@@ -11,6 +11,7 @@ import ConfirmModal from '../../components/confirmModal';
 import { confirmModal } from '../../assets/image'
 import { useRouter } from 'expo-router';
 
+
 const LandmarkCreator = () => {
   const route = useRoute();
   const router = useRouter();

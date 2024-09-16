@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { SafeAreaView } from 'react-native-safe-area-context'
-import { View, ScrollView, TouchableOpacity } from 'react-native'
+import { View, ScrollView, TouchableOpacity, Text } from 'react-native'
 import Mapbox from '@rnmapbox/maps'
 import LottieView from 'lottie-react-native'
 import CustomButton from '../../../components/customButton'
@@ -12,8 +12,14 @@ import { landmarkIcon } from '../../../assets/image'
 import { getLandmarks } from '../../../api/landmark'
 import { confirmModal } from '../../../assets/image'
 import Loading from '../../../components/loading'
-import { useRouter, useLocalSearchParams } from 'expo-router';
 import BottomSheetModal from '../../../components/bottomSheetModal'
+import { useLocalSearchParams, useRouter } from 'expo-router'
+import { useDispatch } from 'react-redux'
+import {
+  setIsShownNav,
+  clearIsShownNav,
+} from '../../../redux/slices/isShownNavSlice'
+import UserLocationCustom from '../../../components/userLocation'
 
 const initialFormState = {
   start_datetime: '',
@@ -35,18 +41,15 @@ const Map = () => {
   const [landmarksData, setLandmarksData] = useState([])
   const [loading, setLoading] = useState(true)
   const [isBottomSheetOpen, setIsBottomSheetOpen] = useState(false)
+  const [selectedLandmark, setSelectedLandmark] = useState(null)
+  const [location, setLocation] = useState(null)
+  const dispatch = useDispatch()
 
   useEffect(() => {
     if (formData) {
       setForm(JSON.parse(formData)) // Parse the formData and set it to the form state
     }
   }, [formData])
-
-  useEffect(() => {
-    if (formData) {
-      setForm(JSON.parse(formData)); // Parse the formData and set it to the form state
-    }
-  }, [formData]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -58,18 +61,25 @@ const Map = () => {
       } finally {
         setLoading(false)
       }
-    }    
+    }
 
     fetchData()
+    return () => {
+      dispatch(clearIsShownNav())
+    }
   }, [])
 
-  const handleBottomSheetModalOpen = () => {
+  const handleBottomSheetModalOpen = (index) => {
     if (!isBottomSheetOpen) {
+      setSelectedLandmark(geoJSON.features[index])
       setIsBottomSheetOpen(true)
+      dispatch(setIsShownNav())
     } else {
       setIsBottomSheetOpen(false)
+      dispatch(setIsShownNav())
     }
   }
+
   const handleSessionStart = () => {
     const currentStartDateTime = getCurrentDateTime()
     setForm((prevForm) => {
@@ -120,8 +130,8 @@ const Map = () => {
   const resetForm = () => {
     setForm(initialFormState)
   }
-
   const geoJSON = getGeoJson(landmarksData)
+
   return (
     <SafeAreaView className="h-full">
       <View className="flex-1 relative">
@@ -145,26 +155,33 @@ const Map = () => {
                   animationDuration={1000}
                   pitch={60}
                 />
-                {geoJSON.features.map((feature, index) => (
-                  <Mapbox.MarkerView
-                    key={index}
-                    id={`marker-${index}`}
-                    coordinate={feature.geometry.coordinates}
-                  >
-                    <TouchableOpacity
-                      onPress={handleBottomSheetModalOpen}
-                      className="rounded-3xl"
+                <UserLocationCustom
+                  animated={true}
+                  visible={true}
+                  showsUserHeadingIndicator={true}
+                />
+                {geoJSON?.features?.map((feature, index) => {
+                  return (
+                    <Mapbox.MarkerView
+                      key={index}
+                      id={`marker-${index}`}
+                      coordinate={feature.geometry.coordinates}
                     >
-                      <View className="w-8 h-8 items-center justify-center p-5">
-                        <LottieView
-                          source={landmarkIcon}
-                          className="w-14 h-14 z-20"
-                          autoPlay
-                        />
-                      </View>
-                    </TouchableOpacity>
-                  </Mapbox.MarkerView>
-                ))}
+                      <TouchableOpacity
+                        onPress={() => handleBottomSheetModalOpen(index)}
+                        className="rounded-3xl"
+                      >
+                        <View className="w-8 h-8 items-center justify-center p-5">
+                          <LottieView
+                            source={landmarkIcon}
+                            className="w-14 h-14 z-20"
+                            autoPlay
+                          />
+                        </View>
+                      </TouchableOpacity>
+                    </Mapbox.MarkerView>
+                  )
+                })}
               </Mapbox.MapView>
             </View>
             {!isModalOpen && (
@@ -194,8 +211,11 @@ const Map = () => {
             handleConfirm={handleSessionConfirmEnd}
           />
         )}
-        {isBottomSheetOpen && (
-          <BottomSheetModal handleModalOpen={handleBottomSheetModalOpen} />
+        {isBottomSheetOpen && selectedLandmark && (
+          <BottomSheetModal
+            handleModalOpen={handleBottomSheetModalOpen}
+            landmarkData={selectedLandmark}
+          />
         )}
       </View>
     </SafeAreaView>

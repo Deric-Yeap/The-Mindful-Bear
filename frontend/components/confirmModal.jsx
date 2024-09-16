@@ -22,7 +22,7 @@ const ConfirmModal = ({
           <Image
             source={imageSource || confirmModal}
             className="w-full h-4/6 rounded-lg"
-            contentFit="cover"
+            contentFit="contain"
           />
           {title && (
             <Text className="text-2xl font-urbanist-extra-bold text-center mb-2">

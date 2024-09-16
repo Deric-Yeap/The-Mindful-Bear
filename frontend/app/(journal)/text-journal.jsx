@@ -6,6 +6,7 @@ import {
   TouchableOpacity,
 } from 'react-native'
 import { useEffect, useState } from 'react'
+import { SafeAreaView } from 'react-native-safe-area-context'
 import { router } from 'expo-router'
 
 import BackButton from '../../components/backButton'
@@ -16,6 +17,7 @@ import { createJournal } from '../../api/journal'
 import { listEmotion } from '../../api/emotion'
 import Loading from '../../components/loading'
 import ConfirmModal from '../../components/confirmModal'
+import emotionWheelImg from '../../assets/emotionWheel.jpg'
 
 const TextJournal = () => {
   const [form, setForm] = useState({
@@ -26,9 +28,11 @@ const TextJournal = () => {
 
   const [isLoading, setIsLoading] = useState(false)
   const [isModalVisible, setIsModalVisible] = useState(false)
+  const [isEmotionModalVisible, setIsEmotionModalVisible] = useState(false)
   const [emotions, setEmotions] = useState([])
   const [selectedEmotion, setSelectedEmotion] = useState(1)
   const [selectedFeelings, setSelectedFeelings] = useState([])
+  const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     const fetchData = async () => {
@@ -37,6 +41,8 @@ const TextJournal = () => {
         setEmotions(emotionResponse)
       } catch (error) {
         console.error(error)
+      } finally {
+        setLoading(false)
       }
     }
     fetchData()
@@ -57,8 +63,19 @@ const TextJournal = () => {
     }
   }
 
+  if (loading) {
+    return (
+      <SafeAreaView className="flex-1 p-4 bg-optimistic-gray-10">
+        <StatusBar barStyle="dark-content" />
+        <View className="flex-1 justify-center items-center">
+          <Loading />
+        </View>
+      </SafeAreaView>
+    )
+  }
+
   return (
-    <View className="flex-1">
+    <View className="flex-1 bg-optimistic-gray-10">
       <StatusBar barStyle="light-content" />
       <View className="h-[20vh] bg-mindful-brown-70 justify-center p-4 pt-6">
         <BackButton buttonStyle="mb-4" />
@@ -80,6 +97,18 @@ const TextJournal = () => {
           handleConfirm={() => {
             setIsModalVisible(false)
             router.push('/journal-home')
+          }}
+        />
+      )}
+      {isEmotionModalVisible && (
+        <ConfirmModal
+          title="Wheel of Emotions"
+          subTitle="How do you feel today?"
+          imageSource={emotionWheelImg}
+          confirmButtonTitle="Ok, Thanks!"
+          isConfirmButton={true}
+          handleConfirm={() => {
+            setIsEmotionModalVisible(false)
           }}
         />
       )}
@@ -106,6 +135,11 @@ const TextJournal = () => {
               <Text className="font-urbanist-bold text-lg">
                 Select your emotion
               </Text>
+              <TouchableOpacity onPress={() => setIsEmotionModalVisible(true)}>
+                <Text className="font-urbanist-semi-bold text-serenity-green-60">
+                  View Wheel of Emotions
+                </Text>
+              </TouchableOpacity>
               <View className="flex flex-wrap flex-row">
                 {emotions
                   .filter((emotion) => emotion.level === 'Inner')
