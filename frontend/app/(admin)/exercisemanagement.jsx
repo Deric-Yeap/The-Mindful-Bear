@@ -96,8 +96,9 @@ const ExerciseManagement = () => {
               className="flex-row items-center justify-between bg-serenity-green-50 rounded-[15px] py-4 px-4 mb-6"
               onPress={() => handleExercisePress(exercise)}
             >
-             <Text className="text-mindful-brown-10 text-base mr-1">
-                {exercise.description}
+              <Text className="text-mindful-brown-10 font-bold text-lg">
+
+              {exercise.description}
               </Text>
               <View style={{ justifyContent: 'center', alignItems: 'center' }}>
                   <Icon name="chevron-right" size={20} color={colors.mindfulBrown10} /> 
