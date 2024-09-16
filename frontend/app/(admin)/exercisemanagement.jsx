@@ -14,8 +14,8 @@ import { router } from 'expo-router' // Import router from expo-router
 import { Link } from 'expo-router'
 import StatusBarComponent from '../../components/darkThemStatusBar'
 import { colors } from '../../common/styles'
-import Loading from '../../components/loading';
-import Icon from 'react-native-vector-icons/FontAwesome'; // Import the icon 
+import Loading from '../../components/loading'; 
+import Icon from 'react-native-vector-icons/FontAwesome';
 
 const ExerciseManagement = () => {
   const [loading, setLoading] = useState(true) // Loading state
@@ -62,7 +62,7 @@ const ExerciseManagement = () => {
   const handleExercisePress = (exercise) => {
     console.log(`Navigating to exercise details:`, exercise)
     router.push({
-      pathname: '/exercisedetails',
+      pathname: '/exerciseCreator',
       params: { exercise: JSON.stringify(exercise) },
     })
   }
@@ -81,7 +81,7 @@ const ExerciseManagement = () => {
             <Text className="text-mindful-brown-80 font-bold text-3xl">
               Exercises
             </Text>
-            <Link href="/" asChild>
+            <Link href="/exerciseCreator" asChild>
               <TouchableOpacity className="bg-mindful-brown-80 px-4 py-1 rounded-full">
                 <Text className="text-white font-bold text-base">
                   Create Exercises
@@ -97,8 +97,7 @@ const ExerciseManagement = () => {
               onPress={() => handleExercisePress(exercise)}
             >
               <Text className="text-mindful-brown-10 font-bold text-lg">
-
-              {exercise.description}
+                {exercise.exercise_name}
               </Text>
               <View style={{ justifyContent: 'center', alignItems: 'center' }}>
                   <Icon name="chevron-right" size={20} color={colors.mindfulBrown10} /> 
