@@ -80,9 +80,7 @@ const Landmark = () => {
 
       <ScrollView className="px-4 mt-4">
         <View className="flex-row justify-between items-center pt-4 pb-0 px-4 mb-4">
-          <Text className="text-mindful-brown-80 font-bold text-3xl">
-            Landmarks
-          </Text>
+          
         
         {/* <Link href="/landmarkCreator" asChild>
             <TouchableOpacity className="bg-mindful-brown-80 px-4 py-1 rounded-full">
