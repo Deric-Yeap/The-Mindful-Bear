@@ -8,6 +8,14 @@ export const journalCountByYear = (params) => {
   return axiosInstance.get('journal/journal_count_year/', { params })
 }
 
+export const journalEntriesByDate = (params) => {
+  return axiosInstance.get('journal/journal_entries_by_date/', { params })
+}
+
+export const journalEntryById = (id) => {
+  return axiosInstance.get(`journal/journal_entry_by_id/${id}/`)
+}
+
 export const createJournal = (data) => {
   return axiosInstance.post('journal/create/', data)
 }
