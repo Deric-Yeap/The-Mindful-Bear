@@ -160,7 +160,7 @@ const LandmarkCreator = () => {
             numberOfLines={3}
           />
           <View className="flex-row gap-3.5 items-start w-full justify-center mb-4">
-            <View className="flex flex-col w-[45%]">
+            <View className="flex flex-col w-[35%]">
               <Text className="self-start text-mindful-brown-80 text-lg font-urbanist-extra-bold">Coordinate-x</Text>
               <TextInput
                 className="mt-4 text-black rounded-3xl bg-zinc-300 px-4 pt-2.5 pb-2.5 h-[41px]"
@@ -169,7 +169,7 @@ const LandmarkCreator = () => {
                 onChangeText={setXCoordinates}
               />
             </View>
-            <View className="flex flex-col w-[45%]">
+            <View className="flex flex-col w-[35%]">
               <Text className="self-start text-mindful-brown-80 text-lg font-urbanist-extra-bold">Coordinate-y</Text>
               <TextInput
                 className="mt-4 text-black rounded-3xl bg-zinc-300 px-4 pt-2.5 pb-2.5 h-[41px]"
@@ -177,6 +177,25 @@ const LandmarkCreator = () => {
                 value={yCoordinates}
                 onChangeText={setYCoordinates}
               />
+            </View>
+
+              <View className="flex flex-col w-[20%] justify-center">
+              <Text className="self-start text-mindful-brown-80 text-lg font-urbanist-extra-bold"></Text>
+
+              <TouchableOpacity
+                  onPress={() => Alert.alert('Search button pressed')}
+                  className="mt-4 bg-mindful-brown-80 rounded-3xl h-[41px] flex items-center justify-center"
+                >
+              <Text className="text-white text-base font-bold">Search</Text>
+            </TouchableOpacity>
+              
+
+                {/* <TouchableOpacity
+                  onPress={() => Alert.alert('Search button pressed')}
+                  className="mt-4 ml-2 bg-mindful-brown-80 rounded-3xl h-[41px] w-[41px] flex items-center justify-center"
+                >
+                  <Text className="text-white text-base font-bold">Search</Text>
+                </TouchableOpacity> */}
             </View>
           </View>
           <View className="mb-4">
