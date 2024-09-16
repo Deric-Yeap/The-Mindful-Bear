@@ -41,18 +41,26 @@ const ExerciseCreator = () => {
   const [selectedLandmarks, setSelectedLandmarks] = useState([]);
   
   const [showSuccess, setShowSuccess] = useState(false);
+  const [allLandmarksAssigned, setAllLandmarksAssigned] = useState(false);
 
   useEffect(() => {
     const fetchLandmarks = async () => {
       try {
         const data = await getLandmarks();
-        const formattedData = data.map(item => ({ key: item.landmark_id, value: item.landmark_name })); 
-        setLandmarkList(formattedData);
+        const formattedData = data.map(item => ({ key: item.landmark_id, value: item.landmark_name, exercise_id: item.exercise.exercise_id })); 
+        console.log('all landmarks list',formattedData)
+
+        // Filter out landmarks that are already assigned to another exercise
+        const availableLandmarks = formattedData.filter(item => !item.exercise_id || (exercise && exercise.landmarks.includes(item.key)));
+        setLandmarkList(availableLandmarks);
+        console.log("available landmarks",availableLandmarks)
+        setAllLandmarksAssigned(availableLandmarks.length === 0);
+        console.log("are all landmarks assigned?",allLandmarksAssigned);
   
         if (exercise?.landmarks) {
           setSelectedLandmarks(exercise.landmarks
             .map(key => {
-              const foundLandmark = formattedData.find(item => item.key === key);
+              const foundLandmark = availableLandmarks.find(item => item.key === key);
               return foundLandmark ? foundLandmark.value : null;
             })
             .filter(value => value !== null)
@@ -77,7 +85,7 @@ const ExerciseCreator = () => {
       exercise_name: exerciseName,
       description: description,
       audio_file: audioFile,
-      landmarks: landmarkList.map(item => item.key),
+      landmarks: selectedLandmarks.map(item => item.key),
     };    
     
     try {
@@ -172,14 +180,26 @@ const ExerciseCreator = () => {
           <Text className="underline text-mindful-brown-100 text-lg">{truncateFileName(audioFile.name)}</Text>
         </View>  
         <View className="flex-row items-center my-4 px-4 w-full">
-          <MultiselectDropdown            
+          {/* <MultiselectDropdown            
             title="Assigned Landmarks"
             data={landmarkList}
             placeHolder="Select Landmarks"
             handleSelect={handleLandmarkSelect}
             selectedItems={selectedLandmarks}
             disabled={false}
-          />
+          /> */}
+          {allLandmarksAssigned ? (
+            <Text className="text-mindful-brown-100 text-lg">All landmarks have been assigned an exercise</Text>
+          ) : (
+            <MultiselectDropdown            
+              title="Assigned Landmarks"
+              data={landmarkList}
+              placeHolder="Select Landmarks"
+              handleSelect={handleLandmarkSelect}
+              selectedItems={selectedLandmarks}
+              disabled={false}
+            />
+          )}
         </View>
         <View className="mb-4 px-4 w-full">
           <CustomButton
