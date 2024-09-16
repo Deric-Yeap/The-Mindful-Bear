@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, ScrollView, TextInput, TouchableOpacity, Image, Alert } from 'react-native';
 import { launchImageLibrary } from 'react-native-image-picker';
 import { useRoute } from '@react-navigation/native';
-import BackButton from '../../components/backButton';
+import LandmarkBackButton from '../../components/landmarkBackButton';
 import Dropdown from '../../components/dropdown';
 import CustomButton from '../../components/customButton';
 import { createLandmark, updateLandmark } from '../../api/landmark';
@@ -15,7 +15,8 @@ import { useRouter } from 'expo-router';
 const LandmarkCreator = () => {
   const route = useRoute();
   const router = useRouter();
-  var { landmark } = route.params || {}; 
+  const { landmark, latitude, longitude } = route.params || {}; 
+  console.log("route",route.params)
   if (landmark) {
     try {
       landmark = JSON.parse(landmark);
@@ -27,8 +28,8 @@ const LandmarkCreator = () => {
   const [landmarkName, setLandmarkName] = useState(landmark?.landmark_name || '');
   const [landmarkDescription, setLandmarkDescription] = useState(landmark?.landmark_description || '');
   const [exerciseId, setExerciseId] = useState(landmark?.exercise?.exercise_id || '');
-  const [xCoordinates, setXCoordinates] = useState(landmark?.x_coordinates || '');
-  const [yCoordinates, setYCoordinates] = useState(landmark?.y_coordinates || '');
+  const [xCoordinates, setXCoordinates] = useState(latitude || landmark?.x_coordinates || '');
+  const [yCoordinates, setYCoordinates] = useState(longitude || landmark?.y_coordinates || '');
   const [imageFile, setImageFile] = useState({
     uri: landmark?.image_file_url || "https://cdn.builder.io/api/v1/image/assets/TEMP/4b116fb504bae4e96910a8019ffd8338d6215db8183025d8130d5d03956a6e90?apiKey=004e7e3501424a9a9c0fe2fe31f6ca4a&",
     fileName: landmark?.landmark_image_url?.split('/').pop() || "image.jpeg",
@@ -125,7 +126,7 @@ const LandmarkCreator = () => {
     <ScrollView className="flex-1" contentContainerStyle={{ flexGrow: 1 }} bounces={false}>
       <View className="flex flex-col bg-stone-100 ">
         <View className="bg-mindful-brown-100 p-4 ">
-          <BackButton title={landmark ? "Modify Landmark" : "Create Landmark"} />
+          <LandmarkBackButton title={landmark ? "Modify Landmark" : "Create Landmark"} route='/landmark'/>
         </View>
         <View className="flex relative flex-col pb-2 w-full aspect-[1.011]">
           <Image
@@ -183,8 +184,8 @@ const LandmarkCreator = () => {
               <Text className="self-start text-mindful-brown-80 text-lg font-urbanist-extra-bold"></Text>
 
               <TouchableOpacity
-                  onPress={() => Alert.alert('Search button pressed')}
-                  className="mt-4 bg-mindful-brown-80 rounded-3xl h-[41px] flex items-center justify-center"
+                 onPress={() => router.push('/selectLocation')} // Navigate to SelectLocationMap component
+      className="mt-4 bg-mindful-brown-80 rounded-3xl h-[41px] flex items-center justify-center"
                 >
               <Text className="text-white text-base font-bold">Search</Text>
             </TouchableOpacity>
