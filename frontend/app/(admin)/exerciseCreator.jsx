@@ -189,7 +189,11 @@ const ExerciseCreator = () => {
             disabled={false}
           /> */}
           {allLandmarksAssigned ? (
-            <Text className="text-mindful-brown-100 text-lg">All landmarks have been assigned an exercise</Text>
+            exercise ? (
+              <Text className="text-mindful-brown-100 text-lg">All landmarks have been assigned an exercise</Text>
+            ) : (
+              <View style={{ height: 20 }} /> // Blank space
+            )
           ) : (
             <MultiselectDropdown            
               title="Assigned Landmarks"
