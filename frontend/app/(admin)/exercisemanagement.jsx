@@ -97,7 +97,8 @@ const ExerciseManagement = () => {
               onPress={() => handleExercisePress(exercise)}
             >
               <Text className="text-mindful-brown-10 font-bold text-lg">
-                {exercise.description}
+
+              {exercise.description}
               </Text>
               <View style={{ justifyContent: 'center', alignItems: 'center' }}>
                   <Icon name="chevron-right" size={20} color={colors.mindfulBrown10} /> 

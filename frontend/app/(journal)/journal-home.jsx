@@ -1,16 +1,26 @@
 import React, { useEffect, useState } from 'react'
-import { View, Text, TouchableOpacity, ScrollView } from 'react-native'
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  ScrollView,
+  StatusBar,
+} from 'react-native'
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons'
-import { router } from 'expo-router'
+import { Link, router } from 'expo-router'
+import { SafeAreaView } from 'react-native-safe-area-context'
 
 import { journalCalendarSumary, journalCountByYear } from '../../api/journal'
 import { monthNames, daysOfWeek } from '../../common/constants'
+import Loading from '../../components/loading'
 
 const JournalHome = () => {
   const [calendarData, setCalendarData] = useState([])
   const [journalCount, setJournalCount] = useState(0)
+  const [loading, setLoading] = useState(true)
   const currentMonth = new Date().getMonth() + 1
   const currentYear = new Date().getFullYear()
+
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -25,6 +35,8 @@ const JournalHome = () => {
         setCalendarData(response.weeks)
       } catch (error) {
         console.error(error)
+      } finally {
+        setLoading(false)
       }
     }
 
@@ -38,6 +50,17 @@ const JournalHome = () => {
   }
 
   let dayCounter = 1
+
+  if (loading) {
+    return (
+      <SafeAreaView className="flex-1 p-4 bg-white">
+        <StatusBar barStyle="dark-content" />
+        <View className="flex-1 justify-center items-center">
+          <Loading />
+        </View>
+      </SafeAreaView>
+    )
+  }
 
   return (
     <ScrollView>
@@ -68,8 +91,14 @@ const JournalHome = () => {
           {/* calendar stuff */}
           <View className="flex flex-row justify-center items-center">
             <Text className="font-urbanist-extra-bold text-black text-2xl">
-              {monthNames[currentMonth]} {currentYear}
+              {monthNames[currentMonth - 1]} {currentYear}
             </Text>
+            <Link
+              href="/(journal)/journal-history"
+              className="font-urbanist-semi-bold text-serenity-green-60 ml-1"
+            >
+              See all
+            </Link>
           </View>
           <View className="w-[100vw] px-4">
             <View className="flex flex-row justify-between mb-4">

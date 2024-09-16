@@ -11,6 +11,7 @@ import ConfirmModal from '../../components/confirmModal';
 import { confirmModal } from '../../assets/image'
 import { useRouter } from 'expo-router';
 
+
 const LandmarkCreator = () => {
   const route = useRoute();
   const router = useRouter();
@@ -123,7 +124,7 @@ const LandmarkCreator = () => {
   return (
     <ScrollView className="flex-1" contentContainerStyle={{ flexGrow: 1 }} bounces={false}>
       <View className="flex flex-col bg-stone-100 ">
-        <View className="bg-mindful-brown-100 p-4 rounded-b-3xl">
+        <View className="bg-mindful-brown-100 p-4 ">
           <BackButton title={landmark ? "Modify Landmark" : "Create Landmark"} />
         </View>
         <View className="flex relative flex-col pb-2 w-full aspect-[1.011]">

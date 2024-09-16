@@ -11,3 +11,5 @@ boto3
 cryptography
 django-rest-passwordreset
 Pillow
+pydub
+vosk
