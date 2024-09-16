@@ -61,7 +61,7 @@ const ExerciseManagement = () => {
   const handleExercisePress = (exercise) => {
     console.log(`Navigating to exercise details:`, exercise)
     router.push({
-      pathname: '/exercisedetails',
+      pathname: '/exerciseCreator',
       params: { exercise: JSON.stringify(exercise) },
     })
   }
@@ -80,7 +80,7 @@ const ExerciseManagement = () => {
             <Text className="text-mindful-brown-80 font-bold text-3xl">
               Exercises
             </Text>
-            <Link href="/" asChild>
+            <Link href="/exerciseCreator" asChild>
               <TouchableOpacity className="bg-mindful-brown-80 px-4 py-1 rounded-full">
                 <Text className="text-white font-bold text-base">
                   Create Exercises
@@ -96,7 +96,7 @@ const ExerciseManagement = () => {
               onPress={() => handleExercisePress(exercise)}
             >
               <Text className="text-mindful-brown-10 text-base mr-1">
-                {exercise.description}
+                {exercise.exercise_name}
               </Text>
               <MaterialIcons name="chevron-right" size={24} color="#9BB167" />
             </TouchableOpacity>
