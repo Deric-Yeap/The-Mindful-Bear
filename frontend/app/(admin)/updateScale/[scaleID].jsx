@@ -11,6 +11,7 @@ import { colors } from '../../../common/styles'
 import Loading from '../../../components/loading'
 import ConfirmModal from '../../../components/confirmModal' 
 import { confirmModal } from '../../../assets/image'
+import { router } from 'expo-router';
 
 
 const UpdateScale = () => {
@@ -342,6 +343,7 @@ useEffect(() => {
           subTitle={successMessage}
           handleConfirm={() => {
             setIsSuccessModalOpen(false)
+            router.push('../form'); 
           }}
         />
       )}
