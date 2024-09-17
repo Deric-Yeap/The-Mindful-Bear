@@ -9,7 +9,7 @@ import { useLocalSearchParams } from 'expo-router'
 import CustomButton from '../../../components/customButton'
 import { colors } from '../../../common/styles'
 import Loading from '../../../components/loading'
-import ConfirmModal from '../../../components/confirmModal' // Ensure this component exists
+import ConfirmModal from '../../../components/confirmModal' 
 import { confirmModal } from '../../../assets/image'
 
 
@@ -337,7 +337,7 @@ useEffect(() => {
           isConfirmButton={true}
           isCancelButton={false}
           imageSource={confirmModal}
-          confirmButtonTitle={'Exit'}
+          confirmButtonTitle={'Ok'}
           title={'Success'}
           subTitle={successMessage}
           handleConfirm={() => {
