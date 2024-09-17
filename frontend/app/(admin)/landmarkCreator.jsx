@@ -90,8 +90,8 @@ const LandmarkCreator = () => {
 
   // Handle map location selection
   const handleLocationSelected = (selectedLocation) => {
-    setXCoordinates(selectedLocation.latitude);
-    setYCoordinates(selectedLocation.longitude);
+    setYCoordinates(selectedLocation.latitude);
+    setXCoordinates(selectedLocation.longitude);
     setIsMapVisible(false); // Hide map after selection
     console.log('Selected location:', selectedLocation.latitude, selectedLocation.longitude);
   };

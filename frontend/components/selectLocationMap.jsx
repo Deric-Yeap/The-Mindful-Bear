@@ -50,8 +50,9 @@ const SelectLocationMap = ({ onLocationSelected }) => {
           onPress={handleMapPress} // Add the press event to capture location
         >
           {selectedLocation && (
-            <Mapbox.MarkerView
-              coordinate={[selectedLocation.longitude, selectedLocation.latitude]}
+            <Mapbox.PointAnnotation
+              id="selectedLocation"
+              coordinate={[parseFloat(selectedLocation.longitude), parseFloat(selectedLocation.latitude)]}
             />
           )}
           <Mapbox.Camera
@@ -70,8 +71,8 @@ const SelectLocationMap = ({ onLocationSelected }) => {
           <TextInput
             className="mt-2 text-black rounded-3xl bg-gray-200 px-4 py-2 h-10"
             placeholder="Coordinate-x"
-            value={latitude}
-            onChangeText={setLatitude}
+            value={longitude}
+            onChangeText={setLongitude}
           />
         </View>
         <View>
@@ -79,8 +80,8 @@ const SelectLocationMap = ({ onLocationSelected }) => {
           <TextInput
             className="mt-2 text-black rounded-3xl bg-gray-200 px-4 py-2 h-10"
             placeholder="Coordinate-y"
-            value={longitude}
-            onChangeText={setLongitude}
+            value={latitude}
+            onChangeText={setLatitude}
           />
         </View>
       </View>
