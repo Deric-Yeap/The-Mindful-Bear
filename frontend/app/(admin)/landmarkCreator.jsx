@@ -11,13 +11,26 @@ import ConfirmModal from '../../components/confirmModal';
 import { confirmModal } from '../../assets/image'
 import { useRouter } from 'expo-router';
 
+import { colors } from '../../common/styles';
+
 
 const LandmarkCreator = () => {
   const route = useRoute();
   const router = useRouter();
-  const { landmark, latitude, longitude } = route.params || {}; 
-  console.log("route",route.params)
+
+  
+
+  const { query } = router;
+  const { latitude, longitude } = query || {};
+
+  console.log("Received Latitude:", latitude);
+  console.log("Received Longitude:", longitude);
+ 
+
+  var { landmark } = route.params || {}; // Get latitude and longitude if available
+  
   if (landmark) {
+    
     try {
       landmark = JSON.parse(landmark);
     } catch (error) {
@@ -25,6 +38,14 @@ const LandmarkCreator = () => {
       landmark = null; 
     }
   }
+
+  useEffect(() => {
+    if (latitude && longitude) {
+      setXCoordinates(latitude.toString());
+      setYCoordinates(longitude.toString());
+    }
+  }, [latitude, longitude]);
+
   const [landmarkName, setLandmarkName] = useState(landmark?.landmark_name || '');
   const [landmarkDescription, setLandmarkDescription] = useState(landmark?.landmark_description || '');
   const [exerciseId, setExerciseId] = useState(landmark?.exercise?.exercise_id || '');
@@ -38,6 +59,7 @@ const LandmarkCreator = () => {
   const [exerciseList, setExerciseList] = useState([]);
   const [selectedExerciseName, setSelectedExerciseName] = useState('');
   const [showSuccess, setShowSuccess] = useState(false);
+  
 
 
   useEffect(() => {
@@ -49,14 +71,20 @@ const LandmarkCreator = () => {
         if (exerciseId) {
           const selectedExercise = data.find(exercise => exercise.exercise_id === exerciseId);          
           setSelectedExerciseName(selectedExercise?.exercise_name || '');
+          
         }
       } catch (error) {
         console.error(error);
+        
+
       }
     };
 
     fetchExercises();    
   }, []);
+
+  
+
   const handleChoosePhoto = () => {
     launchImageLibrary({ noData: true }, (response) => {
       if (response.didCancel) {
@@ -183,9 +211,9 @@ const LandmarkCreator = () => {
               <View className="flex flex-col w-[20%] justify-center">
               <Text className="self-start text-mindful-brown-80 text-lg font-urbanist-extra-bold"></Text>
 
-              <TouchableOpacity
-                 onPress={() => router.push('/selectLocation')} // Navigate to SelectLocationMap component
-      className="mt-4 bg-mindful-brown-80 rounded-3xl h-[41px] flex items-center justify-center"
+              <TouchableOpacity 
+              onPress={() => router.push('/selectLocationMap')}
+              className="mt-4 bg-mindful-brown-80 rounded-3xl h-[41px] flex items-center justify-center"
                 >
               <Text className="text-white text-base font-bold">Search</Text>
             </TouchableOpacity>
