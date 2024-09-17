@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { View, Text, ScrollView } from 'react-native'
+import { View, Text, ScrollView, Alert } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import FormField from '../../../components/formField'
 import BrownPageTitlePortion from '../../../components/brownPageTitlePortion'
@@ -11,7 +11,6 @@ import { colors } from '../../../common/styles'
 import Loading from '../../../components/loading'
 import ConfirmModal from '../../../components/confirmModal' // Ensure this component exists
 import { confirmModal } from '../../../assets/image'
-import { router } from 'expo-router';
 
 
 const UpdateScale = () => {
@@ -21,7 +20,7 @@ const UpdateScale = () => {
   const [options, setOptions] = useState([])
   const [error, setError] = useState(null)
   const [description, setDescription] = useState({ description: '' })
-  const [errors, setErrors] = useState({ description: '', options: [] })
+  const [errors, setErrors] = useState({ description: '', options: [] });
   const [hasChanges, setHasChanges] = useState(false)
   const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false)
   const [isNoChangesModalOpen, setIsNoChangesModalOpen] = useState(false)
@@ -48,31 +47,30 @@ const UpdateScale = () => {
   }
 
   const validateForm = () => {
-    let valid = true
-    const newErrors = { description: '', options: [] }
-
-    if (!description.description.trim()) {
-      newErrors.description = 'Scale name cannot be empty.'
-      valid = false
+    let valid = true;
+    const newErrors = { description: '', options: [] };
+    if ((description.description.slice(15).length)===0) {
+        newErrors.description = 'Please input scale name.';
+        valid = false;
     }
 
     options.forEach((option, index) => {
-      if (!option.description.trim()) {
-        newErrors.options[index] = `Option ${option.value} cannot be empty.`
-        valid = false
-      } else {
-        newErrors.options[index] = ''
-      }
-    })
+        if (!option.description.trim()) {
+          newErrors[`options${option.value}`] = `Option ${option.value} cannot be empty.`;
+            valid = false;
+        } 
+    });
+    
 
-    setErrors(newErrors)
-    return valid
-  }
+    setErrors(newErrors);
+    return valid;
+};
 
   const handleSave = async () => {
     if (!validateForm()) {
-      return
-    }
+      Alert.alert('Validation Error', 'Please fill out all required fields.');
+      return; 
+  }
 
     if (!hasChanges) {
       setIsNoChangesModalOpen(true)
@@ -266,11 +264,9 @@ useEffect(() => {
             customStyles={`mb-1 ${errors.description ? 'border-red-500' : ''}`}
             editable={true}
           />
-          {errors.description && (
-            <Text style={{ color: 'red', marginLeft: 16 }}>
-              {errors.description}
-            </Text>
-          )}
+           {errors.description && (
+                    <Text style={{ color: 'red' }}>{errors.description}</Text>
+                )}
         </View>
 
         <View className="mx-4 mt-4">
@@ -278,7 +274,7 @@ useEffect(() => {
             .slice()
             .sort((a, b) => a.value - b.value)
             .map((option, index) => {
-              const hasError = !!errors.options[index]
+              const hasError = !!errors[`options${index}`];
               return (
                 <View key={option.id} className="mb-4">
                   <View className="flex-row items-center">
@@ -296,9 +292,9 @@ useEffect(() => {
                   </View>
                   {hasError && (
                     <Text style={{ color: 'red', marginLeft: '10%' }}>
-                      {errors.options[index]}
+                         {errors[`options${index}`]}
                     </Text>
-                  )}
+                )}
                 </View>
               )
             })}
