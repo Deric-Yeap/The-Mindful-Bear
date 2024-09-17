@@ -20,6 +20,7 @@ import SuccessMessage from '../../components/successMessage'
 import ConfirmModal from '../../components/confirmModal'
 import { colors } from '../../common/styles'
 
+
 const Landmark = () => {
   const [landmarks, setLandmarks] = useState([])
   const [showSuccess, setShowSuccess] = useState(false)
