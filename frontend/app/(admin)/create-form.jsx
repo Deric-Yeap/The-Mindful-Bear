@@ -9,9 +9,15 @@ import StatusBarComponent from '../../components/darkThemStatusBar'
 import CustomButton from '../../components/customButton'
 import { CreateFormAndQuestion } from '../../api/form'
 import { listOptionSet } from '../../api/option-set'
+import ConfirmModal from '../../components/confirmModal' 
+import { confirmModal } from '../../assets/image'
+
+
 
 const CreateForm = () => {
   const [responseTypeList, setResponseTypeList] = useState([])
+  const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false)
+  const [successMessage, setSuccessMessage] = useState('')
   const [request, setRequest] = useState({
     form_name: '',
     store_responses: false,
@@ -25,7 +31,7 @@ const CreateForm = () => {
       },
     ],
   })
-
+  
 
   const [errors, setErrors] = useState({
     form_name: '',
@@ -101,6 +107,7 @@ const CreateForm = () => {
       Alert.alert('Validation Error', 'Please fill out all required fields.')
       return
     }
+    
 
     try {
       const request_with_order = request.questions.map((question, index) => {
@@ -108,6 +115,9 @@ const CreateForm = () => {
       })
       request.questions = request_with_order
       const response = await CreateFormAndQuestion(request)
+
+      setSuccessMessage('Form Created successfully!')
+      setIsSuccessModalOpen(true)
      
     } catch (error) {
       console.error(error.response.data.error_description)
@@ -128,7 +138,6 @@ const CreateForm = () => {
       return { ...prevErrors, questions: newQuestionsErrors }
     })
   }
-
   
   const handleResponseTypeChange = (index, value) => {
     const newQuestions = [...request.questions]
@@ -344,6 +353,20 @@ const CreateForm = () => {
           buttonStyle="mx-4"
         />
       </ScrollView>
+
+      {isSuccessModalOpen && (
+        <ConfirmModal
+          isConfirmButton={true}
+          isCancelButton={false}
+          imageSource={confirmModal}
+          confirmButtonTitle={'Ok'}
+          title={'Success'}
+          subTitle={successMessage}
+          handleConfirm={() => {
+            setIsSuccessModalOpen(false)
+          }}
+        />
+      )}
     </SafeAreaView>
   )
 }
