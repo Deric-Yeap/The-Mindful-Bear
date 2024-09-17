@@ -173,7 +173,13 @@ const LandmarkCreator = () => {
         <View className="bg-mindful-brown-100 p-4 ">
           <LandmarkBackButton title={landmark ? "Modify Landmark" : "Create Landmark"} route='/landmark'/>
         </View>
+        {/* Conditionally render SelectLocationMap */}
+        {isMapVisible && (
+            <View className="absolute top-0 left-0 right-0 bottom-0 z-10">
+              <SelectLocationMap onLocationSelected={handleLocationSelected} />
+            </View>)}
         <View className="flex relative flex-col pb-2 w-full aspect-[1.011]">
+          
           <Image
             source={{ uri: imageFile.uri }}
             className="object-cover absolute inset-0 w-full h-full"
@@ -235,21 +241,10 @@ const LandmarkCreator = () => {
               <Text className="text-white text-base font-bold" >Search</Text>
             </TouchableOpacity>
               
-
-                {/* <TouchableOpacity
-                  onPress={() => Alert.alert('Search button pressed')}
-                  className="mt-4 ml-2 bg-mindful-brown-80 rounded-3xl h-[41px] w-[41px] flex items-center justify-center"
-                >
-                  <Text className="text-white text-base font-bold">Search</Text>
-                </TouchableOpacity> */}
             </View>
           </View>
 
-          {/* Conditionally render SelectLocationMap */}
-          {isMapVisible && (
-            <View style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, zIndex: 1000 }}>
-              <SelectLocationMap onLocationSelected={handleLocationSelected} />
-            </View>)}
+          
           <View className="mb-4">
             <Dropdown
               key={exerciseId || 'default-key'}
