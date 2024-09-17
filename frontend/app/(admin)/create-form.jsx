@@ -11,6 +11,7 @@ import { CreateFormAndQuestion } from '../../api/form'
 import { listOptionSet } from '../../api/option-set'
 import ConfirmModal from '../../components/confirmModal' 
 import { confirmModal } from '../../assets/image'
+import { router } from 'expo-router';
 
 
 
@@ -364,6 +365,7 @@ const CreateForm = () => {
           subTitle={successMessage}
           handleConfirm={() => {
             setIsSuccessModalOpen(false)
+            router.push('/form'); 
           }}
         />
       )}
