@@ -2,16 +2,17 @@ import React, { useState } from 'react'
 import { SafeAreaView, View, Text, Button, TextInput } from 'react-native'
 import Mapbox from '@rnmapbox/maps'
 import { useRouter } from 'expo-router';
-import CustomButton from '../../components/customButton';
+import CustomButton from './customButton';
 
 
-const SelectLocationMap = () => {
+const SelectLocationMap = ({ onLocationSelected }) => {
   Mapbox.setAccessToken(process.env.MAPBOX_PUBLIC_KEY) // Set your Mapbox token
+  console.log('SelectLocationMap component is rendering'); // Debug log
 
   const [selectedLocation, setSelectedLocation] = useState(null)
   const [latitude, setLatitude] = useState('');
   const [longitude, setLongitude] = useState('');
-  const router = useRouter() // Initialize router
+  // const router = useRouter() // Initialize router
 
   // Function to handle map tap and extract coordinates
   const handleMapPress = (event) => {
@@ -36,13 +37,7 @@ const SelectLocationMap = () => {
         latitude: selectedLocation.latitude,
         longitude: selectedLocation.longitude,
       });
-      router.push({
-        pathname: '/landmarkCreator',
-        query: {
-          latitude: selectedLocation.latitude,
-          longitude: selectedLocation.longitude,
-        },
-      })
+      onLocationSelected(selectedLocation);
     }
   }
 

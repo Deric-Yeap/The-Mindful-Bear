@@ -10,25 +10,28 @@ import { getExercises } from '../../api/exercise';
 import ConfirmModal from '../../components/confirmModal';
 import { confirmModal } from '../../assets/image'
 import { useRouter } from 'expo-router';
+import SelectLocationMap from '../../components/selectLocationMap'; // Import your map component
+
 
 import { colors } from '../../common/styles';
+
 
 
 const LandmarkCreator = () => {
   const route = useRoute();
   const router = useRouter();
 
-  
+  const [isMapVisible, setIsMapVisible] = useState(false);
 
-  const { query } = router;
-  const { latitude, longitude } = query || {};
+  // const { query } = router;
+  // const { latitude, longitude } = query || {};
 
-  console.log("Received Latitude:", latitude);
-  console.log("Received Longitude:", longitude);
+  // console.log("Received Latitude:", latitude);
+  // console.log("Received Longitude:", longitude);
  
 
-  var { landmark } = route.params || {}; // Get latitude and longitude if available
-  
+  var { landmark } = route.params || {}; 
+
   if (landmark) {
     
     try {
@@ -39,18 +42,18 @@ const LandmarkCreator = () => {
     }
   }
 
-  useEffect(() => {
-    if (latitude && longitude) {
-      setXCoordinates(latitude.toString());
-      setYCoordinates(longitude.toString());
-    }
-  }, [latitude, longitude]);
+  // useEffect(() => {
+  //   if (latitude && longitude) {
+  //     setXCoordinates(latitude.toString());
+  //     setYCoordinates(longitude.toString());
+  //   }
+  // }, [latitude, longitude]);
 
   const [landmarkName, setLandmarkName] = useState(landmark?.landmark_name || '');
   const [landmarkDescription, setLandmarkDescription] = useState(landmark?.landmark_description || '');
   const [exerciseId, setExerciseId] = useState(landmark?.exercise?.exercise_id || '');
-  const [xCoordinates, setXCoordinates] = useState(latitude || landmark?.x_coordinates || '');
-  const [yCoordinates, setYCoordinates] = useState(longitude || landmark?.y_coordinates || '');
+  const [xCoordinates, setXCoordinates] = useState(landmark?.x_coordinates || '');
+  const [yCoordinates, setYCoordinates] = useState(landmark?.y_coordinates || '');
   const [imageFile, setImageFile] = useState({
     uri: landmark?.image_file_url || "https://cdn.builder.io/api/v1/image/assets/TEMP/4b116fb504bae4e96910a8019ffd8338d6215db8183025d8130d5d03956a6e90?apiKey=004e7e3501424a9a9c0fe2fe31f6ca4a&",
     fileName: landmark?.landmark_image_url?.split('/').pop() || "image.jpeg",
@@ -63,6 +66,8 @@ const LandmarkCreator = () => {
 
 
   useEffect(() => {
+
+    
     const fetchExercises = async () => {
       try {
         const data = await getExercises();
@@ -83,7 +88,19 @@ const LandmarkCreator = () => {
     fetchExercises();    
   }, []);
 
-  
+  // Handle map location selection
+  const handleLocationSelected = (selectedLocation) => {
+    setXCoordinates(selectedLocation.latitude);
+    setYCoordinates(selectedLocation.longitude);
+    setIsMapVisible(false); // Hide map after selection
+    console.log('Selected location:', selectedLocation.latitude, selectedLocation.longitude);
+  };
+
+  const handleShowMap = () => {
+    console.log('Search button clicked'); // Debug log
+    setIsMapVisible(true);
+    console.log('isMapVisible state:', isMapVisible); 
+  };
 
   const handleChoosePhoto = () => {
     launchImageLibrary({ noData: true }, (response) => {
@@ -212,10 +229,10 @@ const LandmarkCreator = () => {
               <Text className="self-start text-mindful-brown-80 text-lg font-urbanist-extra-bold"></Text>
 
               <TouchableOpacity 
-              onPress={() => router.push('/selectLocationMap')}
+                onPress={handleShowMap}
               className="mt-4 bg-mindful-brown-80 rounded-3xl h-[41px] flex items-center justify-center"
                 >
-              <Text className="text-white text-base font-bold">Search</Text>
+              <Text className="text-white text-base font-bold" >Search</Text>
             </TouchableOpacity>
               
 
@@ -227,6 +244,12 @@ const LandmarkCreator = () => {
                 </TouchableOpacity> */}
             </View>
           </View>
+
+          {/* Conditionally render SelectLocationMap */}
+          {isMapVisible && (
+            <View style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, zIndex: 1000 }}>
+              <SelectLocationMap onLocationSelected={handleLocationSelected} />
+            </View>)}
           <View className="mb-4">
             <Dropdown
               key={exerciseId || 'default-key'}
