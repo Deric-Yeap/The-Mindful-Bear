@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, ScrollView, TextInput, TouchableOpacity, Image, Alert } from 'react-native';
 import { launchImageLibrary } from 'react-native-image-picker';
 import { useRoute } from '@react-navigation/native';
-import BackButton from '../../components/backButton';
+import LandmarkBackButton from '../../components/landmarkBackButton';
 import Dropdown from '../../components/dropdown';
 import CustomButton from '../../components/customButton';
 import { createLandmark, updateLandmark } from '../../api/landmark';
@@ -10,13 +10,30 @@ import { getExercises } from '../../api/exercise';
 import ConfirmModal from '../../components/confirmModal';
 import { confirmModal } from '../../assets/image'
 import { useRouter } from 'expo-router';
+import SelectLocationMap from '../../components/selectLocationMap'; // Import your map component
+
+
+import { colors } from '../../common/styles';
+
 
 
 const LandmarkCreator = () => {
   const route = useRoute();
   const router = useRouter();
+
+  const [isMapVisible, setIsMapVisible] = useState(false);
+
+  // const { query } = router;
+  // const { latitude, longitude } = query || {};
+
+  // console.log("Received Latitude:", latitude);
+  // console.log("Received Longitude:", longitude);
+ 
+
   var { landmark } = route.params || {}; 
+
   if (landmark) {
+    
     try {
       landmark = JSON.parse(landmark);
     } catch (error) {
@@ -24,6 +41,14 @@ const LandmarkCreator = () => {
       landmark = null; 
     }
   }
+
+  // useEffect(() => {
+  //   if (latitude && longitude) {
+  //     setXCoordinates(latitude.toString());
+  //     setYCoordinates(longitude.toString());
+  //   }
+  // }, [latitude, longitude]);
+
   const [landmarkName, setLandmarkName] = useState(landmark?.landmark_name || '');
   const [landmarkDescription, setLandmarkDescription] = useState(landmark?.landmark_description || '');
   const [exerciseId, setExerciseId] = useState(landmark?.exercise?.exercise_id || '');
@@ -37,9 +62,12 @@ const LandmarkCreator = () => {
   const [exerciseList, setExerciseList] = useState([]);
   const [selectedExerciseName, setSelectedExerciseName] = useState('');
   const [showSuccess, setShowSuccess] = useState(false);
+  
 
 
   useEffect(() => {
+
+    
     const fetchExercises = async () => {
       try {
         const data = await getExercises();
@@ -48,14 +76,32 @@ const LandmarkCreator = () => {
         if (exerciseId) {
           const selectedExercise = data.find(exercise => exercise.exercise_id === exerciseId);          
           setSelectedExerciseName(selectedExercise?.exercise_name || '');
+          
         }
       } catch (error) {
         console.error(error);
+        
+
       }
     };
 
     fetchExercises();    
   }, []);
+
+  // Handle map location selection
+  const handleLocationSelected = (selectedLocation) => {
+    setYCoordinates(selectedLocation.latitude);
+    setXCoordinates(selectedLocation.longitude);
+    setIsMapVisible(false); // Hide map after selection
+    console.log('Selected location:', selectedLocation.latitude, selectedLocation.longitude);
+  };
+
+  const handleShowMap = () => {
+    console.log('Search button clicked'); // Debug log
+    setIsMapVisible(true);
+    console.log('isMapVisible state:', isMapVisible); 
+  };
+
   const handleChoosePhoto = () => {
     launchImageLibrary({ noData: true }, (response) => {
       if (response.didCancel) {
@@ -124,10 +170,16 @@ const LandmarkCreator = () => {
   return (
     <ScrollView className="flex-1" contentContainerStyle={{ flexGrow: 1 }} bounces={false}>
       <View className="flex flex-col bg-stone-100 ">
-        <View className="bg-mindful-brown-100 p-4 rounded-b-3xl">
-          <BackButton title={landmark ? "Modify Landmark" : "Create Landmark"} />
+        <View className="bg-mindful-brown-100 p-4 ">
+          <LandmarkBackButton title={landmark ? "Modify Landmark" : "Create Landmark"} route='/landmark'/>
         </View>
+        {/* Conditionally render SelectLocationMap */}
+        {isMapVisible && (
+            <View className="absolute top-0 left-0 right-0 bottom-0 z-10">
+              <SelectLocationMap onLocationSelected={handleLocationSelected} />
+            </View>)}
         <View className="flex relative flex-col pb-2 w-full aspect-[1.011]">
+          
           <Image
             source={{ uri: imageFile.uri }}
             className="object-cover absolute inset-0 w-full h-full"
@@ -160,7 +212,7 @@ const LandmarkCreator = () => {
             numberOfLines={3}
           />
           <View className="flex-row gap-3.5 items-start w-full justify-center mb-4">
-            <View className="flex flex-col w-[45%]">
+            <View className="flex flex-col w-[35%]">
               <Text className="self-start text-mindful-brown-80 text-lg font-urbanist-extra-bold">Coordinate-x</Text>
               <TextInput
                 className="mt-4 text-black rounded-3xl bg-zinc-300 px-4 pt-2.5 pb-2.5 h-[41px]"
@@ -169,7 +221,7 @@ const LandmarkCreator = () => {
                 onChangeText={setXCoordinates}
               />
             </View>
-            <View className="flex flex-col w-[45%]">
+            <View className="flex flex-col w-[35%]">
               <Text className="self-start text-mindful-brown-80 text-lg font-urbanist-extra-bold">Coordinate-y</Text>
               <TextInput
                 className="mt-4 text-black rounded-3xl bg-zinc-300 px-4 pt-2.5 pb-2.5 h-[41px]"
@@ -178,7 +230,21 @@ const LandmarkCreator = () => {
                 onChangeText={setYCoordinates}
               />
             </View>
+
+              <View className="flex flex-col w-[20%] justify-center">
+              <Text className="self-start text-mindful-brown-80 text-lg font-urbanist-extra-bold"></Text>
+
+              <TouchableOpacity 
+                onPress={handleShowMap}
+              className="mt-4 bg-mindful-brown-80 rounded-3xl h-[41px] flex items-center justify-center"
+                >
+              <Text className="text-white text-base font-bold" >Search</Text>
+            </TouchableOpacity>
+              
+            </View>
           </View>
+
+          
           <View className="mb-4">
             <Dropdown
               key={exerciseId || 'default-key'}

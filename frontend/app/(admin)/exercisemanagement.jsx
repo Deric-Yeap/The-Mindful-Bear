@@ -15,6 +15,7 @@ import { Link } from 'expo-router'
 import StatusBarComponent from '../../components/darkThemStatusBar'
 import { colors } from '../../common/styles'
 import Loading from '../../components/loading'; 
+import Icon from 'react-native-vector-icons/FontAwesome';
 
 const ExerciseManagement = () => {
   const [loading, setLoading] = useState(true) // Loading state
@@ -95,10 +96,12 @@ const ExerciseManagement = () => {
               className="flex-row items-center justify-between bg-serenity-green-50 rounded-[15px] py-4 px-4 mb-6"
               onPress={() => handleExercisePress(exercise)}
             >
-              <Text className="text-mindful-brown-10 text-base mr-1">
+              <Text className="text-mindful-brown-10 font-bold text-lg">
                 {exercise.exercise_name}
               </Text>
-              <MaterialIcons name="chevron-right" size={24} color="#9BB167" />
+              <View style={{ justifyContent: 'center', alignItems: 'center' }}>
+                  <Icon name="chevron-right" size={20} color={colors.mindfulBrown10} /> 
+                </View>
             </TouchableOpacity>
           ))}
         </View>
