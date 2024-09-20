@@ -1,10 +1,15 @@
 import React from 'react';
 import { View, Text, ScrollView } from 'react-native';
 import SettingsItem from '../../components/settingsItem';
-
+import StatusBarComponent from '../../components/darkThemStatusBar';
+import TopBrownSearchBar from '../../components/topBrownSearchBar'
+import { colors } from '../../common/styles'
+import { SafeAreaView } from 'react-native-safe-area-context';
 const SettingsPage = () => {
   return (
-    <ScrollView className="bg-optimistic-gray-10 flex-1">
+    <SafeAreaView className="bg-optimistic-gray-10 flex-1">
+      <StatusBarComponent barStyle="light-content" backgroundColor={colors.mindfulBrown100}/>
+      <TopBrownSearchBar title="Settings" />
       <View className="p-4">
         {/* General Settings Section */}
         <View>
@@ -34,7 +39,7 @@ const SettingsPage = () => {
           <SettingsItem title="Log Out" iconName="logout" href="/logout" />
         </View>
       </View>
-    </ScrollView>
+    </SafeAreaView>
   );
 };
 

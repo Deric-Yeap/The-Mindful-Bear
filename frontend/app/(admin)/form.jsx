@@ -189,7 +189,7 @@ const Forms = () => {
                     </Text>
                   </View>
                   <View style={{ justifyContent: 'center', alignItems: 'center' }}>
-                    <Icon name="chevron-right" size={20} color={colors.mindfulBrown10} /> 
+                  <Text className="text-white font-urbanist-bold text-xl"> &#41; </Text>
                   </View>
                 </TouchableOpacity>
               //</Link>
@@ -217,7 +217,7 @@ const Forms = () => {
                   </Text>
                 </View>
                 <View style={{ justifyContent: 'center', alignItems: 'center' }}>
-                  <Icon name="chevron-right" size={20} color={colors.mindfulBrown10} /> 
+                <Text className="text-white font-urbanist-bold text-xl"> &#41; </Text>
                 </View>
               </TouchableOpacity>
             </Link>
