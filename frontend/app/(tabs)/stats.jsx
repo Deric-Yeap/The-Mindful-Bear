@@ -56,6 +56,27 @@ const analytics = () => {
                 </View>
               </TouchableOpacity>
             </Link>
+            <Link href="/journal-stats" asChild>
+              <TouchableOpacity className="bg-white p-4 rounded-2xl mb-4">
+                <View className="flex-row items-center justify-between">
+                  <View className="w-16 h-16 rounded-full bg-mindful-brown-20 flex items-center justify-center">
+                    <MaterialCommunityIcons
+                      name="book-open-variant"
+                      size={32}
+                      color="#704A33"
+                    />
+                  </View>
+                  <View className="flex-1 ml-4">
+                    <Text className="font-urbanist-bold text-lg">
+                     User Journal Stats
+                    </Text>
+                    <Text className="font-urbanist-regular">
+                      Sentiment analysis, frequency of journalling
+                    </Text>
+                  </View>
+                </View>
+              </TouchableOpacity>
+            </Link>
             <Link href="/admin/survey-scores" asChild>
               <TouchableOpacity className="bg-white p-4 rounded-2xl mb-4">
                 <View className="flex-row items-center justify-between">
