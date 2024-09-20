@@ -11,9 +11,15 @@ import { colors } from '../../common/styles'
 import { Image } from 'expo-image'
 import CustomButton from '../customButton'
 import BottomSheet, { BottomSheetView } from '@gorhom/bottom-sheet'
-import { Video, Audio } from 'expo-av'; 
+import { Video, Audio } from 'expo-av'
+import Slider from '@react-native-community/slider'
+import AudioPlayer from './audioPlayer'
 
-const BottomSheetModal = ({ handleModalOpen, landmarkData, openCompletedModal }) => {  
+const BottomSheetModal = ({
+  handleModalOpen,
+  landmarkData,
+  openCompletedModal,
+}) => {
   const landmarkIcons = [
     {
       icon: 'eye',
@@ -48,60 +54,54 @@ const BottomSheetModal = ({ handleModalOpen, landmarkData, openCompletedModal })
       color: '#4C72AB',
     },
   ]
-  const [isReached, setIsReached] = useState(false);//to set to true on reach and after an alert
-  const [sound, setSound] = useState();
-  const [isLoading, setIsLoading] = useState(false); 
-  const data = landmarkData?.properties;
-  const [isPlaying, setIsPlaying] = useState(false);
-
-
-
-const playAudio = async () => {
-  if (!isReached || !data?.exercise_audio_url) {
-    return; 
-  }
-
-  setIsLoading(true);
-
-  try {
-    const { sound } = await Audio.Sound.createAsync(
-      { uri: data.exercise_audio_url }
-    );
-    setSound(sound);
-  
-    sound.setOnPlaybackStatusUpdate((status) => {
-      if (status.didJustFinish) {
-        handleClose(); 
-        setIsPlaying(false); 
-      }
-    });
-
-    await sound.playAsync();
-    setIsPlaying(true); 
-    
-  } catch (error) {
-    console.error('Error playing audio:', error);
-  } finally {
-    setIsLoading(false); 
-  }
-};
-
-useEffect(() => {
-  if (isReached) {
-    playAudio();
-  }
-}, [isReached]);
-  
+  const darkerHex = 'white'
+  const lighterHex = 'white'
+  const [isSoundLoaded, setIsSoundLoaded] = useState(false)
+  const [isReached, setIsReached] = useState(false) //to set to true on reach and after an alert
+  const [sound, setSound] = useState()
+  const [isLoading, setIsLoading] = useState(false)
+  const data = landmarkData?.properties
+  const [isPlaying, setIsPlaying] = useState(false)
   const bottomSheetRef = useRef(null)
   const snapPoints = useMemo(() => ['60%', '100%'], [])
   const [currentSnapIndex, setCurrentSnapIndex] = useState(0)
   const [isFavorite, setIsFavorite] = useState(false)
   const [isExercise, setIsExercise] = useState(false)
+  const [position, setPosition] = useState(0)
+  const [duration, setDuration] = useState(0)
+
+  // const playAudio = async () => {
+  //   //uncomment when isReached created
+  //   // if (!isReached || !data?.exercise_audio_url) {
+  //   //   return
+  //   // }
+  //   if (!data?.exercise_audio_url) {
+  //     return
+  //   }
+
+  //   setIsLoading(true)
+
+  //   try {
+  //     const { sound } = await Audio.Sound.createAsync({
+  //       uri: data.exercise_audio_url,
+  //     })
+  //     setSound(sound)
+
+  //     sound.setOnPlaybackStatusUpdate(onPlaybackStatusUpdate)
+
+  //     await sound.playAsync()
+  //     setIsPlaying(true)
+  //   } catch (error) {
+  //     console.error('Error playing audio:', error)
+  //   } finally {
+  //     setIsLoading(false)
+  //   }
+  // }
 
   const handleClose = () => {
-    setIsExercise(false)    
+    setIsExercise(false)
     handleModalOpen(false)
-    openCompletedModal(true)    
+    // openCompletedModal(true)
   }
   const handleSheetChange = (index) => {
     setCurrentSnapIndex(index)
@@ -110,7 +110,7 @@ useEffect(() => {
     }
   }
   const toggleHeartColor = () => {
-    setIsReached(true)//temp way to trigger isReached
+    // setIsReached(true) //temp way to trigger isReached
     setIsFavorite(!isFavorite)
   }
   const handleExerciseButton = () => {
@@ -120,6 +120,12 @@ useEffect(() => {
       setIsExercise(true)
     }
   }
+
+  useEffect(() => {
+    if (isReached) {
+      playAudio()
+    }
+  }, [isReached])
 
   return (
     <BottomSheet
@@ -188,22 +194,12 @@ useEffect(() => {
           ))}
         </View>
         {isExercise ? (
-              <View className="relative w-full h-48 justify-center items-center">
-              <Video
-                source={require('../assets/exercise.mp4')}                 
-                className="w-full h-full"
-                resizeMode="cover"
-                isLooping 
-                shouldPlay={isPlaying}                
-                isMuted={true}
-              />
-                      
-              {!isPlaying && (
-                <TouchableOpacity onPress={playAudio} className="absolute justify-center items-center">
-                  <MaterialCommunityIcons name="play-circle-outline" size={60} color="white" />
-                </TouchableOpacity>
-              )}
-            </View>
+          <View className="relative w-full h-48 justify-center items-center">
+            <AudioPlayer
+              audioUri={data.exercise_audio_url}
+              imageUrl={data.landmark_image_url}
+            />
+          </View>
         ) : (
           // Show image for landmarks
           <Image

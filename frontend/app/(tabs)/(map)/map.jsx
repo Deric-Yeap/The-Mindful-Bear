@@ -48,7 +48,7 @@ const Map = () => {
 
   useEffect(() => {
     if (formData) {
-      setForm(JSON.parse(formData)) // Parse the formData and set it to the form state
+      setForm(JSON.parse(formData))
     }
   }, [formData])
 
@@ -199,7 +199,7 @@ const Map = () => {
                 handlePress={
                   isSessionStarted ? handleSessionEnd : handleSessionStart
                 }
-                buttonStyle={`w-11/12 z-10 absolute bottom-12 mb-1  self-center ${isSessionStarted ? 'bg-red-500' : ''} md:bottom-16`}
+                buttonStyle={`w-11/12 z-10 absolute bottom-24 mb-1  self-center ${isSessionStarted ? 'bg-red-500' : ''} md:bottom-16`}
                 textStyle="text-white"
               />
             )}
@@ -225,7 +225,7 @@ const Map = () => {
             isConfirmButton={true}
             isCancelButton={false}
             imageSource={confirmModal}
-            confirmButtonTitle={'Confirm'}            
+            confirmButtonTitle={'Confirm'}
             title={'+100'}
             subTitle={'Great Job!'}
             handleConfirm={() => setIsCompletedModalOpen(false)}
