@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import {View, Text, TouchableOpacity, FlatList, ActivityIndicator,} from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import TopBrownSearchBar from '../../components/topBrownSearchBar';
+import BrownPageTitlePortion from '../../components/brownPageTitlePortion';
 import StatusBarComponent from '../../components/darkThemStatusBar';
 import { Link } from 'expo-router';
 import { router } from 'expo-router';
@@ -15,7 +15,7 @@ const journalAnalytics = () => {
   return (
     <SafeAreaView className="bg-optimistic-gray-10 flex-1">
       <StatusBarComponent barStyle="light-content" backgroundColor={colors.mindfulBrown100}/>
-      <TopBrownSearchBar title="Mindful Journal Analytics" />
+      <BrownPageTitlePortion title="Mindful Journal Analytics" />
 
      
       
