@@ -100,8 +100,8 @@ const ExerciseManagement = () => {
                 {exercise.exercise_name}
               </Text>
               <View style={{ justifyContent: 'center', alignItems: 'center' }}>
-                  <Icon name="chevron-right" size={20} color={colors.mindfulBrown10} /> 
-                </View>
+                <Text className="text-white font-urbanist-bold text-xl"> &#41; </Text>
+              </View>
             </TouchableOpacity>
           ))}
         </View>
