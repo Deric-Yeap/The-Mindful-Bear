@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from ..exercise.serializer import ExerciseSerializer
+from ..exercise.serializer import ExerciseSerializer, ExerciseGetSerializer
 from ..exercise.models import Exercise
 from .models import Landmark
 from ..common.validators import is_field_empty
@@ -9,7 +9,7 @@ from urllib.parse import quote
 
 
 class LandmarkSerializer(serializers.ModelSerializer):
-    exercise = ExerciseSerializer(many=False, read_only=True)
+    exercise = ExerciseGetSerializer(read_only=True)
     image_file_url = serializers.SerializerMethodField()
 
     class Meta:

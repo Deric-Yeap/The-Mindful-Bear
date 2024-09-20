@@ -37,6 +37,7 @@ const Map = () => {
   const { sessionStarted, formData } = useLocalSearchParams() // Get sessionStarted and formData from the params
   const [form, setForm] = useState(initialFormState)
   const [isModalOpen, setIsModalOpen] = useState(false)
+  const [isCompletedModalOpen, setIsCompletedModalOpen] = useState(false)
   const [isSessionStarted, setIsSessionStarted] = useState(sessionStarted)
   const [landmarksData, setLandmarksData] = useState([])
   const [loading, setLoading] = useState(true)
@@ -219,10 +220,22 @@ const Map = () => {
             handleConfirm={handleSessionConfirmEnd}
           />
         )}
+        {isCompletedModalOpen && (
+          <ConfirmModal
+            isConfirmButton={true}
+            isCancelButton={false}
+            imageSource={confirmModal}
+            confirmButtonTitle={'Confirm'}            
+            title={'+100'}
+            subTitle={'Great Job!'}
+            handleConfirm={() => setIsCompletedModalOpen(false)}
+          />
+        )}
         {isBottomSheetOpen && selectedLandmark && (
           <BottomSheetModal
             handleModalOpen={handleBottomSheetModalOpen}
             landmarkData={selectedLandmark}
+            openCompletedModal={setIsCompletedModalOpen}
           />
         )}
       </View>

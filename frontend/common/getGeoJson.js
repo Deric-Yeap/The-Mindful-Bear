@@ -15,7 +15,7 @@ export const getGeoJson = (landmarks) => {
       landmark_description: marker.landmark_description,
       exercise_id: marker.exercise.exercise_id,
       exercise_name: marker.exercise.exercise_name,
-      exercise_audio_url: marker.exercise.audio_url,
+      exercise_audio_url: marker.exercise.file_url,
       exercise_description: marker.exercise.description,
     },
   }))
