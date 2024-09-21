@@ -139,6 +139,15 @@ const Map = () => {
   const resetForm = () => {
     setForm(initialFormState)
   }
+  const handleTravel = () => {
+    const selectedLandmarkCoords = selectedLandmark.geometry.coordinates
+    console.log(selectedLandmarkCoords)
+
+    if (!isSessionStarted) {
+      handleSessionStart()
+    }
+  }
+
   const geoJSON = getGeoJson(landmarksData)
 
   return (
@@ -158,8 +167,8 @@ const Map = () => {
                 rotateEnabled={true}
               >
                 <Mapbox.Camera
-                  centerCoordinate={[103.8348, 1.2804]}
-                  zoomLevel={17.5}
+                  centerCoordinate={[-122.084, 37.4219983]}
+                  zoomLevel={17.0}
                   animationMode="flyto"
                   animationDuration={1000}
                   pitch={60}
@@ -236,6 +245,7 @@ const Map = () => {
             handleModalOpen={handleBottomSheetModalOpen}
             landmarkData={selectedLandmark}
             openCompletedModal={setIsCompletedModalOpen}
+            handleTravel={handleTravel}
           />
         )}
       </View>

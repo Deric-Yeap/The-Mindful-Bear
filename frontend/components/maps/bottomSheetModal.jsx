@@ -1,24 +1,17 @@
 import React, { useState, useRef, useMemo, useEffect } from 'react'
-import {
-  View,
-  Text,
-  TouchableOpacity,
-  Dimensions,
-  StyleSheet,
-} from 'react-native'
+import { View, Text, TouchableOpacity, StyleSheet } from 'react-native'
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons'
 import { colors } from '../../common/styles'
 import { Image } from 'expo-image'
 import CustomButton from '../customButton'
 import BottomSheet, { BottomSheetView } from '@gorhom/bottom-sheet'
-import { Video, Audio } from 'expo-av'
-import Slider from '@react-native-community/slider'
 import AudioPlayer from './audioPlayer'
 
 const BottomSheetModal = ({
   handleModalOpen,
   landmarkData,
   openCompletedModal,
+  handleTravel,
 }) => {
   const landmarkIcons = [
     {
@@ -201,7 +194,6 @@ const BottomSheetModal = ({
             />
           </View>
         ) : (
-          // Show image for landmarks
           <Image
             id="landmark-image-frame"
             source={{ uri: data.landmark_image_url }}
@@ -232,7 +224,7 @@ const BottomSheetModal = ({
           {currentSnapIndex === 0 && (
             <CustomButton
               title={'Travel'}
-              handlePress={() => console.log('Travel')}
+              handlePress={handleTravel}
               buttonStyle={`w-full z-10 bg-[#24211E] rounded-full items-center`}
               textStyle="text-white mr-0"
             />
