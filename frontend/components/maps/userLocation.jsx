@@ -13,6 +13,7 @@ const UserLocationCustom = ({
   minDisplacement = 100,
   renderMode = 'normal',
   onUpdate,
+  setCurrentLocation,
 }) => {
   const [coordinates, setCoordinates] = useState(null)
   const [lastCoordinates, setLastCoordinates] = useState(null)
@@ -77,7 +78,7 @@ const UserLocationCustom = ({
 
     setCoordinates(currentCoordinates)
     setLastCoordinates(currentCoordinates)
-
+    if (setCurrentLocation) setCurrentLocation(currentCoordinates)
     if (onUpdate) onUpdate(location)
   }
 

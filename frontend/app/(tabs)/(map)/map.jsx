@@ -1,6 +1,11 @@
 import React, { useState, useEffect } from 'react'
-import { SafeAreaView } from 'react-native-safe-area-context'
-import { View, ScrollView, TouchableOpacity, Text } from 'react-native'
+import {
+  SafeAreaView,
+  View,
+  ScrollView,
+  TouchableOpacity,
+  Text,
+} from 'react-native'
 import Mapbox from '@rnmapbox/maps'
 import LottieView from 'lottie-react-native'
 import CustomButton from '../../../components/customButton'
@@ -14,12 +19,13 @@ import { confirmModal } from '../../../assets/image'
 import Loading from '../../../components/loading'
 import BottomSheetModal from '../../../components/maps/bottomSheetModal'
 import { useLocalSearchParams, useRouter } from 'expo-router'
-import { useDispatch } from 'react-redux'
+import { useDispatch, useSelector } from 'react-redux'
 import {
   setIsShownNav,
   clearIsShownNav,
 } from '../../../redux/slices/isShownNavSlice'
 import UserLocationCustom from '../../../components/maps/userLocation'
+import * as turf from '@turf/turf'
 
 const initialFormState = {
   start_datetime: '',
@@ -44,6 +50,9 @@ const Map = () => {
   const [isBottomSheetOpen, setIsBottomSheetOpen] = useState(false)
   const [selectedLandmark, setSelectedLandmark] = useState(null)
   const [location, setLocation] = useState(null)
+  const [routeGeoJSON, setRouteGeoJSON] = useState(null)
+  const [centerOfLineString, setCenterOfLineString] = useState(null)
+  const isShownNav = useSelector((state) => state.isShownNav).isShownNav
   const dispatch = useDispatch()
 
   useEffect(() => {
@@ -88,7 +97,8 @@ const Map = () => {
         ...prevForm,
         start_datetime: currentStartDateTime,
       }
-      //Start Session Survey
+
+      // Start Session Survey
       router.push({
         pathname: '/questionaire',
         params: {
@@ -139,17 +149,61 @@ const Map = () => {
   const resetForm = () => {
     setForm(initialFormState)
   }
-  const handleTravel = () => {
+  const handleTravel = async () => {
+    if (!location || !selectedLandmark) {
+      console.error('Current location or selected landmark is not available.')
+      return
+    }
+    if (!isSessionStarted) {
+      //edit behaviour to save routegeojson even when shifting page.
+      handleSessionStart()
+      return
+    }
     const selectedLandmarkCoords = selectedLandmark.geometry.coordinates
     console.log(selectedLandmarkCoords)
+    console.log(location)
 
-    if (!isSessionStarted) {
-      handleSessionStart()
+    try {
+      let response = await fetch(
+        `https://api.mapbox.com/directions/v5/mapbox/walking/${location[0]},${location[1]};${selectedLandmarkCoords[0]},${selectedLandmarkCoords[1]}?` +
+          new URLSearchParams({
+            geometries: 'geojson',
+            access_token: process.env.MAPBOX_PUBLIC_KEY,
+          })
+      )
+      let data = await response.json()
+      let lineStringGeoJSON = {
+        type: 'FeatureCollection',
+        features: [
+          {
+            type: 'Feature',
+            properties: {},
+            geometry: data?.routes[0]?.geometry,
+          },
+        ],
+      }
+      setRouteGeoJSON(lineStringGeoJSON)
+
+      let allCoordinates = lineStringGeoJSON?.features[0]?.geometry?.coordinates
+      console.log(
+        'onPressInterestSiteDirection',
+        data,
+        lineStringGeoJSON,
+        allCoordinates[Math.round(allCoordinates.length / 2)]
+      )
+      let featuresCenter = turf.points(allCoordinates)
+
+      let center = turf.center(featuresCenter)
+      setCenterOfLineString(center?.geometry?.coordinates)
+      setIsBottomSheetOpen(false)
+      if (!isShownNav) {
+        dispatch(setIsShownNav())
+      }
+    } catch (error) {
+      console.error('Error fetching route:', error)
     }
   }
-
   const geoJSON = getGeoJson(landmarksData)
-
   return (
     <SafeAreaView className="h-full">
       <View className="flex-1 relative">
@@ -177,6 +231,7 @@ const Map = () => {
                   animated={true}
                   visible={true}
                   showsUserHeadingIndicator={true}
+                  setCurrentLocation={setLocation}
                 />
                 {geoJSON?.features?.map((feature, index) => {
                   return (
@@ -200,6 +255,18 @@ const Map = () => {
                     </Mapbox.MarkerView>
                   )
                 })}
+                {routeGeoJSON && (
+                  <Mapbox.ShapeSource id="routeSource" shape={routeGeoJSON}>
+                    <Mapbox.LineLayer
+                      id="routeFill"
+                      style={{
+                        lineColor: 'blue',
+                        lineWidth: 3,
+                        lineOpacity: 0.75,
+                      }}
+                    />
+                  </Mapbox.ShapeSource>
+                )}
               </Mapbox.MapView>
             </View>
             {!isModalOpen && (
@@ -208,7 +275,7 @@ const Map = () => {
                 handlePress={
                   isSessionStarted ? handleSessionEnd : handleSessionStart
                 }
-                buttonStyle={`w-11/12 z-10 absolute bottom-24 mb-1  self-center ${isSessionStarted ? 'bg-red-500' : ''} md:bottom-16`}
+                buttonStyle={`w-11/12 z-10 absolute mb-1 bottom-20  self-center ${isSessionStarted ? 'bg-red-500 ' : ''} md:bottom-16`}
                 textStyle="text-white"
               />
             )}
