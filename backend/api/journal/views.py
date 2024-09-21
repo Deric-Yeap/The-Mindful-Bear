@@ -2,14 +2,14 @@ from datetime import datetime
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from .models import Journal
-from .serializer import JournalGetSerializer, JournalUploadFileSerializer, JournalCreateSerializer, JournalCalendarSerializer, JournalSummarySerializer, JournalEntriesByDateSerializer
+from .serializer import JournalGetSerializer, JournalUploadFileSerializer, JournalCreateSerializer, JournalCalendarSerializer, JournalSummarySerializer, JournalEntriesByDateSerializer,JournalEntriesByPeriodSerializer
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.parsers import MultiPartParser, FormParser
 from .models import Journal
 from ..common.audio import transcribe
-
+from rest_framework.exceptions import APIException
 
 
 class JournalListView(APIView):
@@ -109,6 +109,29 @@ class JournalEntriesByDateView(APIView):
             return Response(data, status=status.HTTP_200_OK)
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+class JournalEntriesByPeriodView(APIView):
+   def get(self, request, *args, **kwargs):
+        try:
+            start_date_str = request.query_params.get('start_date')
+            end_date_str = request.query_params.get('end_date')
+
+            if not start_date_str or not end_date_str:
+                return Response({"error": "Start date and end date are required parameters."}, status=status.HTTP_400_BAD_REQUEST)
+
+            start_date = datetime.strptime(start_date_str, '%Y-%m-%d')
+            end_date = datetime.strptime(end_date_str, '%Y-%m-%d')
+
+            if start_date > end_date:
+                return Response({"error": "Start date must be before or equal to end date."}, status=status.HTTP_400_BAD_REQUEST)
+
+            # Call your serializer method here
+            serializer = JournalEntriesByPeriodSerializer()
+            data = serializer.get_journal_entries_by_date_range(start_date, end_date)
+            return Response(data, status=status.HTTP_200_OK)
+
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         
 class JournalEntryByIdView(APIView):
     def get(self, request, id):

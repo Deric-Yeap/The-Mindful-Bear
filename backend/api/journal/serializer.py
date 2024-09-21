@@ -199,3 +199,17 @@ class JournalEntriesByDateSerializer(serializers.Serializer):
         }
         
         return data
+    
+class JournalEntriesByPeriodSerializer(serializers.Serializer):
+    
+    def get_journal_entries_by_date_range(self, start_date, end_date):
+        journals = Journal.objects.filter(upload_date__range=(start_date, end_date))
+        journal_dict = {}
+
+        current_date = start_date
+        while current_date <= end_date:
+            day_journals = journals.filter(upload_date__date=current_date.date()).order_by('-upload_date')
+            journal_dict[str(current_date.date())] = JournalGetSerializer(day_journals, many=True).data
+            current_date += timedelta(days=1)
+
+        return journal_dict

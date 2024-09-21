@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import JournalListView, UploadFileView, JournalCalendarView, CountYearJournalView, SpeechToTextView, JournalEntriesByDateView, JournalEntryByIdView
+from .views import JournalListView, UploadFileView, JournalCalendarView, CountYearJournalView, SpeechToTextView, JournalEntriesByDateView, JournalEntryByIdView,JournalEntriesByPeriodView
 
 urlpatterns = [
     path('create/', JournalListView.as_view()),
@@ -10,4 +10,5 @@ urlpatterns = [
     path("speech_to_text/", SpeechToTextView.as_view()),
     path("journal_entries_by_date/", JournalEntriesByDateView.as_view()),
     path("journal_entry_by_id/<int:id>/", JournalEntryByIdView.as_view()),
+    path('journal_entries_by_period/', JournalEntriesByPeriodView.as_view(), name='journal-entries-by-period'),
 ]
