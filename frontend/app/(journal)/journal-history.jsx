@@ -12,22 +12,21 @@ import { SafeAreaView } from 'react-native-safe-area-context'
 
 import BackButton from '../../components/backButton'
 import { journalEntriesByDate } from '../../api/journal'
-import { daysOfWeek } from '../../common/constants'
+import { monthNames, daysOfWeek } from '../../common/constants'
 import { adjustHexColor } from '../../common/hexColor'
 import Loading from '../../components/loading'
-
 
 const JournalHistory = () => {
   const [journals, setJournals] = useState([])
   const [selectedDate, setSelectedDate] = useState(null)
   const [loading, setLoading] = useState(true)
+  const [currentMonth, setCurrentMonth] = useState(new Date().getMonth() + 1)
+  const [currentYear, setCurrentYear] = useState(new Date().getFullYear())
   const router = useRouter()
-
-  const currentMonth = new Date().getMonth() + 1
-  const currentYear = new Date().getFullYear()
 
   useEffect(() => {
     const fetchData = async () => {
+      setLoading(true)
       try {
         const response = await journalEntriesByDate({
           year: currentYear,
@@ -43,12 +42,30 @@ const JournalHistory = () => {
     }
 
     fetchData()
-  }, [])
+  }, [currentMonth, currentYear])
 
   const getEmotionIcon = (sentiment) => {
     if (sentiment === 'Positive') return 'emoticon-happy'
     if (sentiment === 'Negative') return 'emoticon-sad'
     return 'emoticon-neutral'
+  }
+
+  const handlePreviousMonth = () => {
+    if (currentMonth === 1) {
+      setCurrentMonth(12)
+      setCurrentYear(currentYear - 1)
+    } else {
+      setCurrentMonth(currentMonth - 1)
+    }
+  }
+
+  const handleNextMonth = () => {
+    if (currentMonth === 12) {
+      setCurrentMonth(1)
+      setCurrentYear(currentYear + 1)
+    } else {
+      setCurrentMonth(currentMonth + 1)
+    }
   }
 
   if (loading) {
@@ -65,12 +82,15 @@ const JournalHistory = () => {
   return (
     <View className="flex-1">
       <StatusBar barStyle="light-content" />
-      <View className="h-[25vh] bg-mindful-brown-70 justify-center p-4 pt-10">
+      <View className="min-h-[10vh] bg-mindful-brown-70 justify-center p-4 pt-10">
         <BackButton buttonStyle="mb-4" />
         <Text className="font-urbanist-extra-bold text-3xl text-white">
-          My Journals
+          My Journals 
         </Text>
-        <ScrollView horizontal={true} className="flex-row p-1 space-x-4">
+        <ScrollView
+          horizontal={true}
+          className="flex-row py-1 h-[8vh] space-x-4"
+        >
           {journals &&
             Object.keys(journals).map((key) => {
               const date = new Date(key)
@@ -97,6 +117,21 @@ const JournalHistory = () => {
               )
             })}
         </ScrollView>
+        <View className="flex-row justify-between items-center">
+          <TouchableOpacity onPress={handlePreviousMonth}>
+            <Text className="font-urbanist-semi-bold text-zen-yellow-30">
+              Previous
+            </Text>
+          </TouchableOpacity>
+          <Text className="font-urbanist-extra-bold text-white text-2xl">
+            {monthNames[currentMonth - 1]} {currentYear}
+          </Text>
+          <TouchableOpacity onPress={handleNextMonth}>
+            <Text className="font-urbanist-semi-bold text-zen-yellow-30">
+              Next
+            </Text>
+          </TouchableOpacity>
+        </View>
       </View>
       <ScrollView className="p-4 flex-1 py-5">
         <Text className="font-urbanist-extra-bold text-xl text-mindful-brown-80">
@@ -179,7 +214,10 @@ const JournalHistory = () => {
                         <Text className="font-urbanist-extra-bold text-xl text-mindful-brown-90 pb-1">
                           {journal.title}
                         </Text>
-                        <Text className="font-urbanist-semi-bold text-lg text-optimistic-gray-60">
+                        <Text
+                          className="font-urbanist-semi-bold text-lg text-optimistic-gray-60"
+                          numberOfLines={10}
+                        >
                           {journal.journal_text}
                         </Text>
                       </View>
