@@ -18,9 +18,8 @@ const JournalStats = ({
   const [modalVisible, setModalVisible] = useState(false)
   const [startDate, setStartDate] = useState(null)
   const [endDate, setEndDate] = useState(null)
+  const [endDateForAxios, setEndDateForAxios] = useState(null)
   const [journals, setJournals] = useState([])
-  console.log('startdate', startDate)
-  console.log('enddate', endDate)
 
   const handleOnPress = () => {
     setModalVisible(true)
@@ -32,18 +31,23 @@ const JournalStats = ({
       // Selecting a new start date
       setStartDate(selectedDate)
       setEndDate(null)
+      setEndDateForAxios(null)
     } else if (selectedDate < startDate) {
       // If selected date is before start date, update the start date
       setStartDate(selectedDate)
       setEndDate(null)
+      setEndDateForAxios(null)
     } else {
-      // If the selected date is after start date, set it as end date or select single date
+      // Set as end date or select single date
       if (selectedDate.toISOString().split('T')[0] === startDate.toISOString().split('T')[0]) {
-        // If the selected date is the same as the start date, clear the selection (single date selection)
-        setStartDate(null);
+        // If the selected date is the same as the start date, clear the selection
+        setStartDate(null)
+        setEndDate(null)
+        setEndDateForAxios(null)
       } else {
-        // Otherwise, set it as the end date
-        setEndDate(selectedDate);
+        // Set as end date
+        setEndDate(selectedDate)
+        setEndDateForAxios(selectedDate)
       }
     }
   }
@@ -114,16 +118,15 @@ const JournalStats = ({
 
   useEffect(() => {
     const fetchData = async () => {
-      if (startDate && endDate) {
-        // Ensure both dates are set before making the API call
+      if (startDate) {
+        const end = endDateForAxios || startDate // Use startDate if endDateForAxios is not set
         try {
           const response = await journalEntriesByPeriod({
             start_date: startDate.toISOString().split('T')[0], // Convert to 'YYYY-MM-DD'
-            end_date: endDate.toISOString().split('T')[0],
+            end_date: end.toISOString().split('T')[0],
           })
           setJournals(response)
           console.log(response)
-        
         } catch (error) {
           console.error(error)
         }
@@ -131,8 +134,7 @@ const JournalStats = ({
     }
 
     fetchData()
-  }, [startDate, endDate]) // Re-run when startDate or endDate changes
-
+  }, [startDate, endDateForAxios]) // Re-run when startDate or endDate changes
 
   return (
     <SafeAreaView className="bg-optimistic-gray-10 h-full p-4 space-y-4">
@@ -166,7 +168,12 @@ const JournalStats = ({
         animationType="slide"
         transparent={true}
         visible={modalVisible}
-        onRequestClose={() => setModalVisible(false)}
+        onRequestClose={() => {
+          setModalVisible(false)
+          setStartDate(null)
+          setEndDate(null)
+          setEndDateForAxios(null) // Reset dates when closing modal
+        }}
       >
         <View className="flex-1 justify-center items-center bg-black bg-opacity-50">
           <View className="bg-white rounded-lg w-80 p-4 shadow-lg">
@@ -207,9 +214,7 @@ const JournalStats = ({
           yAxisMaxValue={maxValue}
           stepValue={stepValue}
           noOfSections={noOfSections}
-          yAxisLabelTexts={Array.from({ length: noOfSections + 1 }, (_, i) =>
-            (i * stepValue).toString()
-          )}
+          yAxisLabelTexts={Array.from({ length: noOfSections + 1 }, (_, i) => (i * stepValue).toString())}
         />
       </View>
       <CustomButton
