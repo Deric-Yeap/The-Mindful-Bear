@@ -52,9 +52,9 @@ const TextJournal = () => {
     setIsLoading(true)
     let emotionList = [...selectedFeelings]
     emotionList.push(selectedEmotion)
-    setForm({ ...form, emotion_id: emotionList })
+    const updatedForm = { ...form, emotion_id: emotionList }
     try {
-      const response = await createJournal(form)
+      const response = await createJournal(updatedForm)
       setIsLoading(false)
       setIsModalVisible(true)
     } catch (error) {
