@@ -5,7 +5,9 @@ from django.conf import settings
 from ..common.s3 import create_presigned_url, upload_fileobj, make_file_upload_path, delete_s3_object
 from ..emotion.serializer import EmotionSerializer
 from datetime import datetime, timedelta
+from collections import defaultdict
 from collections import Counter
+
 
 
 class JournalGetSerializer(serializers.ModelSerializer):
@@ -203,4 +205,42 @@ class JournalEntriesByDateSerializer(serializers.Serializer):
             'dates': journal_dict
         }
         
+        return data
+    
+  
+class JournalEntriesByPeriodSerializer(serializers.Serializer):
+    
+    def get_journal_entries_by_date_range(self, start_date, end_date):
+        # Filter journals based on the date range provided
+        journals = Journal.objects.filter(upload_date__date__range=(start_date, end_date))
+        journal_dict = {}
+
+        current_date = start_date
+        while current_date <= end_date:
+            
+            day_journals = journals.filter(upload_date__date=current_date).order_by('-upload_date')
+            journal_dict[str(current_date.date())] = JournalGetSerializer(day_journals, many=True).data
+            current_date += timedelta(days=1)
+
+        return journal_dict
+
+    def to_representation(self, instance):
+        request = self.context.get('request')
+        year = request.data.get('year')
+        month = request.data.get('month')
+
+        
+        start_date = f"{year}-{month}-01"
+        end_date = f"{year}-{month}-{(start_date + timedelta(days=31)).replace(day=1) - timedelta(days=1)}"  # Get the last day of the month
+
+        
+        start_date = serializers.DateField().to_internal_value(start_date)
+        end_date = serializers.DateField().to_internal_value(end_date)
+
+        journal_dict = self.get_journal_entries_by_date_range(start_date, end_date)
+
+        data = {
+            'dates': journal_dict
+        }
+
         return data
