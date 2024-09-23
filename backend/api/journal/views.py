@@ -1,3 +1,6 @@
+import json
+import pandas as pd
+from textblob import TextBlob
 from datetime import datetime
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -21,9 +24,23 @@ class JournalListView(APIView):
     def post(self, request): #is it can create entry first then next time upload audio or together?
         serializer = JournalCreateSerializer(data=request.data, context={'request': request})
         if serializer.is_valid():
+            journal_text = serializer.validated_data['journal_text']
+            sentiment_result = self.analyze_sentiment(journal_text)
+            serializer.validated_data['sentiment_analysis_result'] = sentiment_result
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+    def analyze_sentiment(self, text):
+        blob = TextBlob(text)
+        polarity = blob.sentiment.polarity
+        
+        if polarity > 0:
+            return 'Positive'
+        elif polarity < 0:
+            return 'Negative'
+        else:
+            return 'Neutral'
     
 class UploadFileView(APIView):
     parser_classes = [MultiPartParser, FormParser]
