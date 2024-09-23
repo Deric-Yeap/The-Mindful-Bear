@@ -39,7 +39,10 @@ const JournalStats = ({
       setEndDateForAxios(null)
     } else {
       // Set as end date or select single date
-      if (selectedDate.toISOString().split('T')[0] === startDate.toISOString().split('T')[0]) {
+      if (
+        selectedDate.toISOString().split('T')[0] ===
+        startDate.toISOString().split('T')[0]
+      ) {
         // If the selected date is the same as the start date, clear the selection
         setStartDate(null)
         setEndDate(null)
@@ -146,10 +149,10 @@ const JournalStats = ({
           </Text>
           <Text className="font-urbanist-light text-mindful-brown-80 text-xl">
             {startDate && endDate
-              ? `Selected Range: ${startDate.toLocaleDateString()} - ${endDate.toLocaleDateString()}`
+              ? `Selected Range: ${startDate.toLocaleDateString('en-GB')} - ${endDate.toLocaleDateString('en-GB')}`
               : startDate
-              ? `Selected Date: ${startDate.toLocaleDateString()}`
-              : subtitle}
+                ? `Selected Date: ${startDate.toLocaleDateString('en-GB')}`
+                : subtitle}
           </Text>
         </View>
         <TouchableOpacity
@@ -214,7 +217,9 @@ const JournalStats = ({
           yAxisMaxValue={maxValue}
           stepValue={stepValue}
           noOfSections={noOfSections}
-          yAxisLabelTexts={Array.from({ length: noOfSections + 1 }, (_, i) => (i * stepValue).toString())}
+          yAxisLabelTexts={Array.from({ length: noOfSections + 1 }, (_, i) =>
+            (i * stepValue).toString()
+          )}
         />
       </View>
       <CustomButton
