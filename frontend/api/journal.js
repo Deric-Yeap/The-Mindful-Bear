@@ -12,6 +12,10 @@ export const journalEntriesByDate = (params) => {
   return axiosInstance.get('journal/journal_entries_by_date/', { params })
 }
 
+export const journalEntriesByPeriod = (params) => {
+  return axiosInstance.get('journal/journal_entries_by_period/', { params })
+}
+
 export const journalEntryById = (id) => {
   return axiosInstance.get(`journal/journal_entry_by_id/${id}/`)
 }

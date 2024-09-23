@@ -1,15 +1,18 @@
+import json
+import pandas as pd
+from textblob import TextBlob
 from datetime import datetime
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from .models import Journal
-from .serializer import JournalGetSerializer, JournalUploadFileSerializer, JournalCreateSerializer, JournalCalendarSerializer, JournalSummarySerializer, JournalEntriesByDateSerializer
+from .serializer import JournalGetSerializer, JournalUploadFileSerializer, JournalCreateSerializer, JournalCalendarSerializer, JournalSummarySerializer, JournalEntriesByDateSerializer,JournalEntriesByPeriodSerializer
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.parsers import MultiPartParser, FormParser
 from .models import Journal
 from ..common.audio import transcribe
-
+from rest_framework.exceptions import APIException
 
 
 class JournalListView(APIView):
@@ -21,9 +24,23 @@ class JournalListView(APIView):
     def post(self, request): #is it can create entry first then next time upload audio or together?
         serializer = JournalCreateSerializer(data=request.data, context={'request': request})
         if serializer.is_valid():
+            journal_text = serializer.validated_data['journal_text']
+            sentiment_result = self.analyze_sentiment(journal_text)
+            serializer.validated_data['sentiment_analysis_result'] = sentiment_result
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+    def analyze_sentiment(self, text):
+        blob = TextBlob(text)
+        polarity = blob.sentiment.polarity
+        
+        if polarity > 0:
+            return 'Positive'
+        elif polarity < 0:
+            return 'Negative'
+        else:
+            return 'Neutral'
     
 class UploadFileView(APIView):
     parser_classes = [MultiPartParser, FormParser]
@@ -109,6 +126,38 @@ class JournalEntriesByDateView(APIView):
             return Response(data, status=status.HTTP_200_OK)
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+class JournalEntriesByPeriodView(APIView):
+    def get(self, request, *args, **kwargs):
+        start_date_str = request.query_params.get('start_date')
+        end_date_str = request.query_params.get('end_date')
+
+       
+        if not start_date_str or not end_date_str:
+            return Response({"error": "Start date and end date are required parameters."}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+          
+            start_date = datetime.strptime(start_date_str, '%Y-%m-%d')
+            end_date = datetime.strptime(end_date_str, '%Y-%m-%d')
+
+            if start_date > end_date:
+                return Response({"error": "Start date must be before or equal to end date."}, status=status.HTTP_400_BAD_REQUEST)
+
+     
+            serializer_context = {'request': request}  # Include context if needed
+            serializer = JournalEntriesByPeriodSerializer(context=serializer_context)
+            data = serializer.get_journal_entries_by_date_range(start_date, end_date)
+
+            return Response(data, status=status.HTTP_200_OK)
+
+        except ValueError:
+            return Response({"error": "Invalid date format. Use YYYY-MM-DD."}, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+    
+            print(f"Exception occurred: {str(e)}")
+            return Response({"error": "An unexpected error occurred."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            
         
 class JournalEntryByIdView(APIView):
     def get(self, request, id):
