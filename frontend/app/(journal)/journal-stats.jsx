@@ -29,13 +29,22 @@ const JournalStats = ({
   const handleDayPress = (day) => {
     const selectedDate = new Date(day.timestamp)
     if (!startDate || (startDate && endDate)) {
+      // Selecting a new start date
       setStartDate(selectedDate)
       setEndDate(null)
     } else if (selectedDate < startDate) {
+      // If selected date is before start date, update the start date
       setStartDate(selectedDate)
       setEndDate(null)
     } else {
-      setEndDate(selectedDate)
+      // If the selected date is after start date, set it as end date or select single date
+      if (selectedDate.toISOString().split('T')[0] === startDate.toISOString().split('T')[0]) {
+        // If the selected date is the same as the start date, clear the selection (single date selection)
+        setStartDate(null);
+      } else {
+        // Otherwise, set it as the end date
+        setEndDate(selectedDate);
+      }
     }
   }
 
@@ -136,6 +145,8 @@ const JournalStats = ({
           <Text className="font-urbanist-light text-mindful-brown-80 text-xl">
             {startDate && endDate
               ? `Selected Range: ${startDate.toLocaleDateString()} - ${endDate.toLocaleDateString()}`
+              : startDate
+              ? `Selected Date: ${startDate.toLocaleDateString()}`
               : subtitle}
           </Text>
         </View>
@@ -198,22 +209,14 @@ const JournalStats = ({
           noOfSections={noOfSections}
           yAxisLabelTexts={Array.from({ length: noOfSections + 1 }, (_, i) =>
             (i * stepValue).toString()
-          ).concat(maxValue.toString())}
-          showValuesOnTopOfBars={false}
-          renderLabelOnTop={(barData) => (
-            <Text className="text-white font-bold text-center">
-              {barData.value}
-            </Text>
           )}
         />
       </View>
-
       <CustomButton
         title="See All Journal Entries"
         handlePress={() => router.push('/(journal)/journal-history')}
         buttonStyle="w-full"
       />
-      
     </SafeAreaView>
   )
 }
