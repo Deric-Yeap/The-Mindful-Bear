@@ -64,6 +64,7 @@ const JournalHome = () => {
   const getColor = (sentiment) => {
     if (sentiment === 'Positive') return 'bg-serenity-green-40'
     if (sentiment === 'Negative') return 'bg-empathy-orange-40'
+    if (sentiment === 'Neutral') return 'bg-zen-yellow-20'
     return 'bg-mindful-brown-20'
   }
 
@@ -164,26 +165,30 @@ const JournalHome = () => {
             ))}
           </View>
 
-          <View className="flex flex-row justify-center items-center mt-4">
-            <View className="flex flex-row items-center mr-4">
-              <View className="h-4 w-4 bg-mindful-brown-20 rounded-full mr-2"></View>
-              <Text className="font-urbanist-semi-bold text-black text-lg">
-                Skipped
-              </Text>
-            </View>
-            <View className="flex flex-row items-center mr-4">
-              <View className="h-4 w-4 bg-serenity-green-40 rounded-full mr-2"></View>
-              <Text className="font-urbanist-semi-bold text-black text-lg">
-                Positive
-              </Text>
-            </View>
-            <View className="flex flex-row items-center">
-              <View className="h-4 w-4 bg-empathy-orange-40 rounded-full mr-2"></View>
-              <Text className="font-urbanist-semi-bold text-black text-lg">
-                Negative
-              </Text>
-            </View>
-          </View>
+          <View className="flex flex-row justify-center items-center mt-4 px-4">
+
+  <View className="flex flex-row items-center mx-1">
+    <View className="h-4 w-4 bg-mindful-brown-20 rounded-full mr-2"></View>
+    <Text className="font-urbanist-semi-bold text-black text-lg">Skipped</Text>
+  </View>
+
+
+  <View className="flex flex-row items-center mx-1">
+    <View className="h-4 w-4 bg-serenity-green-40 rounded-full mr-2"></View>
+    <Text className="font-urbanist-semi-bold text-black text-lg">Positive</Text>
+  </View>
+
+  
+  <View className="flex flex-row items-center mx-1">
+    <View className="h-4 w-4 bg-zen-yellow-30 rounded-full mr-2"></View>
+    <Text className="font-urbanist-semi-bold text-black text-lg">Neutral</Text>
+  </View>
+
+  <View className="flex flex-row items-center mx-1">
+    <View className="h-4 w-4 bg-empathy-orange-40 rounded-full mr-2"></View>
+    <Text className="font-urbanist-semi-bold text-black text-lg">Negative</Text>
+  </View>
+</View>
         </View>
       </View>
     </ScrollView>
