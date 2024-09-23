@@ -11,7 +11,7 @@ export default function Admin() {
       <StatusBarComponent barStyle="light-content" backgroundColor="#251404" />      
       <View className="mt-7"></View>
       <TopBrownSearchBar title="Hi Admin!" />
-      <ScrollView className="flex-1 bg-optimistic-gray-10 p-4">
+      <ScrollView className="flex-1 bg-optimistic-gray-10 p-4 mb-16">
         <Text className="text-mindful-brown-100 font-urbanist-bold text-xl mb-4">
           Management
         </Text>

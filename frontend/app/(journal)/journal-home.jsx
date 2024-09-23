@@ -18,8 +18,8 @@ const JournalHome = () => {
   const [calendarData, setCalendarData] = useState([])
   const [journalCount, setJournalCount] = useState(0)
   const [loading, setLoading] = useState(true)
-  const currentMonth = new Date().getMonth() + 1
-  const currentYear = new Date().getFullYear()
+  const [currentMonth, setCurrentMonth] = useState(new Date().getMonth() + 1)
+  const [currentYear, setCurrentYear] = useState(new Date().getFullYear())
 
   useEffect(() => {
     const fetchData = async () => {
@@ -41,7 +41,25 @@ const JournalHome = () => {
     }
 
     fetchData()
-  }, [])
+  }, [currentMonth])
+
+  const handlePreviousMonth = () => {
+    if (currentMonth === 1) {
+      setCurrentMonth(12)
+      setCurrentYear(currentYear - 1)
+    } else {
+      setCurrentMonth(currentMonth - 1)
+    }
+  }
+
+  const handleNextMonth = () => {
+    if (currentMonth === 12) {
+      setCurrentMonth(1)
+      setCurrentYear(currentYear + 1)
+    } else {
+      setCurrentMonth(currentMonth + 1)
+    }
+  }
 
   const getColor = (sentiment) => {
     if (sentiment === 'Positive') return 'bg-serenity-green-40'
@@ -90,16 +108,28 @@ const JournalHome = () => {
           </TouchableOpacity>
 
           {/* calendar stuff */}
-          <View className="flex flex-row justify-center items-center">
-            <Text className="font-urbanist-extra-bold text-black text-2xl">
-              {monthNames[currentMonth - 1]} {currentYear}
-            </Text>
-            <Link
-              href="/(journal)/journal-history"
-              className="font-urbanist-semi-bold text-serenity-green-60 ml-1"
-            >
-              See all
-            </Link>
+          <View className="flex-row justify-between items-center px-4 w-[100vw]">
+            <TouchableOpacity onPress={handlePreviousMonth} className="">
+              <Text className="font-urbanist-bold text-zen-yellow-50">
+                Previous
+              </Text>
+            </TouchableOpacity>
+            <View className="flex-row items-center">
+              <Text className="font-urbanist-extra-bold text-black text-2xl">
+                {monthNames[currentMonth - 1]} {currentYear}
+              </Text>
+              <Link
+                href="/(journal)/journal-history"
+                className="font-urbanist-semi-bold text-serenity-green-60 ml-1"
+              >
+                See all
+              </Link>
+            </View>
+            <TouchableOpacity onPress={handleNextMonth}>
+              <Text className="font-urbanist-bold text-zen-yellow-50">
+                Next
+              </Text>
+            </TouchableOpacity>
           </View>
           <View className="w-[100vw] px-4">
             <View className="flex flex-row justify-between mb-4">

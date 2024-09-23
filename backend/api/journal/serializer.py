@@ -6,6 +6,9 @@ from ..common.s3 import create_presigned_url, upload_fileobj, make_file_upload_p
 from ..emotion.serializer import EmotionSerializer
 from datetime import datetime, timedelta
 from collections import defaultdict
+from collections import Counter
+
+
 
 class JournalGetSerializer(serializers.ModelSerializer):
     file_url = serializers.SerializerMethodField()
@@ -146,9 +149,13 @@ class JournalCalendarSerializer(serializers.Serializer):
 
             day_journals = journals.filter(upload_date__date=current_date.date())
             if day_journals.exists():
-                weeks[week_index].append(day_journals.first())
+                journal = day_journals.first()
+                sentiments = [journal.sentiment_analysis_result for journal in day_journals if journal.sentiment_analysis_result]
+                highest_sentiment = Counter(sentiments).most_common(1)[0][0] if sentiments else None 
+                journal.sentiment_analysis_result = highest_sentiment
+                weeks[week_index].append(journal)
             else:
-                weeks[week_index].append({'date': current_date.date(), 'sentiment_analysis_result': None})
+                weeks[week_index].append({ 'sentiment_analysis_result': None})
 
             current_date += timedelta(days=1)
 

@@ -3,13 +3,14 @@ import { useNavigation } from '@react-navigation/native';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { View, Text, ScrollView, TouchableOpacity } from 'react-native';
 import {colors} from '../common/styles';
-const BackButton = ({ title, buttonStyle })  => {
-    const navigation = useNavigation();
+import { useRouter } from 'expo-router'; // Import the useRouter hook
+const LandmarkBackButton = ({ title, buttonStyle, route})  => {
 
+    const router = useRouter(); // Initialize the router    
     return ( 
       <View className={`flex-row items-center ${buttonStyle}`}>
         <TouchableOpacity
-          onPress={() => navigation.goBack()}
+          onPress={() => router.push(route)}
           className="p-3 bg-mindful-brown-20 rounded-full mr-4"
         >
           <MaterialIcons name="arrow-back" size={24} color={colors.mindfulBrown80} />
@@ -19,4 +20,4 @@ const BackButton = ({ title, buttonStyle })  => {
     );
 };
 
-export default BackButton;
+export default LandmarkBackButton;
