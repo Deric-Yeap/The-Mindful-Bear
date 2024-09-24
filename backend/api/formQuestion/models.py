@@ -4,7 +4,7 @@ from api.question.models import Question
 
 class FormQuestion(models.Model):
     SessionID = models.ForeignKey(Session, blank=True, null=True, on_delete=models.CASCADE)
-    QuestionID = models.ForeignKey(Question, blank=True, null=True, on_delete=models.CASCADE)
+    QuestionID = models.ForeignKey(Question, to_field='questionID', blank=True, null=True, on_delete=models.CASCADE)
     Response = models.CharField('Response', max_length=125)
 
     # class Meta:
