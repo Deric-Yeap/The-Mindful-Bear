@@ -13,6 +13,7 @@ import { SafeAreaView } from 'react-native-safe-area-context'
 import { journalCalendarSumary, journalCountByYear } from '../../api/journal'
 import { monthNames, daysOfWeek } from '../../common/constants'
 import Loading from '../../components/loading'
+import LottieView from 'lottie-react-native'
 
 const JournalHome = () => {
   const [calendarData, setCalendarData] = useState([])
@@ -67,19 +68,24 @@ const JournalHome = () => {
     <ScrollView>
       <View>
         <View className="bg-mindful-brown-60 p-4 h-[45vh] items-center pt-[5vh]">
-          <Text className="font-urbanist-extra-bold text-white text-xl">
-            Journal
-          </Text>
-          <View className="flex items-center justify-center mt-11 space-y-2">
-            <Text className="font-urbanist-extra-bold text-white text-9xl">
+          <View className="flex items-center justify-center mt-10 space-y-2">
+            <Text className="font-urbanist-extra-bold text-white text-6xl mt-10">
               {journalCount}
             </Text>
-            <Text className="font-urbanist-semi-bold text-white text-3xl">
+            
+            <Text className="font-urbanist-semi-bold text-white text-3xl mt-10">
               Journals this year.
             </Text>
+            <LottieView
+        source={require('../../assets/animatedBearBee.json')}
+        autoPlay
+        loop
+        className="w-60 h-60 mb-40" // Approximately 200px
+      />
           </View>
         </View>
-        <View className="bg-optimistic-gray-10 p-4 h-full items-center -mt-16 rounded-t-full w-[250vw] -left-[75vw]">
+       
+        <View className="bg-optimistic-gray-10 p-3 h-full items-center -mt-10 rounded-t-full w-[250vw] -left-[75vw]">
           <TouchableOpacity
             className="-mt-10 mb-3"
             onPress={() => router.push('/(journal)/journal-type-select')}
