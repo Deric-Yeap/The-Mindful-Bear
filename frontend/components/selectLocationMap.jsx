@@ -22,12 +22,18 @@ const SelectLocationMap = ({ onLocationSelected }) => {
     const [longitude, latitude] = coordinates // Longitude comes first in GeoJSON
     setSelectedLocation({ latitude, longitude })
     
-    const roundedLatitude = latitude.toFixed(3); // Round to 3 decimal places
-    const roundedLongitude = longitude.toFixed(3); // Round to 3 decimal places
+    const roundedLatitude = roundToNineDigits(latitude) //max 9 digits
+    const roundedLongitude = roundToNineDigits(longitude) // max 9 digits
     setSelectedLocation({ latitude: roundedLatitude.toString(), longitude: roundedLongitude.toString() });
     setLatitude(roundedLatitude.toString());
     setLongitude(roundedLongitude.toString());
   }
+
+  const roundToNineDigits = (number) => {
+    const intPart = Math.floor(Math.abs(number)).toString().length; // Length of integer part
+    const maxDecimalPlaces = Math.min(6, 9 - intPart); // Allow up to 6 decimal places, but ensure total digits equal 9
+    return number.toFixed(maxDecimalPlaces); // Adjust to the calculated decimal places
+}
 
   // Function to handle "confirm location" action
   const confirmLocation = () => {
