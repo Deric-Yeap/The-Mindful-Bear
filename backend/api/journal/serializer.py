@@ -163,36 +163,32 @@ class JournalCalendarSerializer(serializers.Serializer):
                 negative_count = sentiment_counts.get('Negative', 0)
                 neutral_count = sentiment_counts.get('Neutral', 0)
 
-               
-                if positive_count > negative_count and positive_count >= neutral_count:
+                if positive_count > negative_count:
                     highest_sentiment = 'Positive'
-                elif negative_count > positive_count and negative_count >= neutral_count:
+                elif negative_count > positive_count:
                     highest_sentiment = 'Negative'
                 elif positive_count == negative_count:
                     highest_sentiment = 'Neutral' 
-                elif positive_count == neutral_count:
-                    highest_sentiment = 'Positive' 
-                elif negative_count == neutral_count:
+                elif neutral_count > negative_count:
                     highest_sentiment = 'Negative' 
+                elif neutral_count > positive_count:
+                    highest_sentiment = 'Positive'
                 else:
                     highest_sentiment = None  
 
-             
                 journal.sentiment_analysis_result = highest_sentiment
                 
-               
                 weeks[week_index].append(journal)
             else:
                 weeks[week_index].append({'sentiment_analysis_result': None})
 
             current_date += timedelta(days=1)
 
-       
+      
         while len(weeks[-1]) < 7:
             weeks[-1].append(None)
 
         return weeks
-    
 
     def to_representation(self, instance):
         request = self.context.get('request')
