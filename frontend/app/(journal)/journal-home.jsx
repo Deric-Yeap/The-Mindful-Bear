@@ -68,7 +68,7 @@ const JournalHome = () => {
     <ScrollView>
       <View>
         <View className="bg-mindful-brown-60 p-4 h-[45vh] items-center pt-[5vh]">
-          <View className="flex items-center justify-center mt-20 space-y-2">
+          <View className="flex items-center justify-center mt-10 space-y-2">
             <Text className="font-urbanist-extra-bold text-white text-6xl mt-10">
               {journalCount}
             </Text>
@@ -85,7 +85,7 @@ const JournalHome = () => {
           </View>
         </View>
        
-        <View className="bg-optimistic-gray-10 p-4 h-full items-center -mt-2 rounded-t-full w-[250vw] -left-[75vw]">
+        <View className="bg-optimistic-gray-10 p-3 h-full items-center -mt-10 rounded-t-full w-[250vw] -left-[75vw]">
           <TouchableOpacity
             className="-mt-10 mb-3"
             onPress={() => router.push('/(journal)/journal-type-select')}
