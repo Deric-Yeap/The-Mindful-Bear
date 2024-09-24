@@ -258,6 +258,7 @@ const LandmarkCreator = () => {
               handleSelect={(selectedValue) => {
                 const selectedExercise = exerciseList.find(exercise => exercise.exercise_id === selectedValue);
                 setExerciseId(selectedExercise.exercise_id);
+                setSelectedExerciseName(selectedExercise.exercise_name); // Set the selected exercise name
               }              
             }
             />
