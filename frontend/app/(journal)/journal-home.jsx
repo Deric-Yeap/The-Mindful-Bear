@@ -146,6 +146,59 @@ const JournalHome = () => {
               <View key={weekIndex} className="flex flex-row mb-2">
                 {week.map((day, dayIndex) => {
                   const date = day ? dayCounter++ : null
+
+                  let positiveCount = 0
+                  let negativeCount = 0
+                  let neutralCount = 0
+                  let skippedCount = 0
+
+                  if (day && day.sentiment_analysis_result !== undefined) {
+                    const sentiment = day.sentiment_analysis_result
+
+                    if (sentiment === 'Positive') {
+                      positiveCount++
+                    } else if (sentiment === 'Negative') {
+                      negativeCount++
+                    } else if (sentiment === 'Neutral') {
+                      neutralCount++
+                    } else {
+                      skippedCount++
+                    }
+                  } else {
+                    skippedCount++
+                  }
+
+                  console.log('date', date)
+                  console.log('positiveCount', positiveCount)
+                  console.log('negativeCount', negativeCount)
+                  console.log('neutralCount', neutralCount)
+
+                  let overallSentiment
+                  if (positiveCount == negativeCount && positiveCount > 0) {
+                    overallSentiment = 'Neutral'
+                  } else if (
+                    positiveCount > negativeCount &&
+                    positiveCount > neutralCount &&
+                    positiveCount > skippedCount
+                  ) {
+                    overallSentiment = 'Positive'
+                  } else if (
+                    negativeCount > positiveCount &&
+                    negativeCount > neutralCount &&
+                    negativeCount > skippedCount
+                  ) {
+                    overallSentiment = 'Negative'
+                  } else if (
+                    neutralCount > positiveCount &&
+                    neutralCount > negativeCount &&
+                    neutralCount > skippedCount &&
+                    positiveCount == negativeCount
+                  ) {
+                    overallSentiment = 'Neutral'
+                  } else {
+                    overallSentiment = 'skipped' // No sentiments found or all counts are equal
+                  }
+
                   return (
                     <View
                       key={dayIndex}
@@ -166,29 +219,34 @@ const JournalHome = () => {
           </View>
 
           <View className="flex flex-row justify-center items-center mt-4 px-4">
+            <View className="flex flex-row items-center mx-1">
+              <View className="h-4 w-4 bg-mindful-brown-20 rounded-full mr-2"></View>
+              <Text className="font-urbanist-semi-bold text-black text-lg">
+                Skipped
+              </Text>
+            </View>
 
-  <View className="flex flex-row items-center mx-1">
-    <View className="h-4 w-4 bg-mindful-brown-20 rounded-full mr-2"></View>
-    <Text className="font-urbanist-semi-bold text-black text-lg">Skipped</Text>
-  </View>
+            <View className="flex flex-row items-center mx-1">
+              <View className="h-4 w-4 bg-serenity-green-40 rounded-full mr-2"></View>
+              <Text className="font-urbanist-semi-bold text-black text-lg">
+                Positive
+              </Text>
+            </View>
 
+            <View className="flex flex-row items-center mx-1">
+              <View className="h-4 w-4 bg-zen-yellow-30 rounded-full mr-2"></View>
+              <Text className="font-urbanist-semi-bold text-black text-lg">
+                Neutral
+              </Text>
+            </View>
 
-  <View className="flex flex-row items-center mx-1">
-    <View className="h-4 w-4 bg-serenity-green-40 rounded-full mr-2"></View>
-    <Text className="font-urbanist-semi-bold text-black text-lg">Positive</Text>
-  </View>
-
-  
-  <View className="flex flex-row items-center mx-1">
-    <View className="h-4 w-4 bg-zen-yellow-30 rounded-full mr-2"></View>
-    <Text className="font-urbanist-semi-bold text-black text-lg">Neutral</Text>
-  </View>
-
-  <View className="flex flex-row items-center mx-1">
-    <View className="h-4 w-4 bg-empathy-orange-40 rounded-full mr-2"></View>
-    <Text className="font-urbanist-semi-bold text-black text-lg">Negative</Text>
-  </View>
-</View>
+            <View className="flex flex-row items-center mx-1">
+              <View className="h-4 w-4 bg-empathy-orange-40 rounded-full mr-2"></View>
+              <Text className="font-urbanist-semi-bold text-black text-lg">
+                Negative
+              </Text>
+            </View>
+          </View>
         </View>
       </View>
     </ScrollView>
