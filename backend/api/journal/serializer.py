@@ -139,8 +139,8 @@ class JournalCalendarSerializer(serializers.Serializer):
         current_date = start_date
         week_index = 0
 
-        
-        for _ in range(start_date.weekday()): # null to account for starting days
+        # Fill initial nulls for the first week
+        for _ in range(start_date.weekday()): 
             weeks[week_index].append(None)
 
         while current_date <= end_date:
@@ -149,20 +149,50 @@ class JournalCalendarSerializer(serializers.Serializer):
 
             day_journals = journals.filter(upload_date__date=current_date.date())
             if day_journals.exists():
+               
                 journal = day_journals.first()
-                sentiments = [journal.sentiment_analysis_result for journal in day_journals if journal.sentiment_analysis_result]
-                highest_sentiment = Counter(sentiments).most_common(1)[0][0] if sentiments else None 
+                
+               
+                sentiments = [j.sentiment_analysis_result for j in day_journals if j.sentiment_analysis_result]
+
+                
+                sentiment_counts = Counter(sentiments)
+
+               
+                positive_count = sentiment_counts.get('Positive', 0)
+                negative_count = sentiment_counts.get('Negative', 0)
+                neutral_count = sentiment_counts.get('Neutral', 0)
+
+               
+                if positive_count > negative_count and positive_count >= neutral_count:
+                    highest_sentiment = 'Positive'
+                elif negative_count > positive_count and negative_count >= neutral_count:
+                    highest_sentiment = 'Negative'
+                elif positive_count == negative_count:
+                    highest_sentiment = 'Neutral' 
+                elif positive_count == neutral_count:
+                    highest_sentiment = 'Positive' 
+                elif negative_count == neutral_count:
+                    highest_sentiment = 'Negative' 
+                else:
+                    highest_sentiment = None  
+
+             
                 journal.sentiment_analysis_result = highest_sentiment
+                
+               
                 weeks[week_index].append(journal)
             else:
-                weeks[week_index].append({ 'sentiment_analysis_result': None})
+                weeks[week_index].append({'sentiment_analysis_result': None})
 
             current_date += timedelta(days=1)
 
-        while len(weeks[-1]) < 7: #null for remainding days
+       
+        while len(weeks[-1]) < 7:
             weeks[-1].append(None)
 
         return weeks
+    
 
     def to_representation(self, instance):
         request = self.context.get('request')
