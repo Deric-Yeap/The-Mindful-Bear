@@ -13,7 +13,13 @@ from rest_framework.parsers import MultiPartParser, FormParser
 from .models import Journal
 from ..common.audio import transcribe
 from rest_framework.exceptions import APIException
+# analyzer/views.py
+from django.http import JsonResponse
+import nltk
+from nltk.sentiment import SentimentIntensityAnalyzer
 
+# Download VADER lexicon if not already downloaded
+nltk.download('vader_lexicon')
 
 class JournalListView(APIView):
     def get(self, request):
@@ -21,23 +27,24 @@ class JournalListView(APIView):
         serializer = JournalGetSerializer(journals, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
-    def post(self, request): #is it can create entry first then next time upload audio or together?
+    def post(self, request):  # Can create an entry first, then upload audio next time, or do both together
         serializer = JournalCreateSerializer(data=request.data, context={'request': request})
+        
         if serializer.is_valid():
             journal_text = serializer.validated_data['journal_text']
-            sentiment_result = self.analyze_sentiment(journal_text)
+            sentiment_result = self.analyze_sentiment(journal_text)  # Remove self as the first argument
             serializer.validated_data['sentiment_analysis_result'] = sentiment_result
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
+
     def analyze_sentiment(self, text):
-        blob = TextBlob(text)
-        polarity = blob.sentiment.polarity
+        sid = SentimentIntensityAnalyzer()
+        polarity_scores = sid.polarity_scores(text)
         
-        if polarity > 0:
+        if polarity_scores['compound'] >= 0.05:
             return 'Positive'
-        elif polarity < 0:
+        elif polarity_scores['compound'] <= -0.05:
             return 'Negative'
         else:
             return 'Neutral'
