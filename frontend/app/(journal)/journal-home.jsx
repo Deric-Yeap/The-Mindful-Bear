@@ -145,53 +145,74 @@ const JournalHome = () => {
             {calendarData.map((week, weekIndex) => (
               <View key={weekIndex} className="flex flex-row mb-2">
                 {week.map((day, dayIndex) => {
-                  const date = day ? dayCounter++ : null;
+                  const date = day ? dayCounter++ : null
 
-                  let positiveCount = 0;
-                  let negativeCount = 0;
-                  let neutralCount = 0;
-                  let skippedCount = 0;
+                  let positiveCount = 0
+                  let negativeCount = 0
+                  let neutralCount = 0
+                  let skippedCount = 0
 
                   if (day && day.sentiment_analysis_result !== undefined) {
-                    const sentiment = day.sentiment_analysis_result;
+                    const sentiment = day.sentiment_analysis_result
 
-                    if (sentiment === "Positive") {
-                      positiveCount++;
-                    } else if (sentiment === "Negative") {
-                      negativeCount++;
-                    } else if (sentiment === "Neutral") {
-                      neutralCount++;
+                    if (sentiment === 'Positive') {
+                      positiveCount++
+                    } else if (sentiment === 'Negative') {
+                      negativeCount++
+                    } else if (sentiment === 'Neutral') {
+                      neutralCount++
                     } else {
-                     
-                      skippedCount++;
+                      skippedCount++
                     }
                   } else {
-                   
-                    skippedCount++;
+                    skippedCount++
                   }
 
-                 
-                  let overallSentiment;
-                  if (positiveCount > negativeCount && positiveCount > neutralCount && positiveCount > skippedCount) {
-                    overallSentiment = 'Positive';
-                  } else if (negativeCount > positiveCount && negativeCount > neutralCount && negativeCount > skippedCount) {
-                    overallSentiment = 'Negative';
-                  } else if (neutralCount > positiveCount && neutralCount > negativeCount && neutralCount > skippedCount) {
-                    overallSentiment = 'Neutral';
+                  console.log('date', date)
+                  console.log('positiveCount', positiveCount)
+                  console.log('negativeCount', negativeCount)
+                  console.log('neutralCount', neutralCount)
+
+                  let overallSentiment
+                  if (positiveCount == negativeCount && positiveCount > 0) {
+                    overallSentiment = 'Neutral'
+                  } else if (
+                    positiveCount > negativeCount &&
+                    positiveCount > neutralCount &&
+                    positiveCount > skippedCount
+                  ) {
+                    overallSentiment = 'Positive'
+                  } else if (
+                    negativeCount > positiveCount &&
+                    negativeCount > neutralCount &&
+                    negativeCount > skippedCount
+                  ) {
+                    overallSentiment = 'Negative'
+                  } else if (
+                    neutralCount > positiveCount &&
+                    neutralCount > negativeCount &&
+                    neutralCount > skippedCount &&
+                    positiveCount == negativeCount
+                  ) {
+                    overallSentiment = 'Neutral'
                   } else {
-                    overallSentiment = 'skipped'; // No sentiments found or all counts are equal
+                    overallSentiment = 'skipped' // No sentiments found or all counts are equal
                   }
 
                   return (
                     <View
                       key={dayIndex}
-                      className={`h-[12vw] w-[12vw] rounded-full items-center justify-center mx-[0.8vw] ${getColor(overallSentiment)}`}
+                      className={`h-[12vw] w-[12vw] rounded-full items-center justify-center mx-[0.8vw] ${
+                        day
+                          ? getColor(day.sentiment_analysis_result)
+                          : 'transparent'
+                      }`}
                     >
                       {date && (
                         <Text className="text-mindful-brown-100">{date}</Text>
                       )}
                     </View>
-                  );
+                  )
                 })}
               </View>
             ))}
