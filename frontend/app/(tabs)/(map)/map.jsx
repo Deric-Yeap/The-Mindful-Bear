@@ -1,11 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import {
-  SafeAreaView,
-  View,
-  ScrollView,
-  TouchableOpacity,
-  Text,
-} from 'react-native'
+import { SafeAreaView, View, ScrollView, TouchableOpacity } from 'react-native'
 import Mapbox from '@rnmapbox/maps'
 import LottieView from 'lottie-react-native'
 import CustomButton from '../../../components/customButton'
@@ -37,6 +31,10 @@ const initialFormState = {
   engagement_metrics: 1,
 }
 
+const POLLING_INTERVAL = 5000 // Polling every 5 seconds
+const DISTANCE_THRESHOLD = 100 // Distance in meters to trigger directions fetch
+const DEVIATION_THRESHOLD = 52 // Distance in meters to consider as deviation
+
 const Map = () => {
   Mapbox.setAccessToken(process.env.MAPBOX_PUBLIC_KEY)
   const router = useRouter()
@@ -53,6 +51,9 @@ const Map = () => {
   const [routeGeoJSON, setRouteGeoJSON] = useState(null)
   const [centerOfLineString, setCenterOfLineString] = useState(null)
   const isShownNav = useSelector((state) => state.isShownNav).isShownNav
+  const [prevLocation, setPrevLocation] = useState(null)
+  const [isTraveling, setIsTraveling] = useState(false)
+  const [remainingRouteGeoJSON, setRemainingRouteGeoJSON] = useState(null)
   const dispatch = useDispatch()
 
   useEffect(() => {
@@ -78,6 +79,78 @@ const Map = () => {
       dispatch(clearIsShownNav())
     }
   }, [])
+
+  useEffect(() => {
+    if (isTraveling) {
+      const locationInterval = setInterval(() => {
+        if (location && routeGeoJSON) {
+          const route = routeGeoJSON.features[0].geometry.coordinates
+          const nearestPoint = turf.nearestPointOnLine(
+            turf.lineString(route),
+            turf.point(location),
+            { units: 'meters' }
+          )
+          const distanceToRoute = turf.distance(
+            turf.point(location),
+            nearestPoint,
+            { units: 'meters' }
+          )
+
+          if (distanceToRoute > DEVIATION_THRESHOLD) {
+            fetchDirections(location)
+          } else {
+            updateRemainingRoute(nearestPoint.geometry.coordinates)
+          }
+          setPrevLocation(location)
+        }
+      }, POLLING_INTERVAL)
+
+      return () => clearInterval(locationInterval)
+    }
+  }, [isTraveling, location, routeGeoJSON])
+
+  const updateRemainingRoute = (nearestPoint) => {
+    const route = routeGeoJSON.features[0].geometry.coordinates
+    let nearestPointIndex = -1
+    for (let i = 0; i < route.length; i++) {
+      const [lng, lat] = route[i]
+      const [nearestLng, nearestLat] = nearestPoint
+
+      const distanceToPoint = turf.distance(
+        turf.point([lng, lat]),
+        turf.point(nearestPoint),
+        { units: 'meters' }
+      )
+
+      if (distanceToPoint <= 50) {
+        nearestPointIndex = i
+        break
+      }
+    }
+
+    if (nearestPointIndex !== -1) {
+      const remainingRoute = route.slice(nearestPointIndex)
+      const remainingRouteGeoJSON = {
+        type: 'FeatureCollection',
+        features: [
+          {
+            type: 'Feature',
+            properties: {},
+            geometry: {
+              type: 'LineString',
+              coordinates: remainingRoute,
+            },
+          },
+        ],
+      }
+
+      setRemainingRouteGeoJSON(remainingRouteGeoJSON)
+    } else {
+      console.error(
+        'Nearest point within 50 meters not found in the route coordinates'
+      )
+    }
+  }
 
   const handleBottomSheetModalOpen = (index) => {
     if (!isBottomSheetOpen) {
@@ -149,19 +222,16 @@ const Map = () => {
   const resetForm = () => {
     setForm(initialFormState)
   }
-  const handleTravel = async () => {
+  const fetchDirections = async () => {
     if (!location || !selectedLandmark) {
       console.error('Current location or selected landmark is not available.')
       return
     }
     if (!isSessionStarted) {
-      //edit behaviour to save routegeojson even when shifting page.
       handleSessionStart()
       return
     }
     const selectedLandmarkCoords = selectedLandmark.geometry.coordinates
-    console.log(selectedLandmarkCoords)
-    console.log(location)
 
     try {
       let response = await fetch(
@@ -183,26 +253,22 @@ const Map = () => {
         ],
       }
       setRouteGeoJSON(lineStringGeoJSON)
+      setRemainingRouteGeoJSON(lineStringGeoJSON)
 
       let allCoordinates = lineStringGeoJSON?.features[0]?.geometry?.coordinates
-      console.log(
-        'onPressInterestSiteDirection',
-        data,
-        lineStringGeoJSON,
-        allCoordinates[Math.round(allCoordinates.length / 2)]
-      )
       let featuresCenter = turf.points(allCoordinates)
-
       let center = turf.center(featuresCenter)
       setCenterOfLineString(center?.geometry?.coordinates)
       setIsBottomSheetOpen(false)
       if (!isShownNav) {
         dispatch(setIsShownNav())
       }
+      setIsTraveling(true) 
     } catch (error) {
       console.error('Error fetching route:', error)
     }
   }
+
   const geoJSON = getGeoJson(landmarksData)
   return (
     <SafeAreaView className="h-full">
@@ -221,7 +287,7 @@ const Map = () => {
                 rotateEnabled={true}
               >
                 <Mapbox.Camera
-                  centerCoordinate={[-122.084, 37.4219983]}
+                  centerCoordinate={[103.8348, 1.2804]}
                   zoomLevel={17.0}
                   animationMode="flyto"
                   animationDuration={1000}
@@ -256,16 +322,25 @@ const Map = () => {
                   )
                 })}
                 {routeGeoJSON && (
-                  <Mapbox.ShapeSource id="routeSource" shape={routeGeoJSON}>
+                  <Mapbox.ShapeSource
+                    id="routeSource"
+                    shape={remainingRouteGeoJSON || routeGeoJSON}
+                  >
                     <Mapbox.LineLayer
-                      id="routeFill"
+                      id="routeLine"
                       style={{
+                        lineWidth: 5,
+                        lineJoin: 'round',
                         lineColor: 'blue',
-                        lineWidth: 3,
-                        lineOpacity: 0.75,
                       }}
                     />
                   </Mapbox.ShapeSource>
+                )}
+                {centerOfLineString && (
+                  <Mapbox.Camera
+                    zoomLevel={15}
+                    centerCoordinate={centerOfLineString}
+                  />
                 )}
               </Mapbox.MapView>
             </View>
@@ -312,7 +387,7 @@ const Map = () => {
             handleModalOpen={handleBottomSheetModalOpen}
             landmarkData={selectedLandmark}
             openCompletedModal={setIsCompletedModalOpen}
-            handleTravel={handleTravel}
+            handleTravel={fetchDirections}
           />
         )}
       </View>
