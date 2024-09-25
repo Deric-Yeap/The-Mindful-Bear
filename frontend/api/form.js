@@ -4,6 +4,10 @@ export const CreateFormAndQuestion = (data) => {
   return axiosInstance.post('form/create-form-and-questions', data)
 }
 
+export const UpdateFormAndQuestion = (formId, data) => {
+  return axiosInstance.put(`form/update-form-and-questions/${formId}`, data)
+}
+
 export const getForms = async () => {
   return axiosInstance.get('form/get')
 }
@@ -19,15 +23,19 @@ async function fetchOptionSetName(optionSetId) {
 export const getFormQuestions = async (formId) => {
   response = await axiosInstance.get(`form/get-form-and-questions/${formId}`);
   const formName = response.form_name
+  const storeResponses = response.store_responses
+  const isCompulsory = response.is_compulsory
+  const isPresession = response.is_presession
+  const isPostsession = response.is_postsession        
   response = response.questions;
-  const enhancedData = await Promise.all(
+  const questionsWithOptions = await Promise.all(
     response.map(async (item) => {
       const optionSet = await fetchOptionSet(item.optionSet);  
       const optionSetName = await fetchOptionSetName(item.optionSet)
       return { ...item, optionValues: optionSet, optionSetName: optionSetName.description };  
     })
   );  
-  return {formName, enhancedData};
+  return {formName, storeResponses, isCompulsory, isPresession, isPostsession, questionsWithOptions};
 }
 
 export const setFormQuestion = async (sessionId, answers) => {  
@@ -38,9 +46,12 @@ export const setFormQuestion = async (sessionId, answers) => {
 
   return await axiosInstance.post('formQuestion/bulk_create/', 
     {
-      // SessionID: sessionId,
       SessionID: 58,
       data: formattedAnswers
     }
   );  
+}
+
+export const deleteForm = (formId) => {
+  return axiosInstance.delete(`form/delete/${formId}`)
 }

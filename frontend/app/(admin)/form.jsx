@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import {View, Text, TouchableOpacity, FlatList, ActivityIndicator,} from 'react-native';
+import { View, Text, TouchableOpacity, FlatList, ActivityIndicator } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import TopBrownSearchBar from '../../components/topBrownSearchBar';
 import StatusBarComponent from '../../components/darkThemStatusBar';
@@ -8,104 +8,82 @@ import { Link } from 'expo-router';
 import { router } from 'expo-router';
 import axiosInstance from '../../common/axiosInstance';
 import { colors } from '../../common/styles';
-import Icon from 'react-native-vector-icons/FontAwesome'; // Import the icon
-import Loading from '../../components/loading'; 
+import Icon from 'react-native-vector-icons/FontAwesome';
+import Loading from '../../components/loading';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { deleteForm } from '../../api/form';
+import ConfirmModal from '../../components/confirmModal';
+import { confirmModal } from '../../assets/image';
 
 const Forms = () => {
-  const [loading, setLoading] = useState(true); // Loading state // Loading state
-  const [error, setError] = useState(null); // Error state // Error state
-  const [forms, setForms] = useState([]); // State to hold fetched forms // State to hold fetched forms
-  const [likertOptions, setLikertOptions] = useState([]); // State to hold fetched Likert options
-  const [selectedOption, setSelectedOption] = useState(1); // State to handle toggle selection
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [forms, setForms] = useState([]);
+  const [likertOptions, setLikertOptions] = useState([]);
+  const [selectedOption, setSelectedOption] = useState(1);
+  const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
+  const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);
+  const [handleConfirmCallback, setHandleConfirmCallback] = useState(null);
 
   const onSelectSwitch = (index) => {
     setSelectedOption(index);
-    AsyncStorage.setItem('selectedOption', index.toString()); // Save the selected option
+    AsyncStorage.setItem('selectedOption', index.toString());
   };
 
   useEffect(() => {
     const loadSelectedOption = async () => {
       const savedOption = await AsyncStorage.getItem('selectedOption');
-      if (savedOption !== null) {
-        setSelectedOption(Number(savedOption)); // Load saved option
-      } else {
-        setSelectedOption(1); // Default to 1 if no saved option
-      }
+      setSelectedOption(savedOption !== null ? Number(savedOption) : 1);
     };
-  
-    loadSelectedOption(); // Load the selected option when component mounts
-    
 
     const fetchForms = async () => {
-      setLoading(true); // Set loading to true before fetching
+      setLoading(true);
       try {
-        const response = await axiosInstance.get('form/get'); // Use axiosInstance
-        console.log('Full response:', response); // Log the full response
-
-        // Directly set forms from the response if it's an array
-        if (Array.isArray(response)) {
-          setForms(response); // Set the fetched data to state
-          console.log('Forms state updated:', response); // Log the updated forms state
-        } else {
-          console.warn('Expected an array but got:', response);
-          setForms([]); // Set to empty array if not an array
-        }
+        const response = await axiosInstance.get('form/get');
+        setForms(Array.isArray(response) ? response : []);
       } catch (error) {
-        console.error('Error fetching data:', error);
-        if (error.response) {
-          console.error('Response data:', error.response.data);
-          setError(error.response.data); // Set error if fetching fails
-        } else if (error.request) {
-          console.error('Request made but no response received:', error.request);
-          setError('No response received from the server.');
-        } else {
-          console.error('Error setting up the request:', error.message);
-          setError(error.message);
-        }
+        setError(
+          error.response?.data || error.request
+            ? 'No response received from the server.'
+            : error.message
+        );
       } finally {
-        setLoading(false); // Set loading to false after fetching
+        setLoading(false);
       }
     };
+
     const fetchLikertOptions = async () => {
-      setLoading(true); // Set loading to true before fetching
+      setLoading(true);
       try {
-        const response = await axiosInstance.get('option_set/get'); // Fetch Likert options
-        console.log('Likert options response:', response); // Log the full response
-    
-        // Check if the response is an array
+        const response = await axiosInstance.get('option_set/get');
         if (Array.isArray(response)) {
-          // Map the response to the desired format
           const options = response.map(item => ({
-            key: item.id, // Use 'id' as the key
-            value: item.description // Use 'description' as the value
+            key: item.id,
+            value: item.description,
           }));
-          setLikertOptions(options); // Set the fetched Likert options to state
-          console.log('Likert options state updated:', options); // Log the updated state
+          setLikertOptions(options);
         } else {
-          console.warn('Expected an array but got:', response.data);
-          setLikertOptions([]); // Set to empty array if not an array
+          setLikertOptions([]);
         }
       } catch (error) {
         console.error('Error fetching Likert options:', error);
-        if (error.response) {
-          console.error('Response data:', error.response.data);
-        }
       } finally {
-        setLoading(false); // Set loading to false after fetching
+        setLoading(false);
       }
     };
+
+    loadSelectedOption();
     if (selectedOption === 1) {
-      fetchForms(); // Fetch forms only if Forms is selected
+      fetchForms();
     } else if (selectedOption === 2) {
-      fetchLikertOptions(); // Fetch Likert options if Likert-Scales is selected
+      fetchLikertOptions();
     }
-  }, [selectedOption]); // Fetch data when selectedOption changes
+  }, [selectedOption]);
 
   if (loading) {
     return (
       <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: colors.optimisticGray10 }}>
-        <Loading /> 
+        <Loading />
       </View>
     );
   }
@@ -119,32 +97,50 @@ const Forms = () => {
   }
 
   const handleFormPress = (form) => {
-    console.log(`Navigating to update form:`, form);
     router.push({
-      pathname: '/updateform',
+      pathname: '/create-form',
       params: { formId: form.id },
     });
   };
 
-  // Log the forms state before rendering
-  console.log('Forms to render:', forms);
-  console.log('Likert options to render:', likertOptions);
+  const handleDeleteForm = async (formId) => {
+    try {
+      setIsConfirmModalOpen(true);
+
+      const confirmDelete = new Promise((resolve) => {
+        const handleConfirm = () => {
+          setIsConfirmModalOpen(false);
+          resolve(true);
+        };
+        setHandleConfirmCallback(() => handleConfirm);
+      });
+
+      const result = await confirmDelete;
+      if (result) {
+        await deleteForm(formId);
+        setForms((prevForms) => prevForms.filter((form) => form.id !== formId));
+        setIsSuccessModalOpen(true);
+      }
+    } catch (error) {
+      console.error(`Error deleting form with ID: ${formId}`, error);
+    }
+  };
 
   return (
     <SafeAreaView className="flex-1 bg-optimistic-gray-10">
-      <StatusBarComponent barStyle="light-content" backgroundColor={colors.mindfulBrown100}/>
+      <StatusBarComponent barStyle="light-content" backgroundColor={colors.mindfulBrown100} />
       <TopBrownSearchBar title="Form Management" />
       <View style={{ alignItems: 'center', margin: 20 }}>
         <Toggle
           selectionMode={selectedOption}
           roundCorner={true}
-          option1={'Forms'}
-          option2={'Likert-Scales'}
+          option1="Forms"
+          option2="Likert-Scales"
           onSelectSwitch={onSelectSwitch}
           selectionColor={colors.mindfulBrown80}
         />
       </View>
-      <View className="flex-row justify-between items-center pt-4 pb-0 px-4">
+      <View className="flex-row justify-between items-center pt-4 pb-0 px-4 mb-2">
         <Text className="text-mindful-brown-80 font-bold text-3xl">
           {selectedOption === 1 ? 'Forms' : 'Likert-Scales'}
         </Text>
@@ -167,65 +163,86 @@ const Forms = () => {
       {selectedOption === 1 ? (
         forms.length === 0 ? (
           <View className="flex-1 justify-center items-center">
-            <Text className="text-mindful-brown-80 font-bold text-lg">
-              No forms available
-            </Text>
+            <Text className="text-mindful-brown-80 font-bold text-lg">No forms available</Text>
           </View>
         ) : (
           <FlatList
             data={forms}
             renderItem={({ item }) => (
-              //<Link href={`/updateform/${item.id}`} asChild>
-                <TouchableOpacity  className="w-full h-auto p-4 items-center bg-[#9BB167] shadow-lg mt-6 rounded-[15px] flex-row justify-between"
-                onPress={() => handleFormPress(item)}>
-                  <View style={{ flex: 1 }}>
-                    <Text className="text-mindful-brown-10 font-bold text-lg">
-                      {item.form_name}
-                    </Text>
-                    <Text className="text-mindful-brown-10 text-md font-bold">
-                      {item.store_responses
-                        ? 'Store User Response'
-                        : "Don't Store Response"}
-                    </Text>
+              <TouchableOpacity
+                className="w-full h-auto p-4 items-center bg-[#9BB167] shadow-lg mt-4 rounded-[15px] flex-row justify-between"
+                onPress={() => handleFormPress(item)}
+              >
+                <View style={{ flex: 1 }}>
+                  <View className="flex-row">
+                    <Text className="text-mindful-brown-10 font-bold text-lg">{item.form_name}</Text>
+                    <TouchableOpacity onPress={() => handleDeleteForm(item.id)} className="ml-4">
+                      <Icon name="trash" size={24} color={colors.presentRed50} />
+                    </TouchableOpacity>
                   </View>
-                  <View style={{ justifyContent: 'center', alignItems: 'center' }}>
+                  <Text className="text-mindful-brown-10 text-md font-bold">
+                    {item.store_responses ? 'Store User Response' : "Don't Store Response"}
+                  </Text>
+                </View>
+                <View style={{ justifyContent: 'center', alignItems: 'center' }}>
                   <Text className="text-white font-urbanist-bold text-xl"> &#41; </Text>
-                  </View>
-                </TouchableOpacity>
-              //</Link>
+                </View>
+              </TouchableOpacity>
             )}
-            keyExtractor={(item) => item.id.toString()} // Ensure unique key extraction
+            keyExtractor={(item) => item.id.toString()}
             contentContainerStyle={{ paddingHorizontal: 16 }}
           />
         )
       ) : (
         likertOptions.length === 0 ? (
           <View className="flex-1 justify-center items-center">
-            <Text className="text-mindful-brown-80 font-bold text-lg">
-              No Likert options available
-            </Text>
+            <Text className="text-mindful-brown-80 font-bold text-lg">No Likert options available</Text>
           </View>
         ) : (
           <FlatList
-          data={likertOptions.filter(item => item.value.startsWith("Likert Scale"))} 
-          renderItem={({ item }) => (
-            <Link href={`/updateScale/${item.key}`} asChild>
-              <TouchableOpacity className="w-full h-auto p-4 items-center bg-[#9BB167] shadow-lg mt-6 rounded-[15px] flex-row justify-between">
-                <View style={{ flex: 1 }}>
-                  <Text className="text-mindful-brown-10 font-bold text-lg">
-                    {item.value}
-                  </Text>
-                </View>
-                <View style={{ justifyContent: 'center', alignItems: 'center' }}>
-                <Text className="text-white font-urbanist-bold text-xl"> &#41; </Text>
-                </View>
-              </TouchableOpacity>
-            </Link>
-          )}
-          keyExtractor={(item) => item.key.toString()} 
-          contentContainerStyle={{ paddingHorizontal: 16 }}
-        />
+            data={likertOptions.filter(item => item.value.startsWith('Likert Scale'))}
+            renderItem={({ item }) => (
+              <Link href={`/updateScale/${item.key}`} asChild>
+                <TouchableOpacity className="w-full h-auto p-4 items-center bg-[#9BB167] shadow-lg mt-6 rounded-[15px] flex-row justify-between">
+                  <View style={{ flex: 1 }}>
+                    <Text className="text-mindful-brown-10 font-bold text-lg">{item.value}</Text>
+                  </View>
+                  <View style={{ justifyContent: 'center', alignItems: 'center' }}>
+                    <Text className="text-white font-urbanist-bold text-xl"> &#41; </Text>
+                  </View>
+                </TouchableOpacity>
+              </Link>
+            )}
+            keyExtractor={(item) => item.key.toString()}
+            contentContainerStyle={{ paddingHorizontal: 16 }}
+          />
         )
+      )}
+
+      {isConfirmModalOpen && (
+        <ConfirmModal
+          isConfirmButton
+          isCancelButton
+          imageSource={confirmModal}
+          confirmButtonTitle="Confirm"
+          cancelButtonTitle="Cancel"
+          title="Are you sure?"
+          subTitle="Do you really want to delete this form?"
+          handleConfirm={handleConfirmCallback}
+          handleCancel={() => setIsConfirmModalOpen(false)}
+        />
+      )}
+
+      {isSuccessModalOpen && (
+        <ConfirmModal
+          isConfirmButton
+          isCancelButton={false}
+          imageSource={confirmModal}
+          confirmButtonTitle="Ok"
+          title="Form Deleted"
+          subTitle="Form has been successfully deleted!"
+          handleConfirm={() => setIsSuccessModalOpen(false)}
+        />
       )}
     </SafeAreaView>
   );
