@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react'
 import {
   View,
   Text,
@@ -5,35 +6,33 @@ import {
   StatusBar,
   TouchableOpacity,
 } from 'react-native'
-import { useEffect, useState } from 'react'
 import { SafeAreaView } from 'react-native-safe-area-context'
+import { useLocalSearchParams } from 'expo-router'
 import { router } from 'expo-router'
 
-import BackButton from '../../components/backButton'
-import CustomButton from '../../components/customButton'
-import FormField from '../../components/formField'
-import TextBox from '../../components/textBox'
-import { createJournal } from '../../api/journal'
-import { listEmotion } from '../../api/emotion'
-import Loading from '../../components/loading'
-import ConfirmModal from '../../components/confirmModal'
-import emotionWheelImg from '../../assets/emotionWheel.jpg'
+import { journalEntryById, editJournal } from '../../../api/journal'
+import { listEmotion } from '../../../api/emotion'
+import Loading from '../../../components/loading'
+import BackButton from '../../../components/backButton'
+import CustomButton from '../../../components/customButton'
+import ConfirmModal from '../../../components/confirmModal'
+import FormField from '../../../components/formField'
+import TextBox from '../../../components/textBox'
+import emotionWheelImg from '../../../assets/emotionWheel.jpg'
 
-const TextJournal = () => {
+const JournalDetail = () => {
+  const { id } = useLocalSearchParams()
   const [form, setForm] = useState({
     title: '',
     journal_text: '',
     emotion_id: [],
   })
-
-  const [isLoading, setIsLoading] = useState(false)
-  const [isModalVisible, setIsModalVisible] = useState(false)
+  const [journal, setJournal] = useState(null)
   const [isEmotionModalVisible, setIsEmotionModalVisible] = useState(false)
+  const [isSuccessModalVisible, setIsSuccessModalVisible] = useState(false)
   const [emotions, setEmotions] = useState([])
   const [selectedEmotion, setSelectedEmotion] = useState(1)
   const [selectedFeelings, setSelectedFeelings] = useState([])
-  const [loading, setLoading] = useState(true)
-
   const [errorMessages, setErrorMessages] = useState({
     title: '',
     journal_text: '',
@@ -43,16 +42,34 @@ const TextJournal = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
+        const response = await journalEntryById(id)
         const emotionResponse = await listEmotion()
         setEmotions(emotionResponse)
+        setJournal(response)
       } catch (error) {
         console.error(error)
-      } finally {
-        setLoading(false)
       }
     }
     fetchData()
-  }, [])
+  }, [id])
+
+  useEffect(() => {
+    if (journal) {
+      setForm({
+        title: journal.title,
+        journal_text: journal.journal_text,
+      })
+      const userEmotionList = journal.emotion_id
+      setSelectedEmotion(
+        userEmotionList.find((emotion) => emotion.level === 'Inner').id
+      )
+      setSelectedFeelings(
+        userEmotionList
+          .filter((emotion) => emotion.level != 'Inner')
+          .map((emotion) => emotion.id)
+      )
+    }
+  }, [journal])
 
   const validateForm = () => {
     let isValid = true
@@ -81,26 +98,27 @@ const TextJournal = () => {
     return isValid
   }
 
-  const handleCreateJournal = async () => {
+  const handleSaveJournal = async () => {
     if (!validateForm()) {
       return
     }
 
-    setIsLoading(true)
     let emotionList = [...selectedFeelings]
     emotionList.push(selectedEmotion)
     const updatedForm = { ...form, emotion_id: emotionList }
     try {
-      const response = await createJournal(updatedForm)
-      setIsLoading(false)
-      setIsModalVisible(true)
+      setSelectedFeelings([])
+      setJournal(null)
+      await editJournal(id, updatedForm)
+      const response = await journalEntryById(id)
+      setJournal(response)
+      setIsSuccessModalVisible(true)
     } catch (error) {
-      console.error(error)
-      setIsLoading(false)
+      console.error('Error editing journal:', error)
     }
   }
 
-  if (loading) {
+  if (selectedFeelings.length === 0 && !journal) {
     return (
       <SafeAreaView className="flex-1 p-4 bg-optimistic-gray-10">
         <StatusBar barStyle="dark-content" />
@@ -110,46 +128,14 @@ const TextJournal = () => {
       </SafeAreaView>
     )
   }
-
   return (
-    <View className="flex-1 bg-optimistic-gray-10">
-      <StatusBar barStyle="light-content" />
-      <View className="h-[20vh] bg-mindful-brown-70 justify-center p-4 pt-6">
-        <BackButton buttonStyle="mb-4" />
-        <Text className="font-urbanist-extra-bold text-3xl text-white">
-          Add New Journal
+    <SafeAreaView className="flex-1  p-4 bg-optimistic-gray-10">
+      <StatusBar barStyle="dark-content" />
+      <BackButton buttonStyle="pb-5" />
+      <ScrollView className="flex-1 space-y-4 pb-5">
+        <Text className="font-urbanist-extra-bold text-3xl text-mindful-brown-80 pb-5">
+          Edit Your Journal
         </Text>
-      </View>
-      {isLoading && (
-        <View className="absolute top-0 left-0 right-0 bottom-0 flex justify-center items-center z-10 bg-optimistic-gray-80/90">
-          <Loading />
-        </View>
-      )}
-      {isModalVisible && (
-        <ConfirmModal
-          title="Journal Created!"
-          subTitle={`You’ve completed your journal entry. Congratulations!`}
-          confirmButtonTitle="Ok, Thanks!"
-          isConfirmButton={true}
-          handleConfirm={() => {
-            setIsModalVisible(false)
-            router.push('/journal-home')
-          }}
-        />
-      )}
-      {isEmotionModalVisible && (
-        <ConfirmModal
-          title="Wheel of Emotions"
-          subTitle="How do you feel today?"
-          imageSource={emotionWheelImg}
-          confirmButtonTitle="Ok, Thanks!"
-          isConfirmButton={true}
-          handleConfirm={() => {
-            setIsEmotionModalVisible(false)
-          }}
-        />
-      )}
-      <ScrollView className="p-4 flex-1 py-5">
         <FormField
           title="Journal Title"
           iconName="notebook-outline"
@@ -159,9 +145,8 @@ const TextJournal = () => {
           placeHolder="Enter Journal Title"
           errorMessage={errorMessages.title}
         />
-
         <TextBox
-          title="Write Your Entry"
+          title="Edit Your Entry"
           value={form.journal_text}
           handleChange={(value) => setForm({ ...form, journal_text: value })}
           placeHolder="Write your thoughts here..."
@@ -248,16 +233,39 @@ const TextJournal = () => {
             </View>
           </View>
         )}
-        <View className="pb-5">
-          <CustomButton
-            title="Create Journal"
-            buttonStyle="mb-4 mt-2"
-            handlePress={handleCreateJournal}
-          />
-        </View>
+
+        <CustomButton
+          title="Save Journal"
+          handlePress={handleSaveJournal}
+          buttonStyle="w-full mb-10 bg-serenity-green-50"
+        />
       </ScrollView>
-    </View>
+      {isSuccessModalVisible && (
+        <ConfirmModal
+          title="Journal Updated"
+          subTitle="Your journal has been updated successfully"
+          confirmButtonTitle="Ok, Thanks!"
+          isConfirmButton={true}
+          handleConfirm={() => {
+            setIsSuccessModalVisible(false)
+            router.push('/(journal)/journal-history')
+          }}
+        />
+      )}
+      {isEmotionModalVisible && (
+        <ConfirmModal
+          title="Wheel of Emotions"
+          subTitle="How do you feel today?"
+          imageSource={emotionWheelImg}
+          confirmButtonTitle="Ok, Thanks!"
+          isConfirmButton={true}
+          handleConfirm={() => {
+            setIsEmotionModalVisible(false)
+          }}
+        />
+      )}
+    </SafeAreaView>
   )
 }
 
-export default TextJournal
+export default JournalDetail

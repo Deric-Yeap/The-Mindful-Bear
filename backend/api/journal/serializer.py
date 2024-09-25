@@ -103,11 +103,9 @@ class JournalUpdateSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Journal
-        fields = ['audio_file_path', 'journal_text', 'sentiment_analysis_result', 'title', 'emotion_id']
+        fields = ['journal_text', 'title', 'emotion_id']
         extra_kwargs = {
-            'audio_file_path': {'required': False},
             'journal_text': {'required': False},
-            'sentiment_analysis_result': {'required': False},
             'title': {'required': False},
             'emotion_id': {'required': False},
         }
@@ -116,8 +114,10 @@ class JournalUpdateSerializer(serializers.ModelSerializer):
         emotions = validated_data.pop('emotion_id', None)
         for attr, value in validated_data.items():
             setattr(instance, attr, value)
+        
         if emotions is not None:
             instance.emotion_id.set(emotions)
+        
         instance.save()
         return instance
 

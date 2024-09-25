@@ -5,10 +5,11 @@ from datetime import datetime
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from .models import Journal
-from .serializer import JournalGetSerializer, JournalUploadFileSerializer, JournalCreateSerializer, JournalCalendarSerializer, JournalSummarySerializer, JournalEntriesByDateSerializer,JournalEntriesByPeriodSerializer
-from rest_framework import status
+from .serializer import JournalGetSerializer, JournalUploadFileSerializer, JournalCreateSerializer, JournalCalendarSerializer, JournalSummarySerializer, JournalEntriesByDateSerializer,JournalEntriesByPeriodSerializer, JournalUpdateSerializer
+from rest_framework import status, viewsets
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from django.shortcuts import get_object_or_404
 from rest_framework.parsers import MultiPartParser, FormParser
 from .models import Journal
 from ..common.audio import transcribe
@@ -166,12 +167,21 @@ class JournalEntriesByPeriodView(APIView):
             return Response({"error": "An unexpected error occurred."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
             
         
-class JournalEntryByIdView(APIView):
-    def get(self, request, id):
-        try:
-            journal = Journal.objects.get(id=id)
-        except Journal.DoesNotExist:
-            return Response({'error': 'Journal entry not found.'}, status=status.HTTP_404_NOT_FOUND)
-        
+class JournalEntryViewSet(viewsets.ViewSet):
+    def retrieve(self, request, pk=None):
+        journal = get_object_or_404(Journal, pk=pk)
         serializer = JournalGetSerializer(journal)
         return Response(serializer.data, status=status.HTTP_200_OK)
+    
+    def update(self, request, pk=None):
+        journal = get_object_or_404(Journal, pk=pk)
+        serializer = JournalUpdateSerializer(journal, data=request.data, partial=True, context={'request': request})
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+    def destroy(self, request, pk=None):
+        journal = get_object_or_404(Journal, pk=pk)
+        journal.delete()
+        return Response({'message': 'Journal entry deleted successfully.'}, status=status.HTTP_200_OK)

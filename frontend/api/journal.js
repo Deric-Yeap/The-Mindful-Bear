@@ -17,8 +17,17 @@ export const journalEntriesByPeriod = (params) => {
 }
 
 export const journalEntryById = (id) => {
-  return axiosInstance.get(`journal/journal_entry_by_id/${id}/`)
+  return axiosInstance.get(`journal/journal_entry/${id}/`)
 }
+
+export const deleteJournal = (id) => {
+  return axiosInstance.delete(`journal/journal_entry/${id}/`)
+}
+
+export const editJournal = (id, data) => {
+  return axiosInstance.put(`journal/journal_entry/${id}/`, data)
+}
+
 
 export const createJournal = (data) => {
   return axiosInstance.post('journal/create/', data)
