@@ -98,7 +98,7 @@ const Forms = () => {
 
   const handleFormPress = (form) => {
     router.push({
-      pathname: '/create-form',
+      pathname: '/updateform',
       params: { formId: form.id },
     });
   };
