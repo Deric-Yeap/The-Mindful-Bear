@@ -86,25 +86,26 @@ const JournalHome = () => {
   return (
     <ScrollView>
       <View>
-      <View className="bg-mindful-brown-60 p-5 h-[45vh] relative">
-  <BackButton style={{ zIndex: 1, position: 'absolute', top: 40, left: 20 }} />
+        <View className="bg-mindful-brown-60 h-[45vh] relative">
+          <BackButton buttonStyle=" left-4 top-12 z-10" className="absolute" />
 
-  <View className="flex items-center justify-center mt-[5vh] space-y-2">
-    <Text className="font-urbanist-extra-bold text-white text-6xl">
-      {journalCount}
-    </Text>
+          <View className="flex items-center justify-center mt-[5vh] space-y-2">
+            <Text className="font-urbanist-extra-bold text-white text-6xl">
+              {journalCount}
+            </Text>
 
-    <Text className="font-urbanist-semi-bold text-white text-3xl">
-      Journals this year.
-    </Text>
-    <LottieView
-      source={require('../../assets/animatedBearBee.json')}
-      autoPlay
-      loop
-      className="w-60 h-60 mb-40"
-    />
-  </View>
-</View>
+            <Text className="font-urbanist-semi-bold text-white text-3xl">
+              Journals this year.
+            </Text>
+
+            <LottieView
+              source={require('../../assets/animatedBearBee.json')}
+              autoPlay
+              loop
+              className="w-60 h-60 mb-40"
+            />
+          </View>
+        </View>
 
         <View className="bg-optimistic-gray-10 p-3 h-full items-center -mt-10 rounded-t-full w-[250vw] -left-[75vw]">
           <TouchableOpacity
