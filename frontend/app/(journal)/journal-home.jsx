@@ -14,6 +14,7 @@ import { journalCalendarSumary, journalCountByYear } from '../../api/journal'
 import { monthNames, daysOfWeek } from '../../common/constants'
 import Loading from '../../components/loading'
 import LottieView from 'lottie-react-native'
+import BackButton from '../../components/backButton'
 
 const JournalHome = () => {
   const [calendarData, setCalendarData] = useState([])
@@ -85,24 +86,27 @@ const JournalHome = () => {
   return (
     <ScrollView>
       <View>
-      <View className="bg-mindful-brown-60 p-4 h-[45vh] items-center pt-[5vh]">
-          <View className="flex items-center justify-center mt-10 space-y-2">
-            <Text className="font-urbanist-extra-bold text-white text-6xl mt-10">
+        <View className="bg-mindful-brown-60 h-[45vh] relative">
+          <BackButton buttonStyle=" left-4 top-12 z-10" className="absolute" />
+
+          <View className="flex items-center justify-center mt-[5vh] space-y-2">
+            <Text className="font-urbanist-extra-bold text-white text-6xl">
               {journalCount}
             </Text>
-            
-            <Text className="font-urbanist-semi-bold text-white text-3xl mt-10">
+
+            <Text className="font-urbanist-semi-bold text-white text-3xl">
               Journals this year.
             </Text>
+
             <LottieView
-        source={require('../../assets/animatedBearBee.json')}
-        autoPlay
-        loop
-        className="w-60 h-60 mb-40" 
-      />
+              source={require('../../assets/animatedBearBee.json')}
+              autoPlay
+              loop
+              className="w-60 h-60 mb-40"
+            />
           </View>
         </View>
-       
+
         <View className="bg-optimistic-gray-10 p-3 h-full items-center -mt-10 rounded-t-full w-[250vw] -left-[75vw]">
           <TouchableOpacity
             className="-mt-10 mb-3"
@@ -113,7 +117,6 @@ const JournalHome = () => {
             </View>
           </TouchableOpacity>
 
-    
           <View className="flex-row justify-between items-center px-4 w-[100vw]">
             <TouchableOpacity onPress={handlePreviousMonth} className="">
               <Text className="font-urbanist-bold text-zen-yellow-50">
@@ -172,29 +175,34 @@ const JournalHome = () => {
           </View>
 
           <View className="flex flex-row justify-center items-center mt-4 px-4">
+            <View className="flex flex-row items-center mx-1">
+              <View className="h-4 w-4 bg-mindful-brown-20 rounded-full mr-2"></View>
+              <Text className="font-urbanist-semi-bold text-black text-lg">
+                Skipped
+              </Text>
+            </View>
 
-  <View className="flex flex-row items-center mx-1">
-    <View className="h-4 w-4 bg-mindful-brown-20 rounded-full mr-2"></View>
-    <Text className="font-urbanist-semi-bold text-black text-lg">Skipped</Text>
-  </View>
+            <View className="flex flex-row items-center mx-1">
+              <View className="h-4 w-4 bg-serenity-green-40 rounded-full mr-2"></View>
+              <Text className="font-urbanist-semi-bold text-black text-lg">
+                Positive
+              </Text>
+            </View>
 
+            <View className="flex flex-row items-center mx-1">
+              <View className="h-4 w-4 bg-zen-yellow-30 rounded-full mr-2"></View>
+              <Text className="font-urbanist-semi-bold text-black text-lg">
+                Neutral
+              </Text>
+            </View>
 
-  <View className="flex flex-row items-center mx-1">
-    <View className="h-4 w-4 bg-serenity-green-40 rounded-full mr-2"></View>
-    <Text className="font-urbanist-semi-bold text-black text-lg">Positive</Text>
-  </View>
-
-  
-  <View className="flex flex-row items-center mx-1">
-    <View className="h-4 w-4 bg-zen-yellow-30 rounded-full mr-2"></View>
-    <Text className="font-urbanist-semi-bold text-black text-lg">Neutral</Text>
-  </View>
-
-  <View className="flex flex-row items-center mx-1">
-    <View className="h-4 w-4 bg-empathy-orange-40 rounded-full mr-2"></View>
-    <Text className="font-urbanist-semi-bold text-black text-lg">Negative</Text>
-  </View>
-</View>
+            <View className="flex flex-row items-center mx-1">
+              <View className="h-4 w-4 bg-empathy-orange-40 rounded-full mr-2"></View>
+              <Text className="font-urbanist-semi-bold text-black text-lg">
+                Negative
+              </Text>
+            </View>
+          </View>
         </View>
       </View>
     </ScrollView>
