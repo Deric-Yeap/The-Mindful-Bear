@@ -56,6 +56,11 @@ const TextJournal = () => {
     fetchData()
   }, [])
 
+  const validateEnglishText = (text) => {
+    // Check if the text contains only English letters and common punctuation
+    return /^[A-Za-z0-9\s.,!?'"()-]*$/.test(text)
+  }
+
   const validateForm = () => {
     let isValid = true
     const newErrorMessages = {
@@ -64,13 +69,21 @@ const TextJournal = () => {
       feelings: '',
     }
 
+    // Validate title
     if (!form.title) {
       newErrorMessages.title = 'Title cannot be empty'
       isValid = false
+    } else if (!validateEnglishText(form.title)) {
+      newErrorMessages.title = 'Text must be in English' 
+      isValid = false
     }
 
+    // Validate journal_text
     if (!form.journal_text) {
       newErrorMessages.journal_text = 'Text cannot be empty'
+      isValid = false
+    } else if (!validateEnglishText(form.journal_text)) {
+      newErrorMessages.journal_text = 'Text must be in English' 
       isValid = false
     }
 
