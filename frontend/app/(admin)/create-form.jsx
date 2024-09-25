@@ -7,15 +7,15 @@ import Dropdown from '../../components/dropdown'
 import BrownPageTitlePortion from '../../components/brownPageTitlePortion'
 import StatusBarComponent from '../../components/darkThemStatusBar'
 import CustomButton from '../../components/customButton'
-import { CreateFormAndQuestion } from '../../api/form'
+import { CreateFormAndQuestion, UpdateFormAndQuestion, getFormQuestions } from '../../api/form'
 import { listOptionSet } from '../../api/option-set'
 import ConfirmModal from '../../components/confirmModal' 
 import { confirmModal } from '../../assets/image'
 import { router } from 'expo-router';
-
-
+import { useRoute } from '@react-navigation/native';
 
 const CreateForm = () => {
+  const route = useRoute();
   const [responseTypeList, setResponseTypeList] = useState([])
   const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false)
   const [successMessage, setSuccessMessage] = useState('')
@@ -28,18 +28,16 @@ const CreateForm = () => {
     questions: [
       {
         question: '',
-        option_set_id: '',
+        optionSet: '',
       },
     ],
   })
-  
-
+  const [isUpdateMode, setIsUpdateMode] = useState(false)
+  const [formId, setFormId] = useState(null) 
   const [errors, setErrors] = useState({
     form_name: '',
     questions: [],
   })
-
-
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -50,9 +48,31 @@ const CreateForm = () => {
         console.error('Error fetching form details:', error)
       }
     }
-    fetchData()
-  }, [])
 
+    const fetchFormData = async () => {
+      const { formId } = route.params || {};             
+      if (formId) {
+        try {
+          const form = await getFormQuestions(formId);           
+          setRequest({
+            form_name: form.formName,
+            store_responses: form.storeResponses,
+            is_compulsory: form.isCompulsory,
+            is_presession: form.isPresession,
+            is_postsession: form.isPostsession,
+            questions: form.questionsWithOptions || [{ question: '', optionSet: '' }]
+          })          
+          setIsUpdateMode(true)
+          setFormId(formId) 
+        } catch (error) {
+          console.error('Error fetching form:', error)
+          Alert.alert('Error', 'Could not fetch form details.')
+        }
+      }
+    }
+    fetchData()
+    fetchFormData();
+  }, [])
 
   const addQuestion = () => {
     setRequest((prevRequest) => ({
@@ -61,7 +81,7 @@ const CreateForm = () => {
         ...prevRequest.questions,
         {
           question: '',
-          option_set_id: '',
+          optionSet: '',
         },
       ],
     }))
@@ -93,7 +113,7 @@ const CreateForm = () => {
         newErrors.questions[index] = ''
       }
 
-      if (!question.option_set_id) {
+      if (!question.optionSet) {
         newErrors.questions[index] += 'Response type is required.'
         valid = false
       }
@@ -108,20 +128,23 @@ const CreateForm = () => {
       Alert.alert('Validation Error', 'Please fill out all required fields.')
       return
     }
-    
-
     try {
       const request_with_order = request.questions.map((question, index) => {
         return { ...question, order: index }
       })
       request.questions = request_with_order
-      const response = await CreateFormAndQuestion(request)
+      
+      if (isUpdateMode) {
+        await UpdateFormAndQuestion(formId, request) 
+        setSuccessMessage('Form Updated successfully!')
+      } else {
+        await CreateFormAndQuestion(request)
+        setSuccessMessage('Form Created successfully!')
+      }
 
-      setSuccessMessage('Form Created successfully!')
       setIsSuccessModalOpen(true)
-     
     } catch (error) {
-      console.error(error.response.data.error_description)
+      console.error(error.response?.data?.error_description || error.message)
     }
   }
 
@@ -142,7 +165,7 @@ const CreateForm = () => {
   
   const handleResponseTypeChange = (index, value) => {
     const newQuestions = [...request.questions]
-    newQuestions[index].option_set_id = value
+    newQuestions[index].optionSet = value
     setRequest((prevRequest) => ({
       ...prevRequest,
       questions: newQuestions,
@@ -323,6 +346,7 @@ const CreateForm = () => {
 
          
             <Dropdown
+              key={index}
               title="Question Response Type"
               data={responseTypeList.map((opt) => ({
                 key: opt.id,
@@ -331,7 +355,9 @@ const CreateForm = () => {
               customStyles="pb-6 m-4"
               placeHolder="Select Response Type"
               handleSelect={(value) => handleResponseTypeChange(index, value)}
+              selectedValue={request.questions[index].optionSet}
             />
+
             {errors.questions[index]?.includes('Response type is required.') ? (
               <Text style={{ color: 'red', marginLeft: 16 }}>
                 Response type is required.
@@ -344,12 +370,11 @@ const CreateForm = () => {
         <CustomButton
           title="Add Question"
           handlePress={addQuestion}
-          buttonStyle="mx-4 mb-2"
+          buttonStyle="mx-4 mb-2 py-0"
         />
 
-      
         <CustomButton
-          title="Save"
+          title={isUpdateMode ? "Update" : "Save"}
           handlePress={handleSave}
           buttonStyle="mx-4"
         />

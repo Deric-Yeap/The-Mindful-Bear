@@ -8,4 +8,5 @@ urlpatterns = [
     path("delete/<int:pk>",views.FormDestroy.as_view(),name="form-delete"),
     path("create-form-and-questions",views.FormAndQuestionCreateView.as_view(),name="create-form-and-questions"),
     path("get-form-and-questions/<int:pk>",views.FormAndQuestionView.as_view(),name="get-form-and-questions"),
+    path("update-form-and-questions/<int:pk>",views.FormAndQuestionView.as_view(),name="update-form-and-questions"),
 ]
