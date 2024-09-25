@@ -18,6 +18,8 @@ import { listEmotion } from '../../api/emotion'
 import Loading from '../../components/loading'
 import ConfirmModal from '../../components/confirmModal'
 import emotionWheelImg from '../../assets/emotionWheel.jpg'
+import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons'
+import { colors } from '../../common/styles'
 
 const TextJournal = () => {
   const [form, setForm] = useState({
@@ -155,19 +157,51 @@ const TextJournal = () => {
           iconName="notebook-outline"
           value={form.title}
           handleChange={(value) => setForm({ ...form, title: value })}
-          customStyles="w-full pb-4"
+          customStyles="w-full mb-1"
           placeHolder="Enter Journal Title"
-          errorMessage={errorMessages.title}
+          // errorMessage={errorMessages.title}
         />
+
+        {errorMessages.title && (
+          <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+            <MaterialCommunityIcons
+              name="alert-octagon-outline"
+              size={30}
+              color={colors.presentRed50}
+            />
+            <Text
+              className="text-present-red-50 font-urbanist-semi-bold"
+              style={{ marginLeft: 8 }}
+            >
+              {errorMessages.title}
+            </Text>
+          </View>
+        )}
 
         <TextBox
           title="Write Your Entry"
           value={form.journal_text}
           handleChange={(value) => setForm({ ...form, journal_text: value })}
           placeHolder="Write your thoughts here..."
-          errorMessage={errorMessages.journal_text}
+          // errorMessage={errorMessages.journal_text}
+          customStyles="pb-1"
         />
 
+        {errorMessages.journal_text && (
+          <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+            <MaterialCommunityIcons
+              name="alert-octagon-outline"
+              size={30}
+              color={colors.presentRed50}
+            />
+            <Text
+              className="text-present-red-50 font-urbanist-semi-bold"
+              style={{ marginLeft: 8 }}
+            >
+              {errorMessages.journal_text}
+            </Text>
+          </View>
+        )}
         {emotions.length > 0 && (
           <View className="space-y-4 my-2">
             <View>
@@ -240,10 +274,21 @@ const TextJournal = () => {
                     </TouchableOpacity>
                   ))}
               </View>
+
               {errorMessages.feelings && (
-                <Text className="text-present-red-50 font-urbanist-semi-bold">
-                  {errorMessages.feelings}
-                </Text>
+                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                  <MaterialCommunityIcons
+                    name="alert-octagon-outline"
+                    size={30}
+                    color={colors.presentRed50}
+                  />
+                  <Text
+                    className="text-present-red-50 font-urbanist-semi-bold"
+                    style={{ marginLeft: 8 }}
+                  >
+                    {errorMessages.feelings}
+                  </Text>
+                </View>
               )}
             </View>
           </View>
