@@ -44,3 +44,7 @@ export const setFormQuestion = async (sessionId, answers) => {
     }
   );  
 }
+
+export const deleteQuestion = (id) => {
+  return axiosInstance.delete(`/form/delete/${id}`)
+}

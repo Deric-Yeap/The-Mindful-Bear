@@ -1,101 +1,127 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, ScrollView, Alert } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import StatusBarComponent from '../../components/darkThemStatusBar';
-import BrownPageTitlePortion from '../../components/brownPageTitlePortion';
-import FormField from '../../components/formField';
-import Dropdown from '../../components/dropdown';
-import CustomButton from '../../components/customButton';
-import axiosInstance from '../../common/axiosInstance';
-import { listOptionSet } from '../../api/option-set';
-import { useRoute } from '@react-navigation/native';
-import { colors } from '../../common/styles'
+import React, { useState, useEffect } from 'react'
+import { View, Text, TouchableOpacity, ScrollView, Alert } from 'react-native'
+import { SafeAreaView } from 'react-native-safe-area-context'
+import { useRoute } from '@react-navigation/native'
 
+import StatusBarComponent from '../../components/darkThemStatusBar'
+import BrownPageTitlePortion from '../../components/brownPageTitlePortion'
+import FormField from '../../components/formField'
+import Dropdown from '../../components/dropdown'
+import CustomButton from '../../components/customButton'
+import axiosInstance from '../../common/axiosInstance'
+import { listOptionSet } from '../../api/option-set'
+import { colors } from '../../common/styles'
+import { deleteQuestion, editQuestion } from '../../api/question'
+import ConfirmModal from '../../components/confirmModal'
 
 const UpdateForm = () => {
-  const route = useRoute();
-  const formId = route.params.formId;
-  console.log('Form ID:', formId);
+  const route = useRoute()
+  const formId = route.params.formId
+  console.log('Form ID:', formId)
 
-  const [formName, setFormName] = useState("");
-  const [storeResponses, setStoreResponses] = useState(false);
-  const [questions, setQuestions] = useState([]);
-  const [responseTypeList, setResponseTypeList] = useState([]);
-  const [editable, setEditable] = useState(false);
+  const [formName, setFormName] = useState('')
+  const [storeResponses, setStoreResponses] = useState(false)
+  const [questions, setQuestions] = useState([])
+  const [responseTypeList, setResponseTypeList] = useState([])
+  const [editable, setEditable] = useState(false)
+  const [isDeleteModalVisible, setIsDeleteModalVisible] = useState(false)
+  const [questionToDelete, setQuestionToDelete] = useState(null)
+  const [isEditSuccessModalVisible, setIsEditSuccessModalVisible] = useState(false)
+  const [questionChanges, setQuestionChanges] = useState({})
+  const [noChangeError, setNoChangeError] = useState({})
 
-  useEffect(() => {
-    const fetchFormDetails = async () => {
-      try {
-        console.log('Fetching form details for Form ID:', formId);
-        const response = await axiosInstance.get(`/form/get-form-and-questions/${formId}`);
-        console.log('Form details fetched:', response);
+  const fetchFormDetails = async () => {
+    try {
+      console.log('Fetching form details for Form ID:', formId)
+      const response = await axiosInstance.get(
+        `/form/get-form-and-questions/${formId}`
+      )
+      console.log('Form details fetched:', response)
 
-        const formDetails = response;
-        setFormName(formDetails.form_name);
-        setStoreResponses(formDetails.store_responses);
-        setQuestions(formDetails.questions.map(q => ({
+      const formDetails = response
+      setFormName(formDetails.form_name)
+      setStoreResponses(formDetails.store_responses)
+      setQuestions(
+        formDetails.questions.map((q) => ({
           ...q,
           editable: false,
           optionSet_id: q.optionSet || '',
-        })));
-        console.log('Questions after setting state:', formDetails.questions);
+        }))
+      )
+      console.log('Questions after setting state:', formDetails.questions)
 
-        const optionSetResponse = await listOptionSet();
-        console.log('Option Set Response:', optionSetResponse);
-        setResponseTypeList(optionSetResponse);
-      } catch (error) {
-        console.error('Error fetching form details:', error);
-      }
-    };
+      const optionSetResponse = await listOptionSet()
+      console.log('Option Set Response:', optionSetResponse)
+      setResponseTypeList(optionSetResponse)
+    } catch (error) {
+      console.error('Error fetching form details:', error)
+    }
+  }
 
-    fetchFormDetails();
-  }, [formId]);
+  useEffect(() => {
+    fetchFormDetails()
+  }, [formId])
 
   const getPlaceholder = (optionSetId) => {
-    const foundOption = responseTypeList.find(opt => opt.id === optionSetId);
-    return foundOption ? foundOption.description : "Select Response Type";
-  };
+    const foundOption = responseTypeList.find((opt) => opt.id === optionSetId)
+    return foundOption ? foundOption.description : 'Select Response Type'
+  }
 
   const toggleEditable = () => {
-    setEditable(!editable);
-    setQuestions(prevQuestions =>
-      prevQuestions.map(q => ({ ...q, editable: !q.editable }))
-    );
-  };
+    setEditable(!editable)
+    setQuestions((prevQuestions) =>
+      prevQuestions.map((q) => ({ ...q, editable: !q.editable }))
+    )
+  }
 
-  const handleSaveChanges = async () => {
-    try {
-      console.log('Saving changes for Form ID:', formId);
-      await axiosInstance.put(`/form/update/${formId}`, {
-        form_name: formName,
-        store_responses: storeResponses,
-        questions: questions.map((q, index) => ({
-          question_text: q.question,
-          optionSet_id: q.optionSet_id,
-          order: index,
-        })),
-      });
-      Alert.alert('Form Updated Successfully');
-      toggleEditable();
-    } catch (error) {
-      console.error('Error saving form:', error);
+  const handleSaveChanges = async (questionId) => {
+    if (!questionChanges[questionId]) {
+      setNoChangeError((prev) => ({ ...prev, [questionId]: true }))
+      return
     }
-  };
 
-  const handleDelete = async () => {
     try {
-      console.log('Deleting Form ID:', formId);
-      await axiosInstance.delete(`/form/delete/${formId}`);
-      Alert.alert('Form Deleted Successfully');
-      // Add navigation back or any other post-delete action here
+      const question = questions.find((q) => q.questionID === questionId)
+      console.log('Saving changes for Question ID:', questionId)
+      await editQuestion(questionId, {
+        question: question.question,
+        optionSet: question.optionSet,
+      })
+      fetchFormDetails()
+      setIsEditSuccessModalVisible(true)
+      setQuestionChanges((prev) => ({ ...prev, [questionId]: false }))
+      setNoChangeError((prev) => ({ ...prev, [questionId]: false }))
     } catch (error) {
-      console.error('Error deleting form:', error);
+      console.error('Error saving question:', error)
     }
-  };
+  }
+
+  const handleDeleteConfirm = async () => {
+    if (questionToDelete) {
+      try {
+        const response = await deleteQuestion(questionToDelete)
+        console.log(response)
+        fetchFormDetails() // Fetch the form details again after deletion
+        setIsDeleteModalVisible(false)
+        setQuestionToDelete(null)
+      } catch (error) {
+        console.error('Error deleting question:', error)
+      }
+    }
+  }
+
+  const handleChange = (setter, questionId) => (value) => {
+    setter(value)
+    setQuestionChanges((prev) => ({ ...prev, [questionId]: true }))
+    setNoChangeError((prev) => ({ ...prev, [questionId]: false }))
+  }
 
   return (
     <SafeAreaView className="flex-1 bg-optimistic-gray-10">
-      <StatusBarComponent barStyle="light-content" backgroundColor={colors.mindfulBrown100} />
+      <StatusBarComponent
+        barStyle="light-content"
+        backgroundColor={colors.mindfulBrown100}
+      />
       <BrownPageTitlePortion title="Form Management" />
 
       <ScrollView contentContainerStyle={{ paddingBottom: 20 }}>
@@ -103,7 +129,7 @@ const UpdateForm = () => {
           title="Form Name"
           iconName="form-select"
           value={formName}
-          handleChange={(value) => setFormName(value)}
+          handleChange={handleChange(setFormName, 'formName')}
           customStyles="mb-4 m-4"
           editable={editable}
         />
@@ -114,7 +140,7 @@ const UpdateForm = () => {
           </Text>
           <TouchableOpacity
             className="flex-1 flex-row items-center justify-end"
-            onPress={() => editable && setStoreResponses(!storeResponses)}
+            onPress={() => editable && handleChange(setStoreResponses, 'storeResponses')(!storeResponses)}
           >
             <View
               className={`w-6 h-6 rounded border-2 border-mindful-brown-80 ${
@@ -124,14 +150,16 @@ const UpdateForm = () => {
           </TouchableOpacity>
         </View>
 
-        <View style={{ height: 1, backgroundColor: '#E1E1E0', marginVertical: 10 }} />
+        <View
+          style={{ height: 1, backgroundColor: '#E1E1E0', marginVertical: 10 }}
+        />
 
         {questions.map((question, index) => {
-          const placeholder = getPlaceholder(question.optionSet_id);
-          console.log(`Rendering Question ${index + 1}`);
-          console.log('Question Details:', question);
-          console.log('Selected OptionSet ID:', question.optionSet_id);
-          console.log('Placeholder:', placeholder);
+          const placeholder = getPlaceholder(question.optionSet_id)
+          console.log(`Rendering Question ${index + 1}`)
+          console.log('Question Details:', question)
+          console.log('Selected OptionSet ID:', question.optionSet_id)
+          console.log('Placeholder:', placeholder)
 
           return (
             <View key={index} className="mb-4 px-4">
@@ -144,11 +172,11 @@ const UpdateForm = () => {
               <FormField
                 iconName="text-box-outline"
                 value={question.question}
-                handleChange={(value) => {
-                  const newQuestions = [...questions];
-                  newQuestions[index].question = value;
-                  setQuestions(newQuestions);
-                }}
+                handleChange={handleChange((value) => {
+                  const newQuestions = [...questions]
+                  newQuestions[index].question = value
+                  setQuestions(newQuestions)
+                }, question.questionID)}
                 customStyles="mx-0"
                 editable={editable}
                 multiline={true}
@@ -162,37 +190,85 @@ const UpdateForm = () => {
 
               <Dropdown
                 title="Question Response Type"
-                data={responseTypeList.map(opt => ({ key: opt.id, value: opt.description }))}
+                data={responseTypeList.map((opt) => ({
+                  key: opt.id,
+                  value: opt.description,
+                }))}
                 customStyles="pb-2 mt-2"
                 placeHolder={placeholder}
-                handleSelect={(value) => {
-                  const newQuestions = [...questions];
-                  newQuestions[index].optionSet_id = value;
-                  setQuestions(newQuestions);
-                  console.log(`Option selected for Question ${index + 1}:`, value);
-                }}
+                handleSelect={handleChange((value) => {
+                  console.log('here', value)
+                  const newQuestions = [...questions]
+                  newQuestions[index].optionSet = value
+                  setQuestions(newQuestions)
+                  console.log(
+                    `Option selected for Question ${index + 1}:`,
+                    value
+                  )
+                }, question.questionID)}
                 disabled={!editable}
               />
 
               <View className="flex-row justify-between mt-4 mb-4">
-                <View className="bg-mindful-brown-70 rounded-full py-3 flex-1 justify-center items-center mr-2">
-                  <Text className="text-white text-lg font-bold">Make Changes</Text>
-                </View>
-
-                <View className="bg-optimistic-gray-60 rounded-full py-3 flex-1 justify-center items-center ml-2">
-                  <Text className="text-white text-lg font-bold">Delete</Text>
-                </View>
+                <CustomButton
+                  title="Save Change"
+                  handlePress={() => handleSaveChanges(question.questionID)}
+                  buttonStyle={`w-[45vw] ${!questionChanges[question.questionID] ? 'bg-mindful-brown-30' : ''}`}
+                />
+                <CustomButton
+                  title="Delete"
+                  handlePress={() => {
+                    setQuestionToDelete(question.questionID)
+                    setIsDeleteModalVisible(true)
+                  }}
+                  buttonStyle="w-[45vw] bg-present-red-70"
+                />
               </View>
 
+              {noChangeError[question.questionID] && (
+                <Text className="text-red-500 text-center">
+                  There are no changes to save.
+                </Text>
+              )}
+
               <View
-                style={{ height: 1, backgroundColor: '#E1E1E0', marginVertical: 10 }}
+                style={{
+                  height: 1,
+                  backgroundColor: '#E1E1E0',
+                  marginVertical: 10,
+                }}
               />
             </View>
-          );
+          )
         })}
       </ScrollView>
+      {isDeleteModalVisible && (
+        <ConfirmModal
+          title="Are you sure?"
+          subTitle={`You are about to delete the question`}
+          isCancelButton={true}
+          cancelButtonTitle={'Cancel'}
+          handleCancel={() => {
+            setIsDeleteModalVisible(false)
+            setQuestionToDelete(null)
+          }}
+          confirmButtonTitle="Delete"
+          isConfirmButton={true}
+          handleConfirm={handleDeleteConfirm}
+        />
+      )}
+      {isEditSuccessModalVisible && (
+        <ConfirmModal
+          title="Success"
+          subTitle={`The question has been successfully edited.`}
+          isCancelButton={false}
+          confirmButtonTitle="OK, Thanks!"
+          isConfirmButton={true}
+          handleConfirm={() => setIsEditSuccessModalVisible(false)}
+        />
+      )}
     </SafeAreaView>
-  );
-};
+  )
+}
 
-export default UpdateForm;
+export default UpdateForm
