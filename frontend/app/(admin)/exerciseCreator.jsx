@@ -5,7 +5,7 @@ import FormField from '../../components/formField';
 import BrownPageTitlePortion from '../../components/brownPageTitlePortion';
 import StatusBarComponent from '../../components/darkThemStatusBar';
 import CustomButton from '../../components/customButton';
-import { createExercise, updateExercise } from '../../api/exercise';
+import { createExercise, updateExercise, deleteExercise } from '../../api/exercise';
 import { getLandmarks } from '../../api/landmark';
 import ConfirmModal from '../../components/confirmModal';
 import { confirmModal } from '../../assets/image';
@@ -22,6 +22,7 @@ const ExerciseCreator = () => {
   if (exercise) {
     try {
       exercise = JSON.parse(exercise);
+      console.log(exercise)
     } catch (error) {
       console.error('Error parsing exercise:', error);
       exercise = null; 
@@ -42,6 +43,7 @@ const ExerciseCreator = () => {
   
   const [showSuccess, setShowSuccess] = useState(false);
   const [allLandmarksAssigned, setAllLandmarksAssigned] = useState(false);
+  const [modalMessage, setModalMessage] = useState('');
 
   useEffect(() => {
     const fetchLandmarks = async () => {
@@ -91,9 +93,11 @@ const ExerciseCreator = () => {
     try {
       if (exercise) {
         await updateExercise(exercise.exercise_id, exerciseData); 
+        setModalMessage("updated")
         setShowSuccess(true); 
       } else {
         await createExercise(exerciseData); 
+        setModalMessage("created")
         setShowSuccess(true); 
         resetForm(); 
       }
@@ -102,6 +106,17 @@ const ExerciseCreator = () => {
       Alert.alert(`Error ${exercise ? 'updating' : 'creating'} exercise:`, error.message);
     }
   };
+
+  const handleDelete = async () => {
+    try {
+      await deleteExercise(exercise.exercise_id)
+      setModalMessage("deleted")
+      setShowSuccess(true); 
+    }
+    catch (error) {
+      console.error("Error deleting exercise:", error);
+    }
+  }
 
   const resetForm = () => {
     setExerciseName('');    
@@ -141,7 +156,7 @@ const ExerciseCreator = () => {
 
   const handleConfirm = () => {
     setShowSuccess(false);   
-    if (exercise) {    
+    if (exercise || modalMessage === "deleted") {    
       router.push('/exercisemanagement');  
     }    
   };
@@ -154,47 +169,32 @@ const ExerciseCreator = () => {
     <SafeAreaView className="flex-1 bg-optimistic-gray-10">
       <StatusBarComponent barStyle="light-content" backgroundColor="#251404" />
       <BrownPageTitlePortion title="Exercise Management" />
-      <ScrollView contentContainerStyle={{ paddingBottom: 20 }}>
+      <ScrollView className="pb-20 mt-4">
         <FormField
           title="Exercise Name"
           iconName="form-select"
           value={exerciseName}
           handleChange={setExerciseName}
-          customStyles="mb-4 m-4"
+          customStyles="m-4"
         />
-        <View className="flex-row justify-between items-center">
-          <Text className="text-mindful-brown-80 font-urbanist-extra-bold text-lg mb-2 p-4">
-            Description
-          </Text>
-        </View>
         <FormField
+          title="Description"
           iconName="text-box-outline"
           value={description}
           handleChange={setDescription}
-          customStyles="mx-4"
+          customStyles="m-4"
         />
-        <View className="flex-row items-center my-4 px-4 w-full">
-          <TouchableOpacity className="bg-serenity-green-50 rounded-full py-2 px-4 mr-4 shadow-lg" onPress={handleAudioUpload}>
-            <Text className="text-white text-lg">Upload Audio</Text>
-          </TouchableOpacity>
+        <View className="flex-row items-center mb-4 px-4 justify-between w-full">
           <Text className="underline text-mindful-brown-100 text-lg">{truncateFileName(audioFile.name)}</Text>
+          <TouchableOpacity className="bg-serenity-green-50 rounded-full py-2 px-4 ml-4 shadow-lg" onPress={handleAudioUpload}>
+            <Text className="text-white text-lg">Upload Audio</Text>
+          </TouchableOpacity>          
         </View>  
-        <View className="flex-row items-center my-4 px-4 w-full">
-          {/* <MultiselectDropdown            
-            title="Assigned Landmarks"
-            data={landmarkList}
-            placeHolder="Select Landmarks"
-            handleSelect={handleLandmarkSelect}
-            selectedItems={selectedLandmarks}
-            disabled={false}
-          /> */}
-          {allLandmarksAssigned ? (
-            exercise ? (
-              <Text className="text-mindful-brown-100 text-lg">All landmarks have been assigned an exercise</Text>
-            ) : (
-              <View style={{ height: 20 }} /> // Blank space
-            )
-          ) : (
+        <View className="px-4 w-full mb-4">
+          {allLandmarksAssigned || !exercise ? (
+              <Text className="text-mindful-brown-100 font-urbanist-regular text-base text-center mb-4">All landmarks have been assigned an exercise</Text>
+            ) 
+          : (
             <MultiselectDropdown            
               title="Assigned Landmarks"
               data={landmarkList}
@@ -212,6 +212,13 @@ const ExerciseCreator = () => {
             title={exercise ? "Update Exercise" : "Create Exercise"}
           />
         </View>        
+        <View className="mb-4 px-4 w-full">
+          <CustomButton
+            className="mt-2 w-full"
+            handlePress={handleDelete}
+            title="Delete Exercise"
+          />
+        </View>     
       </ScrollView>
       {showSuccess && (
         <ConfirmModal
@@ -220,7 +227,7 @@ const ExerciseCreator = () => {
           imageSource={confirmModal}
           confirmButtonTitle={'Confirm'}
           title={'Success!'}
-          subTitle={`Exercise ${exercise ? 'updated' : 'created'} successfully.`}
+          subTitle={`Exercise ${modalMessage} successfully.`}
           handleConfirm={handleConfirm}
         />
       )}
