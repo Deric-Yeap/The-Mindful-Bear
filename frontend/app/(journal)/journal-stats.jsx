@@ -10,6 +10,7 @@ import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons'
 import { Calendar } from 'react-native-calendars'
 import { journalEntriesByPeriod } from '../../api/journal'
 import LottieView from 'lottie-react-native'
+import Loading from '../../components/loading';
 
 const JournalStats = ({
   title = 'Journal Stats',
@@ -21,6 +22,7 @@ const JournalStats = ({
   const [endDate, setEndDate] = useState(null)
   const [endDateForAxios, setEndDateForAxios] = useState(null)
   const [journals, setJournals] = useState([])
+  const [loading, setLoading] = useState(true);
 
   const handleOnPress = () => {
     setModalVisible(true)
@@ -109,6 +111,7 @@ const JournalStats = ({
 
   useEffect(() => {
     const fetchData = async () => {
+      setLoading(true);
       if (startDate) {
         const end = endDateForAxios || startDate // Use startDate if endDateForAxios is not set
         try {
@@ -120,6 +123,8 @@ const JournalStats = ({
           console.log(response)
         } catch (error) {
           console.error(error)
+        }finally{
+          setLoading(false);
         }
       }
     }
