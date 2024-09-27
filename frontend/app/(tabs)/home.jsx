@@ -41,6 +41,20 @@ const Home = () => {
               xx Days Streak
             </Text>
           </MetricCard>
+          <Text className="text-mindful-brown-100 font-urbanist-extra-bold text-xl mb-4">
+          Discover Articles
+          </Text>
+          <MetricCard
+            route="/(article)/article-discovery"
+            iconName="book-plus-outline"
+            iconColor={colors.kindPurple50}
+            circleStyle="bg-kind-purple-10"
+            title="Article Discovery Made Easy"
+          >
+            <Text className="font-urbanist-semi-bold text-mindful-brown-80 text-lg">
+            Effortlessly search and find articles that inspire and inform.
+            </Text>
+          </MetricCard>
         </View>
       </ScrollView>
     </SafeAreaView>
