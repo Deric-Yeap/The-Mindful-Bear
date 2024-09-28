@@ -32,6 +32,9 @@ axiosInstance.interceptors.request.use(
 
 axiosInstance.interceptors.response.use(
   (response) => {
+    if (response.status === 204) {
+      return response.data
+    }
     return response.data.data
   },
   (error) => {

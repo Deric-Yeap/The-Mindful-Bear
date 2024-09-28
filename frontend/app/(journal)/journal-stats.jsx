@@ -9,6 +9,7 @@ import { router } from 'expo-router'
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons'
 import { Calendar } from 'react-native-calendars'
 import { journalEntriesByPeriod } from '../../api/journal'
+import LottieView from 'lottie-react-native'
 
 const JournalStats = ({
   title = 'Journal Stats',
@@ -106,19 +107,6 @@ const JournalStats = ({
     return marked
   }
 
-  const barData = [
-    { value: 5, label: 'Happy', frontColor: colors.serenityGreen50 },
-    { value: 11, label: 'Angry', frontColor: colors.presentRed40 },
-    { value: 8, label: 'Bad', frontColor: colors.mindfulBrown60 },
-    { value: 1, label: 'Surprised', frontColor: colors.empathyOrange40 },
-    { value: 4, label: 'Sad', frontColor: '#507DBC' },
-    { value: 1, label: 'Disgusted', frontColor: colors.kindPurple40 },
-  ]
-
-  const maxValue = Math.max(...barData.map((item) => item.value))
-  const noOfSections = 4
-  const stepValue = Math.ceil(maxValue / noOfSections)
-
   useEffect(() => {
     const fetchData = async () => {
       if (startDate) {
@@ -137,7 +125,67 @@ const JournalStats = ({
     }
 
     fetchData()
-  }, [startDate, endDateForAxios]) // Re-run when startDate or endDate changes
+  }, [startDate, endDateForAxios])
+
+  const innerEmotionsArray = Object.entries(journals || {}).flatMap(
+    ([date, entries]) =>
+      entries.flatMap((entry) =>
+        entry.emotion_id
+          .filter((emotion) => emotion.level === 'Inner')
+          .map((emotion) => emotion.name)
+      )
+  )
+
+  console.log('hi', journals)
+
+  console.log('inner', innerEmotionsArray)
+  // Function to count occurrences of each emotion
+  const countEmotions = (emotions) => {
+    return emotions.reduce((acc, emotion) => {
+      acc[emotion] = (acc[emotion] || 0) + 1
+      return acc
+    }, {})
+  }
+
+  // Convert the counts into the desired barData format
+  const createBarData = (emotionCounts) => {
+    return [
+      {
+        label: 'Happy',
+        value: emotionCounts.Happy || 0,
+        frontColor: colors.serenityGreen50,
+      },
+      {
+        label: 'Angry',
+        value: emotionCounts.Angry || 0,
+        frontColor: colors.presentRed40,
+      },
+      {
+        label: 'Bad',
+        value: emotionCounts.Bad || 0,
+        frontColor: colors.mindfulBrown60,
+      },
+      {
+        label: 'Surprised',
+        value: emotionCounts.Surprised || 0,
+        frontColor: colors.empathyOrange40,
+      },
+      { label: 'Sad', value: emotionCounts.Sad || 0, frontColor: '#507DBC' },
+      {
+        label: 'Disgusted',
+        value: emotionCounts.Disgusted || 0,
+        frontColor: colors.kindPurple40,
+      },
+    ]
+  }
+
+  const emotionCounts = countEmotions(innerEmotionsArray)
+
+  const barData = createBarData(emotionCounts)
+
+  const maxValue = Math.max(...barData.map((item) => item.value))
+  const noOfSections = 4
+  const stepValue = Math.ceil(maxValue / noOfSections)
 
   return (
     <SafeAreaView className="bg-optimistic-gray-10 h-full p-4 space-y-4">
@@ -204,29 +252,65 @@ const JournalStats = ({
       </Modal>
 
       <View className="pb-20">
-        <BarChart
-          height={400}
-          barWidth={30}
-          barBorderRadius={20}
-          frontColor="lightgray"
-          data={barData}
-          yAxisThickness={0}
-          xAxisThickness={0}
-          borderSkipped={false}
-          isAnimated
-          yAxisMaxValue={maxValue}
-          stepValue={stepValue}
-          noOfSections={noOfSections}
-          yAxisLabelTexts={Array.from({ length: noOfSections + 1 }, (_, i) =>
-            (i * stepValue).toString()
-          )}
+        {startDate && innerEmotionsArray.length === 0 ? ( // Check if emotions array is empty
+          <>
+            <View className="flex-row my-3">
+              <View className="bg-mindful-brown-80 max-w-[250px] p-3 rounded-lg relative text">
+                <Text className="pt-1 text-white">
+                  Hey! There are no journal entries for this period.
+                </Text>
+              </View>
+            </View>
+
+            <LottieView
+              source={require('../../assets/bearSleeping.json')}
+              autoPlay
+              loop
+              className="w-30 h-40 mb-10"
+            />
+          </>
+        ) : !startDate ? (
+          <>
+            <View className="flex-row my-3">
+              <View className="bg-mindful-brown-80 max-w-[250px] p-3 rounded-lg relative">
+                <Text className="pt-1 text-white">
+                  Hey! Please select a date.
+                </Text>
+              </View>
+            </View>
+
+            <LottieView
+              source={require('../../assets/bearSleeping.json')}
+              autoPlay
+              loop
+              className="w-30 h-40 mb-10"
+            />
+          </>
+        ) : (
+          <BarChart
+            height={400}
+            barWidth={30}
+            barBorderRadius={20}
+            frontColor="lightgray"
+            data={barData}
+            yAxisThickness={0}
+            xAxisThickness={0}
+            borderSkipped={false}
+            isAnimated
+            yAxisMaxValue={maxValue}
+            stepValue={stepValue}
+            noOfSections={noOfSections}
+            yAxisLabelTexts={Array.from({ length: noOfSections + 1 }, (_, i) =>
+              (i * stepValue).toString()
+            )}
+          />
+        )}
+        <CustomButton
+          title="See All Journal Entries"
+          handlePress={() => router.push('/(journal)/journal-history')}
+          buttonStyle="w-full mt-10"
         />
       </View>
-      <CustomButton
-        title="See All Journal Entries"
-        handlePress={() => router.push('/(journal)/journal-history')}
-        buttonStyle="w-full"
-      />
     </SafeAreaView>
   )
 }

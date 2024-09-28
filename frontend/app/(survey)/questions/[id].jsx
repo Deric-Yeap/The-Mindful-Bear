@@ -38,7 +38,7 @@ const QuestionPage = () => {
   const [loading, setLoading] = useState(true);
   
   let formName = "";
-  let enhancedData = [];
+  let questionsWithOptions = [];
 
   useEffect(() => {
     if (formData) {
@@ -50,9 +50,9 @@ const QuestionPage = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        ({ formName, enhancedData } = await getFormQuestions(id));
-        console.log(enhancedData);
-        setQuestions(enhancedData);
+        ({ formName, questionsWithOptions } = await getFormQuestions(id));
+        console.log(questionsWithOptions);
+        setQuestions(questionsWithOptions);
         
         setFormTitle(formName);
         setLoading(false); // Set loading to false after data is returned
@@ -78,7 +78,7 @@ const QuestionPage = () => {
     } else {
         try {                
           await setFormQuestion(sessionID, answers);   
-          const updatedCompletedForms = [...completedForms, enhancedData.formID];               
+          const updatedCompletedForms = [...completedForms, questionsWithOptions.formID];               
           console.log(updatedCompletedForms)
           router.push({
             pathname: `/questionaire`,
