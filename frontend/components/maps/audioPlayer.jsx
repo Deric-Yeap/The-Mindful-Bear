@@ -5,7 +5,16 @@ import { MaterialCommunityIcons } from '@expo/vector-icons'
 import { Image } from 'expo-image'
 import Slider from '@react-native-community/slider'
 
-const AudioPlayer = ({ audioUri, imageUrl }) => {
+const AudioPlayer = ({
+  audioUri,
+  imageUrl,
+  toPlay,
+  setIsExercise,
+  handleSheetChange,
+  setHasArrived,
+  handleClose,
+  openCompletedModal,
+}) => {
   const [sound, setSound] = useState()
   const [isPlaying, setIsPlaying] = useState(false)
   const [playbackStatus, setPlaybackStatus] = useState(null)
@@ -48,6 +57,14 @@ const AudioPlayer = ({ audioUri, imageUrl }) => {
       setDurationMillis(status.durationMillis || 1)
       setPlaybackStatus(status)
       if (status.didJustFinish) {
+        if (toPlay) {
+          openCompletedModal(true)
+          setIsExercise(false)
+          handleSheetChange(0)
+          setHasArrived(false)
+          handleClose()
+        }
+
         setIsPlaying(false)
       }
     }
@@ -68,6 +85,11 @@ const AudioPlayer = ({ audioUri, imageUrl }) => {
         }
       : undefined
   }, [sound])
+  useEffect(() => {
+    if (toPlay) {
+      handlePlayPause(true)
+    }
+  }, [toPlay])
 
   return (
     <View className="relative w-full h-48 justify-center items-center">

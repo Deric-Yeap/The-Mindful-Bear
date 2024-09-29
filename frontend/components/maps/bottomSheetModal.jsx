@@ -6,13 +6,29 @@ import { Image } from 'expo-image'
 import CustomButton from '../customButton'
 import BottomSheet, { BottomSheetView } from '@gorhom/bottom-sheet'
 import AudioPlayer from './audioPlayer'
+import { useDispatch, useSelector } from 'react-redux'
+import {
+  setIsShownNav,
+  clearIsShownNav,
+} from '../../redux/slices/isShownNavSlice'
 
 const BottomSheetModal = ({
   handleModalOpen,
   landmarkData,
   openCompletedModal,
   handleTravel,
+  hasArrived,
+  setHasArrived,
+  distanceTimeEst,
 }) => {
+  const landmarkDistancesMap = {}
+  distanceTimeEst.forEach((item) => {
+    const { landmark_id, exercise_id } = item
+    landmarkDistancesMap[landmark_id] = item
+  })
+
+  const landmarkId = landmarkData.properties.landmark_id.toString()
+
   const landmarkIcons = [
     {
       icon: 'eye',
@@ -26,10 +42,20 @@ const BottomSheetModal = ({
     },
     {
       icon: 'clock',
-      value: '4min',
+      value: landmarkDistancesMap[landmarkId].estimatedTime
+        ? `${landmarkDistancesMap[landmarkId].estimatedTime.toFixed(0)}s`
+        : '0min',
       color: '#4C72AB',
     },
+    {
+      icon: 'map-marker-distance',
+      value: landmarkDistancesMap[landmarkId].distance
+        ? `${landmarkDistancesMap[landmarkId].distance.toFixed(0)}m`
+        : 'N/A',
+      color: colors.distanceColor || 'red',
+    },
   ]
+
   const exerciseIcons = [
     {
       icon: 'star',
@@ -43,14 +69,24 @@ const BottomSheetModal = ({
     },
     {
       icon: 'clock',
-      value: '10min',
+      value: landmarkDistancesMap[landmarkId].estimatedTime
+        ? `${landmarkDistancesMap[landmarkId].estimatedTime.toFixed(0)}s`
+        : '0min',
       color: '#4C72AB',
     },
+    {
+      icon: 'map-marker-distance',
+      value: landmarkDistancesMap[landmarkId].distance
+        ? `${landmarkDistancesMap[landmarkId].distance.toFixed(0)}m`
+        : 'N/A',
+    },
   ]
+
+  const isShownNav = useSelector((state) => state.isShownNav).isShownNav
   const darkerHex = 'white'
   const lighterHex = 'white'
   const [isSoundLoaded, setIsSoundLoaded] = useState(false)
-  const [isReached, setIsReached] = useState(false) //to set to true on reach and after an alert
+  const [isReached, setIsReached] = useState(false)
   const [sound, setSound] = useState()
   const [isLoading, setIsLoading] = useState(false)
   const data = landmarkData?.properties
@@ -62,48 +98,26 @@ const BottomSheetModal = ({
   const [isExercise, setIsExercise] = useState(false)
   const [position, setPosition] = useState(0)
   const [duration, setDuration] = useState(0)
-
-  // const playAudio = async () => {
-  //   //uncomment when isReached created
-  //   // if (!isReached || !data?.exercise_audio_url) {
-  //   //   return
-  //   // }
-  //   if (!data?.exercise_audio_url) {
-  //     return
-  //   }
-
-  //   setIsLoading(true)
-
-  //   try {
-  //     const { sound } = await Audio.Sound.createAsync({
-  //       uri: data.exercise_audio_url,
-  //     })
-  //     setSound(sound)
-
-  //     sound.setOnPlaybackStatusUpdate(onPlaybackStatusUpdate)
-
-  //     await sound.playAsync()
-  //     setIsPlaying(true)
-  //   } catch (error) {
-  //     console.error('Error playing audio:', error)
-  //   } finally {
-  //     setIsLoading(false)
-  //   }
-  // }
+  const dispatch = useDispatch()
 
   const handleClose = () => {
+    if (!isShownNav) {
+      dispatch(clearIsShownNav())
+    }
     setIsExercise(false)
     handleModalOpen(false)
-    // openCompletedModal(true)
   }
   const handleSheetChange = (index) => {
-    setCurrentSnapIndex(index)
-    if (index === 0) {
+    if (index >= 0 && index < snapPoints.length) {
+      setCurrentSnapIndex(index)
+      setIsExercise(index === 1)
+    } else {
+      setCurrentSnapIndex(0)
       setIsExercise(false)
     }
   }
+
   const toggleHeartColor = () => {
-    // setIsReached(true) //temp way to trigger isReached
     setIsFavorite(!isFavorite)
   }
   const handleExerciseButton = () => {
@@ -115,15 +129,16 @@ const BottomSheetModal = ({
   }
 
   useEffect(() => {
-    if (isReached) {
-      playAudio()
+    if (hasArrived && bottomSheetRef.current) {
+      setIsExercise(true)
+      handleSheetChange(1)
     }
-  }, [isReached])
+  }, [hasArrived])
 
   return (
     <BottomSheet
       ref={bottomSheetRef}
-      index={0}
+      index={currentSnapIndex}
       snapPoints={snapPoints}
       onClose={handleClose}
       enablePanDownToClose={true}
@@ -191,6 +206,12 @@ const BottomSheetModal = ({
             <AudioPlayer
               audioUri={data.exercise_audio_url}
               imageUrl={data.landmark_image_url}
+              toPlay={hasArrived}
+              setIsExercise={setIsExercise}
+              handleSheetChange={handleSheetChange}
+              setHasArrived={setHasArrived}
+              handleClose={handleClose}
+              openCompletedModal={openCompletedModal}
             />
           </View>
         ) : (
@@ -229,14 +250,14 @@ const BottomSheetModal = ({
               textStyle="text-white mr-0"
             />
           )}
-          {currentSnapIndex === 1 && isExercise ? (
+          {currentSnapIndex === 1 && !hasArrived && isExercise ? (
             <CustomButton
               title={'Start Exercise'}
               handlePress={() => console.log('Start Exercise')}
               buttonStyle={`w-full z-10 bg-[#24211E] rounded-full items-center`}
               textStyle="text-white mr-0"
             />
-          ) : currentSnapIndex === 1 && !isExercise ? (
+          ) : currentSnapIndex === 1 && !hasArrived && !isExercise ? (
             <CustomButton
               title={'View Exercise'}
               handlePress={handleExerciseButton}

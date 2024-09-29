@@ -20,6 +20,7 @@ import {
 } from '../../../redux/slices/isShownNavSlice'
 import UserLocationCustom from '../../../components/maps/userLocation'
 import * as turf from '@turf/turf'
+import { Alert } from 'react-native'
 
 const initialFormState = {
   start_datetime: '',
@@ -31,9 +32,9 @@ const initialFormState = {
   engagement_metrics: 1,
 }
 
-const POLLING_INTERVAL = 5000 // Polling every 5 seconds
-const DISTANCE_THRESHOLD = 100 // Distance in meters to trigger directions fetch
-const DEVIATION_THRESHOLD = 52 // Distance in meters to consider as deviation
+const POLLING_INTERVAL = 500
+// const DISTANCE_THRESHOLD = 100 // Distance in meters to trigger directions fetch
+const DEVIATION_THRESHOLD = 52
 
 const Map = () => {
   Mapbox.setAccessToken(process.env.MAPBOX_PUBLIC_KEY)
@@ -42,7 +43,8 @@ const Map = () => {
   const [form, setForm] = useState(initialFormState)
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [isCompletedModalOpen, setIsCompletedModalOpen] = useState(false)
-  const [isSessionStarted, setIsSessionStarted] = useState(sessionStarted)
+  // const [isSessionStarted, setIsSessionStarted] = useState(sessionStarted)
+  const [isSessionStarted, setIsSessionStarted] = useState(false)
   const [landmarksData, setLandmarksData] = useState([])
   const [loading, setLoading] = useState(true)
   const [isBottomSheetOpen, setIsBottomSheetOpen] = useState(false)
@@ -54,6 +56,9 @@ const Map = () => {
   const [prevLocation, setPrevLocation] = useState(null)
   const [isTraveling, setIsTraveling] = useState(false)
   const [remainingRouteGeoJSON, setRemainingRouteGeoJSON] = useState(null)
+  const [hasArrived, setHasArrived] = useState(false)
+  const [landmarkDistances, setLandmarkDistances] = useState([])
+
   const dispatch = useDispatch()
 
   useEffect(() => {
@@ -79,27 +84,53 @@ const Map = () => {
       dispatch(clearIsShownNav())
     }
   }, [])
-
   useEffect(() => {
     if (isTraveling) {
       const locationInterval = setInterval(() => {
-        if (location && routeGeoJSON) {
-          const route = routeGeoJSON.features[0].geometry.coordinates
-          const nearestPoint = turf.nearestPointOnLine(
-            turf.lineString(route),
-            turf.point(location),
-            { units: 'meters' }
-          )
-          const distanceToRoute = turf.distance(
-            turf.point(location),
-            nearestPoint,
-            { units: 'meters' }
-          )
+        if (location) {
+          if (routeGeoJSON) {
+            const route = routeGeoJSON.features[0].geometry.coordinates
+            const nearestPoint = turf.nearestPointOnLine(
+              turf.lineString(route),
+              turf.point(location),
+              { units: 'meters' }
+            )
+            const distanceToRoute = turf.distance(
+              turf.point(location),
+              nearestPoint,
+              { units: 'meters' }
+            )
 
-          if (distanceToRoute > DEVIATION_THRESHOLD) {
-            fetchDirections(location)
-          } else {
-            updateRemainingRoute(nearestPoint.geometry.coordinates)
+            if (distanceToRoute > DEVIATION_THRESHOLD) {
+              fetchDirections(location)
+            } else {
+              updateRemainingRoute(nearestPoint.geometry.coordinates)
+            }
+          }
+
+          if (selectedLandmark) {
+            const destinationCoords = selectedLandmark.geometry.coordinates
+            const distanceToDestination = turf.distance(
+              turf.point(location),
+              turf.point(destinationCoords),
+              { units: 'meters' }
+            )
+
+            if (distanceToDestination <= 10) {
+              setHasArrived(true)
+              setIsTraveling(false)
+              setSelectedLandmark(selectedLandmark)
+              setIsBottomSheetOpen(true)
+              if (isShownNav) {
+                dispatch(setIsShownNav())
+              }
+
+              Alert.alert(
+                'Arrival Notification',
+                'You have arrived at the landmark!',
+                [{ text: 'OK' }]
+              )
+            }
           }
           setPrevLocation(location)
         }
@@ -107,7 +138,32 @@ const Map = () => {
 
       return () => clearInterval(locationInterval)
     }
-  }, [isTraveling, location, routeGeoJSON])
+  }, [isTraveling, location, routeGeoJSON, selectedLandmark])
+
+  useEffect(() => {
+    if (location && geoJSON.features && geoJSON.features.length > 0) {
+      const updatedDistances = geoJSON.features.map((landmark) => {
+        const landmarkCoords = landmark.geometry.coordinates
+
+        const distanceToLandmark = turf.distance(
+          turf.point(location),
+          turf.point(landmarkCoords),
+          { units: 'meters' }
+        )
+
+        const estimatedTime = distanceToLandmark / 1.4
+
+        return {
+          landmark_id: landmark.properties.landmark_id,
+          exercise_id: landmark.properties.exercise_id,
+          distance: distanceToLandmark,
+          estimatedTime: estimatedTime,
+        }
+      })
+
+      setLandmarkDistances(updatedDistances)
+    }
+  }, [location, geoJSON])
 
   const updateRemainingRoute = (nearestPoint) => {
     const route = routeGeoJSON.features[0].geometry.coordinates
@@ -156,10 +212,9 @@ const Map = () => {
     if (!isBottomSheetOpen) {
       setSelectedLandmark(geoJSON.features[index])
       setIsBottomSheetOpen(true)
-      dispatch(setIsShownNav())
-    } else {
-      setIsBottomSheetOpen(false)
-      dispatch(setIsShownNav())
+      if (isShownNav) {
+        dispatch(setIsShownNav())
+      }
     }
   }
 
@@ -170,18 +225,18 @@ const Map = () => {
         ...prevForm,
         start_datetime: currentStartDateTime,
       }
-
+      setIsSessionStarted(true)
       // Start Session Survey
-      router.push({
-        pathname: '/questionaire',
-        params: {
-          sessionStarted: true,
-          formData: JSON.stringify(updatedForm),
-          start: 'true',
-        },
-      })
+      // router.push({
+      //   pathname: '/questionaire',
+      //   params: {
+      //     sessionStarted: true,
+      //     formData: JSON.stringify(updatedForm),
+      //     start: 'true',
+      //   },
+      // })
 
-      return updatedForm
+      // return updatedForm
     })
   }
 
@@ -241,6 +296,7 @@ const Map = () => {
             access_token: process.env.MAPBOX_PUBLIC_KEY,
           })
       )
+      console.log('direction fetched')
       let data = await response.json()
       let lineStringGeoJSON = {
         type: 'FeatureCollection',
@@ -263,7 +319,7 @@ const Map = () => {
       if (!isShownNav) {
         dispatch(setIsShownNav())
       }
-      setIsTraveling(true) 
+      setIsTraveling(true)
     } catch (error) {
       console.error('Error fetching route:', error)
     }
@@ -384,10 +440,13 @@ const Map = () => {
         )}
         {isBottomSheetOpen && selectedLandmark && (
           <BottomSheetModal
-            handleModalOpen={handleBottomSheetModalOpen}
+            handleModalOpen={setIsBottomSheetOpen}
             landmarkData={selectedLandmark}
             openCompletedModal={setIsCompletedModalOpen}
             handleTravel={fetchDirections}
+            hasArrived={hasArrived}
+            setHasArrived={setHasArrived}
+            distanceTimeEst={landmarkDistances}
           />
         )}
       </View>
