@@ -21,7 +21,13 @@ const CustomRadioButton = ({ selected, onPress }) => {
 
 const QuestionPage = () => {
   const router = useRouter();
-  const { sessionStarted, formData, sessionID, id, completedForms: initialCompletedForms, start } = useLocalSearchParams();  
+  const { 
+    id, 
+    sessionID, 
+    sessionStarted, 
+    formData,     
+    start,
+    completedForms: initialCompletedForms } = useLocalSearchParams();  
   const [completedForms, setCompletedForms] = useState(() => {
     try {
       return initialCompletedForms ? JSON.parse(initialCompletedForms) : [];
@@ -75,13 +81,15 @@ const QuestionPage = () => {
       setCurrentQuestionIndex(currentQuestionIndex + 1);
     } else {
         try {                                           
-          await setFormQuestion(id, answers);             
+          await setFormQuestion(sessionID, id, answers);             
           router.push({
             pathname: `/questionaire`,
-            params: { sessionStarted: true, 
+            params: { 
+              sessionID: sessionID,
+              sessionStarted: true, 
               formData: JSON.stringify(sessionData), 
-              completedForms: JSON.stringify(completedForms),
-              start: start
+              start: start,
+              completedForms: JSON.stringify(completedForms),              
             },
           });
         } catch (error) {

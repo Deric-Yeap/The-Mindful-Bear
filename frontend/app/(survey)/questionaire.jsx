@@ -7,11 +7,11 @@ import { setIsShownNav } from '../../redux/slices/isShownNavSlice'
 
 const Questionaire = () => {
   const {
-    sessionStarted,
-    formData,
     sessionID,
-    completedForms: initialCompletedForms,
+    sessionStarted,
+    formData,    
     start,
+    completedForms: initialCompletedForms,    
   } = useLocalSearchParams()
   const [sessionData, setSessionData] = useState({})
   const isShownNav = useSelector((state) => state.isShownNav).isShownNav
@@ -73,11 +73,11 @@ const Questionaire = () => {
     router.push({
       pathname: `/questions/${formId}`,
       params: {
+        sessionID: sessionID,
         sessionStarted: sessionStarted,
         formData: JSON.stringify(sessionData),
-        sessionID: sessionID,
-        completedForms: JSON.stringify(updatedCompletedForms),
         start: start,
+        completedForms: JSON.stringify(updatedCompletedForms),        
       },
     })
   }
@@ -95,6 +95,7 @@ const Questionaire = () => {
         router.push({
           pathname: '/map',
           params: {
+            sessionID: sessionID,
             sessionStarted: true,
             formData: JSON.stringify(sessionData),
           },

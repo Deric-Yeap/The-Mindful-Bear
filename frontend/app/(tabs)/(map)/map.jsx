@@ -6,7 +6,7 @@ import CustomButton from '../../../components/customButton'
 import ConfirmModal from '../../../components/confirmModal'
 import { getCurrentDateTime } from '../../../common/getCurrentFormattedDateTime'
 import { getGeoJson } from '../../../common/getGeoJson'
-import { createSession } from '../../../api/session'
+import { createSession, updateSession } from '../../../api/session'
 import { landmarkIcon } from '../../../assets/image'
 import { getLandmarks } from '../../../api/landmark'
 import { confirmModal } from '../../../assets/image'
@@ -39,11 +39,11 @@ const DEVIATION_THRESHOLD = 52
 const Map = () => {
   Mapbox.setAccessToken(process.env.MAPBOX_PUBLIC_KEY)
   const router = useRouter()
-  const { sessionStarted, formData } = useLocalSearchParams() // Get sessionStarted and formData from the params
+  const { sessionID, sessionStarted, formData } = useLocalSearchParams() // Get sessionStarted and formData from the params
   const [form, setForm] = useState(initialFormState)
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [isCompletedModalOpen, setIsCompletedModalOpen] = useState(false)  
-  const [isSessionStarted, setIsSessionStarted] = useState(false)
+  const [isSessionStarted, setIsSessionStarted] = useState(sessionStarted)
   const [landmarksData, setLandmarksData] = useState([])
   const [loading, setLoading] = useState(true)
   const [isBottomSheetOpen, setIsBottomSheetOpen] = useState(false)
@@ -219,23 +219,33 @@ const Map = () => {
   }
 
   const handleSessionStart = () => {
+    let sessionId = null
     const currentStartDateTime = getCurrentDateTime()
     setForm((prevForm) => {
       const updatedForm = {
         ...prevForm,
         start_datetime: currentStartDateTime,
+        end_datetime: currentStartDateTime,
       }
-      setIsSessionStarted(true)
-      // Start Session Survey
-      router.push({
-        pathname: '/questionaire',
-        params: {
-          sessionStarted: true,
-          formData: JSON.stringify(updatedForm),
-          start: 'true',
-        },
+      
+      createSession(updatedForm)
+      .then((response) => {        
+        console.log(response)
+        sessionId = response.id;
+        setIsSessionStarted(true);
+        router.push({
+          pathname: '/questionaire',
+          params: {
+            sessionID: sessionId,
+            sessionStarted: true,
+            formData: JSON.stringify(updatedForm),
+            start: 'true',            
+          },
+        });
       })
-
+      .catch((error) => {
+        console.error(error);
+      });      
       return updatedForm
     })
   }
@@ -251,11 +261,21 @@ const Map = () => {
         ...prevForm,
         end_datetime: currentEndDateTime,
       }
-      createSession(updatedForm)
+      updateSession(updatedForm, sessionID)      
         .then(() => {
+          console.log(sessionID)
           resetForm()
           setIsSessionStarted(false)
-          setIsModalOpen(false)
+          setIsModalOpen(false)              
+          router.push({
+            pathname: '/questionaire',
+            params: {
+              sessionID: sessionID,
+              sessionStarted: true,
+              formData: JSON.stringify(form),
+              start: 'false',
+            },
+          })
         })
         .catch((error) => {
           console.error(error.response?.data?.error_description)
@@ -263,15 +283,7 @@ const Map = () => {
 
       return updatedForm
     })
-    //End Session Survey
-    router.push({
-      pathname: '/questionaire',
-      params: {
-        sessionStarted: true,
-        formData: JSON.stringify(form),
-        start: 'false',
-      },
-    })
+
   }
 
   const resetForm = () => {
