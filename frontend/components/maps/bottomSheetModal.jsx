@@ -83,21 +83,12 @@ const BottomSheetModal = ({
   ]
 
   const isShownNav = useSelector((state) => state.isShownNav).isShownNav
-  const darkerHex = 'white'
-  const lighterHex = 'white'
-  const [isSoundLoaded, setIsSoundLoaded] = useState(false)
-  const [isReached, setIsReached] = useState(false)
-  const [sound, setSound] = useState()
-  const [isLoading, setIsLoading] = useState(false)
   const data = landmarkData?.properties
-  const [isPlaying, setIsPlaying] = useState(false)
   const bottomSheetRef = useRef(null)
   const snapPoints = useMemo(() => ['60%', '100%'], [])
   const [currentSnapIndex, setCurrentSnapIndex] = useState(0)
   const [isFavorite, setIsFavorite] = useState(false)
   const [isExercise, setIsExercise] = useState(false)
-  const [position, setPosition] = useState(0)
-  const [duration, setDuration] = useState(0)
   const dispatch = useDispatch()
 
   const handleClose = () => {
@@ -118,13 +109,14 @@ const BottomSheetModal = ({
   const toggleHeartColor = () => {
     setIsFavorite(!isFavorite)
   }
-  const handleExerciseButton = () => {
+  const handleViewExerciseButton = () => {
     if (isExercise) {
       setIsExercise(false)
     } else {
       setIsExercise(true)
     }
   }
+  const handleStartExerciseButton = () => {}
 
   useEffect(() => {
     if (hasArrived && bottomSheetRef.current) {
@@ -147,7 +139,7 @@ const BottomSheetModal = ({
       <BottomSheetView style={styles.container}>
         <View className="flex-row items-center" id="landmark-overview-frame">
           {isExercise && (
-            <TouchableOpacity onPress={handleExerciseButton}>
+            <TouchableOpacity onPress={handleViewExerciseButton}>
               <View className="bg-mindful-brown-70 w-10 h-10 mr-3 justify-center items-center rounded-full">
                 <MaterialCommunityIcons
                   name="arrow-left"
@@ -251,14 +243,14 @@ const BottomSheetModal = ({
           {currentSnapIndex === 1 && !hasArrived && isExercise ? (
             <CustomButton
               title={'Start Exercise'}
-              handlePress={() => console.log('Start Exercise')}
+              handlePress={handleTravel}
               buttonStyle={`w-full z-10 bg-[#24211E] rounded-full items-center`}
               textStyle="text-white mr-0"
             />
           ) : currentSnapIndex === 1 && !hasArrived && !isExercise ? (
             <CustomButton
               title={'View Exercise'}
-              handlePress={handleExerciseButton}
+              handlePress={handleViewExerciseButton}
               buttonStyle={`w-full z-10 bg-[#24211E] rounded-full items-center`}
               textStyle="text-white mr-0"
             />
