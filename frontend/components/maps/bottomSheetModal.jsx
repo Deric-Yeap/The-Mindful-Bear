@@ -110,10 +110,8 @@ const BottomSheetModal = ({
   const handleSheetChange = (index) => {
     if (index >= 0 && index < snapPoints.length) {
       setCurrentSnapIndex(index)
-      setIsExercise(index === 1)
     } else {
       setCurrentSnapIndex(0)
-      setIsExercise(false)
     }
   }
 
