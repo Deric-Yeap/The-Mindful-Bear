@@ -42,15 +42,15 @@ const BottomSheetModal = ({
     },
     {
       icon: 'clock',
-      value: landmarkDistancesMap[landmarkId].estimatedTime
-        ? `${landmarkDistancesMap[landmarkId].estimatedTime.toFixed(0)}s`
+      value: landmarkDistancesMap[landmarkId]?.estimatedTime
+        ? `${landmarkDistancesMap[landmarkId]?.estimatedTime.toFixed(0)}s`
         : '0min',
       color: '#4C72AB',
     },
     {
       icon: 'map-marker-distance',
-      value: landmarkDistancesMap[landmarkId].distance
-        ? `${landmarkDistancesMap[landmarkId].distance.toFixed(0)}m`
+      value: landmarkDistancesMap[landmarkId]?.distance
+        ? `${landmarkDistancesMap[landmarkId]?.distance.toFixed(0)}m`
         : 'N/A',
       color: colors.distanceColor || 'red',
     },
@@ -69,15 +69,15 @@ const BottomSheetModal = ({
     },
     {
       icon: 'clock',
-      value: landmarkDistancesMap[landmarkId].estimatedTime
-        ? `${landmarkDistancesMap[landmarkId].estimatedTime.toFixed(0)}s`
+      value: landmarkDistancesMap[landmarkId]?.estimatedTime
+        ? `${landmarkDistancesMap[landmarkId]?.estimatedTime.toFixed(0)}s`
         : '0min',
       color: '#4C72AB',
     },
     {
       icon: 'map-marker-distance',
-      value: landmarkDistancesMap[landmarkId].distance
-        ? `${landmarkDistancesMap[landmarkId].distance.toFixed(0)}m`
+      value: landmarkDistancesMap[landmarkId]?.distance
+        ? `${landmarkDistancesMap[landmarkId]?.distance.toFixed(0)}m`
         : 'N/A',
     },
   ]
