@@ -8,7 +8,7 @@ import { getCurrentDateTime } from '../../../common/getCurrentFormattedDateTime'
 import { getGeoJson } from '../../../common/getGeoJson'
 import { createSession, updateSession } from '../../../api/session'
 import { landmarkIcon } from '../../../assets/image'
-import { getLandmarks } from '../../../api/landmark'
+import { getLandmarks, updateLandmark } from '../../../api/landmark'
 import { confirmModal } from '../../../assets/image'
 import Loading from '../../../components/loading'
 import BottomSheetModal from '../../../components/maps/bottomSheetModal'
@@ -108,6 +108,8 @@ const Map = () => {
           }
 
           if (selectedLandmark) {
+            console.log("SELECTED")            
+            console.log(selectedLandmark)
             const destinationCoords = selectedLandmark.geometry.coordinates
             const distanceToDestination = turf.distance(
               turf.point(location),
@@ -117,9 +119,12 @@ const Map = () => {
 
             if (distanceToDestination <= 10) {
               setHasArrived(true)
-              //
+              //add 1 to landmark.usercount
+              console.log(selectedLandmark.properties.landmark_user_count)
+              u
               setIsTraveling(false)
               setSelectedLandmark(selectedLandmark)
+
               setIsBottomSheetOpen(true)
               if (isShownNav) {
                 dispatch(setIsShownNav())

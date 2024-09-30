@@ -26,7 +26,7 @@ const BottomSheetModal = ({
     const { landmark_id, exercise_id } = item
     landmarkDistancesMap[landmark_id] = item
   })
-
+  console.log(landmarkData)
   const landmarkId = landmarkData.properties.landmark_id.toString()
 
   const landmarkIcons = [
@@ -37,7 +37,7 @@ const BottomSheetModal = ({
     },
     {
       icon: 'account',
-      value: '4',
+      value: landmarkData ? landmarkData.properties.landmark_user_count : 0,
       color: colors.optimisticGray30,
     },
     {
