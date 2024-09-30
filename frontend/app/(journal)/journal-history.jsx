@@ -33,7 +33,7 @@ const JournalHistory = () => {
           month: currentMonth,
         })
         setJournals(response)
-        setSelectedDate(Object.keys(response)[0])
+        setSelectedDate(new Date().toISOString().split('T')[0])
       } catch (error) {
         console.error(error)
       } finally {
