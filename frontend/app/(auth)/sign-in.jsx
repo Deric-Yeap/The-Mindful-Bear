@@ -23,14 +23,14 @@ const SignIn = () => {
   const handleLogin = async () => {
     try {
       setIsLoading(true)
-      // const response = await login({
-      //   email: form.email,
-      //   password: form.password,
-      // })
       const response = await login({
-        email: process.env.ACCOUNT_USER,
-        password: process.env.ACCOUNT_PASSWORD,
+        email: form.email,
+        password: form.password,
       })
+      // const response = await login({
+      //   email: process.env.ACCOUNT_USER,
+      //   password: process.env.ACCOUNT_PASSWORD,
+      // })
       setIsLoading(false)
       dispatch(
         setTokens({
