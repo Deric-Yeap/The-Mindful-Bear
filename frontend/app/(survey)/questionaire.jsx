@@ -7,13 +7,13 @@ import { setIsShownNav } from '../../redux/slices/isShownNavSlice'
 
 const Questionaire = () => {
   const {
+    isRedirectedForms,
+    selectedLandmarkData,
     sessionID,
-    sessionStarted,
-    formData,    
+    sessionStarted,      
     start,
     completedForms: initialCompletedForms,    
-  } = useLocalSearchParams()
-  const [sessionData, setSessionData] = useState({})
+  } = useLocalSearchParams()  
   const isShownNav = useSelector((state) => state.isShownNav).isShownNav
   const [forms, setForms] = useState([])
   const [completedForms, setCompletedForms] = useState(() => {
@@ -34,17 +34,9 @@ const Questionaire = () => {
   let filteredForms
 
   useEffect(() => {
-    if (formData) {
-      setSessionData(JSON.parse(formData))
-    }
-  }, [formData])
-
-  useEffect(() => {
     const fetchData = async () => {
       try {
         const response = await getForms()
-        console.log('START?')
-        console.log(start)
         if (start === 'true') {
           filteredForms = response.filter((form) => form.is_presession)
         } else {
@@ -73,9 +65,11 @@ const Questionaire = () => {
     router.push({
       pathname: `/questions/${formId}`,
       params: {
+        isRedirectedForms: isRedirectedForms,
+        selectedLandmarkData: selectedLandmarkData, 
         sessionID: sessionID,
         sessionStarted: sessionStarted,
-        formData: JSON.stringify(sessionData),
+        formData: formData,
         start: start,
         completedForms: JSON.stringify(updatedCompletedForms),        
       },
@@ -95,9 +89,10 @@ const Questionaire = () => {
         router.push({
           pathname: '/map',
           params: {
+            isRedirectedForms: isRedirectedForms,
+            selectedLandmarkData: selectedLandmarkData, 
             sessionID: sessionID,
-            sessionStarted: true,
-            formData: JSON.stringify(sessionData),
+            sessionStarted: true,            
           },
         })
       } else {

@@ -23,6 +23,8 @@ const QuestionPage = () => {
   const router = useRouter();
   const { 
     id, 
+    isRedirectedForms,
+    selectedLandmarkData,
     sessionID, 
     sessionStarted, 
     formData,     
@@ -45,13 +47,6 @@ const QuestionPage = () => {
   
   let formName = "";
   let questionsWithOptions = [];
-
-  useEffect(() => {
-    if (formData) {
-      setSessionData(JSON.parse(formData)); 
-      console.log(formData);
-    }
-  }, [formData]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -85,9 +80,11 @@ const QuestionPage = () => {
           router.push({
             pathname: `/questionaire`,
             params: { 
+              isRedirectedForms: isRedirectedForms,
+              selectedLandmarkData: selectedLandmarkData, 
               sessionID: sessionID,
               sessionStarted: true, 
-              formData: JSON.stringify(sessionData), 
+              formData: formData,
               start: start,
               completedForms: JSON.stringify(completedForms),              
             },

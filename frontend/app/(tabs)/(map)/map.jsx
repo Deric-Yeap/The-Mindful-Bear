@@ -39,7 +39,7 @@ const DEVIATION_THRESHOLD = 52
 const Map = () => {
   Mapbox.setAccessToken(process.env.MAPBOX_PUBLIC_KEY)
   const router = useRouter()
-  const { sessionID, sessionStarted, formData } = useLocalSearchParams() // Get sessionStarted and formData from the params
+  const {isRedirectedForms : isRedirected, selectedLandmarkData, sessionID, sessionStarted } = useLocalSearchParams()
   const [form, setForm] = useState(initialFormState)
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [isCompletedModalOpen, setIsCompletedModalOpen] = useState(false)  
@@ -57,14 +57,22 @@ const Map = () => {
   const [remainingRouteGeoJSON, setRemainingRouteGeoJSON] = useState(null)
   const [hasArrived, setHasArrived] = useState(false)
   const [landmarkDistances, setLandmarkDistances] = useState([])
+  const [isRedirectedForms, setIsRedirectedForms] = useState(useLocalSearchParams())
 
   const dispatch = useDispatch()
 
   useEffect(() => {
-    if (formData) {
-      setForm(JSON.parse(formData))
+    if (selectedLandmarkData) {
+      setSelectedLandmark(JSON.parse(selectedLandmarkData))
+      console.log("SELECTEDLANDAMRK")
+      console.log(selectedLandmarkData)
     }
-  }, [formData])
+    if (isRedirected) {
+      setIsRedirectedForms(isRedirected === "true")
+      console.log("redireceed")
+      console.log(isRedirected)
+    }      
+  }, [selectedLandmarkData])
 
   useEffect(() => {
     const fetchData = async () => {
@@ -108,8 +116,6 @@ const Map = () => {
           }
 
           if (selectedLandmark) {
-            console.log("SELECTED")            
-            console.log(selectedLandmark)
             const destinationCoords = selectedLandmark.geometry.coordinates
             const distanceToDestination = turf.distance(
               turf.point(location),
@@ -172,11 +178,11 @@ const Map = () => {
     }
   }, [location, geoJSON])
 
-  // useEffect(() => {
-  //   if (isRedirectedForms) {
-  //     fetchDirections()
-  //   }
-  // }, [isRedirectedForms])
+  useEffect(() => {
+    if (isRedirectedForms && selectedLandmark) {
+      fetchDirections()
+    }
+  }, [isRedirectedForms])
 
   const updateRemainingRoute = (nearestPoint) => {
     const route = routeGeoJSON.features[0].geometry.coordinates
@@ -249,9 +255,10 @@ const Map = () => {
         router.push({
           pathname: '/questionaire',
           params: {
+            isRedirectedForms: true,
+            selectedLandmarkData: JSON.stringify(selectedLandmark), 
             sessionID: sessionId,
-            sessionStarted: true,
-            formData: JSON.stringify(updatedForm),
+            sessionStarted: true,            
             start: 'true',            
           },
         });
@@ -283,9 +290,10 @@ const Map = () => {
           router.push({
             pathname: '/questionaire',
             params: {
+              isRedirectedForms: false,
+              selectedLandmarkData: null, 
               sessionID: sessionID,
-              sessionStarted: true,
-              formData: JSON.stringify(form),
+              sessionStarted: true,              
               start: 'false',
             },
           })
