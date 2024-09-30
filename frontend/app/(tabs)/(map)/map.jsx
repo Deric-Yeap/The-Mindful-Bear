@@ -119,9 +119,11 @@ const Map = () => {
 
             if (distanceToDestination <= 10) {
               setHasArrived(true)
-              //add 1 to landmark.usercount
-              console.log(selectedLandmark.properties.landmark_user_count)
-              u
+              try {
+                updateLandmark(selectedLandmark.properties.landmark_id, {"user_count" : selectedLandmark.properties.landmark_user_count + 1})                
+              } catch (error) {
+                console.error('Error updating landmarks:', error)
+              }                                           
               setIsTraveling(false)
               setSelectedLandmark(selectedLandmark)
 

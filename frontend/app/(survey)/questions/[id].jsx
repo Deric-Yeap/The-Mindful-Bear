@@ -107,7 +107,7 @@ const QuestionPage = () => {
   }
 
   return (
-    <ScrollView className="flex-1 p-4 bg-mindful-brown-10">
+    <ScrollView className="flex-1 p-4 bg-mindful-brown-10 mt-2">
       <View className="mb-4 flex flex-row justify-between items-center">
         <Text className="text-mindful-brown-100 text-xl font-urbanist-bold">
           {formTitle + " Assessment"}
