@@ -1,0 +1,43 @@
+question,formID_id,optionSet_id,order,questionID
+How would you rate the landmark 1?,4,5,1,1
+How would you rate the landmark 2?,4,5,2,2
+How would you rate the landmark 3?,4,5,3,3
+How physically tired do you feel now?,4,2,4,4
+Do you have any suggestions on how to improve this landmark? ,4,28,5,5
+How effective did you find the mindfulness exercises in reducing your stress levels? ,4,4,6,6
+How likely are you to use this app again?,4,4,7,7
+"How would you rate your overall experience with the ""The Mindfulness Bear"" app? ",4,37,8,8
+I was aware of different emotions that arose in me.,3,3,1,9
+"I was conscious of my body, whether eating, cooking, cleaning, or talking.",3,3,2,10
+I clearly physically felt what was going on in my body.,3,3,3,11
+I noticed how my emotions expressed themselves through my body.,3,3,4,12
+I was aware of where my body was as I moved around.,3,3,5,13
+I noticed how things smelled and tasted.,3,3,6,14
+I could hear sounds clearly.,3,3,7,15
+I felt in contact with my body.,3,3,8,16
+I noticed how my thoughts and emotions affected my body.,3,3,9,17
+I paid attention to whether my muscles were tense or relaxed.,3,3,10,18
+I felt a sense of unity with my surroundings.,3,3,11,19
+I felt aware of what was going on inside me.,3,3,12,20
+I experienced the beauty of the moment.,3,3,13,21
+I appreciated the way my body felt.,3,3,14,22
+I noticed what it felt like to move.,3,3,15,23
+I noticed the sensations of my breathing in and breathing out.,3,3,16,24
+I felt a sense of stillness or calm.,3,3,17,25
+I was aware of how the environment affected my thoughts and emotions.,3,3,18,26
+I noticed my emotions but did not get lost in them.,3,3,19,27
+I was aware of my thoughts and feelings without identifying with them.,3,3,20,28
+I was aware of how my mind and body felt as I moved from one activity to another.,3,3,21,29
+"In the last month, how often have you been upset because of something that happened unexpectedly?",5,3,1,30
+"In the last month, how often have you felt that you were unable to control the important things in your life?",5,3,2,31
+"In the last month, how often have you felt nervous and stressed?",5,3,3,32
+"In the last month, how often have you felt confident about your ability to handle your personal problems?",5,3,4,33
+"In the last month, how often have you felt that things were going your way?",5,3,5,34
+"In the last month, how often have you found that you could not cope with all the things that you had to do?",5,3,6,35
+"In the last month, how often have you been able to control irritations in your life?",5,3,7,36
+"In the last month, how often have you felt that you were on top of things?",5,3,8,37
+"In the last month, how often have you been angered because of things that were outside of your control?",5,3,9,38
+"In the last month, how often have you felt difficulties were piling up so high that you could not overcome them?",5,3,10,39
+Please explain your choice above ,4,4,9,40
+What could be improved in the app? ,4,4,10,41
+What did you like most about the app?,4,4,11,42
