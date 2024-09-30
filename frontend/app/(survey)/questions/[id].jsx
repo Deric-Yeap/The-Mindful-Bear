@@ -42,7 +42,7 @@ const QuestionPage = () => {
 
   useEffect(() => {
     if (formData) {
-      setSessionData(JSON.parse(formData)); // Parse the formData and set it to the form state
+      setSessionData(JSON.parse(formData)); 
       console.log(formData);
     }
   }, [formData]);
@@ -50,15 +50,13 @@ const QuestionPage = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        ({ formName, questionsWithOptions } = await getFormQuestions(id));
-        console.log(questionsWithOptions);
-        setQuestions(questionsWithOptions);
-        
+        ({ formName, questionsWithOptions } = await getFormQuestions(id));        
+        setQuestions(questionsWithOptions);    
         setFormTitle(formName);
-        setLoading(false); // Set loading to false after data is returned
+        setLoading(false); 
       } catch (error) {
         console.error('Error fetching form data:', error);
-        setLoading(false); // Ensure loading stops even if there is an error
+        setLoading(false); 
       }
     };
 
@@ -76,15 +74,13 @@ const QuestionPage = () => {
     if (currentQuestionIndex < questions.length - 1) {
       setCurrentQuestionIndex(currentQuestionIndex + 1);
     } else {
-        try {                
-          await setFormQuestion(sessionID, answers);   
-          const updatedCompletedForms = [...completedForms, questionsWithOptions.formID];               
-          console.log(updatedCompletedForms)
+        try {                                           
+          await setFormQuestion(id, answers);             
           router.push({
             pathname: `/questionaire`,
             params: { sessionStarted: true, 
               formData: JSON.stringify(sessionData), 
-              completedForms: JSON.stringify(updatedCompletedForms),
+              completedForms: JSON.stringify(completedForms),
               start: start
             },
           });
