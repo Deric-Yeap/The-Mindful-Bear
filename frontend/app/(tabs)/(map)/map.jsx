@@ -42,8 +42,7 @@ const Map = () => {
   const { sessionStarted, formData } = useLocalSearchParams() // Get sessionStarted and formData from the params
   const [form, setForm] = useState(initialFormState)
   const [isModalOpen, setIsModalOpen] = useState(false)
-  const [isCompletedModalOpen, setIsCompletedModalOpen] = useState(false)
-  // const [isSessionStarted, setIsSessionStarted] = useState(sessionStarted)
+  const [isCompletedModalOpen, setIsCompletedModalOpen] = useState(false)  
   const [isSessionStarted, setIsSessionStarted] = useState(false)
   const [landmarksData, setLandmarksData] = useState([])
   const [loading, setLoading] = useState(true)
@@ -118,6 +117,7 @@ const Map = () => {
 
             if (distanceToDestination <= 10) {
               setHasArrived(true)
+              //
               setIsTraveling(false)
               setSelectedLandmark(selectedLandmark)
               setIsBottomSheetOpen(true)
@@ -227,16 +227,16 @@ const Map = () => {
       }
       setIsSessionStarted(true)
       // Start Session Survey
-      // router.push({
-      //   pathname: '/questionaire',
-      //   params: {
-      //     sessionStarted: true,
-      //     formData: JSON.stringify(updatedForm),
-      //     start: 'true',
-      //   },
-      // })
+      router.push({
+        pathname: '/questionaire',
+        params: {
+          sessionStarted: true,
+          formData: JSON.stringify(updatedForm),
+          start: 'true',
+        },
+      })
 
-      // return updatedForm
+      return updatedForm
     })
   }
 
