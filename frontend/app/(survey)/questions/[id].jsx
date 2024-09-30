@@ -26,8 +26,7 @@ const QuestionPage = () => {
     isRedirectedForms,
     selectedLandmarkData,
     sessionID, 
-    sessionStarted, 
-    formData,     
+    sessionStarted,     
     start,
     completedForms: initialCompletedForms } = useLocalSearchParams();  
   const [completedForms, setCompletedForms] = useState(() => {
@@ -79,12 +78,11 @@ const QuestionPage = () => {
           await setFormQuestion(sessionID, id, answers);             
           router.push({
             pathname: `/questionaire`,
-            params: { 
+            params: {               
               isRedirectedForms: isRedirectedForms,
               selectedLandmarkData: selectedLandmarkData, 
               sessionID: sessionID,
-              sessionStarted: true, 
-              formData: formData,
+              sessionStarted: true,               
               start: start,
               completedForms: JSON.stringify(completedForms),              
             },

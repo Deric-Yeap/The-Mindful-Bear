@@ -6,7 +6,7 @@ import { useSelector } from 'react-redux'
 import { setIsShownNav } from '../../redux/slices/isShownNavSlice'
 
 const Questionaire = () => {
-  const {
+  const {    
     isRedirectedForms,
     selectedLandmarkData,
     sessionID,
@@ -64,12 +64,11 @@ const Questionaire = () => {
 
     router.push({
       pathname: `/questions/${formId}`,
-      params: {
+      params: {        
         isRedirectedForms: isRedirectedForms,
         selectedLandmarkData: selectedLandmarkData, 
         sessionID: sessionID,
-        sessionStarted: sessionStarted,
-        formData: formData,
+        sessionStarted: sessionStarted,        
         start: start,
         completedForms: JSON.stringify(updatedCompletedForms),        
       },
@@ -88,7 +87,7 @@ const Questionaire = () => {
         }
         router.push({
           pathname: '/map',
-          params: {
+          params: {            
             isRedirectedForms: isRedirectedForms,
             selectedLandmarkData: selectedLandmarkData, 
             sessionID: sessionID,

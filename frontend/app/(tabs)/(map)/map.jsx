@@ -43,7 +43,7 @@ const Map = () => {
   const [form, setForm] = useState(initialFormState)
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [isCompletedModalOpen, setIsCompletedModalOpen] = useState(false)  
-  const [isSessionStarted, setIsSessionStarted] = useState(sessionStarted)
+  const [isSessionStarted, setIsSessionStarted] = useState(false)
   const [landmarksData, setLandmarksData] = useState([])
   const [loading, setLoading] = useState(true)
   const [isBottomSheetOpen, setIsBottomSheetOpen] = useState(false)
@@ -62,17 +62,20 @@ const Map = () => {
   const dispatch = useDispatch()
 
   useEffect(() => {
+    if (sessionStarted) {
+      setIsSessionStarted(sessionStarted === "true")
+    }
     if (selectedLandmarkData) {
       setSelectedLandmark(JSON.parse(selectedLandmarkData))
-      console.log("SELECTEDLANDAMRK")
+      console.log("SELECTEDLANDAMRK?")
       console.log(selectedLandmarkData)
     }
     if (isRedirected) {
       setIsRedirectedForms(isRedirected === "true")
-      console.log("redireceed")
+      console.log("redireceed?")
       console.log(isRedirected)
-    }      
-  }, [selectedLandmarkData])
+    }  
+  }, [])
 
   useEffect(() => {
     const fetchData = async () => {
@@ -92,7 +95,7 @@ const Map = () => {
     }
   }, [])
   useEffect(() => {
-    if (isTraveling) {
+    if (location && isTraveling) {
       const locationInterval = setInterval(() => {
         if (location) {
           if (routeGeoJSON) {
@@ -154,7 +157,7 @@ const Map = () => {
   }, [isTraveling, location, routeGeoJSON, selectedLandmark])
 
   useEffect(() => {
-    if (location && geoJSON.features && geoJSON.features.length > 0) {
+    if (geoJSON.features?.length > 0) {
       const updatedDistances = geoJSON.features.map((landmark) => {
         const landmarkCoords = landmark.geometry.coordinates
 
@@ -179,10 +182,10 @@ const Map = () => {
   }, [location, geoJSON])
 
   useEffect(() => {
-    if (isRedirectedForms && selectedLandmark) {
+    if (isRedirectedForms && selectedLandmark && location) {
       fetchDirections()
     }
-  }, [isRedirectedForms])
+  }, [isRedirectedForms, location])
 
   const updateRemainingRoute = (nearestPoint) => {
     const route = routeGeoJSON.features[0].geometry.coordinates
@@ -248,13 +251,12 @@ const Map = () => {
       }
       
       createSession(updatedForm)
-      .then((response) => {        
-        console.log(response)
+      .then((response) => {                
         sessionId = response.id;
         setIsSessionStarted(true);
         router.push({
           pathname: '/questionaire',
-          params: {
+          params: {            
             isRedirectedForms: true,
             selectedLandmarkData: JSON.stringify(selectedLandmark), 
             sessionID: sessionId,
@@ -282,14 +284,14 @@ const Map = () => {
         end_datetime: currentEndDateTime,
       }
       updateSession(updatedForm, sessionID)      
-        .then(() => {
-          console.log(sessionID)
+        .then(() => {          
           resetForm()
           setIsSessionStarted(false)
           setIsModalOpen(false)              
           router.push({
             pathname: '/questionaire',
             params: {
+              location: {},
               isRedirectedForms: false,
               selectedLandmarkData: null, 
               sessionID: sessionID,
@@ -312,6 +314,9 @@ const Map = () => {
   }
   const fetchDirections = async () => {
     if (!location || !selectedLandmark) {
+      console.log("Location")
+      console.log(location)
+      console.log(selectedLandmark)
       console.error('Current location or selected landmark is not available.')
       return
     }
