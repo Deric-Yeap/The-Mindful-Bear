@@ -165,6 +165,12 @@ const Map = () => {
     }
   }, [location, geoJSON])
 
+  // useEffect(() => {
+  //   if (isRedirectedForms) {
+  //     fetchDirections()
+  //   }
+  // }, [isRedirectedForms])
+
   const updateRemainingRoute = (nearestPoint) => {
     const route = routeGeoJSON.features[0].geometry.coordinates
     let nearestPointIndex = -1
