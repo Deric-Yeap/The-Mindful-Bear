@@ -5,6 +5,7 @@ from .models import Favourite
 from api.landmark.models import Landmark
 from .serializer import FavouriteSerializer
 from django.shortcuts import get_object_or_404
+from api.landmark.serializer import LandmarkSerializer
 
 class FavouriteCreateView(generics.CreateAPIView):
     queryset = Favourite.objects.all()
@@ -42,3 +43,12 @@ class FavouriteDeleteView(generics.DestroyAPIView):
         instance = self.get_object()
         self.perform_destroy(instance)
         return Response({'detail': 'Favourite has been successfully deleted.'}, status=status.HTTP_200_OK)
+    
+
+class FavouriteListView(generics.ListAPIView):
+    serializer_class = LandmarkSerializer
+    # permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        user = self.request.user
+        return Landmark.objects.filter(liked_by__user=user)
