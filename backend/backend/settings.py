@@ -69,6 +69,7 @@ INSTALLED_APPS = [
     "api.userSession",
     "api.color",
     "api.formSession",
+    "api.favourite",
 ]
 
 REST_FRAMEWORK = {

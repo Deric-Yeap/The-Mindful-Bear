@@ -11,6 +11,19 @@ import {
   setIsShownNav,
   clearIsShownNav,
 } from '../../redux/slices/isShownNavSlice'
+import { createFavouriteLandmark, deleteFavouriteLandmark } from '../../api/landmark'
+const THRESHOLD = [3, 5, 10];
+
+const getUserCountColor = (userCount) => {
+  if (userCount < THRESHOLD[0]) {
+    return colors.serenityGreen50; // Green for less crowded
+  } else if (userCount < THRESHOLD[1]) {
+    return colors.empathyOrange50; // Orange for medium crowd
+  } else {
+    return colors.presentRed50; // Red for crowded
+  }
+};
+
 
 const BottomSheetModal = ({
   handleModalOpen,
@@ -38,7 +51,7 @@ const BottomSheetModal = ({
     {
       icon: 'account',
       value: landmarkData ? landmarkData.properties.landmark_user_count : 0,
-      color: colors.optimisticGray30,
+      color: getUserCountColor(landmarkData.properties.landmark_user_count),
     },
     {
       icon: 'clock',
@@ -106,9 +119,20 @@ const BottomSheetModal = ({
     }
   }
 
-  const toggleHeartColor = () => {
-    setIsFavorite(!isFavorite)
-  }
+  const toggleHeartColor = async () => {
+    try {
+      if (isFavorite) {        
+        deleteFavouriteLandmark(landmarkId);
+      } else {        
+        createFavouriteLandmark(landmarkId);
+      }
+      setIsFavorite(!isFavorite); 
+    } catch (error) {
+      console.error('Error while toggling favourite:', error);
+    }
+  };
+  
+
   const handleViewExerciseButton = () => {
     if (isExercise) {
       setIsExercise(false)
