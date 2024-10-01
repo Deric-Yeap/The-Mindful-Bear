@@ -73,3 +73,15 @@ export const updateLandmark = async (landmarkId, landmarkData) => {
 export const deleteLandmark = async (id) => {
     return axiosInstance.delete(`landmark/delete/${id}`);             
 };
+
+export const createFavouriteLandmark = async (id) => {
+    return axiosInstance.post(`favourite/create/${id}/`)
+}
+
+export const deleteFavouriteLandmark = async (id) => {
+    return axiosInstance.delete(`favourite/delete/${id}/`)
+}
+
+export const getFavouriteLandmarks = async () => {
+    return axiosInstance.get('favourite/list')
+}

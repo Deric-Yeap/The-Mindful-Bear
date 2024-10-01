@@ -41,6 +41,20 @@ const Home = () => {
               xx Days Streak
             </Text>
           </MetricCard>
+
+          <MetricCard
+            route="/favourite"
+            iconName="book-plus-outline"
+            iconColor={colors.empathyOrange40}
+            circleStyle="bg-empathy-orange-10"
+            title="Favourite Landmarks"
+            rightImage={require('../../assets/mindfulJournalMetricCard.png')}
+          >
+            <Text className="font-urbanist-semi-bold text-mindful-brown-80 text-lg">
+              xx Days Streak
+            </Text>
+          </MetricCard>
+
         </View>
       </ScrollView>
     </SafeAreaView>
