@@ -38,7 +38,7 @@ export const getFormQuestions = async (formId) => {
   return {formName, storeResponses, isCompulsory, isPresession, isPostsession, questionsWithOptions};
 }
 
-export const setFormQuestion = async (sessionId, answers) => {  
+export const setFormQuestion = async (sessionId, formId, answers) => {    
   const formattedAnswers = Object.keys(answers).map(questionId => ({
     QuestionID: parseInt(questionId),        
     Response: answers[questionId]
@@ -46,7 +46,8 @@ export const setFormQuestion = async (sessionId, answers) => {
 
   return await axiosInstance.post('formQuestion/bulk_create/', 
     {
-      SessionID: 58,
+      SessionID: sessionId,
+      FormID: formId,
       data: formattedAnswers
     }
   );  
