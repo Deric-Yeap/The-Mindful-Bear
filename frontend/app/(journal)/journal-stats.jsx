@@ -1,5 +1,5 @@
-import { View, Text, TouchableOpacity, Modal } from 'react-native'
-import React, { useEffect, useState } from 'react'
+import { View, Text, TouchableOpacity, Modal, Animated } from 'react-native'
+import React, { useEffect, useState, useRef } from 'react'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { BarChart } from 'react-native-gifted-charts'
 import { colors } from '../../common/styles'
@@ -11,6 +11,7 @@ import { Calendar } from 'react-native-calendars'
 import { journalEntriesByPeriod } from '../../api/journal'
 import LottieView from 'lottie-react-native'
 
+
 const JournalStats = ({
   title = 'Journal Stats',
   subtitle = 'Please Select a date range',
@@ -21,6 +22,7 @@ const JournalStats = ({
   const [endDate, setEndDate] = useState(null)
   const [endDateForAxios, setEndDateForAxios] = useState(null)
   const [journals, setJournals] = useState([])
+  const [loading, setLoading] = useState(true)
 
   const handleOnPress = () => {
     setModalVisible(true)
@@ -109,6 +111,7 @@ const JournalStats = ({
 
   useEffect(() => {
     const fetchData = async () => {
+      setLoading(true)
       if (startDate) {
         const end = endDateForAxios || startDate // Use startDate if endDateForAxios is not set
         try {
@@ -120,6 +123,8 @@ const JournalStats = ({
           console.log(response)
         } catch (error) {
           console.error(error)
+        } finally {
+          setLoading(false)
         }
       }
     }
@@ -136,9 +141,6 @@ const JournalStats = ({
       )
   )
 
-  console.log('hi', journals)
-
-  console.log('inner', innerEmotionsArray)
   // Function to count occurrences of each emotion
   const countEmotions = (emotions) => {
     return emotions.reduce((acc, emotion) => {
@@ -186,6 +188,24 @@ const JournalStats = ({
   const maxValue = Math.max(...barData.map((item) => item.value))
   const noOfSections = 4
   const stepValue = Math.ceil(maxValue / noOfSections)
+  const fadeAnim = useRef(new Animated.Value(0)).current
+  const scaleAnim = useRef(new Animated.Value(0)).current
+  
+
+  useEffect(() => {
+    Animated.parallel([
+      Animated.timing(fadeAnim, {
+        toValue: 1,
+        duration: 1000,
+        useNativeDriver: true, // Use native driver for better performance
+      }),
+      Animated.timing(scaleAnim, {
+        toValue: 1,
+        duration: 1000,
+        useNativeDriver: true,
+      }),
+    ]).start()
+  }, [fadeAnim, scaleAnim])
 
   return (
     <SafeAreaView className="bg-optimistic-gray-10 h-full p-4 space-y-4">
@@ -256,9 +276,16 @@ const JournalStats = ({
           <>
             <View className="flex-row my-3">
               <View className="bg-mindful-brown-80 max-w-[250px] p-3 rounded-lg relative text">
-                <Text className="pt-1 text-white">
+                <Animated.Text
+                  style={{
+                    opacity: fadeAnim, 
+                    paddingTop: 5, 
+                    color: 'white', 
+                    fontSize: 16, 
+                  }}
+                >
                   Hey! There are no journal entries for this period.
-                </Text>
+                </Animated.Text>
               </View>
             </View>
 
@@ -273,9 +300,16 @@ const JournalStats = ({
           <>
             <View className="flex-row my-3">
               <View className="bg-mindful-brown-80 max-w-[250px] p-3 rounded-lg relative">
-                <Text className="pt-1 text-white">
+                <Animated.Text
+                  style={{
+                    opacity: fadeAnim,
+                    paddingTop: 5, 
+                    color: 'white',
+                    fontSize: 16, 
+                  }}
+                >
                   Hey! Please select a date.
-                </Text>
+                </Animated.Text>
               </View>
             </View>
 
