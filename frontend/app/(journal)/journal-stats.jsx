@@ -210,9 +210,21 @@ const JournalStats = ({
       <BackButton buttonStyle="mb-4" />
       <View className="flex-row items-center justify-between">
         <View>
-          <Text className="font-urbanist-extra-bold text-mindful-brown-80 text-4xl mb-1">
-            {title}
-          </Text>
+        <View className="flex flex-row items-center">
+  <Text className="font-urbanist-extra-bold text-mindful-brown-80 text-4xl mb-1">
+    {title}
+  </Text>
+  <TouchableOpacity
+    onPress={handleOnPress}
+    className="w-16 h-16 rounded-full bg-empathy-orange-40 flex items-center justify-center -mt-4 ml-4" // Added ml-4 for spacing
+  >
+    <MaterialCommunityIcons
+      name="calendar-month-outline"
+      size={30}
+      color="white"
+    />
+  </TouchableOpacity>
+</View>
           <Text className="font-urbanist-light text-mindful-brown-80 text-xl">
             {startDate && endDate
               ? `Selected Range: ${startDate.toLocaleDateString('en-GB')} - ${endDate.toLocaleDateString('en-GB')}`
@@ -221,16 +233,6 @@ const JournalStats = ({
                 : subtitle}
           </Text>
         </View>
-        <TouchableOpacity
-          onPress={handleOnPress}
-          className="w-16 h-16 rounded-full bg-empathy-orange-40 flex items-center justify-center -mt-4"
-        >
-          <MaterialCommunityIcons
-            name="calendar-month-outline"
-            size={30}
-            color="white"
-          />
-        </TouchableOpacity>
       </View>
 
       <Modal
@@ -241,7 +243,7 @@ const JournalStats = ({
           setModalVisible(false)
           setStartDate(null)
           setEndDate(null)
-          setEndDateForAxios(null) // Reset dates when closing modal
+          setEndDateForAxios(null) 
         }}
       >
         <View className="flex-1 justify-center items-center bg-black bg-opacity-50">
