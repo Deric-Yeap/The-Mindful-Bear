@@ -132,9 +132,11 @@ class JournalCalendarSerializer(serializers.Serializer):
     def get_weekly_matrix(self, year, month):
         start_date = datetime(year, month, 1)
         end_date = (start_date + timedelta(days=31)).replace(day=1) - timedelta(days=1)
+        request = self.context.get('request')
+        user = request.user if request and request.user else None
 
         weeks = [[] for _ in range(6)]
-        journals = Journal.objects.filter(upload_date__year=year, upload_date__month=month)
+        journals = Journal.objects.filter(user_id = user,upload_date__year=year, upload_date__month=month)
 
         current_date = start_date
         week_index = 0
