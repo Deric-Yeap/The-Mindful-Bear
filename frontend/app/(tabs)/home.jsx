@@ -7,12 +7,32 @@ import TopBrownSearchBar from '../../components/topBrownSearchBar'
 import MetricCard from '../../components/metricCard'
 import { colors } from '../../common/styles'
 import StatusBarComponent from '../../components/darkThemStatusBar';
+import { useEffect } from 'react';
+import { getMe } from '../../api/user';
+import React, { useState } from 'react'
+
+
 const Home = () => {
+  const [userName, setUserName] = useState([])
+useEffect(() => {
+  const fetchData = async () => {
+    try {
+      const response = await getMe()
+      setUserName(response.name)
+    } catch (error) {
+      console.error(error)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  fetchData()
+}, [])
   return (
     <SafeAreaView className="flex-1 bg-optimistic-gray-10">
       <ScrollView>      
       <StatusBarComponent barStyle="light-content" backgroundColor="#251404" />
-      <TopBrownSearchBar title="Hi Staff!" />
+      <TopBrownSearchBar title={`Welcome, ${userName}!`} />
         <View className="bg-optimistic-gray-10 p-4 rounded-lg mb-4">
         <Link href="/map" asChild>
           <Pressable className="relative w-full rounded-xl mb-4" style={{ aspectRatio: 1.5 }}>
