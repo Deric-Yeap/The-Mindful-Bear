@@ -210,8 +210,10 @@ class JournalEntriesByDateSerializer(serializers.Serializer):
     def get_journal_entries_by_date(self, year, month):
         start_date = datetime(year, month, 1)
         end_date = (start_date + timedelta(days=31)).replace(day=1) - timedelta(days=1)
+        request = self.context.get('request')
+        user = request.user if request and request.user else None
 
-        journals = Journal.objects.filter(upload_date__year=year, upload_date__month=month)
+        journals = Journal.objects.filter(user_id = user, upload_date__year=year, upload_date__month=month)
         journal_dict = {}
 
         current_date = start_date
