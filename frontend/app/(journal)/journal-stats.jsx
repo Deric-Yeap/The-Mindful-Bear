@@ -11,7 +11,6 @@ import { Calendar } from 'react-native-calendars'
 import { journalEntriesByPeriod } from '../../api/journal'
 import LottieView from 'lottie-react-native'
 
-
 const JournalStats = ({
   title = 'Journal Stats',
   subtitle = 'Please Select a date range',
@@ -190,7 +189,6 @@ const JournalStats = ({
   const stepValue = Math.ceil(maxValue / noOfSections)
   const fadeAnim = useRef(new Animated.Value(0)).current
   const scaleAnim = useRef(new Animated.Value(0)).current
-  
 
   useEffect(() => {
     Animated.parallel([
@@ -212,9 +210,21 @@ const JournalStats = ({
       <BackButton buttonStyle="mb-4" />
       <View className="flex-row items-center justify-between">
         <View>
-          <Text className="font-urbanist-extra-bold text-mindful-brown-80 text-4xl mb-1">
-            {title}
-          </Text>
+        <View className="flex flex-row items-center">
+  <Text className="font-urbanist-extra-bold text-mindful-brown-80 text-4xl mb-1">
+    {title}
+  </Text>
+  <TouchableOpacity
+    onPress={handleOnPress}
+    className="w-16 h-16 rounded-full bg-empathy-orange-40 flex items-center justify-center -mt-4 ml-4" // Added ml-4 for spacing
+  >
+    <MaterialCommunityIcons
+      name="calendar-month-outline"
+      size={30}
+      color="white"
+    />
+  </TouchableOpacity>
+</View>
           <Text className="font-urbanist-light text-mindful-brown-80 text-xl">
             {startDate && endDate
               ? `Selected Range: ${startDate.toLocaleDateString('en-GB')} - ${endDate.toLocaleDateString('en-GB')}`
@@ -223,16 +233,6 @@ const JournalStats = ({
                 : subtitle}
           </Text>
         </View>
-        <TouchableOpacity
-          onPress={handleOnPress}
-          className="w-16 h-16 rounded-full bg-empathy-orange-40 flex items-center justify-center -mt-4"
-        >
-          <MaterialCommunityIcons
-            name="calendar-month-outline"
-            size={30}
-            color="white"
-          />
-        </TouchableOpacity>
       </View>
 
       <Modal
@@ -243,7 +243,7 @@ const JournalStats = ({
           setModalVisible(false)
           setStartDate(null)
           setEndDate(null)
-          setEndDateForAxios(null) // Reset dates when closing modal
+          setEndDateForAxios(null) 
         }}
       >
         <View className="flex-1 justify-center items-center bg-black bg-opacity-50">
@@ -278,10 +278,10 @@ const JournalStats = ({
               <View className="bg-mindful-brown-80 max-w-[250px] p-3 rounded-lg relative text">
                 <Animated.Text
                   style={{
-                    opacity: fadeAnim, 
-                    paddingTop: 5, 
-                    color: 'white', 
-                    fontSize: 16, 
+                    opacity: fadeAnim,
+                    paddingTop: 5,
+                    color: 'white',
+                    fontSize: 16,
                   }}
                 >
                   Hey! There are no journal entries for this period.
@@ -303,9 +303,9 @@ const JournalStats = ({
                 <Animated.Text
                   style={{
                     opacity: fadeAnim,
-                    paddingTop: 5, 
+                    paddingTop: 5,
                     color: 'white',
-                    fontSize: 16, 
+                    fontSize: 16,
                   }}
                 >
                   Hey! Please select a date.
@@ -339,11 +339,13 @@ const JournalStats = ({
             )}
           />
         )}
-        <CustomButton
-          title="See All Journal Entries"
-          handlePress={() => router.push('/(journal)/journal-history')}
-          buttonStyle="w-full mt-10"
-        />
+        {startDate && (
+          <CustomButton
+            title="See All Journal Entries"
+            handlePress={() => router.push('/(journal)/journal-history')}
+            buttonStyle="w-full mt-10"
+          />
+        )}
       </View>
     </SafeAreaView>
   )

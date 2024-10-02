@@ -15,6 +15,7 @@ import { monthNames, daysOfWeek } from '../../common/constants'
 import Loading from '../../components/loading'
 import LottieView from 'lottie-react-native'
 import BackButton from '../../components/backButton'
+import { colors } from '../../common/styles'
 
 const JournalHome = () => {
   const [calendarData, setCalendarData] = useState([])
@@ -128,11 +129,19 @@ const JournalHome = () => {
                 {monthNames[currentMonth - 1]} {currentYear}
               </Text>
               <Link
-                href="/(journal)/journal-history"
-                className="font-urbanist-semi-bold text-serenity-green-60 ml-1"
+                href="/(journal)/journal-stats"
+                className="font-urbanist-semi-bold ml-2"
               >
-                See all
+                <MaterialCommunityIcons name="chart-bar" size={30} color={colors.serenityGreen60} />
               </Link>
+              <Link
+                href="/(journal)/journal-history"
+                className="font-urbanist-semi-bold ml-2"
+              >
+                <MaterialCommunityIcons name="book-account" size={30} color={colors.mindfulBrown60} />
+              </Link>
+              
+
             </View>
             <TouchableOpacity onPress={handleNextMonth}>
               <Text className="font-urbanist-bold text-zen-yellow-50">
