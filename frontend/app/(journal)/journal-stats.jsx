@@ -152,28 +152,28 @@ const JournalStats = ({
   const createBarData = (emotionCounts) => {
     return [
       {
-        label: 'Happy',
+        primaryEmotion: 'Happy',
         value: emotionCounts.Happy || 0,
         frontColor: colors.serenityGreen50,
       },
       {
-        label: 'Angry',
+        primaryEmotion: 'Angry',
         value: emotionCounts.Angry || 0,
         frontColor: colors.presentRed40,
       },
       {
-        label: 'Bad',
+        primaryEmotion: 'Bad',
         value: emotionCounts.Bad || 0,
         frontColor: colors.mindfulBrown60,
       },
       {
-        label: 'Surprised',
+        primaryEmotion: 'Surprised',
         value: emotionCounts.Surprised || 0,
         frontColor: colors.empathyOrange40,
       },
-      { label: 'Sad', value: emotionCounts.Sad || 0, frontColor: '#507DBC' },
+      { primaryEmotion: 'Sad', value: emotionCounts.Sad || 0, frontColor: '#507DBC' },
       {
-        label: 'Disgusted',
+        primaryEmotion: 'Disgusted',
         value: emotionCounts.Disgusted || 0,
         frontColor: colors.kindPurple40,
       },
@@ -321,23 +321,36 @@ const JournalStats = ({
             />
           </>
         ) : (
-          <BarChart
-            height={400}
-            barWidth={30}
-            barBorderRadius={20}
-            frontColor="lightgray"
-            data={barData}
-            yAxisThickness={0}
-            xAxisThickness={0}
-            borderSkipped={false}
-            isAnimated
-            yAxisMaxValue={maxValue}
-            stepValue={stepValue}
-            noOfSections={noOfSections}
-            yAxisLabelTexts={Array.from({ length: noOfSections + 1 }, (_, i) =>
-              (i * stepValue).toString()
-            )}
-          />
+          <View className="relative mt-2">
+         <BarChart
+        data={barData}
+        height={400}
+        barWidth={30}
+        barBorderRadius={20}
+        frontColor="lightgray"
+        yAxisThickness={0} 
+        xAxisThickness={0}
+        isAnimated
+        yAxisMaxValue={maxValue}
+        stepValue={stepValue}
+        noOfSections={noOfSections}
+        yAxisLabelTexts={Array.from({ length: noOfSections + 1 }, (_, i) =>
+          (i * stepValue).toString()
+        )}
+        xAxisLabelTexts={[]} 
+        scrollAnimation = {true}
+      />
+          <View className="flex flex-row justify-between ml-3 mr-11 ">
+        {barData.map((item, index) => (
+          <Text
+            key={index}
+            className="text-center text-sm -mx-1 transform rotate-[-40deg] w-16"
+          >
+            {item.primaryEmotion} 
+          </Text>
+        ))}
+      </View>
+    </View>
         )}
         {startDate && (
           <CustomButton
