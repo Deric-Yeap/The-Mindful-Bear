@@ -11,7 +11,6 @@ import { Calendar } from 'react-native-calendars'
 import { journalEntriesByPeriod } from '../../api/journal'
 import LottieView from 'lottie-react-native'
 
-
 const JournalStats = ({
   title = 'Journal Stats',
   subtitle = 'Please Select a date range',
@@ -190,7 +189,6 @@ const JournalStats = ({
   const stepValue = Math.ceil(maxValue / noOfSections)
   const fadeAnim = useRef(new Animated.Value(0)).current
   const scaleAnim = useRef(new Animated.Value(0)).current
-  
 
   useEffect(() => {
     Animated.parallel([
@@ -278,10 +276,10 @@ const JournalStats = ({
               <View className="bg-mindful-brown-80 max-w-[250px] p-3 rounded-lg relative text">
                 <Animated.Text
                   style={{
-                    opacity: fadeAnim, 
-                    paddingTop: 5, 
-                    color: 'white', 
-                    fontSize: 16, 
+                    opacity: fadeAnim,
+                    paddingTop: 5,
+                    color: 'white',
+                    fontSize: 16,
                   }}
                 >
                   Hey! There are no journal entries for this period.
@@ -303,9 +301,9 @@ const JournalStats = ({
                 <Animated.Text
                   style={{
                     opacity: fadeAnim,
-                    paddingTop: 5, 
+                    paddingTop: 5,
                     color: 'white',
-                    fontSize: 16, 
+                    fontSize: 16,
                   }}
                 >
                   Hey! Please select a date.
@@ -339,11 +337,13 @@ const JournalStats = ({
             )}
           />
         )}
-        <CustomButton
-          title="See All Journal Entries"
-          handlePress={() => router.push('/(journal)/journal-history')}
-          buttonStyle="w-full mt-10"
-        />
+        {startDate && (
+          <CustomButton
+            title="See All Journal Entries"
+            handlePress={() => router.push('/(journal)/journal-history')}
+            buttonStyle="w-full mt-10"
+          />
+        )}
       </View>
     </SafeAreaView>
   )

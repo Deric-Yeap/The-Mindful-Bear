@@ -134,6 +134,12 @@ const JournalHome = () => {
               >
                 <MaterialCommunityIcons name="chart-bar" size={30} color={colors.serenityGreen60} />
               </Link>
+              <Link
+                href="/(journal)/journal-history"
+                className="font-urbanist-semi-bold ml-2"
+              >
+                <MaterialCommunityIcons name="book-account" size={30} color={colors.mindfulBrown60} />
+              </Link>
               
 
             </View>
