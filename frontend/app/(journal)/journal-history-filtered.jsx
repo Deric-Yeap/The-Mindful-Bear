@@ -38,8 +38,8 @@ const JournalHistoryFiltered = () => {
     return dates;
 };
 
-  const startDate = '2024-09-29'
-  const endDate = '2024-10-2'
+  const startDate = '2024-09-1'
+  const endDate = '2024-10-30'
 
   const dateRange = getDatesBetween(startDate, endDate);
 
@@ -131,12 +131,12 @@ const JournalHistoryFiltered = () => {
                         <Text
                             className={`font-urbanist-extra-bold ${isSelected ? 'text-mindful-brown-80' : 'text-optimistic-gray-60'}`}
                         >
-                            {dayOfWeek} {/* Display day of the week */}
+                            {monthNames[currentMonth - 1].substring(0, 3)}
                         </Text>
                         <Text
                             className={`font-urbanist-extra-bold text-lg ${isSelected ? 'text-mindful-brown-80' : 'text-optimistic-gray-60'}`}
                         >
-                            {dayOfMonth} {/* Display day of the month */}
+                            {dayOfMonth} 
                         </Text>
                     </TouchableOpacity>
                 );
