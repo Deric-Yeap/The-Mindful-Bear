@@ -204,6 +204,13 @@ const JournalStats = ({
       }),
     ]).start()
   }, [fadeAnim, scaleAnim])
+  const handlePress = (startDate,endDateForAxios) => {
+    router.push({
+        pathname: '/(journal)/journal-history-filtered',
+        params: { start: startDate, end: endDateForAxios },
+    });
+};
+
 
   return (
     <SafeAreaView className="bg-optimistic-gray-10 h-full p-4 space-y-4">
@@ -355,7 +362,7 @@ const JournalStats = ({
         {startDate && (
           <CustomButton
             title="See All Journal Entries"
-            handlePress={() => router.push('/(journal)/journal-history')}
+            handlePress={(handlePress)}
             buttonStyle="w-full mt-10"
           />
         )}
