@@ -13,7 +13,6 @@ import LottieView from 'lottie-react-native'
 
 const JournalStats = ({
   title = 'Journal Stats',
-  subtitle = 'Please Select a date range',
 }) => {
   const today = new Date()
   const [modalVisible, setModalVisible] = useState(false)
@@ -237,7 +236,7 @@ const JournalStats = ({
               ? `Selected Range: ${startDate.toLocaleDateString('en-GB')} - ${endDate.toLocaleDateString('en-GB')}`
               : startDate
                 ? `Selected Date: ${startDate.toLocaleDateString('en-GB')}`
-                : subtitle}
+                :null}
           </Text>
         </View>
       </View>
@@ -315,7 +314,7 @@ const JournalStats = ({
                     fontSize: 16,
                   }}
                 >
-                  Hey! Please select a date.
+                  Hey! Please Select a date range
                 </Animated.Text>
               </View>
             </View>
