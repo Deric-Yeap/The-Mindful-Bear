@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, ScrollView, TextInput, TouchableOpacity, Image, Alert } from 'react-native';
+import { View, Text, ScrollView, TextInput, TouchableOpacity, Image, Alert, SafeAreaView } from 'react-native';
 import { launchImageLibrary } from 'react-native-image-picker';
 import { useRoute } from '@react-navigation/native';
 import LandmarkBackButton from '../../components/landmarkBackButton';
@@ -168,18 +168,20 @@ const LandmarkCreator = () => {
   };
 
   return (
+  <SafeAreaView className="flex-1">
+    <View className="bg-mindful-brown-100 p-4">
+      <LandmarkBackButton title={landmark ? "Modify Landmark" : "Create Landmark"} route='/landmark'/>
+    </View>
     <ScrollView className="flex-1" contentContainerStyle={{ flexGrow: 1 }} bounces={false}>
-      <View className="flex flex-col bg-stone-100 ">
-        <View className="bg-mindful-brown-100 p-4 ">
-          <LandmarkBackButton title={landmark ? "Modify Landmark" : "Create Landmark"} route='/landmark'/>
-        </View>
+      <View className="flex flex-col bg-stone-100">
+
         {/* Conditionally render SelectLocationMap */}
         {isMapVisible && (
             <View className="absolute top-0 left-0 right-0 bottom-0 z-10">
               <SelectLocationMap onLocationSelected={handleLocationSelected} />
-            </View>)}
+            </View>
+        )}
         <View className="flex relative flex-col pb-2 w-full aspect-[1.011]">
-          
           <Image
             source={{ uri: imageFile.uri }}
             className="object-cover absolute inset-0 w-full h-full"
@@ -231,20 +233,17 @@ const LandmarkCreator = () => {
               />
             </View>
 
-              <View className="flex flex-col w-[20%] justify-center">
+            <View className="flex flex-col w-[20%] justify-center">
               <Text className="self-start text-mindful-brown-80 text-lg font-urbanist-extra-bold"></Text>
-
               <TouchableOpacity 
                 onPress={handleShowMap}
-              className="mt-4 bg-mindful-brown-80 rounded-3xl h-[41px] flex items-center justify-center"
-                >
-              <Text className="text-white text-base font-bold" >Search</Text>
-            </TouchableOpacity>
-              
+                className="mt-4 bg-mindful-brown-80 rounded-3xl h-[41px] flex items-center justify-center"
+              >
+                <Text className="text-white text-base font-bold">Search</Text>
+              </TouchableOpacity>
             </View>
           </View>
 
-          
           <View className="mb-4">
             <Dropdown
               key={exerciseId || 'default-key'}
@@ -259,8 +258,7 @@ const LandmarkCreator = () => {
                 const selectedExercise = exerciseList.find(exercise => exercise.exercise_id === selectedValue);
                 setExerciseId(selectedExercise.exercise_id);
                 setSelectedExerciseName(selectedExercise.exercise_name); // Set the selected exercise name
-              }              
-            }
+              }}
             />
           </View>
           <View className="mb-4">
@@ -272,19 +270,21 @@ const LandmarkCreator = () => {
           </View>
         </View>
       </View>      
-       {/* Success Modal */}
-       {showSuccess && (       
-        <ConfirmModal
-          isConfirmButton={true}
-          isCancelButton={false}
-          imageSource={confirmModal}
-          confirmButtonTitle={'Confirm'}          
-          title={'Success!'}
-          subTitle={`Landmark ${landmark ? 'updated' : 'created'} successfully.`}
-          handleConfirm={handleConfirm}          
-        />)}
-      
-    </ScrollView>
+      {/* Success Modal */}
+      {showSuccess && (       
+      <ConfirmModal
+        isConfirmButton={true}
+        isCancelButton={false}
+        imageSource={confirmModal}
+        confirmButtonTitle={'Confirm'}          
+        title={'Success!'}
+        subTitle={`Landmark ${landmark ? 'updated' : 'created'} successfully.`}
+        handleConfirm={handleConfirm}          
+      />
+     )}
+  </ScrollView>
+</SafeAreaView>
+
   );
 };
 
