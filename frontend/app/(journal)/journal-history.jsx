@@ -1,15 +1,16 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, useRef } from 'react'
 import {
   View,
   Text,
   StatusBar,
   ScrollView,
   TouchableOpacity,
+  Animated,
 } from 'react-native'
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons'
 import { useRouter } from 'expo-router'
 import { SafeAreaView } from 'react-native-safe-area-context'
-
+import LottieView from 'lottie-react-native'
 import BackButton from '../../components/backButton'
 import { journalEntriesByDate } from '../../api/journal'
 import { monthNames, daysOfWeek } from '../../common/constants'
@@ -23,6 +24,23 @@ const JournalHistory = () => {
   const [currentMonth, setCurrentMonth] = useState(new Date().getMonth() + 1)
   const [currentYear, setCurrentYear] = useState(new Date().getFullYear())
   const router = useRouter()
+  const fadeAnim = useRef(new Animated.Value(0)).current
+  const scaleAnim = useRef(new Animated.Value(0)).current
+
+  useEffect(() => {
+    Animated.parallel([
+      Animated.timing(fadeAnim, {
+        toValue: 1,
+        duration: 1000,
+        useNativeDriver: true, // Use native driver for better performance
+      }),
+      Animated.timing(scaleAnim, {
+        toValue: 1,
+        duration: 1000,
+        useNativeDriver: true,
+      }),
+    ]).start()
+  }, [fadeAnim, scaleAnim])
 
   useEffect(() => {
     const fetchData = async () => {
@@ -227,10 +245,26 @@ const JournalHistory = () => {
               })
             ) : (
               <View className="flex-1 justify-center items-center">
-                <Text className="font-urbanist-semi-bold text-lg text-optimistic-gray-60">
-                  No journals for the selected day.
-                </Text>
+                <View className=" bg-mindful-brown-80 max-w-[400px] p-3 mt-8 rounded-lg relative">
+                <Animated.Text 
+                  style={{
+                    opacity: fadeAnim,
+                    paddingTop: 1,
+                    color: 'white',
+                    fontSize: 16,
+                  fontFamily: 'Urbanist'
+                  }}
+                >
+                 No journals for the selected day.
+                </Animated.Text>
               </View>
+              <LottieView
+                source={require('../../assets/bearSleeping.json')}
+                autoPlay
+                loop
+                style={{ width: 120, height: 160, marginBottom: 10 }} // Use style instead of className for LottieView
+              />
+            </View>
             )}
           </View>
         </View>

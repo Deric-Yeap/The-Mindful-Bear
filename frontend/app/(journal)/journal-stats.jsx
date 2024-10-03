@@ -281,8 +281,8 @@ const JournalStats = ({
       <View className="pb-20">
         {startDate && innerEmotionsArray.length === 0 ? ( // Check if emotions array is empty
           <>
-            <View className="flex-row my-3">
-              <View className="bg-mindful-brown-80 max-w-[250px] p-3 rounded-lg relative text">
+            <View className="flex-row justify-center items-center">
+              <View className="bg-mindful-brown-80 max-w-[550px] p-3 rounded-lg relative text">
                 <Animated.Text
                   style={{
                     opacity: fadeAnim,
@@ -300,12 +300,12 @@ const JournalStats = ({
               source={require('../../assets/bearSleeping.json')}
               autoPlay
               loop
-              className="w-30 h-40 mb-10"
+              className="w-30 h-40 mt-5"
             />
           </>
         ) : !startDate ? (
           <>
-            <View className="flex-row my-3">
+            <View className="flex-row justify-center items-center">
               <View className="bg-mindful-brown-80 max-w-[250px] p-3 rounded-lg relative">
                 <Animated.Text
                   style={{
@@ -324,9 +324,13 @@ const JournalStats = ({
               source={require('../../assets/bearSleeping.json')}
               autoPlay
               loop
-              className="w-30 h-40 mb-10"
+               className="w-30 h-40 mt-5"
             />
+
+            
           </>
+          
+
         ) : (
           <View className="relative mt-2">
          <BarChart
