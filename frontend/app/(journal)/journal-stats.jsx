@@ -361,7 +361,7 @@ const JournalStats = ({
         )}
         {startDate && (
           <CustomButton
-            title="See All Journal Entries"
+            title="View Journal Entries"
             handlePress={(handlePress)}
             buttonStyle="w-full mt-10"
           />
