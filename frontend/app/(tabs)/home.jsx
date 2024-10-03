@@ -10,10 +10,12 @@ import StatusBarComponent from '../../components/darkThemStatusBar';
 import { useEffect } from 'react';
 import { getMe } from '../../api/user';
 import React, { useState } from 'react'
+import Loading from '../../components/loading'
 
 
 const Home = () => {
   const [userName, setUserName] = useState([])
+  const [loading, setLoading] = useState(true);
 useEffect(() => {
   const fetchData = async () => {
     try {
@@ -28,6 +30,17 @@ useEffect(() => {
 
   fetchData()
 }, [])
+
+if (loading) {
+  return (
+    <SafeAreaView className="flex-1 p-4 bg-white">
+       <StatusBarComponent barStyle="light-content" backgroundColor="#251404" />
+      <View className="flex-1 justify-center items-center">
+        <Loading />
+      </View>
+    </SafeAreaView>
+  )
+}
   return (
     <SafeAreaView className="flex-1 bg-optimistic-gray-10">
       <ScrollView>      
