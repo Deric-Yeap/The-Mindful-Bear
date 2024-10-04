@@ -11,19 +11,22 @@ import {
   setIsShownNav,
   clearIsShownNav,
 } from '../../redux/slices/isShownNavSlice'
-import { createFavouriteLandmark, deleteFavouriteLandmark } from '../../api/landmark'
-const THRESHOLD = [3, 5, 10];
+import {
+  createFavouriteLandmark,
+  deleteFavouriteLandmark,
+} from '../../api/landmark'
+
+const THRESHOLD = [3, 5, 10]
 
 const getUserCountColor = (userCount) => {
   if (userCount < THRESHOLD[0]) {
-    return colors.serenityGreen50; // Green for less crowded
+    return colors.serenityGreen50 // Green for less crowded
   } else if (userCount < THRESHOLD[1]) {
-    return colors.empathyOrange50; // Orange for medium crowd
+    return colors.empathyOrange50 // Orange for medium crowd
   } else {
-    return colors.presentRed50; // Red for crowded
+    return colors.presentRed50 // Red for crowded
   }
-};
-
+}
 
 const BottomSheetModal = ({
   handleModalOpen,
@@ -39,7 +42,6 @@ const BottomSheetModal = ({
     const { landmark_id, exercise_id } = item
     landmarkDistancesMap[landmark_id] = item
   })
-  console.log(landmarkData)
   const landmarkId = landmarkData.properties.landmark_id.toString()
 
   const landmarkIcons = [
@@ -98,7 +100,7 @@ const BottomSheetModal = ({
   const isShownNav = useSelector((state) => state.isShownNav).isShownNav
   const data = landmarkData?.properties
   const bottomSheetRef = useRef(null)
-  const snapPoints = useMemo(() => ['60%', '100%'], [])
+  const snapPoints = useMemo(() => ['60%', '95%'], [])
   const [currentSnapIndex, setCurrentSnapIndex] = useState(0)
   const [isFavorite, setIsFavorite] = useState(false)
   const [isExercise, setIsExercise] = useState(false)
@@ -121,17 +123,16 @@ const BottomSheetModal = ({
 
   const toggleHeartColor = async () => {
     try {
-      if (isFavorite) {        
-        deleteFavouriteLandmark(landmarkId);
-      } else {        
-        createFavouriteLandmark(landmarkId);
+      if (isFavorite) {
+        deleteFavouriteLandmark(landmarkId)
+      } else {
+        createFavouriteLandmark(landmarkId)
       }
-      setIsFavorite(!isFavorite); 
+      setIsFavorite(!isFavorite)
     } catch (error) {
-      console.error('Error while toggling favourite:', error);
+      console.error('Error while toggling favourite:', error)
     }
-  };
-  
+  }
 
   const handleViewExerciseButton = () => {
     if (isExercise) {
@@ -140,7 +141,6 @@ const BottomSheetModal = ({
       setIsExercise(true)
     }
   }
-  const handleStartExerciseButton = () => {}
 
   useEffect(() => {
     if (hasArrived && bottomSheetRef.current) {

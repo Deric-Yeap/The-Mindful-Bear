@@ -17,6 +17,7 @@ const PasswordReset = () => {
     token: token || '',
     password: '',
   })
+  const [confirmPassword, setConfirmPassword] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const [isModalVisible, setIsModalVisible] = useState(false)
   const [errorMessage, setErrorMessage] = useState({
@@ -24,6 +25,13 @@ const PasswordReset = () => {
   })
 
   const handleReset = async () => {
+    if (request.password !== confirmPassword) {
+      setErrorMessage({
+        password: 'Passwords do not match.',
+      })
+      return
+    }
+
     try {
       setErrorMessage({})
       setIsLoading(true)
@@ -80,10 +88,10 @@ const PasswordReset = () => {
       )}
       <View className="min-h-[78vh] mt-[25vh] items-center mx-5">
         <Text className="font-urbanist-extra-bold text-3xl text-mindful-brown-80 pb-10">
-          Enter new password
+          Password Reset
         </Text>
         <Text className="font-urbanist-medium text-xl text-mindful-brown-80 pb-10">
-          Enter your password address to receive the reset password link.
+          Please enter your new password below.
         </Text>
         <FormField
           title="Password"
@@ -94,6 +102,15 @@ const PasswordReset = () => {
           }
           customStyles="w-full pb-4"
           placeHolder="Enter your password"
+          errorMessage=""
+        />
+        <FormField
+          title="Confirm Password"
+          iconName="lock-outline"
+          value={confirmPassword}
+          handleChange={(value) => setConfirmPassword(value)}
+          customStyles="w-full pb-4"
+          placeHolder="Confirm your password"
           errorMessage={errorMessage.password ? errorMessage.password : ''}
         />
         <CustomButton

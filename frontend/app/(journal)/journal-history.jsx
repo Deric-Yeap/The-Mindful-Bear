@@ -101,7 +101,7 @@ const JournalHistory = () => {
     <View className="flex-1">
       <StatusBar barStyle="light-content" />
       <View className="min-h-[10vh] bg-mindful-brown-70 justify-center p-4 pt-10">
-        <BackButton buttonStyle="mb-4" />
+        <BackButton buttonStyle="mb-4" tabName="(journal)" screenName={"journal-home"}/>
         <Text className="font-urbanist-extra-bold text-3xl text-white">
           My Journals 
         </Text>
