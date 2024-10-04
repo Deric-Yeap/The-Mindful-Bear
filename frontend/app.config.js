@@ -14,6 +14,11 @@ export default () => ({
       resizeMode: 'contain',
       backgroundColor: '#ffffff',
     },
+    extra: {
+      eas: {
+        projectId: 'af68e63f-6282-4d84-9a81-de4af7a097c9',
+      },
+    },
     ios: {
       supportsTablet: true,
       bundleIdentifier: 'com.anonymous.frontend1',
@@ -70,6 +75,21 @@ export default () => ({
             'Allow $(PRODUCT_NAME) to use your location.',
           isAndroidBackgroundLocationEnabled: true,
           isIosBackgroundLocationEnabled: true,
+        },
+      ],
+      [
+        '@bam.tech/react-native-app-security',
+        {
+          sslPinning: {
+            'themindfulbear.xyz': [
+              '2wAy2q6RNZ+mJZYfLkrMVecVwxGtSNhkW7MUyPV0FoY=',
+              'NYbU7PBwV4y9J67c4guWTki8FJ+uudrXL0a4V4aRcrg=',
+            ],
+          },
+          preventRecentScreenshots: {
+            ios: { enabled: true },
+            android: { enabled: true },
+          },
         },
       ],
     ],

@@ -1,15 +1,24 @@
 import React from 'react'
-import { View, Text, ScrollView, TouchableOpacity, SafeAreaView } from 'react-native'
+import {
+  View,
+  Text,
+  ScrollView,
+  TouchableOpacity,
+  SafeAreaView,
+} from 'react-native'
 import { Link } from 'expo-router'
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons'
 import { colors } from '../../common/styles'
 import TopBrownSearchBar from '../../components/topBrownSearchBar'
-import StatusBarComponent from '../../components/darkThemStatusBar';
+import StatusBarComponent from '../../components/darkThemStatusBar'
 export default function Admin() {
   return (
-    <SafeAreaView className="flex-1 bg-optimistic-gray-10">
-      <StatusBarComponent barStyle="light-content" backgroundColor="#251404" />      
-      <View className="mt-7"></View>
+    <SafeAreaView
+      className="flex-1 bg-optimistic-gray-10"
+      backgroundColor="#251404"
+    >
+      <StatusBarComponent barStyle="light-content" backgroundColor="#251404" />
+      <View className="mt-7 bg-mindful-brown-70"></View>
       <TopBrownSearchBar title="Hi Admin!" />
       <ScrollView className="flex-1 bg-optimistic-gray-10 p-4 mb-16">
         <Text className="text-mindful-brown-100 font-urbanist-bold text-xl mb-4">
