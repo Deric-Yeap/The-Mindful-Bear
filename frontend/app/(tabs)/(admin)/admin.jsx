@@ -23,8 +23,7 @@ export default function Admin() {
         barStyle="light-content"
         backgroundColor={colors.mindfulBrown100}
       />
-      <ScrollView className="flex-1 bg-optimistic-gray-10 mb-16">
-        <View className="mt-12 bg-mindful-brown-70"></View>
+      <ScrollView className="flex-1 bg-optimistic-gray-10 mb-16 mt-12">
         <TopBrownSearchBar title="Hi Admin!" />
         <View className="p-4">
           <Text className="text-mindful-brown-100 font-urbanist-bold text-xl mb-4">
