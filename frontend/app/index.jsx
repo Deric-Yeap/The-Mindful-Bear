@@ -27,14 +27,14 @@ export default function App() {
         className="flex-1" 
         resizeMode="cover"
       >
-         <View className="h-1/6 bg-blue-200 justify-center items-center z-[-1]">
+         <View className="mt-20 bg-blue-200 justify-center items-center z-[-1]">
         </View>
         <ScrollView contentContainerStyle="flex-grow">
           <View className="flex-1 justify-start items-center "> 
-            <Text className="font-urbanist-bold mt-1 text-2xl font-bold text-mindful-brown-80 text-center">
+            <Text className="font-urbanist-extra-bold mt-1 text-3xl text-mindful-brown-80 text-center">
               Welcome to 
             </Text>
-            <Text className="font-urbanist-bold mt-4 text-4xl font-bold text-mindful-brown-80 text-center">
+            <Text className="font-urbanist-extra-bold mt-1 text-4xl text-mindful-brown-80 text-center">
               The Mindful Bear
             </Text>
             <CustomButton
