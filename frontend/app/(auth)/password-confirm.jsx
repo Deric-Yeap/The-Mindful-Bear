@@ -59,14 +59,6 @@ const PasswordReset = () => {
     }
   }
 
-  useEffect(() => {
-    console.log(errorMessage)
-  }, [errorMessage])
-
-  useEffect(() => {
-    console.log(errorMessage)
-  }, [errorMessage])
-
   return (
     <SafeAreaView>
       {isLoading && (

@@ -21,6 +21,7 @@ const SignIn = () => {
   const dispatch = useDispatch()
   const auth = useSelector((state) => state.auth)
   const handleLogin = async () => {
+    setErrorMessage({})
     try {
       setIsLoading(true)
       const response = await login({
@@ -42,7 +43,7 @@ const SignIn = () => {
       }
     } catch (error) {
       setIsLoading(false)
-      console.error(error.response.data.error_description)
+      setErrorMessage({ password: error.response.data.error_description })
     }
   }
 
