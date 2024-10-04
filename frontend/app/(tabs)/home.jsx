@@ -12,10 +12,28 @@ import { colors } from '../../common/styles'
 import StatusBarComponent from '../../components/darkThemStatusBar'
 import { getMe } from '../../api/user'
 import Loading from '../../components/loading'
+import { journalStreak } from '../../api/journal'
 
 const Home = () => {
   const user = useSelector((state) => state.user)
   const [loading, setLoading] = useState(false)
+  const [streak, setStreak] = useState(0)
+
+  useEffect(() => {
+    const fetchData = async () => {
+      setLoading(true)
+      try {
+        const response = await journalStreak()
+        setStreak(response.streak)
+      } catch (error) {
+        console.error(error)
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchData()
+  }, [])
 
   if (loading) {
     return (
@@ -66,7 +84,7 @@ const Home = () => {
             rightImage={require('../../assets/mindfulJournalMetricCard.png')}
           >
             <Text className="font-urbanist-semi-bold text-mindful-brown-80 text-lg">
-              xx Days Streak
+              {streak} {streak <= 1 ? "Day":"Days"} Streak
             </Text>
           </MetricCard>
 
@@ -94,7 +112,7 @@ const Home = () => {
             rightImage={require('../../assets/mindfulJournalMetricCard.png')}
           >
             <Text className="font-urbanist-semi-bold text-mindful-brown-80 text-lg">
-              xx Days Streak
+              View your favourite landmarks here.
             </Text>
           </MetricCard>
         </View>

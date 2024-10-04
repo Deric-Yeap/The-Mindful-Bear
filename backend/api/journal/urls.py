@@ -1,6 +1,6 @@
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
-from .views import (JournalListView, UploadFileView, JournalCalendarView, CountYearJournalView,SpeechToTextView, JournalEntriesByDateView, JournalEntriesByPeriodView, JournalEntryViewSet)
+from .views import (JournalListView, UploadFileView, JournalCalendarView, CountYearJournalView,SpeechToTextView, JournalEntriesByDateView, JournalEntriesByPeriodView, JournalEntryViewSet, JournalStreakView)
 
 router = DefaultRouter()
 router.register(r'journal_entry', JournalEntryViewSet, basename='journal-entry')
@@ -14,5 +14,6 @@ urlpatterns = [
     path("speech_to_text/", SpeechToTextView.as_view()),
     path("journal_entries_by_date/", JournalEntriesByDateView.as_view()),
     path('journal_entries_by_period/', JournalEntriesByPeriodView.as_view(), name='journal-entries-by-period'),
+    path("journal_streak/", JournalStreakView.as_view()),
     path('', include(router.urls)),
 ]
