@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { View, Text, ScrollView, Image, TouchableOpacity} from 'react-native'
+import { View, Text, ScrollView, Image, TouchableOpacity } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import BrownPageTitlePortion from '../../components/brownPageTitlePortion'
 import StatusBarComponent from '../../components/darkThemStatusBar'
@@ -9,7 +9,7 @@ import { LineChart } from 'react-native-gifted-charts'
 import PositiveBear from '../../assets/positiveBear.png'
 import NeutralBear from '../../assets/neutralBear.png'
 import NegativeBear from '../../assets/negativeBear.png'
-import Toggle from '../../components/toggle';
+import Toggle from '../../components/toggle'
 
 const lineData = [
   { value: 0, label: '23/9' },
@@ -61,16 +61,14 @@ const JournalAnalytics = () => {
     fetchData()
   }, [])
 
+  const chartWidth = lineData.length * 100
 
-  const chartWidth = lineData.length * 100 
+  const [selectedOption, setSelectedOption] = useState('Daily')
 
-   const [selectedOption, setSelectedOption] = useState('Daily'); 
-
-
-   const onSelectSwitch = (option) => {
-     setSelectedOption(option);
-     console.log(`Selected option: ${option}`); 
-   };
+  const onSelectSwitch = (option) => {
+    setSelectedOption(option)
+    console.log(`Selected option: ${option}`)
+  }
 
   return (
     <SafeAreaView
@@ -87,30 +85,30 @@ const JournalAnalytics = () => {
           fontWeight: 'bold',
           fontSize: 18,
           marginTop: 16,
-          marginLeft:12,
+          marginLeft: 12,
         }}
       >
-       Filter
+        Filter
       </Text>
       <Text
         style={{
           color: colors['mindful-brown-80'],
           fontSize: 16,
           marginBottom: 16,
-          marginLeft:12,
+          marginLeft: 12,
         }}
       >
-       Choose which date component
+        Choose which date component
       </Text>
       <View style={{ alignItems: 'center', margin: 10 }}>
         <Toggle
-          style={{alignItems: 'center'}}
-          selectionMode={selectedOption} 
+          style={{ alignItems: 'center' }}
+          selectionMode={selectedOption}
           roundCorner={true}
           option1="Daily"
           option2="Weekly"
           option3="Monthly"
-          onSelectSwitch={onSelectSwitch} 
+          onSelectSwitch={onSelectSwitch}
           selectionColor={colors.mindfulBrown80}
         />
       </View>
@@ -120,7 +118,7 @@ const JournalAnalytics = () => {
           fontWeight: 'bold',
           fontSize: 18,
           marginTop: 16,
-          marginLeft:12,
+          marginLeft: 12,
         }}
       >
         Primary Emotions
@@ -130,44 +128,65 @@ const JournalAnalytics = () => {
           color: colors['mindful-brown-80'],
           fontSize: 16,
           marginBottom: 16,
-          marginLeft:12,
+          marginLeft: 12,
         }}
       >
-       Choose which sentiment
+        Choose which sentiment
       </Text>
-      
-      <View style={{ flexDirection: 'row', justifyContent: 'space-around', alignItems: 'center', marginVertical: 16 }}>
-        
-      {/* Positive Bear */}
-      <TouchableOpacity onPress={() => handlePress('Positive')} style={{ alignItems: 'center' }}>
-        <Image 
-          source={PositiveBear} 
-          style={{ width: 80, height: 80 }} 
-          resizeMode="contain" 
-        />
-        <Text style={{ marginTop: 5, fontSize: 14, color: '#333' }}>Positive</Text>
-      </TouchableOpacity>
 
-      {/* Neutral Bear */}
-      <TouchableOpacity onPress={() => handlePress('Neutral')} style={{ alignItems: 'center' }}>
-        <Image 
-          source={NeutralBear} 
-          style={{ width: 80, height: 80 }} 
-          resizeMode="contain" 
-        />
-        <Text style={{ marginTop: 5, fontSize: 14, color: '#333' }}>Neutral</Text>
-      </TouchableOpacity>
+      <View
+        style={{
+          flexDirection: 'row',
+          justifyContent: 'space-around',
+          alignItems: 'center',
+          marginVertical: 16,
+        }}
+      >
+        {/* Positive Bear */}
+        <TouchableOpacity
+          onPress={() => handlePress('Positive')}
+          style={{ alignItems: 'center' }}
+        >
+          <Image
+            source={PositiveBear}
+            style={{ width: 80, height: 80 }}
+            resizeMode="contain"
+          />
+          <Text style={{ marginTop: 5, fontSize: 14, color: '#333' }}>
+            Positive
+          </Text>
+        </TouchableOpacity>
 
-      {/* Negative Bear */}
-      <TouchableOpacity onPress={() => handlePress('Negative')} style={{ alignItems: 'center' }}>
-        <Image 
-          source={NegativeBear} 
-          style={{ width: 80, height: 80 }} 
-          resizeMode="contain" 
-        />
-        <Text style={{ marginTop: 5, fontSize: 14, color: '#333' }}>Negative</Text>
-      </TouchableOpacity>
-    </View>
+        {/* Neutral Bear */}
+        <TouchableOpacity
+          onPress={() => handlePress('Neutral')}
+          style={{ alignItems: 'center' }}
+        >
+          <Image
+            source={NeutralBear}
+            style={{ width: 80, height: 80 }}
+            resizeMode="contain"
+          />
+          <Text style={{ marginTop: 5, fontSize: 14, color: '#333' }}>
+            Neutral
+          </Text>
+        </TouchableOpacity>
+
+        {/* Negative Bear */}
+        <TouchableOpacity
+          onPress={() => handlePress('Negative')}
+          style={{ alignItems: 'center' }}
+        >
+          <Image
+            source={NegativeBear}
+            style={{ width: 80, height: 80 }}
+            resizeMode="contain"
+          />
+          <Text style={{ marginTop: 5, fontSize: 14, color: '#333' }}>
+            Negative
+          </Text>
+        </TouchableOpacity>
+      </View>
       <Text
         style={{
           color: colors['mindful-brown-80'],
@@ -175,12 +194,15 @@ const JournalAnalytics = () => {
           fontSize: 18,
           marginTop: 16,
           marginBottom: 16,
-          marginLeft:12,
+          marginLeft: 12,
         }}
       >
         No. of journal entries based on sentiment
       </Text>
-      <ScrollView horizontal={true} className="flex-row py-1 h-[8vh] space-x-4 left-2">
+      <ScrollView
+        horizontal={true}
+        className="flex-row py-1 h-[8vh] space-x-4 left-2"
+      >
         <LineChart
           areaChart
           curved
