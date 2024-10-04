@@ -17,7 +17,7 @@ import { monthNames, daysOfWeek } from '../../common/constants'
 import { adjustHexColor } from '../../common/hexColor'
 import Loading from '../../components/loading'
 
-const JournalHistory = () => {
+const JournalHistoryFiltered = () => {
   const [journals, setJournals] = useState([])
   const [selectedDate, setSelectedDate] = useState(null)
   const [loading, setLoading] = useState(true)
@@ -26,7 +26,7 @@ const JournalHistory = () => {
   const router = useRouter()
   const fadeAnim = useRef(new Animated.Value(0)).current
   const scaleAnim = useRef(new Animated.Value(0)).current
-
+  
   useEffect(() => {
     Animated.parallel([
       Animated.timing(fadeAnim, {
@@ -42,6 +42,25 @@ const JournalHistory = () => {
     ]).start()
   }, [fadeAnim, scaleAnim])
 
+  const getDatesBetween = (startDate, endDate) => {
+    const dates = [];
+    let currentDate = new Date(startDate);
+    const end = new Date(endDate);
+
+
+    while (currentDate <= end) {
+        dates.push(currentDate.toISOString().split('T')[0]); // Push the date in YYYY-MM-DD format
+        currentDate.setDate(currentDate.getDate() + 1);
+    }
+
+    return dates;
+};
+
+  const startDate = '2024-10-1'
+  const endDate = '2024-10-2'
+
+  const dateRange = getDatesBetween(startDate, endDate);
+
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true)
@@ -51,7 +70,10 @@ const JournalHistory = () => {
           month: currentMonth,
         })
         setJournals(response)
-        setSelectedDate(new Date().toISOString().split('T')[0])
+         // Set the first date as selected
+         if (dateRange.length > 0) {
+          setSelectedDate(dateRange[0]); 
+        }
       } catch (error) {
         console.error(error)
       } finally {
@@ -101,55 +123,43 @@ const JournalHistory = () => {
     <View className="flex-1">
       <StatusBar barStyle="light-content" />
       <View className="min-h-[10vh] bg-mindful-brown-70 justify-center p-4 pt-10">
-        <BackButton buttonStyle="mb-4" tabName="(journal)" screenName={"journal-home"}/>
+        <BackButton buttonStyle="mb-4" />
         <Text className="font-urbanist-extra-bold text-3xl text-white">
-          My Journals 
+          My {currentYear} Journals
         </Text>
         <ScrollView
           horizontal={true}
           className="flex-row py-1 h-[8vh] space-x-4"
         >
-          {journals &&
-            Object.keys(journals).map((key) => {
-              const date = new Date(key)
-              const dayOfWeek = daysOfWeek[(date.getDay() + 6) % 7]
-              const dayOfMonth = date.getDate()
-              const isSelected = selectedDate === key
-              return (
-                <TouchableOpacity
-                  key={key}
-                  onPress={() => setSelectedDate(key)}
-                  className={`h-full w-[5vh] rounded-t-full rounded-b-full items-center justify-center ${isSelected ? 'bg-white' : 'bg-mindful-brown-30'}`}
-                >
-                  <Text
-                    className={`font-urbanist-extra-bold ${isSelected ? 'text-mindful-brown-80' : 'text-optimistic-gray-60'}`}
-                  >
-                    {dayOfWeek}
-                  </Text>
-                  <Text
-                    className={`font-urbanist-extra-bold text-lg ${isSelected ? 'text-mindful-brown-80' : 'text-optimistic-gray-60'}`}
-                  >
-                    {dayOfMonth}
-                  </Text>
-                </TouchableOpacity>
-              )
+          {dateRange.map((date) => {
+                const journalsForDate = journals[date] || []; // Get journals for the current date
+                const journalCount = journalsForDate.length;
+
+                const journalDate = new Date(date);
+                const dayOfWeek = daysOfWeek[(journalDate.getDay() + 6) % 7];
+                const dayOfMonth = journalDate.getDate();
+                const isSelected = selectedDate === date; // Check if the date is selected
+
+                return (
+                    <TouchableOpacity
+                        key={date} // Use date as a unique identifier
+                        onPress={() => setSelectedDate(date)} // Set the selected date
+                        className={`h-full w-[5vh] rounded-t-full rounded-b-full items-center justify-center ${isSelected ? 'bg-white' : 'bg-mindful-brown-30'}`}
+                    >
+                        <Text
+                            className={`font-urbanist-extra-bold ${isSelected ? 'text-mindful-brown-80' : 'text-optimistic-gray-60'}`}
+                        >
+                            {monthNames[currentMonth - 1].substring(0, 3)}
+                        </Text>
+                        <Text
+                            className={`font-urbanist-extra-bold text-lg ${isSelected ? 'text-mindful-brown-80' : 'text-optimistic-gray-60'}`}
+                        >
+                            {dayOfMonth} 
+                        </Text>
+                    </TouchableOpacity>
+                );
             })}
         </ScrollView>
-        <View className="flex-row justify-between items-center">
-          <TouchableOpacity onPress={handlePreviousMonth}>
-            <Text className="font-urbanist-semi-bold text-zen-yellow-30">
-              Previous
-            </Text>
-          </TouchableOpacity>
-          <Text className="font-urbanist-extra-bold text-white text-2xl">
-            {monthNames[currentMonth - 1]} {currentYear}
-          </Text>
-          <TouchableOpacity onPress={handleNextMonth}>
-            <Text className="font-urbanist-semi-bold text-zen-yellow-30">
-              Next
-            </Text>
-          </TouchableOpacity>
-        </View>
       </View>
       <ScrollView className="p-4 flex-1 py-5">
         <Text className="font-urbanist-extra-bold text-xl text-mindful-brown-80">
@@ -245,19 +255,19 @@ const JournalHistory = () => {
               })
             ) : (
               <View className="flex-1 justify-center items-center">
-                <View className=" bg-mindful-brown-80 max-w-[400px] p-3 mt-8 rounded-lg relative">
-                <Animated.Text 
-                  style={{
-                    opacity: fadeAnim,
-                    paddingTop: 1,
-                    color: 'white',
-                    fontSize: 16,
-                  fontFamily: 'Urbanist'
-                  }}
-                >
-                 No journals for the selected day.
-                </Animated.Text>
-              </View>
+              <View className=" bg-mindful-brown-80 max-w-[400px] p-3 mt-8 rounded-lg relative">
+              <Animated.Text 
+                style={{
+                  opacity: fadeAnim,
+                  paddingTop: 1,
+                  color: 'white',
+                  fontSize: 16,
+                fontFamily: 'Urbanist'
+                }}
+              >
+               No journals for the selected day.
+              </Animated.Text>
+            </View>
               <LottieView
                 source={require('../../assets/bearSleeping.json')}
                 autoPlay
@@ -265,6 +275,7 @@ const JournalHistory = () => {
                 style={{ width: 120, height: 160, marginBottom: 10 }} // Use style instead of className for LottieView
               />
             </View>
+              
             )}
           </View>
         </View>
@@ -273,4 +284,4 @@ const JournalHistory = () => {
   )
 }
 
-export default JournalHistory
+export default JournalHistoryFiltered
