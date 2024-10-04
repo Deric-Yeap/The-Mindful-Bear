@@ -61,12 +61,15 @@ const SignIn = () => {
           <Loading />
         </View>
       )}
-      <View className="min-h-[78vh] mt-[15vh] items-center mx-5">
+      <View className="min-h-[78vh] mt-[13vh] items-center mx-5">
       <Image 
                 source={logo} 
-                className="w-auto h-64" // Set height to a specific value (e.g., 24)
-                resizeMode="contain" // Maintains aspect ratio
+                className="w-auto h-64 mb-0" 
+                resizeMode="contain" 
             />
+              <Text className="font-urbanist-extra-bold text-3xl text-mindful-brown-80 pb-3">
+         The Mindful Bear
+        </Text>
         <Text className="font-urbanist-extra-bold text-3xl text-mindful-brown-80 pb-10">
           Sign In
         </Text>
