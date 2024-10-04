@@ -6,8 +6,8 @@ import CustomButton from '../components/customButton';
 import { useDispatch, useSelector } from 'react-redux';
 import { setUserDetails } from '../redux/slices/userSlice';
 
-// Import your PNG image
-const backgroundImage = require('../assets/loadingPage.png'); 
+
+const backgroundImage = require('../assets/landingPage.png'); 
 
 export default function App() {
   const dispatch = useDispatch();
