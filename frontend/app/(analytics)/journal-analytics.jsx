@@ -81,15 +81,39 @@ const JournalAnalytics = () => {
         backgroundColor={colors.mindfulBrown100}
       />
       <BrownPageTitlePortion title="Mindful Journal Analytics" />
-      <Toggle
-        selectionMode={selectedOption} // Set the selected option
-        roundCorner={true}
-        option1="Daily"
-        option2="Weekly"
-        option3="Monthly"
-        onSelectSwitch={onSelectSwitch} // Handle selection change
-        selectionColor={colors.mindfulBrown80}
-      />
+      <Text
+        style={{
+          color: colors['mindful-brown-80'],
+          fontWeight: 'bold',
+          fontSize: 18,
+          marginTop: 16,
+          marginLeft:12,
+        }}
+      >
+       Filter
+      </Text>
+      <Text
+        style={{
+          color: colors['mindful-brown-80'],
+          fontSize: 16,
+          marginBottom: 16,
+          marginLeft:12,
+        }}
+      >
+       Choose which date component
+      </Text>
+      <View style={{ alignItems: 'center', margin: 10 }}>
+        <Toggle
+          style={{alignItems: 'center'}}
+          selectionMode={selectedOption} 
+          roundCorner={true}
+          option1="Daily"
+          option2="Weekly"
+          option3="Monthly"
+          onSelectSwitch={onSelectSwitch} 
+          selectionColor={colors.mindfulBrown80}
+        />
+      </View>
       <Text
         style={{
           color: colors['mindful-brown-80'],
@@ -109,9 +133,11 @@ const JournalAnalytics = () => {
           marginLeft:12,
         }}
       >
-        Click on one of the bears to filter
+       Choose which sentiment
       </Text>
+      
       <View style={{ flexDirection: 'row', justifyContent: 'space-around', alignItems: 'center', marginVertical: 16 }}>
+        
       {/* Positive Bear */}
       <TouchableOpacity onPress={() => handlePress('Positive')} style={{ alignItems: 'center' }}>
         <Image 
