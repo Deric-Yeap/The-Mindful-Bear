@@ -165,6 +165,25 @@ class JournalEntriesByPeriodView(APIView):
     
             print(f"Exception occurred: {str(e)}")
             return Response({"error": "An unexpected error occurred."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        
+class JournalStreakView(APIView):
+    def get(self, request):
+        journals = Journal.objects.filter(user_id=request.user.user_id).order_by('-upload_date')
+        current_streak = 0
+        last_date = None
+
+        for journal in journals:
+            print(journal.upload_date, "user_id", journal.user_id.user_id)
+            if last_date is None:
+                last_date = journal.upload_date
+                current_streak = 1  
+            else:
+                if (last_date.date() - journal.upload_date.date()).days == 1:
+                    current_streak += 1 
+                elif (last_date.date() - journal.upload_date.date()).days > 1:
+                    break  
+                last_date = journal.upload_date  
+        return Response({'streak': current_streak}, status=status.HTTP_200_OK)
             
         
 class JournalEntryViewSet(viewsets.ViewSet):

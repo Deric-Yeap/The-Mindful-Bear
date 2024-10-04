@@ -2,6 +2,7 @@ import { View, Text, ScrollView, StatusBar } from 'react-native'
 import { useState } from 'react'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { setTokens } from '../../redux/slices/authSlice'
+import { setUserDetails } from '../../redux/slices/userSlice'
 import { useDispatch, useSelector } from 'react-redux'
 import { router } from 'expo-router'
 
@@ -21,16 +22,13 @@ const SignIn = () => {
   const dispatch = useDispatch()
   const auth = useSelector((state) => state.auth)
   const handleLogin = async () => {
+    setErrorMessage({})
     try {
       setIsLoading(true)
       const response = await login({
         email: form.email,
         password: form.password,
       })
-      // const response = await login({
-      //   email: process.env.ACCOUNT_USER,
-      //   password: process.env.ACCOUNT_PASSWORD,
-      // })
       setIsLoading(false)
       dispatch(
         setTokens({
@@ -39,6 +37,7 @@ const SignIn = () => {
         })
       )
       const user = await getMe()
+      dispatch(setUserDetails(user))
       if (user.is_staff) {
         router.push('/admin')
       } else {
@@ -46,7 +45,7 @@ const SignIn = () => {
       }
     } catch (error) {
       setIsLoading(false)
-      console.error(error.response.data.error_description)
+      setErrorMessage({ password: error.response.data.error_description })
     }
   }
 
@@ -69,8 +68,7 @@ const SignIn = () => {
         <FormField
           title="Email Address"
           iconName="email-outline"
-          // value={form.email}
-          value={process.env.ACCOUNT_USER}
+          value={form.email}
           handleChange={(value) => setForm({ ...form, email: value })}
           customStyles="w-full pb-4"
           keyboardType="email-address"
@@ -80,8 +78,7 @@ const SignIn = () => {
         <FormField
           title="Password"
           iconName="lock-outline"
-          value={process.env.ACCOUNT_PASSWORD}
-          // value={form.password}
+          value={form.password}
           handleChange={(value) => setForm({ ...form, password: value })}
           customStyles="w-full pb-6"
           errorMessage={errorMessage.password ? errorMessage.password : ''}

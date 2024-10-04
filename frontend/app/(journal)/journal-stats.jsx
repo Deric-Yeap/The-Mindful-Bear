@@ -13,7 +13,6 @@ import LottieView from 'lottie-react-native'
 
 const JournalStats = ({
   title = 'Journal Stats',
-  subtitle = 'Please Select a date range',
 }) => {
   const today = new Date()
   const [modalVisible, setModalVisible] = useState(false)
@@ -204,10 +203,17 @@ const JournalStats = ({
       }),
     ]).start()
   }, [fadeAnim, scaleAnim])
+  const handlePress = (startDate,endDateForAxios) => {
+    router.push({
+        pathname: '/(journal)/journal-history-filtered',
+        params: { start: startDate, end: endDateForAxios },
+    });
+};
+
 
   return (
     <SafeAreaView className="bg-optimistic-gray-10 h-full p-4 space-y-4">
-      <BackButton buttonStyle="mb-4" />
+      <BackButton buttonStyle="mb-4" tabName="(journal)" screenName={"journal-home"}/>
       <View className="flex-row items-center justify-between">
         <View>
         <View className="flex flex-row items-center">
@@ -230,7 +236,7 @@ const JournalStats = ({
               ? `Selected Range: ${startDate.toLocaleDateString('en-GB')} - ${endDate.toLocaleDateString('en-GB')}`
               : startDate
                 ? `Selected Date: ${startDate.toLocaleDateString('en-GB')}`
-                : subtitle}
+                :null}
           </Text>
         </View>
       </View>
@@ -274,8 +280,8 @@ const JournalStats = ({
       <View className="pb-20">
         {startDate && innerEmotionsArray.length === 0 ? ( // Check if emotions array is empty
           <>
-            <View className="flex-row my-3">
-              <View className="bg-mindful-brown-80 max-w-[250px] p-3 rounded-lg relative text">
+            <View className="flex-row justify-center items-center">
+              <View className="bg-mindful-brown-80 max-w-[550px] p-3 rounded-lg relative text">
                 <Animated.Text
                   style={{
                     opacity: fadeAnim,
@@ -293,12 +299,12 @@ const JournalStats = ({
               source={require('../../assets/bearSleeping.json')}
               autoPlay
               loop
-              className="w-30 h-40 mb-10"
+              className="w-30 h-40 mt-5"
             />
           </>
         ) : !startDate ? (
           <>
-            <View className="flex-row my-3">
+            <View className="flex-row justify-center items-center">
               <View className="bg-mindful-brown-80 max-w-[250px] p-3 rounded-lg relative">
                 <Animated.Text
                   style={{
@@ -308,7 +314,7 @@ const JournalStats = ({
                     fontSize: 16,
                   }}
                 >
-                  Hey! Please select a date.
+                  Hey! Please Select a date range
                 </Animated.Text>
               </View>
             </View>
@@ -317,9 +323,13 @@ const JournalStats = ({
               source={require('../../assets/bearSleeping.json')}
               autoPlay
               loop
-              className="w-30 h-40 mb-10"
+               className="w-30 h-40 mt-5"
             />
+
+            
           </>
+          
+
         ) : (
           <View className="relative mt-2">
          <BarChart
@@ -354,8 +364,8 @@ const JournalStats = ({
         )}
         {startDate && (
           <CustomButton
-            title="See All Journal Entries"
-            handlePress={() => router.push('/(journal)/journal-history')}
+            title="View Journal Entries"
+            handlePress={(handlePress)}
             buttonStyle="w-full mt-10"
           />
         )}
