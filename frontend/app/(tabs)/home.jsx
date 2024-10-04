@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react'
 import { View, Text, ScrollView, Pressable } from 'react-native'
-import { Link } from 'expo-router'
+import { useRouter } from 'expo-router'
 import { SafeAreaView } from 'react-native-safe-area-context'
+import { Link } from 'expo-router'
 import { Image } from 'expo-image'
-import { useDispatch, useSelector } from 'react-redux'
-import { setUserDetails } from '../../redux/slices/userSlice'
+import { useSelector } from 'react-redux'
 
 import TopBrownSearchBar from '../../components/topBrownSearchBar'
 import MetricCard from '../../components/metricCard'
@@ -14,24 +14,8 @@ import { getMe } from '../../api/user'
 import Loading from '../../components/loading'
 
 const Home = () => {
-  // const dispatch = useDispatch()
   const user = useSelector((state) => state.user)
   const [loading, setLoading] = useState(false)
-
-  // useEffect(() => {
-  //   const fetchData = async () => {
-  //     try {
-  //       const response = await getMe()
-  //       dispatch(setUserDetails(response))
-  //     } catch (error) {
-  //       console.error(error)
-  //     } finally {
-  //       setLoading(false)
-  //     }
-  //   }
-
-  //   fetchData()
-  // }, [])
 
   if (loading) {
     return (
@@ -46,7 +30,6 @@ const Home = () => {
       </SafeAreaView>
     )
   }
-
   return (
     <SafeAreaView className="flex-1 bg-optimistic-gray-10">
       <ScrollView>
