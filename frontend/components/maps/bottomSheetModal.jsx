@@ -1,18 +1,47 @@
-import React, { useState, useRef, useMemo } from 'react'
-import {
-  View,
-  Text,
-  TouchableOpacity,
-  Dimensions,
-  StyleSheet,
-} from 'react-native'
+import React, { useState, useRef, useMemo, useEffect } from 'react'
+import { View, Text, TouchableOpacity, StyleSheet } from 'react-native'
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons'
 import { colors } from '../../common/styles'
 import { Image } from 'expo-image'
 import CustomButton from '../customButton'
 import BottomSheet, { BottomSheetView } from '@gorhom/bottom-sheet'
+import AudioPlayer from './audioPlayer'
+import { useDispatch, useSelector } from 'react-redux'
+import {
+  setIsShownNav,
+  clearIsShownNav,
+} from '../../redux/slices/isShownNavSlice'
+import { createFavouriteLandmark, deleteFavouriteLandmark } from '../../api/landmark'
+const THRESHOLD = [3, 5, 10];
 
-const BottomSheetModal = ({ handleModalOpen, landmarkData }) => {
+const getUserCountColor = (userCount) => {
+  if (userCount < THRESHOLD[0]) {
+    return colors.serenityGreen50; // Green for less crowded
+  } else if (userCount < THRESHOLD[1]) {
+    return colors.empathyOrange50; // Orange for medium crowd
+  } else {
+    return colors.presentRed50; // Red for crowded
+  }
+};
+
+
+const BottomSheetModal = ({
+  handleModalOpen,
+  landmarkData,
+  openCompletedModal,
+  handleTravel,
+  hasArrived,
+  setHasArrived,
+  distanceTimeEst,
+}) => {
+  const landmarkDistancesMap = {}
+  distanceTimeEst.forEach((item) => {
+    const { landmark_id, exercise_id } = item
+    landmarkDistancesMap[landmark_id] = item
+  })
+  console.log(landmarkData)
+  const landmarkId = landmarkData.properties.landmark_id.toString()
+
   const landmarkIcons = [
     {
       icon: 'eye',
@@ -21,13 +50,22 @@ const BottomSheetModal = ({ handleModalOpen, landmarkData }) => {
     },
     {
       icon: 'account',
-      value: '4',
-      color: colors.optimisticGray30,
+      value: landmarkData ? landmarkData.properties.landmark_user_count : 0,
+      color: getUserCountColor(landmarkData.properties.landmark_user_count),
     },
     {
       icon: 'clock',
-      value: '4min',
+      value: landmarkDistancesMap[landmarkId]?.estimatedTime
+        ? `${landmarkDistancesMap[landmarkId]?.estimatedTime.toFixed(0)}s`
+        : '0min',
       color: '#4C72AB',
+    },
+    {
+      icon: 'map-marker-distance',
+      value: landmarkDistancesMap[landmarkId]?.distance
+        ? `${landmarkDistancesMap[landmarkId]?.distance.toFixed(0)}m`
+        : 'N/A',
+      color: colors.distanceColor || 'red',
     },
   ]
 
@@ -44,44 +82,77 @@ const BottomSheetModal = ({ handleModalOpen, landmarkData }) => {
     },
     {
       icon: 'clock',
-      value: '10min',
+      value: landmarkDistancesMap[landmarkId]?.estimatedTime
+        ? `${landmarkDistancesMap[landmarkId]?.estimatedTime.toFixed(0)}s`
+        : '0min',
       color: '#4C72AB',
+    },
+    {
+      icon: 'map-marker-distance',
+      value: landmarkDistancesMap[landmarkId]?.distance
+        ? `${landmarkDistancesMap[landmarkId]?.distance.toFixed(0)}m`
+        : 'N/A',
     },
   ]
 
+  const isShownNav = useSelector((state) => state.isShownNav).isShownNav
+  const data = landmarkData?.properties
   const bottomSheetRef = useRef(null)
   const snapPoints = useMemo(() => ['60%', '100%'], [])
   const [currentSnapIndex, setCurrentSnapIndex] = useState(0)
   const [isFavorite, setIsFavorite] = useState(false)
   const [isExercise, setIsExercise] = useState(false)
+  const dispatch = useDispatch()
 
   const handleClose = () => {
+    if (!isShownNav) {
+      dispatch(clearIsShownNav())
+    }
     setIsExercise(false)
     handleModalOpen(false)
   }
   const handleSheetChange = (index) => {
-    setCurrentSnapIndex(index)
-    if (index === 0) {
-      setIsExercise(false)
+    if (index >= 0 && index < snapPoints.length) {
+      setCurrentSnapIndex(index)
+    } else {
+      setCurrentSnapIndex(0)
     }
   }
-  const toggleHeartColor = () => {
-    setIsFavorite(!isFavorite)
-  }
-  const handleExerciseButton = () => {
+
+  const toggleHeartColor = async () => {
+    try {
+      if (isFavorite) {        
+        deleteFavouriteLandmark(landmarkId);
+      } else {        
+        createFavouriteLandmark(landmarkId);
+      }
+      setIsFavorite(!isFavorite); 
+    } catch (error) {
+      console.error('Error while toggling favourite:', error);
+    }
+  };
+  
+
+  const handleViewExerciseButton = () => {
     if (isExercise) {
       setIsExercise(false)
     } else {
       setIsExercise(true)
     }
   }
+  const handleStartExerciseButton = () => {}
 
-  const data = landmarkData.properties
+  useEffect(() => {
+    if (hasArrived && bottomSheetRef.current) {
+      setIsExercise(true)
+      handleSheetChange(1)
+    }
+  }, [hasArrived])
 
   return (
     <BottomSheet
       ref={bottomSheetRef}
-      index={0}
+      index={currentSnapIndex}
       snapPoints={snapPoints}
       onClose={handleClose}
       enablePanDownToClose={true}
@@ -92,7 +163,7 @@ const BottomSheetModal = ({ handleModalOpen, landmarkData }) => {
       <BottomSheetView style={styles.container}>
         <View className="flex-row items-center" id="landmark-overview-frame">
           {isExercise && (
-            <TouchableOpacity onPress={handleExerciseButton}>
+            <TouchableOpacity onPress={handleViewExerciseButton}>
               <View className="bg-mindful-brown-70 w-10 h-10 mr-3 justify-center items-center rounded-full">
                 <MaterialCommunityIcons
                   name="arrow-left"
@@ -144,13 +215,27 @@ const BottomSheetModal = ({ handleModalOpen, landmarkData }) => {
             </View>
           ))}
         </View>
-        {/* no exercise image/video */}
-        <Image
-          id="landmark-image-frame"
-          source={data.landmark_image_url}
-          className={`w-full h-[32%] rounded-lg mt-2`}
-          contentFit="cover"
-        />
+        {isExercise ? (
+          <View className="relative w-full h-48 justify-center items-center">
+            <AudioPlayer
+              audioUri={data.exercise_audio_url}
+              imageUrl={data.landmark_image_url}
+              toPlay={hasArrived}
+              setIsExercise={setIsExercise}
+              handleSheetChange={handleSheetChange}
+              setHasArrived={setHasArrived}
+              handleClose={handleClose}
+              openCompletedModal={openCompletedModal}
+            />
+          </View>
+        ) : (
+          <Image
+            id="landmark-image-frame"
+            source={{ uri: data.landmark_image_url }}
+            className={`w-full h-[32%] rounded-lg mt-2`}
+            contentFit="cover"
+          />
+        )}
 
         {currentSnapIndex === 1 && (
           <View
@@ -174,22 +259,22 @@ const BottomSheetModal = ({ handleModalOpen, landmarkData }) => {
           {currentSnapIndex === 0 && (
             <CustomButton
               title={'Travel'}
-              handlePress={() => console.log('Travel')}
+              handlePress={handleTravel}
               buttonStyle={`w-full z-10 bg-[#24211E] rounded-full items-center`}
               textStyle="text-white mr-0"
             />
           )}
-          {currentSnapIndex === 1 && isExercise ? (
+          {currentSnapIndex === 1 && !hasArrived && isExercise ? (
             <CustomButton
               title={'Start Exercise'}
-              handlePress={() => console.log('Start Exercise')}
+              handlePress={handleTravel}
               buttonStyle={`w-full z-10 bg-[#24211E] rounded-full items-center`}
               textStyle="text-white mr-0"
             />
-          ) : currentSnapIndex === 1 && !isExercise ? (
+          ) : currentSnapIndex === 1 && !hasArrived && !isExercise ? (
             <CustomButton
               title={'View Exercise'}
-              handlePress={handleExerciseButton}
+              handlePress={handleViewExerciseButton}
               buttonStyle={`w-full z-10 bg-[#24211E] rounded-full items-center`}
               textStyle="text-white mr-0"
             />

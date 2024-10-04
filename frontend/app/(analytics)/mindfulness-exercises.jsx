@@ -7,40 +7,7 @@ import { colors } from '../../common/styles'
 import { listEmotion } from '../../api/emotion'
 import { LineChart } from 'react-native-gifted-charts'
 
-const lineData = [
-  { value: 0, label: '23/9' },
-  { value: 10, label: '24/9' },
-  { value: 8, label: '25/9' },
-  { value: 58, label: '26/9' },
-  { value: 56, label: '27/9' },
-  { value: 78, label: '28/9' },
-  { value: 74, label: '29/9' },
-  { value: 98, label: '30/9' },
-  { value: 0, label: '23/9' },
-  { value: 10, label: '24/9' },
-  { value: 8, label: '25/9' },
-  { value: 58, label: '26/9' },
-  { value: 56, label: '27/9' },
-  { value: 78, label: '28/9' },
-  { value: 74, label: '29/9' },
-  { value: 98, label: '30/9' },
-  { value: 0, label: '23/9' },
-  { value: 10, label: '24/9' },
-  { value: 8, label: '25/9' },
-  { value: 58, label: '26/9' },
-  { value: 56, label: '27/9' },
-  { value: 78, label: '28/9' },
-  { value: 74, label: '29/9' },
-  { value: 98, label: '30/9' },
-  { value: 0, label: '23/9' },
-  { value: 10, label: '24/9' },
-  { value: 8, label: '25/9' },
-  { value: 58, label: '26/9' },
-  { value: 56, label: '27/9' },
-  { value: 78, label: '28/9' },
-  { value: 74, label: '29/9' },
-  { value: 98, label: '30/9' },
-]
+const lineData = []
 
 const MindfulnessExercises = () => {
   const [emotions, setEmotions] = useState([])

@@ -6,18 +6,22 @@ export const getLandmarks = () => {
 }
 
 export const createLandmark = async (landmarkData) => {
-    const formData = new FormData();
-    formData.append('landmark_name', landmarkData.landmark_name);
-    formData.append('landmark_description', landmarkData.landmark_description);
-    formData.append('landmark_image_url', { 
-        uri: landmarkData.image_file.uri,
-        name: landmarkData.image_file.fileName,
-        type: landmarkData.image_file.type,
+    const formData = new FormData();    
+    Object.entries(landmarkData).forEach(([key, value]) => {
+        if (value !== undefined && value !== null) {            
+            if (key === 'image_file' && value.uri) {
+                formData.append('landmark_image_url', {
+                    uri: value.uri,
+                    name: value.fileName,
+                    type: value.type,
+                });
+            } else if (key === 'x_coordinates' || key === 'y_coordinates') {                
+                formData.append(key, parseFloat(value));
+            } else {                
+                formData.append(key, value);
+            }
+        }
     });
-    formData.append('exercise', landmarkData.exercise);
-    formData.append('x_coordinates', parseFloat(landmarkData.x_coordinates));
-    formData.append('y_coordinates', parseFloat(landmarkData.y_coordinates));
-
     try {
         const response = await axiosInstance.post('landmark/create', formData, {
             headers: {
@@ -31,18 +35,25 @@ export const createLandmark = async (landmarkData) => {
     }
 };
 
+
 export const updateLandmark = async (landmarkId, landmarkData) => {
     const formData = new FormData();
-    formData.append('landmark_name', landmarkData.landmark_name);
-    formData.append('landmark_description', landmarkData.landmark_description);
-    formData.append('landmark_image_url', {
-        uri: landmarkData.image_file.uri,
-        name: landmarkData.image_file.fileName,
-        type: landmarkData.image_file.type,
-    }); 
-    formData.append('exercise', landmarkData.exercise);
-    formData.append('x_coordinates', parseFloat(landmarkData.x_coordinates));
-    formData.append('y_coordinates', parseFloat(landmarkData.y_coordinates));
+    
+    Object.entries(landmarkData).forEach(([key, value]) => {
+        if (value !== undefined && value !== null) {            
+            if (key === 'image_file' && value.uri) {
+                formData.append('landmark_image_url', {
+                    uri: value.uri,
+                    name: value.fileName,
+                    type: value.type,
+                });
+            } else if (key === 'x_coordinates' || key === 'y_coordinates') {                
+                formData.append(key, parseFloat(value));
+            } else {                
+                formData.append(key, value);
+            }
+        }
+    });
 
     try {
         const response = await axiosInstance.put(`landmark/update/${landmarkId}`, formData, {
@@ -58,6 +69,19 @@ export const updateLandmark = async (landmarkId, landmarkData) => {
 };
 
 
+
 export const deleteLandmark = async (id) => {
     return axiosInstance.delete(`landmark/delete/${id}`);             
 };
+
+export const createFavouriteLandmark = async (id) => {
+    return axiosInstance.post(`favourite/create/${id}/`)
+}
+
+export const deleteFavouriteLandmark = async (id) => {
+    return axiosInstance.delete(`favourite/delete/${id}/`)
+}
+
+export const getFavouriteLandmarks = async () => {
+    return axiosInstance.get('favourite/list')
+}

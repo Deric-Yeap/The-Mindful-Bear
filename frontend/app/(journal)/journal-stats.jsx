@@ -1,5 +1,5 @@
-import { View, Text, TouchableOpacity, Modal } from 'react-native'
-import React, { useEffect, useState } from 'react'
+import { View, Text, TouchableOpacity, Modal, Animated } from 'react-native'
+import React, { useEffect, useState, useRef } from 'react'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { BarChart } from 'react-native-gifted-charts'
 import { colors } from '../../common/styles'
@@ -21,6 +21,7 @@ const JournalStats = ({
   const [endDate, setEndDate] = useState(null)
   const [endDateForAxios, setEndDateForAxios] = useState(null)
   const [journals, setJournals] = useState([])
+  const [loading, setLoading] = useState(true)
 
   const handleOnPress = () => {
     setModalVisible(true)
@@ -109,6 +110,7 @@ const JournalStats = ({
 
   useEffect(() => {
     const fetchData = async () => {
+      setLoading(true)
       if (startDate) {
         const end = endDateForAxios || startDate // Use startDate if endDateForAxios is not set
         try {
@@ -120,6 +122,8 @@ const JournalStats = ({
           console.log(response)
         } catch (error) {
           console.error(error)
+        } finally {
+          setLoading(false)
         }
       }
     }
@@ -136,9 +140,6 @@ const JournalStats = ({
       )
   )
 
-  console.log('hi', journals)
-
-  console.log('inner', innerEmotionsArray)
   // Function to count occurrences of each emotion
   const countEmotions = (emotions) => {
     return emotions.reduce((acc, emotion) => {
@@ -151,28 +152,28 @@ const JournalStats = ({
   const createBarData = (emotionCounts) => {
     return [
       {
-        label: 'Happy',
+        primaryEmotion: 'Happy',
         value: emotionCounts.Happy || 0,
         frontColor: colors.serenityGreen50,
       },
       {
-        label: 'Angry',
+        primaryEmotion: 'Angry',
         value: emotionCounts.Angry || 0,
         frontColor: colors.presentRed40,
       },
       {
-        label: 'Bad',
+        primaryEmotion: 'Bad',
         value: emotionCounts.Bad || 0,
         frontColor: colors.mindfulBrown60,
       },
       {
-        label: 'Surprised',
+        primaryEmotion: 'Surprised',
         value: emotionCounts.Surprised || 0,
         frontColor: colors.empathyOrange40,
       },
-      { label: 'Sad', value: emotionCounts.Sad || 0, frontColor: '#507DBC' },
+      { primaryEmotion: 'Sad', value: emotionCounts.Sad || 0, frontColor: '#507DBC' },
       {
-        label: 'Disgusted',
+        primaryEmotion: 'Disgusted',
         value: emotionCounts.Disgusted || 0,
         frontColor: colors.kindPurple40,
       },
@@ -186,15 +187,44 @@ const JournalStats = ({
   const maxValue = Math.max(...barData.map((item) => item.value))
   const noOfSections = 4
   const stepValue = Math.ceil(maxValue / noOfSections)
+  const fadeAnim = useRef(new Animated.Value(0)).current
+  const scaleAnim = useRef(new Animated.Value(0)).current
+
+  useEffect(() => {
+    Animated.parallel([
+      Animated.timing(fadeAnim, {
+        toValue: 1,
+        duration: 1000,
+        useNativeDriver: true, // Use native driver for better performance
+      }),
+      Animated.timing(scaleAnim, {
+        toValue: 1,
+        duration: 1000,
+        useNativeDriver: true,
+      }),
+    ]).start()
+  }, [fadeAnim, scaleAnim])
 
   return (
     <SafeAreaView className="bg-optimistic-gray-10 h-full p-4 space-y-4">
       <BackButton buttonStyle="mb-4" />
       <View className="flex-row items-center justify-between">
         <View>
-          <Text className="font-urbanist-extra-bold text-mindful-brown-80 text-4xl mb-1">
-            {title}
-          </Text>
+        <View className="flex flex-row items-center">
+  <Text className="font-urbanist-extra-bold text-mindful-brown-80 text-4xl mb-1">
+    {title}
+  </Text>
+  <TouchableOpacity
+    onPress={handleOnPress}
+    className="w-16 h-16 rounded-full bg-empathy-orange-40 flex items-center justify-center -mt-4 ml-4" // Added ml-4 for spacing
+  >
+    <MaterialCommunityIcons
+      name="calendar-month-outline"
+      size={30}
+      color="white"
+    />
+  </TouchableOpacity>
+</View>
           <Text className="font-urbanist-light text-mindful-brown-80 text-xl">
             {startDate && endDate
               ? `Selected Range: ${startDate.toLocaleDateString('en-GB')} - ${endDate.toLocaleDateString('en-GB')}`
@@ -203,16 +233,6 @@ const JournalStats = ({
                 : subtitle}
           </Text>
         </View>
-        <TouchableOpacity
-          onPress={handleOnPress}
-          className="w-16 h-16 rounded-full bg-empathy-orange-40 flex items-center justify-center -mt-4"
-        >
-          <MaterialCommunityIcons
-            name="calendar-month-outline"
-            size={30}
-            color="white"
-          />
-        </TouchableOpacity>
       </View>
 
       <Modal
@@ -223,7 +243,7 @@ const JournalStats = ({
           setModalVisible(false)
           setStartDate(null)
           setEndDate(null)
-          setEndDateForAxios(null) // Reset dates when closing modal
+          setEndDateForAxios(null) 
         }}
       >
         <View className="flex-1 justify-center items-center bg-black bg-opacity-50">
@@ -256,9 +276,16 @@ const JournalStats = ({
           <>
             <View className="flex-row my-3">
               <View className="bg-mindful-brown-80 max-w-[250px] p-3 rounded-lg relative text">
-                <Text className="pt-1 text-white">
+                <Animated.Text
+                  style={{
+                    opacity: fadeAnim,
+                    paddingTop: 5,
+                    color: 'white',
+                    fontSize: 16,
+                  }}
+                >
                   Hey! There are no journal entries for this period.
-                </Text>
+                </Animated.Text>
               </View>
             </View>
 
@@ -273,9 +300,16 @@ const JournalStats = ({
           <>
             <View className="flex-row my-3">
               <View className="bg-mindful-brown-80 max-w-[250px] p-3 rounded-lg relative">
-                <Text className="pt-1 text-white">
+                <Animated.Text
+                  style={{
+                    opacity: fadeAnim,
+                    paddingTop: 5,
+                    color: 'white',
+                    fontSize: 16,
+                  }}
+                >
                   Hey! Please select a date.
-                </Text>
+                </Animated.Text>
               </View>
             </View>
 
@@ -287,29 +321,44 @@ const JournalStats = ({
             />
           </>
         ) : (
-          <BarChart
-            height={400}
-            barWidth={30}
-            barBorderRadius={20}
-            frontColor="lightgray"
-            data={barData}
-            yAxisThickness={0}
-            xAxisThickness={0}
-            borderSkipped={false}
-            isAnimated
-            yAxisMaxValue={maxValue}
-            stepValue={stepValue}
-            noOfSections={noOfSections}
-            yAxisLabelTexts={Array.from({ length: noOfSections + 1 }, (_, i) =>
-              (i * stepValue).toString()
-            )}
+          <View className="relative mt-2">
+         <BarChart
+        data={barData}
+        height={400}
+        barWidth={30}
+        barBorderRadius={20}
+        frontColor="lightgray"
+        yAxisThickness={0} 
+        xAxisThickness={0}
+        isAnimated
+        yAxisMaxValue={maxValue}
+        stepValue={stepValue}
+        noOfSections={noOfSections}
+        yAxisLabelTexts={Array.from({ length: noOfSections + 1 }, (_, i) =>
+          (i * stepValue).toString()
+        )}
+        xAxisLabelTexts={[]} 
+        scrollAnimation = {true}
+      />
+          <View className="flex flex-row justify-between ml-3 mr-11 ">
+        {barData.map((item, index) => (
+          <Text
+            key={index}
+            className="text-center text-sm -mx-1 transform rotate-[-40deg] w-16"
+          >
+            {item.primaryEmotion} 
+          </Text>
+        ))}
+      </View>
+    </View>
+        )}
+        {startDate && (
+          <CustomButton
+            title="See All Journal Entries"
+            handlePress={() => router.push('/(journal)/journal-history')}
+            buttonStyle="w-full mt-10"
           />
         )}
-        <CustomButton
-          title="See All Journal Entries"
-          handlePress={() => router.push('/(journal)/journal-history')}
-          buttonStyle="w-full mt-10"
-        />
       </View>
     </SafeAreaView>
   )

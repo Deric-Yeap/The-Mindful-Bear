@@ -22,7 +22,7 @@ const ExerciseCreator = () => {
   if (exercise) {
     try {
       exercise = JSON.parse(exercise);
-      console.log(exercise)
+      console.log(exercise);
     } catch (error) {
       console.error('Error parsing exercise:', error);
       exercise = null; 
@@ -49,57 +49,68 @@ const ExerciseCreator = () => {
     const fetchLandmarks = async () => {
       try {
         const data = await getLandmarks();
-        const formattedData = data.map(item => ({ key: item.landmark_id, value: item.landmark_name, exercise_id: item.exercise.exercise_id })); 
-        console.log('all landmarks list',formattedData)
+        const formattedData = data.map(item => ({
+          key: item.landmark_id,
+          value: item.landmark_name,
+          exercise_id: item.exercise?.exercise_id,
+        }));
 
-        // Filter out landmarks that are already assigned to another exercise
-        const availableLandmarks = formattedData.filter(item => !item.exercise_id || (exercise && exercise.landmarks.includes(item.key)));
+        console.log('All landmarks list:', formattedData);
+
+        // Filter out landmarks that are already assigned to another exercise unless they belong to the current exercise
+        const availableLandmarks = formattedData.filter(
+          item => !item.exercise_id || (exercise && exercise.landmarks.includes(item.key))
+        );
+
         setLandmarkList(availableLandmarks);
-        console.log("available landmarks",availableLandmarks)
         setAllLandmarksAssigned(availableLandmarks.length === 0);
-        console.log("are all landmarks assigned?",allLandmarksAssigned);
-  
+
         if (exercise?.landmarks) {
-          setSelectedLandmarks(exercise.landmarks
-            .map(key => {
-              const foundLandmark = availableLandmarks.find(item => item.key === key);
-              return foundLandmark ? foundLandmark.value : null;
-            })
-            .filter(value => value !== null)
-          )
-          console.log(selectedLandmarks);
+          const selected = availableLandmarks
+            .filter(item => exercise.landmarks.includes(item.key))
+            .map(item => item.value); 
+
+          setSelectedLandmarks(selected);
+          console.log("Selected landmarks after setting:", selected);
         }
       } catch (error) {
         console.error(error);
       }
     };
-  
-    fetchLandmarks();    
+
+    fetchLandmarks();
   }, []);
 
   const handleSubmit = async () => {
+    console.log("SUBMIT");
     if (!exerciseName || !description || !audioFile?.uri) {
       Alert.alert('Please fill in all fields and upload an audio file.');
       return;
     }
 
+    // Map selectedLandmarks (names) back to keys for API submission
+    const landmarkKeys = selectedLandmarks.map(name => {
+      const landmark = landmarkList.find(item => item.value === name);
+      return landmark ? landmark.key : null;
+    }).filter(key => key !== null);
+
     const exerciseData = {
       exercise_name: exerciseName,
       description: description,
       audio_file: audioFile,
-      landmarks: selectedLandmarks.map(item => item.key),
-    };    
-    
+      landmarks: landmarkKeys,
+    };
+
     try {
       if (exercise) {
-        await updateExercise(exercise.exercise_id, exerciseData); 
-        setModalMessage("updated")
-        setShowSuccess(true); 
+        await updateExercise(exercise.exercise_id, exerciseData);
+        setModalMessage("updated");
+        setShowSuccess(true);
       } else {
-        await createExercise(exerciseData); 
-        setModalMessage("created")
-        setShowSuccess(true); 
-        resetForm(); 
+        await createExercise(exerciseData);
+        setModalMessage("created");
+        setShowSuccess(true);
+        resetForm();
       }
     } catch (error) {
       console.error(error);
@@ -109,17 +120,16 @@ const ExerciseCreator = () => {
 
   const handleDelete = async () => {
     try {
-      await deleteExercise(exercise.exercise_id)
-      setModalMessage("deleted")
-      setShowSuccess(true); 
-    }
-    catch (error) {
+      await deleteExercise(exercise.exercise_id);
+      setModalMessage("deleted");
+      setShowSuccess(true);
+    } catch (error) {
       console.error("Error deleting exercise:", error);
     }
-  }
+  };
 
   const resetForm = () => {
-    setExerciseName('');    
+    setExerciseName('');
     setDescription('');
     setAudioFile({});
     setSelectedLandmarks([]);
@@ -132,20 +142,20 @@ const ExerciseCreator = () => {
   };
 
   const handleAudioUpload = async () => {
-    try {    
+    try {
       const result = await DocumentPicker.getDocumentAsync({
         type: 'audio/*',
         copyToCacheDirectory: true,
-      });      
+      });
 
       if (!result.canceled && result.assets && result.assets.length > 0) {
         const selectedFile = result.assets[0];
-  
+
         setAudioFile({
-          uri: selectedFile.uri,    
+          uri: selectedFile.uri,
           name: selectedFile.name,
           type: selectedFile.mimeType,
-        });        
+        });
       } else {
         console.error("Server returned an error:", result.error);
       }
@@ -155,16 +165,17 @@ const ExerciseCreator = () => {
   };
 
   const handleConfirm = () => {
-    setShowSuccess(false);   
-    if (exercise || modalMessage === "deleted") {    
-      router.push('/exercisemanagement');  
-    }    
+    setShowSuccess(false);
+    if (exercise || modalMessage === "deleted") {
+      router.push('/exercisemanagement');
+    }
   };
 
   const handleLandmarkSelect = (newSelectedItems) => {
+    // Set selected items as an array of values (names) to match dropdown functionality
     setSelectedLandmarks(newSelectedItems);
   };
-
+  
   return (
     <SafeAreaView className="flex-1 bg-optimistic-gray-10">
       <StatusBarComponent barStyle="light-content" backgroundColor="#251404" />
@@ -218,7 +229,7 @@ const ExerciseCreator = () => {
             handlePress={handleDelete}
             title="Delete Exercise"
           />
-        </View>     
+        </View>         
       </ScrollView>
       {showSuccess && (
         <ConfirmModal

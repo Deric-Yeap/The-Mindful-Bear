@@ -13,9 +13,10 @@ export const getGeoJson = (landmarks) => {
       landmark_name: marker.landmark_name,
       landmark_image_url: marker.image_file_url,
       landmark_description: marker.landmark_description,
+      landmark_user_count: marker.user_count,
       exercise_id: marker.exercise.exercise_id,
       exercise_name: marker.exercise.exercise_name,
-      exercise_audio_url: marker.exercise.audio_url,
+      exercise_audio_url: marker.exercise.file_url,
       exercise_description: marker.exercise.description,
     },
   }))

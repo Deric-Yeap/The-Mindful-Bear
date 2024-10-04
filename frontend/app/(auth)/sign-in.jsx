@@ -26,22 +26,24 @@ const SignIn = () => {
       const response = await login({
         email: form.email,
         password: form.password,
-      })    
-      setIsLoading(false)  
+      })
+      // const response = await login({
+      //   email: process.env.ACCOUNT_USER,
+      //   password: process.env.ACCOUNT_PASSWORD,
+      // })
+      setIsLoading(false)
       dispatch(
         setTokens({
           token: response.access,
           refreshToken: response.refresh,
         })
       )
-      const user = await getMe()      
-      if (user.is_staff){                
+      const user = await getMe()
+      if (user.is_staff) {
         router.push('/admin')
-      }
-      else{
+      } else {
         router.push('/home')
       }
-      
     } catch (error) {
       setIsLoading(false)
       console.error(error.response.data.error_description)
@@ -67,7 +69,8 @@ const SignIn = () => {
         <FormField
           title="Email Address"
           iconName="email-outline"
-          value={form.email}
+          // value={form.email}
+          value={process.env.ACCOUNT_USER}
           handleChange={(value) => setForm({ ...form, email: value })}
           customStyles="w-full pb-4"
           keyboardType="email-address"
@@ -77,7 +80,8 @@ const SignIn = () => {
         <FormField
           title="Password"
           iconName="lock-outline"
-          value={form.password}
+          value={process.env.ACCOUNT_PASSWORD}
+          // value={form.password}
           handleChange={(value) => setForm({ ...form, password: value })}
           customStyles="w-full pb-6"
           errorMessage={errorMessage.password ? errorMessage.password : ''}

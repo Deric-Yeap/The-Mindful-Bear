@@ -1,7 +1,7 @@
 from rest_framework import generics, status
 from rest_framework.response import Response
 from .models import Session
-from .serializer import SessionSerializer, SessionUpdateSerializer, SessionByDateSerializer
+from .serializer import SessionSerializer, SessionUpdateSerializer, SessionSplitSerializer
 
 class SessionCreate(generics.CreateAPIView):
     # Create a new session
@@ -31,19 +31,43 @@ class SessionDetail(generics.RetrieveAPIView):
         except Exception as e:
             return Response({'detail': str(e)}, status=status.HTTP_400_BAD_REQUEST)
     
-class SessionByDate(generics.ListAPIView):
-    serializer_class = SessionByDateSerializer
+# class SessionByDate(generics.ListAPIView):
+#     queryset = Session.objects.all()
 
+#     serializer_class = SessionByDateSerializer
+
+
+#     def get(self, request, *args, **kwargs):
+#         try:
+#             serializer = self.get_serializer(context={'request': request})
+#             data = serializer.to_representation(None)
+#             print("data",data)
+#             return Response(data, status=status.HTTP_200_OK)
+#         except Session.DoesNotExist:
+#             return Response({'detail': 'Session not found'}, status=status.HTTP_404_NOT_FOUND)
+#         except Exception as e:
+#             return Response({'detail': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        
+
+
+class SessionSplitView(generics.ListAPIView):
+    queryset = Session.objects.all()
+    serializer_class = SessionSplitSerializer
 
     def get(self, request, *args, **kwargs):
         try:
-            serializer = self.get_serializer()
+            # Initialize the serializer with context including the request
+            serializer = self.get_serializer(context={'request': request})
+
+            # Get the serialized data
             data = serializer.to_representation(None)
-            return Response(serializer.data, status=status.HTTP_200_OK)
+            
+            return Response(data, status=status.HTTP_200_OK)
         except Session.DoesNotExist:
             return Response({'detail': 'Session not found'}, status=status.HTTP_404_NOT_FOUND)
         except Exception as e:
             return Response({'detail': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
     
 
 class UpdateSessionDetail(generics.RetrieveUpdateAPIView):

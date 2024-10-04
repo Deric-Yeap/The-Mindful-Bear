@@ -14,6 +14,7 @@ class Landmark(models.Model):
     x_coordinates = models.DecimalField(max_digits=9, decimal_places=6,default=0)
     y_coordinates = models.DecimalField(max_digits=9, decimal_places=6, default=0)
     exercise = models.ForeignKey(Exercise, on_delete=models.SET_NULL,default=None, null=True,related_name="landmarks")
+    user_count = models.IntegerField(default=0)
 
     def __str__(self) -> str:
         return str(self.landmark_id)
