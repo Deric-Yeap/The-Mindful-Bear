@@ -7,7 +7,7 @@ const CustomSwitch = ({
   roundCorner,
   option1,
   option2,
-  option3, // Add option3 to props
+  option3, 
   onSelectSwitch,
   selectionColor
 }) => {
@@ -20,11 +20,11 @@ const CustomSwitch = ({
   };
 
   return (
-    <View>
+    <View style={{ width: '100%' }}> 
       <View
         style={{
           height: 44,
-          width: 215,
+          width: '100%', // Set width to full
           backgroundColor: 'white',
           borderRadius: getRoundCorner ? 25 : 0,
           borderWidth: 1,
@@ -68,7 +68,7 @@ const CustomSwitch = ({
           </Text>
         </TouchableOpacity>
 
-        {/* Conditionally render the third option if it exists */}
+   
         {option3 && (
           <TouchableOpacity
             activeOpacity={1}
