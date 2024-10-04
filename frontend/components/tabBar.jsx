@@ -11,7 +11,7 @@ const TabBar = ({ state, descriptors, navigation }) => {
     '(map)': (props) => <MaterialCommunityIcons name="map" {...props} />,
     stats: (props) => <MaterialCommunityIcons name="poll" {...props} />,
     settings: (props) => <MaterialCommunityIcons name="cog" {...props} />,
-    admin: (props) => <MaterialCommunityIcons name="account" {...props} />,
+    '(admin)': (props) => <MaterialCommunityIcons name="account" {...props} />,
   }
   //add into this list the routes that you do not want in the navbar
   const [notIncludedRoutes, setNotIncludedRoutes] = useState([

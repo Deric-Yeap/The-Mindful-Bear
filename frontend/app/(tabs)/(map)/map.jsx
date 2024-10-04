@@ -67,6 +67,8 @@ const Map = () => {
   const [isRedirectedForms, setIsRedirectedForms] = useState(
     useLocalSearchParams()
   )
+  const [isPlayAudio, setIsPlayAudio] = useState(false)
+  const [isArriveModalOpen, setIsArriveModalOpen] = useState(false)
 
   const dispatch = useDispatch()
 
@@ -154,17 +156,12 @@ const Map = () => {
               }
               setIsTraveling(false)
               setSelectedLandmark(selectedLandmark)
+              setIsArriveModalOpen(true)
 
               setIsBottomSheetOpen(true)
               if (isShownNav) {
                 dispatch(setIsShownNav())
               }
-
-              Alert.alert(
-                'Arrival Notification',
-                'You have arrived at the landmark!',
-                [{ text: 'OK' }]
-              )
             }
           }
           setPrevLocation(location)
@@ -186,7 +183,7 @@ const Map = () => {
           { units: 'meters' }
         )
 
-        const estimatedTime = distanceToLandmark / 1.4
+        const estimatedTime = Math.round(distanceToLandmark / 1.4 / 60)
 
         return {
           landmark_id: landmark.properties.landmark_id,
@@ -262,6 +259,12 @@ const Map = () => {
       if (isShownNav) {
         dispatch(setIsShownNav())
       }
+    }
+  }
+  const handleIsArriveModalOpen = () => {
+    if (isArriveModalOpen) {
+      setIsArriveModalOpen(false)
+      setIsPlayAudio(true)
     }
   }
 
@@ -387,6 +390,11 @@ const Map = () => {
   const geoJSON = getGeoJson(landmarksData)
   return (
     <SafeAreaView className="h-full">
+      <StatusBarComponent
+        barStyle="light-content"
+        backgroundColor="transparent"
+        translucent={true}
+      />
       <View className="flex-1 relative">
         {loading ? (
           <View className="flex-1 justify-center items-center">
@@ -504,8 +512,19 @@ const Map = () => {
             openCompletedModal={setIsCompletedModalOpen}
             handleTravel={fetchDirections}
             hasArrived={hasArrived}
+            isPlayAudio={isPlayAudio}
             setHasArrived={setHasArrived}
             distanceTimeEst={landmarkDistances}
+          />
+        )}
+        {hasArrived && isArriveModalOpen && (
+          <ConfirmModal
+            isConfirmButton={true}
+            isCancelButton={false}
+            imageSource={confirmModal}
+            confirmButtonTitle={'Start!'}
+            title={'You have arrived at the landmark!'}
+            handleConfirm={handleIsArriveModalOpen}
           />
         )}
       </View>

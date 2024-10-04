@@ -15,6 +15,7 @@ import {
   createFavouriteLandmark,
   deleteFavouriteLandmark,
 } from '../../api/landmark'
+import StatusBarComponent from '../darkThemStatusBar'
 
 const THRESHOLD = [3, 5, 10]
 
@@ -35,6 +36,7 @@ const BottomSheetModal = ({
   handleTravel,
   hasArrived,
   setHasArrived,
+  isPlayAudio,
   distanceTimeEst,
 }) => {
   const landmarkDistancesMap = {}
@@ -58,7 +60,7 @@ const BottomSheetModal = ({
     {
       icon: 'clock',
       value: landmarkDistancesMap[landmarkId]?.estimatedTime
-        ? `${landmarkDistancesMap[landmarkId]?.estimatedTime.toFixed(0)}s`
+        ? `${landmarkDistancesMap[landmarkId]?.estimatedTime.toFixed(0)}min`
         : '0min',
       color: '#4C72AB',
     },
@@ -85,7 +87,7 @@ const BottomSheetModal = ({
     {
       icon: 'clock',
       value: landmarkDistancesMap[landmarkId]?.estimatedTime
-        ? `${landmarkDistancesMap[landmarkId]?.estimatedTime.toFixed(0)}s`
+        ? `${landmarkDistancesMap[landmarkId]?.estimatedTime.toFixed(0)}min`
         : '0min',
       color: '#4C72AB',
     },
@@ -116,8 +118,12 @@ const BottomSheetModal = ({
   const handleSheetChange = (index) => {
     if (index >= 0 && index < snapPoints.length) {
       setCurrentSnapIndex(index)
+      if (index === 0) {
+        setIsExercise(false)
+      }
     } else {
       setCurrentSnapIndex(0)
+      setIsExercise(false)
     }
   }
 
@@ -220,7 +226,7 @@ const BottomSheetModal = ({
             <AudioPlayer
               audioUri={data.exercise_audio_url}
               imageUrl={data.landmark_image_url}
-              toPlay={hasArrived}
+              toPlay={isPlayAudio}
               setIsExercise={setIsExercise}
               handleSheetChange={handleSheetChange}
               setHasArrived={setHasArrived}
