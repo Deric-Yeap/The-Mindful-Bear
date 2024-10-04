@@ -244,8 +244,10 @@ class JournalEntriesByPeriodSerializer(serializers.Serializer):
     end_date = serializers.DateField()
 
     def get_journal_entries_by_date_range(self, start_date, end_date):
+        request = self.context.get('request')
+        user = request.user if request and request.user else None
         # Filter journals based on the date range provided
-        journals = Journal.objects.filter(upload_date__date__range=(start_date, end_date))
+        journals = Journal.objects.filter(user_id = user, upload_date__date__range=(start_date, end_date))
         journal_dict = {}
 
         current_date = start_date
