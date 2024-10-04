@@ -32,11 +32,40 @@ const PasswordReset = () => {
       setIsModalVisible(true)
     } catch (error) {
       setIsLoading(false)
-      setErrorMessage({
-        password: error.response.data.error_description.password[0],
-      })
+      if (
+        error.response &&
+        error.response.data &&
+        error.response.data.error_description
+      ) {
+        const errorDescription = error.response.data.error_description
+        if (typeof errorDescription === 'string') {
+          setErrorMessage({
+            password:
+              'The password reset link is invalid or has expired. Please request for a new link.',
+          })
+        } else if (
+          typeof errorDescription === 'object' &&
+          errorDescription.password
+        ) {
+          setErrorMessage({
+            password: errorDescription.password[0],
+          })
+        }
+      } else {
+        setErrorMessage({
+          password: 'An unexpected error occurred. Please try again.',
+        })
+      }
     }
   }
+
+  useEffect(() => {
+    console.log(errorMessage)
+  }, [errorMessage])
+
+  useEffect(() => {
+    console.log(errorMessage)
+  }, [errorMessage])
 
   return (
     <SafeAreaView>
