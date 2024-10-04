@@ -14,8 +14,8 @@ import Loading from '../../components/loading'
 const SignIn = () => {
   const [isLoading, setIsLoading] = useState(false)
   const [form, setForm] = useState({
-    email: 'themindfulbear0@gmail.com',
-    password: 'Themindfulbear123!',
+    email: '',
+    password: '',
   })
   const [errorMessage, setErrorMessage] = useState({})
 
