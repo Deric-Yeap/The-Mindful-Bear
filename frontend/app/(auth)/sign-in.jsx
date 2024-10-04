@@ -2,6 +2,7 @@ import { View, Text, ScrollView, StatusBar } from 'react-native'
 import { useState } from 'react'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { setTokens } from '../../redux/slices/authSlice'
+import { setUserDetails } from '../../redux/slices/userSlice'
 import { useDispatch, useSelector } from 'react-redux'
 import { router } from 'expo-router'
 
@@ -36,6 +37,7 @@ const SignIn = () => {
         })
       )
       const user = await getMe()
+      dispatch(setUserDetails(user))
       if (user.is_staff) {
         router.push('/admin')
       } else {

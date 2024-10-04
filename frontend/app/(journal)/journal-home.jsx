@@ -88,7 +88,7 @@ const JournalHome = () => {
     <ScrollView>
       <View>
         <View className="bg-mindful-brown-60 h-[45vh] relative">
-          <BackButton buttonStyle=" left-4 top-12 z-10" className="absolute" />
+          <BackButton buttonStyle=" left-4 top-12 z-10" className="absolute" tabName="(tabs)" screenName="home" />
 
           <View className="flex items-center justify-center mt-[5vh] space-y-2">
             <Text className="font-urbanist-extra-bold text-white text-6xl">

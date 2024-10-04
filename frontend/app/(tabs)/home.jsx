@@ -1,63 +1,75 @@
-import { View, Text, ScrollView, TouchableOpacity, Pressable } from 'react-native'
-import { useRouter } from 'expo-router';
-import { SafeAreaView } from 'react-native-safe-area-context'
+import React, { useState, useEffect } from 'react'
+import { View, Text, ScrollView, Pressable } from 'react-native'
 import { Link } from 'expo-router'
+import { SafeAreaView } from 'react-native-safe-area-context'
 import { Image } from 'expo-image'
+import { useDispatch, useSelector } from 'react-redux'
+import { setUserDetails } from '../../redux/slices/userSlice'
+
 import TopBrownSearchBar from '../../components/topBrownSearchBar'
 import MetricCard from '../../components/metricCard'
 import { colors } from '../../common/styles'
-import StatusBarComponent from '../../components/darkThemStatusBar';
-import { useEffect } from 'react';
-import { getMe } from '../../api/user';
-import React, { useState } from 'react'
+import StatusBarComponent from '../../components/darkThemStatusBar'
+import { getMe } from '../../api/user'
 import Loading from '../../components/loading'
 
-
 const Home = () => {
-  const [userName, setUserName] = useState([])
-  const [loading, setLoading] = useState(true);
-useEffect(() => {
-  const fetchData = async () => {
-    try {
-      const response = await getMe()
-      setUserName(response.name)
-    } catch (error) {
-      console.error(error)
-    } finally {
-      setLoading(false)
-    }
+  // const dispatch = useDispatch()
+  const user = useSelector((state) => state.user)
+  const [loading, setLoading] = useState(false)
+
+  // useEffect(() => {
+  //   const fetchData = async () => {
+  //     try {
+  //       const response = await getMe()
+  //       dispatch(setUserDetails(response))
+  //     } catch (error) {
+  //       console.error(error)
+  //     } finally {
+  //       setLoading(false)
+  //     }
+  //   }
+
+  //   fetchData()
+  // }, [])
+
+  if (loading) {
+    return (
+      <SafeAreaView className="flex-1 p-4 bg-white">
+        <StatusBarComponent
+          barStyle="light-content"
+          backgroundColor="#251404"
+        />
+        <View className="flex-1 justify-center items-center">
+          <Loading />
+        </View>
+      </SafeAreaView>
+    )
   }
 
-  fetchData()
-}, [])
-
-if (loading) {
-  return (
-    <SafeAreaView className="flex-1 p-4 bg-white">
-       <StatusBarComponent barStyle="light-content" backgroundColor="#251404" />
-      <View className="flex-1 justify-center items-center">
-        <Loading />
-      </View>
-    </SafeAreaView>
-  )
-}
   return (
     <SafeAreaView className="flex-1 bg-optimistic-gray-10">
-      <ScrollView>      
-      <StatusBarComponent barStyle="light-content" backgroundColor="#251404" />
-      <TopBrownSearchBar title={`Welcome, ${userName}!`} />
+      <ScrollView>
+        <StatusBarComponent
+          barStyle="light-content"
+          backgroundColor="#251404"
+        />
+        <TopBrownSearchBar title={`Welcome, ${user.name}!`} />
         <View className="bg-optimistic-gray-10 p-4 rounded-lg mb-4">
-        <Link href="/map" asChild>
-          <Pressable className="relative w-full rounded-xl mb-4" style={{ aspectRatio: 1.5 }}>
-            <Image
-              source={require("../../assets/start.svg")}
-              className="w-full h-full rounded-xl"
-            />
-            <Text className="absolute text-white font-urbanist-black text-3xl mt-4 ml-5">
-              Explore
-            </Text>
-          </Pressable>
-        </Link>
+          <Link href="/map" asChild>
+            <Pressable
+              className="relative w-full rounded-xl mb-4"
+              style={{ aspectRatio: 1.5 }}
+            >
+              <Image
+                source={require('../../assets/start.svg')}
+                className="w-full h-full rounded-xl"
+              />
+              <Text className="absolute text-white font-urbanist-black text-3xl mt-4 ml-5">
+                Explore
+              </Text>
+            </Pressable>
+          </Link>
 
           <Text className="text-mindful-brown-100 font-urbanist-extra-bold text-xl mb-4">
             Mindfulness Tracker
@@ -74,8 +86,9 @@ if (loading) {
               xx Days Streak
             </Text>
           </MetricCard>
+
           <Text className="text-mindful-brown-100 font-urbanist-extra-bold text-xl mb-4">
-          Discover Articles
+            Discover Articles
           </Text>
           <MetricCard
             route="/(article)/article-discovery"
@@ -85,7 +98,7 @@ if (loading) {
             title="Article Discovery Made Easy"
           >
             <Text className="font-urbanist-semi-bold text-mindful-brown-80 text-lg">
-            Effortlessly search and find articles that inspire and inform.
+              Effortlessly search and find articles that inspire and inform.
             </Text>
           </MetricCard>
 
@@ -101,7 +114,6 @@ if (loading) {
               xx Days Streak
             </Text>
           </MetricCard>
-
         </View>
       </ScrollView>
     </SafeAreaView>

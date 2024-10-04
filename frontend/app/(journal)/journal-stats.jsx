@@ -207,7 +207,7 @@ const JournalStats = ({
 
   return (
     <SafeAreaView className="bg-optimistic-gray-10 h-full p-4 space-y-4">
-      <BackButton buttonStyle="mb-4" />
+      <BackButton buttonStyle="mb-4" tabName="(journal)" screenName={"journal-home"}/>
       <View className="flex-row items-center justify-between">
         <View>
         <View className="flex flex-row items-center">
