@@ -19,3 +19,4 @@ transformers
 sqlalchemy==2.0.35
 pandas==2.2.3
 openpyxl==3.1.5
+pytz

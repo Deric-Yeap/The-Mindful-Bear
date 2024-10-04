@@ -1,7 +1,7 @@
-from rest_framework import generics
+from rest_framework import generics, status
 from rest_framework.response import Response
 from .models import Session
-from .serializer import SessionSerializer, SessionUpdateSerializer
+from .serializer import SessionSerializer, SessionUpdateSerializer, SessionByDateSerializer
 
 class SessionCreate(generics.CreateAPIView):
     # Create a new session
@@ -19,6 +19,32 @@ class SessionDetail(generics.RetrieveAPIView):
     # Retrieve a session
     queryset = Session.objects.all()
     serializer_class = SessionSerializer
+    lookup_field = "pk"
+
+    def get(self, request, *args, **kwargs):
+        try:
+            session = self.get_object()
+            serializer = self.get_serializer(session)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        except Session.DoesNotExist:
+            return Response({'detail': 'Landmark not found'}, status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            return Response({'detail': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+    
+class SessionByDate(generics.ListAPIView):
+    serializer_class = SessionByDateSerializer
+
+
+    def get(self, request, *args, **kwargs):
+        try:
+            serializer = self.get_serializer()
+            data = serializer.to_representation(None)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        except Session.DoesNotExist:
+            return Response({'detail': 'Session not found'}, status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            return Response({'detail': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+    
 
 class UpdateSessionDetail(generics.RetrieveUpdateAPIView):
    
