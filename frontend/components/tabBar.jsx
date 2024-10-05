@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { View, TouchableOpacity, StyleSheet } from 'react-native'
+import { View, TouchableOpacity } from 'react-native'
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons'
 import { colors } from '../common/styles'
 import { getMe } from '../api/user'
@@ -13,19 +13,22 @@ const TabBar = ({ state, descriptors, navigation }) => {
     settings: (props) => <MaterialCommunityIcons name="account" {...props} />,
     admin: (props) => <MaterialCommunityIcons name="cog" {...props} />,
   }
-  //add into this list the routes that you do not want in the navbar
+  const user = useSelector((state) => state.user)
   const [notIncludedRoutes, setNotIncludedRoutes] = useState([
     '_sitemap',
     '+not-found',
+    '(admin)',
   ])
+
   const isShownNav = useSelector((state) => state.isShownNav).isShownNav
 
   useEffect(() => {
     const fetchUser = async () => {
       try {
-        const data = await getMe()
-        if (!data.is_staff) {
+        if (!user.isStaff) {
           setNotIncludedRoutes((prevRoutes) => [...prevRoutes, 'admin'])
+        } else {
+          setNotIncludedRoutes((prevRoutes) => [...prevRoutes, '(map)'])
         }
       } catch (error) {
         console.error(error)
@@ -48,9 +51,12 @@ const TabBar = ({ state, descriptors, navigation }) => {
               : options.title !== undefined
                 ? options.title
                 : route.name
+
+          // Check if the current route is excluded
           if (notIncludedRoutes.includes(route.name)) return null
+
           const isFocused = state.index === index
-          const onPress = () => {
+          const handleNavigation = () => {
             const event = navigation.emit({
               type: 'tabPress',
               target: route.key,
@@ -58,15 +64,21 @@ const TabBar = ({ state, descriptors, navigation }) => {
             })
 
             if (!isFocused && !event.defaultPrevented) {
-              navigation.navigate(route.name, route.params)
+              if (route.name === 'home') {
+                navigation.navigate(user.isStaff ? '(admin)' : 'home')
+              } else {
+                navigation.navigate(route.name, route.params)
+              }
             }
           }
+
           const onLongPress = () => {
             navigation.emit({
               type: 'tabLongPress',
               target: route.key,
             })
           }
+
           return (
             <TouchableOpacity
               key={route.name}
@@ -74,7 +86,7 @@ const TabBar = ({ state, descriptors, navigation }) => {
               accessibilityState={isFocused ? { selected: true } : {}}
               accessibilityLabel={options.tabBarAccessibilityLabel}
               testID={options.tabBarTestID}
-              onPress={onPress}
+              onPress={handleNavigation}
               onLongPress={onLongPress}
               className="flex-1 items-center"
             >
