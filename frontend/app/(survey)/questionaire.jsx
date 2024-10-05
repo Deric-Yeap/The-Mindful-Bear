@@ -12,6 +12,7 @@ const Questionaire = () => {
     sessionID,
     sessionStarted,      
     start,
+    isClickTravel,
     completedForms: initialCompletedForms,    
   } = useLocalSearchParams()  
   const isShownNav = useSelector((state) => state.isShownNav).isShownNav
@@ -91,7 +92,8 @@ const Questionaire = () => {
             isRedirectedForms: isRedirectedForms,
             selectedLandmarkData: selectedLandmarkData, 
             sessionID: sessionID,
-            sessionStarted: true,            
+            sessionStarted: true,     
+            isClickTravel: isClickTravel       
           },
         })
       } else {

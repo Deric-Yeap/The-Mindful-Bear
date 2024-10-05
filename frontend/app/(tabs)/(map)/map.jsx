@@ -49,6 +49,7 @@ const Map = () => {
     selectedLandmarkData,
     sessionID,
     sessionStarted,
+    isClickTravel: isClickTraveled,
   } = useLocalSearchParams()
   const [form, setForm] = useState(initialFormState)
   const [isModalOpen, setIsModalOpen] = useState(false)
@@ -73,17 +74,13 @@ const Map = () => {
   )
   const [isPlayAudio, setIsPlayAudio] = useState(false)
   const [isArriveModalOpen, setIsArriveModalOpen] = useState(false)
-  const [isClickTravel, setIsClickTravel] = useState(false)
+  const [isClickTravel, setIsClickTravel] = useState(null)
 
   const dispatch = useDispatch()
 
   useEffect(() => {
-    if (sessionStarted === 'true') {
-      setIsSessionStarted(true)
-    } else {
-      setIsSessionStarted(false)
-    }
-
+    setIsSessionStarted(sessionStarted ==='true');
+    setIsClickTravel(isClickTraveled === 'true');
     if (selectedLandmarkData) {
       try {
         const landmarkData = JSON.parse(selectedLandmarkData)
@@ -92,13 +89,9 @@ const Map = () => {
         console.error('Error parsing selected landmark data:', error)
       }
     }
+    setIsRedirectedForms(isRedirected === 'true');
 
-    if (isRedirected === 'true') {
-      setIsRedirectedForms(true)
-    } else {
-      setIsRedirectedForms(false)
-    }
-  }, [sessionStarted, selectedLandmarkData, isRedirected])
+  }, [sessionStarted, selectedLandmarkData, isRedirected, isClickTraveled])
 
   useEffect(() => {
     const fetchData = async () => {
@@ -203,6 +196,7 @@ const Map = () => {
   }, [location, geoJSON])
 
   useEffect(() => {
+    
     if (
       isRedirectedForms &&
       selectedLandmark &&
@@ -274,7 +268,7 @@ const Map = () => {
     }
   }
 
-  const handleSessionStart = () => {
+  const handleSessionStart = (isClickTravel) => {
     let sessionId = null
     const currentStartDateTime = getCurrentDateTime()
     setForm((prevForm) => {
@@ -296,6 +290,7 @@ const Map = () => {
               sessionID: sessionId,
               sessionStarted: true,
               start: 'true',
+              isClickTravel: isClickTravel 
             },
           })
         })
@@ -325,13 +320,13 @@ const Map = () => {
           setIsModalOpen(false)
           router.push({
             pathname: '/questionaire',
-            params: {
-              location: {},
+            params: {              
               isRedirectedForms: false,
               selectedLandmarkData: null,
               sessionID: sessionID,
               sessionStarted: true,
               start: 'false',
+              isClickTravel: isClickTravel
             },
           })
         })
@@ -348,13 +343,12 @@ const Map = () => {
   }
 
   const fetchDirections = async () => {
-    setIsClickTravel(true)
     if (!location || !selectedLandmark) {
       console.error('Current location or selected landmark is not available.')
       return
     }
     if (!isSessionStarted) {
-      handleSessionStart()
+      handleSessionStart(true)
       return
     }
     const selectedLandmarkCoords = selectedLandmark.geometry.coordinates
