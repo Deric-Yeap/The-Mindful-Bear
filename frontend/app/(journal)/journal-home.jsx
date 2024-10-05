@@ -13,13 +13,16 @@ import { SafeAreaView } from 'react-native-safe-area-context'
 import { journalCalendarSumary, journalCountByYear } from '../../api/journal'
 import { monthNames, daysOfWeek } from '../../common/constants'
 import Loading from '../../components/loading'
+import LottieView from 'lottie-react-native'
+import BackButton from '../../components/backButton'
+import { colors } from '../../common/styles'
 
 const JournalHome = () => {
   const [calendarData, setCalendarData] = useState([])
   const [journalCount, setJournalCount] = useState(0)
   const [loading, setLoading] = useState(true)
-  const currentMonth = new Date().getMonth() + 1
-  const currentYear = new Date().getFullYear()
+  const [currentMonth, setCurrentMonth] = useState(new Date().getMonth() + 1)
+  const [currentYear, setCurrentYear] = useState(new Date().getFullYear())
 
   useEffect(() => {
     const fetchData = async () => {
@@ -41,11 +44,30 @@ const JournalHome = () => {
     }
 
     fetchData()
-  }, [])
+  }, [currentMonth])
+
+  const handlePreviousMonth = () => {
+    if (currentMonth === 1) {
+      setCurrentMonth(12)
+      setCurrentYear(currentYear - 1)
+    } else {
+      setCurrentMonth(currentMonth - 1)
+    }
+  }
+
+  const handleNextMonth = () => {
+    if (currentMonth === 12) {
+      setCurrentMonth(1)
+      setCurrentYear(currentYear + 1)
+    } else {
+      setCurrentMonth(currentMonth + 1)
+    }
+  }
 
   const getColor = (sentiment) => {
     if (sentiment === 'Positive') return 'bg-serenity-green-40'
     if (sentiment === 'Negative') return 'bg-empathy-orange-40'
+    if (sentiment === 'Neutral') return 'bg-zen-yellow-20'
     return 'bg-mindful-brown-20'
   }
 
@@ -65,20 +87,28 @@ const JournalHome = () => {
   return (
     <ScrollView>
       <View>
-        <View className="bg-mindful-brown-60 p-4 h-[45vh] items-center pt-[5vh]">
-          <Text className="font-urbanist-extra-bold text-white text-xl">
-            Journal
-          </Text>
-          <View className="flex items-center justify-center mt-11 space-y-2">
-            <Text className="font-urbanist-extra-bold text-white text-9xl">
+        <View className="bg-mindful-brown-60 h-[45vh] relative">
+          <BackButton buttonStyle=" left-4 top-12 z-10" className="absolute" tabName="(tabs)" screenName="home" />
+
+          <View className="flex items-center justify-center mt-[5vh] space-y-2">
+            <Text className="font-urbanist-extra-bold text-white text-6xl">
               {journalCount}
             </Text>
+
             <Text className="font-urbanist-semi-bold text-white text-3xl">
               Journals this year.
             </Text>
+
+            <LottieView
+              source={require('../../assets/animatedBearBee.json')}
+              autoPlay
+              loop
+              className="w-60 h-60 mb-40"
+            />
           </View>
         </View>
-        <View className="bg-optimistic-gray-10 p-4 h-full items-center -mt-16 rounded-t-full w-[250vw] -left-[75vw]">
+
+        <View className="bg-optimistic-gray-10 p-3 h-full items-center -mt-10 rounded-t-full w-[250vw] -left-[75vw]">
           <TouchableOpacity
             className="-mt-10 mb-3"
             onPress={() => router.push('/(journal)/journal-type-select')}
@@ -88,17 +118,36 @@ const JournalHome = () => {
             </View>
           </TouchableOpacity>
 
-          {/* calendar stuff */}
-          <View className="flex flex-row justify-center items-center">
-            <Text className="font-urbanist-extra-bold text-black text-2xl">
-              {monthNames[currentMonth - 1]} {currentYear}
-            </Text>
-            <Link
-              href="/(journal)/journal-history"
-              className="font-urbanist-semi-bold text-serenity-green-60 ml-1"
-            >
-              See all
-            </Link>
+          <View className="flex-row justify-between items-center px-4 w-[100vw]">
+            <TouchableOpacity onPress={handlePreviousMonth} className="">
+              <Text className="font-urbanist-bold text-zen-yellow-50">
+                Previous
+              </Text>
+            </TouchableOpacity>
+            <View className="flex-row items-center">
+              <Text className="font-urbanist-extra-bold text-black text-2xl">
+                {monthNames[currentMonth - 1]} {currentYear}
+              </Text>
+              <Link
+                href="/(journal)/journal-stats"
+                className="font-urbanist-semi-bold ml-2"
+              >
+                <MaterialCommunityIcons name="chart-bar" size={30} color={colors.serenityGreen60} />
+              </Link>
+              <Link
+                href="/(journal)/journal-history"
+                className="font-urbanist-semi-bold ml-2"
+              >
+                <MaterialCommunityIcons name="book-account" size={30} color={colors.mindfulBrown60} />
+              </Link>
+              
+
+            </View>
+            <TouchableOpacity onPress={handleNextMonth}>
+              <Text className="font-urbanist-bold text-zen-yellow-50">
+                Next
+              </Text>
+            </TouchableOpacity>
           </View>
           <View className="w-[100vw] px-4">
             <View className="flex flex-row justify-between mb-4">
@@ -134,20 +183,29 @@ const JournalHome = () => {
             ))}
           </View>
 
-          <View className="flex flex-row justify-center items-center mt-4">
-            <View className="flex flex-row items-center mr-4">
+          <View className="flex flex-row justify-center items-center mt-4 px-4">
+            <View className="flex flex-row items-center mx-1">
               <View className="h-4 w-4 bg-mindful-brown-20 rounded-full mr-2"></View>
               <Text className="font-urbanist-semi-bold text-black text-lg">
                 Skipped
               </Text>
             </View>
-            <View className="flex flex-row items-center mr-4">
+
+            <View className="flex flex-row items-center mx-1">
               <View className="h-4 w-4 bg-serenity-green-40 rounded-full mr-2"></View>
               <Text className="font-urbanist-semi-bold text-black text-lg">
                 Positive
               </Text>
             </View>
-            <View className="flex flex-row items-center">
+
+            <View className="flex flex-row items-center mx-1">
+              <View className="h-4 w-4 bg-zen-yellow-30 rounded-full mr-2"></View>
+              <Text className="font-urbanist-semi-bold text-black text-lg">
+                Neutral
+              </Text>
+            </View>
+
+            <View className="flex flex-row items-center mx-1">
               <View className="h-4 w-4 bg-empathy-orange-40 rounded-full mr-2"></View>
               <Text className="font-urbanist-semi-bold text-black text-lg">
                 Negative

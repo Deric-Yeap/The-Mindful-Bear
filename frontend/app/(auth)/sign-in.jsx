@@ -1,10 +1,11 @@
-import { View, Text, ScrollView, StatusBar, Image } from 'react-native'
+import { View, Text, ScrollView, StatusBar,Image } from 'react-native'
 import { useState } from 'react'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { setTokens } from '../../redux/slices/authSlice'
+import { setUserDetails } from '../../redux/slices/userSlice'
 import { useDispatch, useSelector } from 'react-redux'
 import { router } from 'expo-router'
-
+import logo from '../../assets/mindfulBearLogo.png'
 import CustomButton from '../../components/customButton'
 import FormField from '../../components/formField'
 import { login, getMe } from '../../api/user'
@@ -21,15 +22,12 @@ const SignIn = () => {
   const dispatch = useDispatch()
   const auth = useSelector((state) => state.auth)
   const handleLogin = async () => {
+    setErrorMessage({})
     try {
       setIsLoading(true)
-      // const response = await login({
-      //   email: form.email,
-      //   password: form.password,
-      // })
       const response = await login({
-        email: process.env.ACCOUNT_USER,
-        password: process.env.ACCOUNT_PASSWORD,
+        email: form.email,
+        password: form.password,
       })
       setIsLoading(false)
       dispatch(
@@ -39,6 +37,7 @@ const SignIn = () => {
         })
       )
       const user = await getMe()
+      dispatch(setUserDetails(user))
       if (user.is_staff) {
         router.push('/admin')
       } else {
@@ -46,7 +45,7 @@ const SignIn = () => {
       }
     } catch (error) {
       setIsLoading(false)
-      console.error(error.response.data.error_description)
+      setErrorMessage({ password: error.response.data.error_description })
     }
   }
 
@@ -63,13 +62,13 @@ const SignIn = () => {
         </View>
       )}
       <View className="min-h-[78vh] mt-[13vh] items-center mx-5">
-        <Image
-          source={logo}
-          className="w-auto h-64 mb-0"
-          resizeMode="contain"
-        />
-        <Text className="font-urbanist-extra-bold text-3xl text-mindful-brown-80 pb-3">
-          The Mindful Bear
+      <Image 
+                source={logo} 
+                className="w-auto h-64 mb-0" 
+                resizeMode="contain" 
+            />
+              <Text className="font-urbanist-extra-bold text-3xl text-mindful-brown-80 pb-3">
+         The Mindful Bear
         </Text>
         <Text className="font-urbanist-extra-bold text-3xl text-mindful-brown-80 pb-10">
           Sign In
@@ -77,8 +76,7 @@ const SignIn = () => {
         <FormField
           title="Email Address"
           iconName="email-outline"
-          // value={form.email}
-          value={process.env.ACCOUNT_USER}
+          value={form.email}
           handleChange={(value) => setForm({ ...form, email: value })}
           customStyles="w-full pb-4"
           keyboardType="email-address"
@@ -88,8 +86,7 @@ const SignIn = () => {
         <FormField
           title="Password"
           iconName="lock-outline"
-          value={process.env.ACCOUNT_PASSWORD}
-          // value={form.password}
+          value={form.password}
           handleChange={(value) => setForm({ ...form, password: value })}
           customStyles="w-full pb-6"
           errorMessage={errorMessage.password ? errorMessage.password : ''}

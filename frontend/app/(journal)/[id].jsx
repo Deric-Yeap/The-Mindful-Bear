@@ -11,11 +11,14 @@ import { useLocalSearchParams } from 'expo-router'
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons'
 import { Audio } from 'expo-av'
 import Slider from '@react-native-community/slider'
+import { router } from 'expo-router'
 
-import { journalEntryById } from '../../api/journal'
+import { journalEntryById, deleteJournal } from '../../api/journal'
 import { adjustHexColor } from '../../common/hexColor'
 import Loading from '../../components/loading'
 import BackButton from '../../components/backButton'
+import CustomButton from '../../components/customButton'
+import ConfirmModal from '../../components/confirmModal'
 
 const JournalDetail = () => {
   const { id } = useLocalSearchParams()
@@ -24,6 +27,7 @@ const JournalDetail = () => {
   const [isPlaying, setIsPlaying] = useState(false)
   const [position, setPosition] = useState(0)
   const [duration, setDuration] = useState(0)
+  const [isModalVisible, setIsModalVisible] = useState(false)
 
   useEffect(() => {
     const fetchData = async () => {
@@ -73,6 +77,10 @@ const JournalDetail = () => {
       setPosition(status.positionMillis)
       setDuration(status.durationMillis)
       setIsPlaying(status.isPlaying)
+      if (status.didJustFinish) {
+        setPosition(status.durationMillis)
+        setIsPlaying(false)
+      }
     }
   }
 
@@ -82,6 +90,9 @@ const JournalDetail = () => {
         if (isPlaying) {
           await sound.pauseAsync()
         } else {
+          if (position >= duration) {
+            await sound.setPositionAsync(0)
+          }
           await sound.playAsync()
         }
       } else {
@@ -98,6 +109,16 @@ const JournalDetail = () => {
       await sound
         .setPositionAsync(positionMillis)
         .catch((error) => console.error('Error setting position:', error))
+    }
+  }
+
+  const handleDeleteConfirm = async () => {
+    try {
+      await deleteJournal(id)
+      setIsModalVisible(false)
+      router.push('/journal-history')
+    } catch (error) {
+      console.error('Error deleting journal:', error)
     }
   }
 
@@ -197,7 +218,33 @@ const JournalDetail = () => {
             </View>
           </View>
         )}
+        <CustomButton
+          title="Edit Journal"
+          handlePress={() => router.push(`/(journal)/edit/${journal.id}`)}
+          buttonStyle="w-full mb-5 bg-mindful-brown-70"
+        />
+        <CustomButton
+          title="Delete Journal"
+          handlePress={() => {
+            setIsModalVisible(true)
+          }}
+          buttonStyle="w-full mb-10 bg-present-red-70"
+        />
       </ScrollView>
+      {isModalVisible && (
+        <ConfirmModal
+          title="Are you sure?"
+          subTitle={`You are about to delete the journal entry "${journal.title}".`}
+          isCancelButton={true}
+          cancelButtonTitle={'Cancel'}
+          handleCancel={() => {
+            setIsModalVisible(false)
+          }}
+          confirmButtonTitle="Delete"
+          isConfirmButton={true}
+          handleConfirm={handleDeleteConfirm}
+        />
+      )}
     </SafeAreaView>
   )
 }

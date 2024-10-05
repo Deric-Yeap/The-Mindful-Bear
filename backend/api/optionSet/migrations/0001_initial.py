@@ -8,10 +8,6 @@ class Migration(migrations.Migration):
 
     initial = True
 
-    dependencies = [
-        ("question", "0003_remove_question_question_type"),
-    ]
-
     operations = [
         migrations.CreateModel(
             name="OptionSet",

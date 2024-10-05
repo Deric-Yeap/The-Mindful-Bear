@@ -6,15 +6,14 @@ import { useSelector } from 'react-redux'
 import { setIsShownNav } from '../../redux/slices/isShownNavSlice'
 
 const Questionaire = () => {
-  const {
+  const {    
     isRedirectedForms,
     selectedLandmarkData,
     sessionID,
-    sessionStarted,
+    sessionStarted,      
     start,
-    isClickTravel,
-    completedForms: initialCompletedForms,
-  } = useLocalSearchParams()
+    completedForms: initialCompletedForms,    
+  } = useLocalSearchParams()  
   const isShownNav = useSelector((state) => state.isShownNav).isShownNav
   const [forms, setForms] = useState([])
   const [completedForms, setCompletedForms] = useState(() => {
@@ -35,17 +34,9 @@ const Questionaire = () => {
   let filteredForms
 
   useEffect(() => {
-    if (formData) {
-      setSessionData(JSON.parse(formData))
-    }
-  }, [formData])
-
-  useEffect(() => {
     const fetchData = async () => {
       try {
         const response = await getForms()
-        console.log('START?')
-        console.log(start)
         if (start === 'true') {
           filteredForms = response.filter((form) => form.is_presession)
         } else {
@@ -73,14 +64,13 @@ const Questionaire = () => {
 
     router.push({
       pathname: `/questions/${formId}`,
-      params: {
+      params: {        
         isRedirectedForms: isRedirectedForms,
-        selectedLandmarkData: selectedLandmarkData,
+        selectedLandmarkData: selectedLandmarkData, 
         sessionID: sessionID,
-        sessionStarted: sessionStarted,
+        sessionStarted: sessionStarted,        
         start: start,
-        isClickTravel: isClickTravel,
-        completedForms: JSON.stringify(updatedCompletedForms),
+        completedForms: JSON.stringify(updatedCompletedForms),        
       },
     })
   }
@@ -97,11 +87,11 @@ const Questionaire = () => {
         }
         router.push({
           pathname: '/map',
-          params: {
+          params: {            
             isRedirectedForms: isRedirectedForms,
-            selectedLandmarkData: selectedLandmarkData,
+            selectedLandmarkData: selectedLandmarkData, 
             sessionID: sessionID,
-            sessionStarted: true,
+            sessionStarted: true,            
           },
         })
       } else {

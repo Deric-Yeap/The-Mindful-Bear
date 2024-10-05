@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import { SafeAreaView, View, ScrollView, TouchableOpacity } from 'react-native'
 import Mapbox from '@rnmapbox/maps'
 import LottieView from 'lottie-react-native'
@@ -6,9 +6,9 @@ import CustomButton from '../../../components/customButton'
 import ConfirmModal from '../../../components/confirmModal'
 import { getCurrentDateTime } from '../../../common/getCurrentFormattedDateTime'
 import { getGeoJson } from '../../../common/getGeoJson'
-import { createSession } from '../../../api/session'
+import { createSession, updateSession } from '../../../api/session'
 import { landmarkIcon } from '../../../assets/image'
-import { getLandmarks } from '../../../api/landmark'
+import { getLandmarks, updateLandmark } from '../../../api/landmark'
 import { confirmModal } from '../../../assets/image'
 import Loading from '../../../components/loading'
 import BottomSheetModal from '../../../components/maps/bottomSheetModal'
@@ -53,7 +53,6 @@ const Map = () => {
   const [form, setForm] = useState(initialFormState)
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [isCompletedModalOpen, setIsCompletedModalOpen] = useState(false)
-  // const [isSessionStarted, setIsSessionStarted] = useState(sessionStarted)
   const [isSessionStarted, setIsSessionStarted] = useState(false)
   const [landmarksData, setLandmarksData] = useState([])
   const [loading, setLoading] = useState(true)
@@ -118,7 +117,7 @@ const Map = () => {
     }
   }, [])
   useEffect(() => {
-    if (isTraveling) {
+    if (location && isTraveling) {
       const locationInterval = setInterval(() => {
         if (location) {
           if (routeGeoJSON) {
@@ -161,16 +160,12 @@ const Map = () => {
               }
               setIsTraveling(false)
               setSelectedLandmark(selectedLandmark)
+              setIsArriveModalOpen(true)
+
               setIsBottomSheetOpen(true)
               if (isShownNav) {
                 dispatch(setIsShownNav())
               }
-
-              Alert.alert(
-                'Arrival Notification',
-                'You have arrived at the landmark!',
-                [{ text: 'OK' }]
-              )
             }
           }
           setPrevLocation(location)
@@ -182,7 +177,7 @@ const Map = () => {
   }, [isTraveling, location, routeGeoJSON, selectedLandmark])
 
   useEffect(() => {
-    if (location && geoJSON.features && geoJSON.features.length > 0) {
+    if (geoJSON.features?.length > 0) {
       const updatedDistances = geoJSON.features.map((landmark) => {
         const landmarkCoords = landmark.geometry.coordinates
 
@@ -192,7 +187,7 @@ const Map = () => {
           { units: 'meters' }
         )
 
-        const estimatedTime = distanceToLandmark / 1.4
+        const estimatedTime = Math.round(distanceToLandmark / 1.4 / 60)
 
         return {
           landmark_id: landmark.properties.landmark_id,
@@ -270,13 +265,21 @@ const Map = () => {
       }
     }
   }
+  const handleIsArriveModalOpen = () => {
+    if (isArriveModalOpen) {
+      setIsArriveModalOpen(false)
+      setIsPlayAudio(true)
+    }
+  }
 
   const handleSessionStart = () => {
+    let sessionId = null
     const currentStartDateTime = getCurrentDateTime()
     setForm((prevForm) => {
       const updatedForm = {
         ...prevForm,
         start_datetime: currentStartDateTime,
+        end_datetime: currentStartDateTime,
       }
 
       createSession(updatedForm)
@@ -313,26 +316,28 @@ const Map = () => {
         ...prevForm,
         end_datetime: currentEndDateTime,
       }
-      createSession(updatedForm)
+      updateSession(updatedForm, sessionID)
         .then(() => {
           resetForm()
           setIsSessionStarted(false)
           setIsModalOpen(false)
+          router.push({
+            pathname: '/questionaire',
+            params: {
+              location: {},
+              isRedirectedForms: false,
+              selectedLandmarkData: null,
+              sessionID: sessionID,
+              sessionStarted: true,
+              start: 'false',
+            },
+          })
         })
         .catch((error) => {
           console.error(error.response?.data?.error_description)
         })
 
       return updatedForm
-    })
-    //End Session Survey
-    router.push({
-      pathname: '/questionaire',
-      params: {
-        sessionStarted: true,
-        formData: JSON.stringify(form),
-        start: 'false',
-      },
     })
   }
 
@@ -392,6 +397,11 @@ const Map = () => {
   const geoJSON = getGeoJson(landmarksData)
   return (
     <SafeAreaView className="h-full">
+      <StatusBarComponent
+        barStyle="light-content"
+        backgroundColor="transparent"
+        translucent={true}
+      />
       <View className="flex-1 relative">
         {loading ? (
           <View className="flex-1 justify-center items-center">
@@ -509,8 +519,19 @@ const Map = () => {
             openCompletedModal={setIsCompletedModalOpen}
             handleTravel={fetchDirections}
             hasArrived={hasArrived}
+            isPlayAudio={isPlayAudio}
             setHasArrived={setHasArrived}
             distanceTimeEst={landmarkDistances}
+          />
+        )}
+        {hasArrived && isArriveModalOpen && (
+          <ConfirmModal
+            isConfirmButton={true}
+            isCancelButton={false}
+            imageSource={confirmModal}
+            confirmButtonTitle={'Start!'}
+            title={'You have arrived at the landmark!'}
+            handleConfirm={handleIsArriveModalOpen}
           />
         )}
       </View>

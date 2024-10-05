@@ -5,6 +5,9 @@ from django.conf import settings
 from ..common.s3 import create_presigned_url, upload_fileobj, make_file_upload_path, delete_s3_object
 from ..emotion.serializer import EmotionSerializer
 from datetime import datetime, timedelta
+from collections import defaultdict
+from collections import Counter
+
 
 
 class JournalGetSerializer(serializers.ModelSerializer):
@@ -100,11 +103,9 @@ class JournalUpdateSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Journal
-        fields = ['audio_file_path', 'journal_text', 'sentiment_analysis_result', 'title', 'emotion_id']
+        fields = ['journal_text', 'title', 'emotion_id']
         extra_kwargs = {
-            'audio_file_path': {'required': False},
             'journal_text': {'required': False},
-            'sentiment_analysis_result': {'required': False},
             'title': {'required': False},
             'emotion_id': {'required': False},
         }
@@ -113,8 +114,10 @@ class JournalUpdateSerializer(serializers.ModelSerializer):
         emotions = validated_data.pop('emotion_id', None)
         for attr, value in validated_data.items():
             setattr(instance, attr, value)
+        
         if emotions is not None:
             instance.emotion_id.set(emotions)
+        
         instance.save()
         return instance
 
@@ -129,15 +132,17 @@ class JournalCalendarSerializer(serializers.Serializer):
     def get_weekly_matrix(self, year, month):
         start_date = datetime(year, month, 1)
         end_date = (start_date + timedelta(days=31)).replace(day=1) - timedelta(days=1)
+        request = self.context.get('request')
+        user = request.user if request and request.user else None
 
         weeks = [[] for _ in range(6)]
-        journals = Journal.objects.filter(upload_date__year=year, upload_date__month=month)
+        journals = Journal.objects.filter(user_id = user,upload_date__year=year, upload_date__month=month)
 
         current_date = start_date
         week_index = 0
 
-        
-        for _ in range(start_date.weekday()): # null to account for starting days
+        # Fill initial nulls for the first week
+        for _ in range(start_date.weekday()): 
             weeks[week_index].append(None)
 
         while current_date <= end_date:
@@ -146,13 +151,43 @@ class JournalCalendarSerializer(serializers.Serializer):
 
             day_journals = journals.filter(upload_date__date=current_date.date())
             if day_journals.exists():
-                weeks[week_index].append(day_journals.first())
+               
+                journal = day_journals.first()
+                
+               
+                sentiments = [j.sentiment_analysis_result for j in day_journals if j.sentiment_analysis_result]
+
+                
+                sentiment_counts = Counter(sentiments)
+
+               
+                positive_count = sentiment_counts.get('Positive', 0)
+                negative_count = sentiment_counts.get('Negative', 0)
+                neutral_count = sentiment_counts.get('Neutral', 0)
+
+                if positive_count > negative_count:
+                    highest_sentiment = 'Positive'
+                elif negative_count > positive_count:
+                    highest_sentiment = 'Negative'
+                elif positive_count == negative_count:
+                    highest_sentiment = 'Neutral' 
+                elif neutral_count > negative_count:
+                    highest_sentiment = 'Negative' 
+                elif neutral_count > positive_count:
+                    highest_sentiment = 'Positive'
+                else:
+                    highest_sentiment = None  
+
+                journal.sentiment_analysis_result = highest_sentiment
+                
+                weeks[week_index].append(journal)
             else:
-                weeks[week_index].append({'date': current_date.date(), 'sentiment_analysis_result': None})
+                weeks[week_index].append({'sentiment_analysis_result': None})
 
             current_date += timedelta(days=1)
 
-        while len(weeks[-1]) < 7: #null for remainding days
+      
+        while len(weeks[-1]) < 7:
             weeks[-1].append(None)
 
         return weeks
@@ -175,8 +210,10 @@ class JournalEntriesByDateSerializer(serializers.Serializer):
     def get_journal_entries_by_date(self, year, month):
         start_date = datetime(year, month, 1)
         end_date = (start_date + timedelta(days=31)).replace(day=1) - timedelta(days=1)
+        request = self.context.get('request')
+        user = request.user if request and request.user else None
 
-        journals = Journal.objects.filter(upload_date__year=year, upload_date__month=month)
+        journals = Journal.objects.filter(user_id = user, upload_date__year=year, upload_date__month=month)
         journal_dict = {}
 
         current_date = start_date
@@ -198,4 +235,40 @@ class JournalEntriesByDateSerializer(serializers.Serializer):
             'dates': journal_dict
         }
         
+        return data
+    
+  
+
+class JournalEntriesByPeriodSerializer(serializers.Serializer):
+    start_date = serializers.DateField()
+    end_date = serializers.DateField()
+
+    def get_journal_entries_by_date_range(self, start_date, end_date):
+        request = self.context.get('request')
+        user = request.user if request and request.user else None
+        # Filter journals based on the date range provided
+        journals = Journal.objects.filter(user_id = user, upload_date__date__range=(start_date, end_date))
+        journal_dict = {}
+
+        current_date = start_date
+        while current_date <= end_date:
+            # Retrieve journals for the current date and serialize them
+            day_journals = journals.filter(upload_date__date=current_date).order_by('-upload_date')
+            journal_dict[str(current_date.date())] = JournalGetSerializer(day_journals, many=True).data
+            current_date += timedelta(days=1)
+
+        return journal_dict
+
+    def to_representation(self, instance):
+        # Retrieve the start and end dates from the validated data
+        start_date = self.validated_data['start_date']
+        end_date = self.validated_data['end_date']
+
+        # Get journal entries within the date range
+        journal_dict = self.get_journal_entries_by_date_range(start_date, end_date)
+
+        data = {
+            'dates': journal_dict
+        }
+
         return data

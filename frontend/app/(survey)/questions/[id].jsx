@@ -21,7 +21,14 @@ const CustomRadioButton = ({ selected, onPress }) => {
 
 const QuestionPage = () => {
   const router = useRouter();
-  const { sessionStarted, formData, sessionID, id, completedForms: initialCompletedForms, start } = useLocalSearchParams();  
+  const { 
+    id, 
+    isRedirectedForms,
+    selectedLandmarkData,
+    sessionID, 
+    sessionStarted,     
+    start,
+    completedForms: initialCompletedForms } = useLocalSearchParams();  
   const [completedForms, setCompletedForms] = useState(() => {
     try {
       return initialCompletedForms ? JSON.parse(initialCompletedForms) : [];
@@ -38,27 +45,18 @@ const QuestionPage = () => {
   const [loading, setLoading] = useState(true);
   
   let formName = "";
-  let enhancedData = [];
-
-  useEffect(() => {
-    if (formData) {
-      setSessionData(JSON.parse(formData)); // Parse the formData and set it to the form state
-      console.log(formData);
-    }
-  }, [formData]);
+  let questionsWithOptions = [];
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        ({ formName, enhancedData } = await getFormQuestions(id));
-        console.log(enhancedData);
-        setQuestions(enhancedData);
-        
+        ({ formName, questionsWithOptions } = await getFormQuestions(id));        
+        setQuestions(questionsWithOptions);    
         setFormTitle(formName);
-        setLoading(false); // Set loading to false after data is returned
+        setLoading(false); 
       } catch (error) {
         console.error('Error fetching form data:', error);
-        setLoading(false); // Ensure loading stops even if there is an error
+        setLoading(false); 
       }
     };
 
@@ -76,16 +74,17 @@ const QuestionPage = () => {
     if (currentQuestionIndex < questions.length - 1) {
       setCurrentQuestionIndex(currentQuestionIndex + 1);
     } else {
-        try {                
-          await setFormQuestion(sessionID, answers);   
-          const updatedCompletedForms = [...completedForms, enhancedData.formID];               
-          console.log(updatedCompletedForms)
+        try {                                           
+          await setFormQuestion(sessionID, id, answers);             
           router.push({
             pathname: `/questionaire`,
-            params: { sessionStarted: true, 
-              formData: JSON.stringify(sessionData), 
-              completedForms: JSON.stringify(updatedCompletedForms),
-              start: start
+            params: {               
+              isRedirectedForms: isRedirectedForms,
+              selectedLandmarkData: selectedLandmarkData, 
+              sessionID: sessionID,
+              sessionStarted: true,               
+              start: start,
+              completedForms: JSON.stringify(completedForms),              
             },
           });
         } catch (error) {
@@ -103,7 +102,7 @@ const QuestionPage = () => {
   }
 
   return (
-    <ScrollView className="flex-1 p-4 bg-mindful-brown-10">
+    <ScrollView className="flex-1 p-4 bg-mindful-brown-10 mt-2">
       <View className="mb-4 flex flex-row justify-between items-center">
         <Text className="text-mindful-brown-100 text-xl font-urbanist-bold">
           {formTitle + " Assessment"}

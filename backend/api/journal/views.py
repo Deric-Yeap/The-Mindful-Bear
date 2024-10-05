@@ -1,16 +1,26 @@
+import json
+import pandas as pd
+from textblob import TextBlob
 from datetime import datetime
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from .models import Journal
-from .serializer import JournalGetSerializer, JournalUploadFileSerializer, JournalCreateSerializer, JournalCalendarSerializer, JournalSummarySerializer, JournalEntriesByDateSerializer
-from rest_framework import status
+from .serializer import JournalGetSerializer, JournalUploadFileSerializer, JournalCreateSerializer, JournalCalendarSerializer, JournalSummarySerializer, JournalEntriesByDateSerializer,JournalEntriesByPeriodSerializer, JournalUpdateSerializer
+from rest_framework import status, viewsets
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from django.shortcuts import get_object_or_404
 from rest_framework.parsers import MultiPartParser, FormParser
 from .models import Journal
 from ..common.audio import transcribe
+from rest_framework.exceptions import APIException
+# analyzer/views.py
+from django.http import JsonResponse
+import nltk
+from nltk.sentiment import SentimentIntensityAnalyzer
 
-
+# Download VADER lexicon if not already downloaded
+nltk.download('vader_lexicon')
 
 class JournalListView(APIView):
     def get(self, request):
@@ -18,12 +28,27 @@ class JournalListView(APIView):
         serializer = JournalGetSerializer(journals, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
-    def post(self, request): #is it can create entry first then next time upload audio or together?
+    def post(self, request):  # Can create an entry first, then upload audio next time, or do both together
         serializer = JournalCreateSerializer(data=request.data, context={'request': request})
+        
         if serializer.is_valid():
+            journal_text = serializer.validated_data['journal_text']
+            sentiment_result = self.analyze_sentiment(journal_text)  # Remove self as the first argument
+            serializer.validated_data['sentiment_analysis_result'] = sentiment_result
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+
+    def analyze_sentiment(self, text):
+        sid = SentimentIntensityAnalyzer()
+        polarity_scores = sid.polarity_scores(text)
+        
+        if polarity_scores['compound'] >= 0.05:
+            return 'Positive'
+        elif polarity_scores['compound'] <= -0.05:
+            return 'Negative'
+        else:
+            return 'Neutral'
     
 class UploadFileView(APIView):
     parser_classes = [MultiPartParser, FormParser]
@@ -109,13 +134,73 @@ class JournalEntriesByDateView(APIView):
             return Response(data, status=status.HTTP_200_OK)
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-        
-class JournalEntryByIdView(APIView):
-    def get(self, request, id):
+
+class JournalEntriesByPeriodView(APIView):
+    def get(self, request, *args, **kwargs):
+        start_date_str = request.query_params.get('start_date')
+        end_date_str = request.query_params.get('end_date')
+
+       
+        if not start_date_str or not end_date_str:
+            return Response({"error": "Start date and end date are required parameters."}, status=status.HTTP_400_BAD_REQUEST)
+
         try:
-            journal = Journal.objects.get(id=id)
-        except Journal.DoesNotExist:
-            return Response({'error': 'Journal entry not found.'}, status=status.HTTP_404_NOT_FOUND)
+          
+            start_date = datetime.strptime(start_date_str, '%Y-%m-%d')
+            end_date = datetime.strptime(end_date_str, '%Y-%m-%d')
+
+            if start_date > end_date:
+                return Response({"error": "Start date must be before or equal to end date."}, status=status.HTTP_400_BAD_REQUEST)
+
+     
+            serializer_context = {'request': request}  # Include context if needed
+            serializer = JournalEntriesByPeriodSerializer(context=serializer_context)
+            data = serializer.get_journal_entries_by_date_range(start_date, end_date)
+
+            return Response(data, status=status.HTTP_200_OK)
+
+        except ValueError:
+            return Response({"error": "Invalid date format. Use YYYY-MM-DD."}, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+    
+            print(f"Exception occurred: {str(e)}")
+            return Response({"error": "An unexpected error occurred."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         
+class JournalStreakView(APIView):
+    def get(self, request):
+        journals = Journal.objects.filter(user_id=request.user.user_id).order_by('-upload_date')
+        current_streak = 0
+        last_date = None
+
+        for journal in journals:
+            print(journal.upload_date, "user_id", journal.user_id.user_id)
+            if last_date is None:
+                last_date = journal.upload_date
+                current_streak = 1  
+            else:
+                if (last_date.date() - journal.upload_date.date()).days == 1:
+                    current_streak += 1 
+                elif (last_date.date() - journal.upload_date.date()).days > 1:
+                    break  
+                last_date = journal.upload_date  
+        return Response({'streak': current_streak}, status=status.HTTP_200_OK)
+            
+        
+class JournalEntryViewSet(viewsets.ViewSet):
+    def retrieve(self, request, pk=None):
+        journal = get_object_or_404(Journal, pk=pk)
         serializer = JournalGetSerializer(journal)
         return Response(serializer.data, status=status.HTTP_200_OK)
+    
+    def update(self, request, pk=None):
+        journal = get_object_or_404(Journal, pk=pk)
+        serializer = JournalUpdateSerializer(journal, data=request.data, partial=True, context={'request': request})
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+    def destroy(self, request, pk=None):
+        journal = get_object_or_404(Journal, pk=pk)
+        journal.delete()
+        return Response({'message': 'Journal entry deleted successfully.'}, status=status.HTTP_200_OK)

@@ -2,10 +2,11 @@ import axios from 'axios'
 import { store } from '../redux/store'
 import { Platform } from 'react-native'
 
-const baseURL =
-  Platform.OS === 'ios'
-    ? 'http://localhost:8000/api/'
-    : 'http://10.0.2.2:8000/api/'
+const baseURL = 'https://themindfulbear.xyz/api/'
+// const baseURL =
+//   Platform.OS === 'ios'
+//     ? 'http://localhost:8000/api/'
+//     : 'http://10.0.2.2:8000/api/'
 
 const axiosInstance = axios.create({
   baseURL: baseURL,
@@ -32,6 +33,9 @@ axiosInstance.interceptors.request.use(
 
 axiosInstance.interceptors.response.use(
   (response) => {
+    if (response.status === 204) {
+      return response.data
+    }
     return response.data.data
   },
   (error) => {
@@ -42,7 +46,7 @@ axiosInstance.interceptors.response.use(
     ) {
       console.log('Error Description:', error.response.data.error_description)
     } else {
-      console.log('Error:', error.message)
+      console.log('Error:', error)
     }
 
     return Promise.reject(error)

@@ -10,8 +10,8 @@ const TabBar = ({ state, descriptors, navigation }) => {
     home: (props) => <MaterialCommunityIcons name="home" {...props} />,
     '(map)': (props) => <MaterialCommunityIcons name="map" {...props} />,
     stats: (props) => <MaterialCommunityIcons name="poll" {...props} />,
-    settings: (props) => <MaterialCommunityIcons name="account" {...props} />,
-    admin: (props) => <MaterialCommunityIcons name="cog" {...props} />,
+    settings: (props) => <MaterialCommunityIcons name="cog" {...props} />,
+    '(admin)': (props) => <MaterialCommunityIcons name="account" {...props} />,
   }
   const user = useSelector((state) => state.user)
   const [notIncludedRoutes, setNotIncludedRoutes] = useState([

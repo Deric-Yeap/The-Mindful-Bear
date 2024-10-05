@@ -12,9 +12,22 @@ export const journalEntriesByDate = (params) => {
   return axiosInstance.get('journal/journal_entries_by_date/', { params })
 }
 
-export const journalEntryById = (id) => {
-  return axiosInstance.get(`journal/journal_entry_by_id/${id}/`)
+export const journalEntriesByPeriod = (params) => {
+  return axiosInstance.get('journal/journal_entries_by_period/', { params })
 }
+
+export const journalEntryById = (id) => {
+  return axiosInstance.get(`journal/journal_entry/${id}/`)
+}
+
+export const deleteJournal = (id) => {
+  return axiosInstance.delete(`journal/journal_entry/${id}/`)
+}
+
+export const editJournal = (id, data) => {
+  return axiosInstance.put(`journal/journal_entry/${id}/`, data)
+}
+
 
 export const createJournal = (data) => {
   return axiosInstance.post('journal/create/', data)
@@ -34,4 +47,8 @@ export const speechToText = (formData) => {
       'Content-Type': 'multipart/form-data',
     },
   })
+}
+
+export const journalStreak = () => {
+  return axiosInstance.get('journal/journal_streak/')
 }

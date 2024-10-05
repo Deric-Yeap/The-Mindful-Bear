@@ -14,7 +14,7 @@ class LandmarkSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Landmark
-        fields = ['landmark_id', 'landmark_name', 'landmark_image_url','landmark_description', 'x_coordinates', 'y_coordinates', 'exercise', 'image_file_url']
+        fields = ['landmark_id', 'landmark_name', 'landmark_image_url','landmark_description', 'x_coordinates', 'y_coordinates', 'exercise', 'image_file_url', 'user_count']
 
     def get_image_file_url(self, obj):
         if obj.landmark_image_url:
@@ -64,7 +64,7 @@ class LandmarkUpdateSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Landmark
-        fields = ['landmark_name', 'landmark_image_url', 'landmark_description', 'x_coordinates', 'y_coordinates', 'exercise']
+        fields = ['landmark_name', 'landmark_image_url', 'landmark_description', 'x_coordinates', 'y_coordinates', 'exercise', 'user_count']
 
     def validate_landmark_image_url(self, value):
         if not value.name.endswith(('.jpg', '.jpeg', '.png')):
@@ -75,19 +75,15 @@ class LandmarkUpdateSerializer(serializers.ModelSerializer):
         user = self.context['request'].user    
         if 'landmark_image_url' in validated_data:
             landmark_image_file = validated_data.pop('landmark_image_url')
-            file_name, object_path = make_file_upload_path("landmark", user, quote(landmark_image_file.name))            
+            file_name, object_path = make_file_upload_path("landmark", user, quote(landmark_image_file.name))
             bucket = settings.AWS_STORAGE_BUCKET_NAME
             file_url = upload_fileobj(landmark_image_file, bucket, object_path)
             if not file_url:
                 raise serializers.ValidationError("File upload to S3 failed")
-
             instance.landmark_image_url = object_path
-        
-        instance.landmark_name = validated_data.get('landmark_name', instance.landmark_name)
-        instance.landmark_description = validated_data.get('landmark_description', instance.landmark_description)
-        instance.x_coordinates = validated_data.get('x_coordinates', instance.x_coordinates)
-        instance.y_coordinates = validated_data.get('y_coordinates', instance.y_coordinates)
-        instance.exercise = validated_data.get('exercise', instance.exercise)
+    
+        for attr, value in validated_data.items():
+            setattr(instance, attr, value)
 
         instance.save()
         return instance
@@ -97,3 +93,4 @@ class LandmarkUpdateSerializer(serializers.ModelSerializer):
         representation['landmark_image_url'] = instance.landmark_image_url
         representation['exercise'] = ExerciseSerializer(instance.exercise).data
         return representation
+
