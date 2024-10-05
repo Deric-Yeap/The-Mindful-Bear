@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react'
 import { View, Text, TouchableOpacity, ScrollView, Alert } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { useRoute } from '@react-navigation/native'
-
+import { router } from 'expo-router';
 import StatusBarComponent from '../../components/darkThemStatusBar'
 import BrownPageTitlePortion from '../../components/brownPageTitlePortion'
 import FormField from '../../components/formField'
@@ -13,6 +13,7 @@ import { listOptionSet } from '../../api/option-set'
 import { colors } from '../../common/styles'
 import { deleteQuestion, editQuestion } from '../../api/question'
 import ConfirmModal from '../../components/confirmModal'
+import { deleteForm } from '../../api/form';
 
 const UpdateForm = () => {
   const route = useRoute()
@@ -29,6 +30,9 @@ const UpdateForm = () => {
   const [isEditSuccessModalVisible, setIsEditSuccessModalVisible] = useState(false)
   const [questionChanges, setQuestionChanges] = useState({})
   const [noChangeError, setNoChangeError] = useState({})
+  const [handleConfirmCallback, setHandleConfirmCallback] = useState(null);
+  const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
+  const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);
 
   const fetchFormDetails = async () => {
     try {
@@ -115,6 +119,28 @@ const UpdateForm = () => {
     setQuestionChanges((prev) => ({ ...prev, [questionId]: true }))
     setNoChangeError((prev) => ({ ...prev, [questionId]: false }))
   }
+
+  const handleDeleteForm = async (formId) => {
+    try {
+      setIsConfirmModalOpen(true);
+
+      const confirmDelete = new Promise((resolve) => {
+        const handleConfirm = () => {
+          setIsConfirmModalOpen(false);
+          resolve(true);
+        };
+        setHandleConfirmCallback(() => handleConfirm);
+      });
+
+      const result = await confirmDelete;
+      if (result) {
+        await deleteForm(formId);        
+        setIsSuccessModalOpen(true);
+      }
+    } catch (error) {
+      console.error(`Error deleting form with ID: ${formId}`, error);
+    }
+  };
 
   return (
     <SafeAreaView className="flex-1 bg-optimistic-gray-10">
@@ -241,7 +267,15 @@ const UpdateForm = () => {
             </View>
           )
         })}
+        <View className="m-4">
+          <CustomButton
+            title="Delete Form"
+            handlePress={() => handleDeleteForm(formId)}
+            buttonStyle="w-full bg-mindfulBrown90"
+          />
+        </View>
       </ScrollView>
+
       {isDeleteModalVisible && (
         <ConfirmModal
           title="Are you sure?"
@@ -265,6 +299,35 @@ const UpdateForm = () => {
           confirmButtonTitle="OK, Thanks!"
           isConfirmButton={true}
           handleConfirm={() => setIsEditSuccessModalVisible(false)}
+        />
+      )}
+
+      {isConfirmModalOpen && (
+        <ConfirmModal
+          isConfirmButton
+          isCancelButton
+          // imageSource={confirmModal}
+          confirmButtonTitle="Confirm"
+          cancelButtonTitle="Cancel"
+          title="Are you sure?"
+          subTitle="Do you really want to delete this form?"
+          handleConfirm={handleConfirmCallback}
+          handleCancel={() => setIsConfirmModalOpen(false)}
+        />
+      )}
+
+      {isSuccessModalOpen && (
+        <ConfirmModal
+          isConfirmButton
+          isCancelButton={false}
+          // imageSource={confirmModal}
+          confirmButtonTitle="Ok"
+          title="Form Deleted"
+          subTitle="Form has been successfully deleted!"
+          handleConfirm={() => {
+            setIsSuccessModalOpen(false);
+            router.push('/form')
+          }}
         />
       )}
     </SafeAreaView>
