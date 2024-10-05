@@ -1,5 +1,11 @@
 import React, { useState, useRef, useMemo, useEffect } from 'react'
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native'
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  StyleSheet,
+  Dimensions,
+} from 'react-native'
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons'
 import { colors } from '../../common/styles'
 import { Image } from 'expo-image'
@@ -7,10 +13,7 @@ import CustomButton from '../customButton'
 import BottomSheet, { BottomSheetView } from '@gorhom/bottom-sheet'
 import AudioPlayer from './audioPlayer'
 import { useDispatch, useSelector } from 'react-redux'
-import {
-  setIsShownNav,
-  clearIsShownNav,
-} from '../../redux/slices/isShownNavSlice'
+import { clearIsShownNav } from '../../redux/slices/isShownNavSlice'
 import {
   createFavouriteLandmark,
   deleteFavouriteLandmark,
@@ -26,6 +29,19 @@ const getUserCountColor = (userCount) => {
     return colors.empathyOrange50 // Orange for medium crowd
   } else {
     return colors.presentRed50 // Red for crowded
+  }
+}
+
+const { width } = Dimensions.get('window')
+const getIconSize = (icon, width) => {
+  const sizes = {
+    heart: { small: 24, medium: 28 },
+    default: { small: 20, medium: 24 },
+  }
+  if (width < 365) {
+    return icon === 'heart' ? sizes.heart.small : sizes.default.small
+  } else {
+    return icon === 'heart' ? sizes.heart.medium : sizes.default.medium
   }
 }
 
@@ -67,7 +83,9 @@ const BottomSheetModal = ({
     {
       icon: 'map-marker-distance',
       value: landmarkDistancesMap[landmarkId]?.distance
-        ? `${landmarkDistancesMap[landmarkId]?.distance.toFixed(0)}m`
+        ? landmarkDistancesMap[landmarkId]?.distance >= 1000
+          ? `${(landmarkDistancesMap[landmarkId]?.distance / 1000).toFixed(2)} km`
+          : `${landmarkDistancesMap[landmarkId]?.distance.toFixed(0)} m`
         : 'N/A',
       color: colors.distanceColor || 'red',
     },
@@ -94,7 +112,9 @@ const BottomSheetModal = ({
     {
       icon: 'map-marker-distance',
       value: landmarkDistancesMap[landmarkId]?.distance
-        ? `${landmarkDistancesMap[landmarkId]?.distance.toFixed(0)}m`
+        ? landmarkDistancesMap[landmarkId]?.distance >= 1000
+          ? `${(landmarkDistancesMap[landmarkId]?.distance / 1000).toFixed(2)} km`
+          : `${landmarkDistancesMap[landmarkId]?.distance.toFixed(0)} m`
         : 'N/A',
     },
   ]
@@ -180,22 +200,24 @@ const BottomSheetModal = ({
             </TouchableOpacity>
           )}
 
-          <Text className={`text-xl font-urbanist-semibold text-white `}>
+          <Text
+            className={` text-lg xs:text-xl font-urbanist-semibold text-white `}
+          >
             {isExercise ? 'Exercise Overview' : 'Landmark Overview'}
           </Text>
         </View>
         <View
-          className="flex-row items-center w-full mt-2"
+          className="flex-row items-center w-full  xs:mt-2"
           id="landmark-name-frame"
         >
-          <Text className="text-3xl font-urbanist-bold text-white mr-5">
+          <Text className="text-2xl xs:text-3xl font-urbanist-bold text-white mr-5">
             {isExercise ? data.exercise_name : data.landmark_name}
           </Text>
           <TouchableOpacity onPress={toggleHeartColor}>
-            <View className="bg-mindful-brown-70 w-12 h-12 justify-center items-center rounded-full">
+            <View className="bg-mindful-brown-70 w-10 h-10 xs:w-12 xs:h-12 justify-center items-center rounded-full">
               <MaterialCommunityIcons
                 name="heart"
-                size={28}
+                size={getIconSize('heart', width)}
                 color={isFavorite ? 'red' : 'white'}
               />
             </View>
@@ -206,10 +228,10 @@ const BottomSheetModal = ({
             <View key={index} className="flex-row items-center">
               <MaterialCommunityIcons
                 name={detail.icon}
-                size={24}
+                size={getIconSize('detail', width)}
                 color={detail.color}
               />
-              <Text className="font-urbanist-semi-bold text-lg text-white ml-2">
+              <Text className="font-urbanist-semi-bold text-md xs:text-lg text-white ml-1 xs:ml-2">
                 {detail.value}
               </Text>
               {index <
@@ -238,7 +260,7 @@ const BottomSheetModal = ({
           <Image
             id="landmark-image-frame"
             source={{ uri: data.landmark_image_url }}
-            className={`w-full h-[32%] rounded-lg mt-2`}
+            className={`w-full h-1/4 xs:h-[32%] rounded-lg mt-2`}
             contentFit="cover"
           />
         )}
@@ -248,10 +270,10 @@ const BottomSheetModal = ({
             id="landmark-description-frame"
             className="mt-3 justify-center items-start"
           >
-            <Text className="text-xl text-white font-urbanist-semi-bold">
+            <Text className=" text-md xs:text-xl text-white font-urbanist-semi-bold">
               Description
             </Text>
-            <Text className="text-lg text-white font-urbanist-regular">
+            <Text className="text-md xs:text-lg text-white font-urbanist-regular">
               {isExercise
                 ? data.exercise_description
                 : data.landmark_description}

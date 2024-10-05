@@ -22,6 +22,10 @@ import UserLocationCustom from '../../../components/maps/userLocation'
 import * as turf from '@turf/turf'
 import { Alert } from 'react-native'
 import StatusBarComponent from '../../../components/darkThemStatusBar'
+import { Dimensions } from 'react-native'
+
+const windowWidth = Dimensions.get('window').width
+const screenWidth = Dimensions.get('screen').width
 
 const initialFormState = {
   start_datetime: '',
@@ -45,6 +49,7 @@ const Map = () => {
     selectedLandmarkData,
     sessionID,
     sessionStarted,
+    isClickTravel: isClickTraveled,
   } = useLocalSearchParams()
   const [form, setForm] = useState(initialFormState)
   const [isModalOpen, setIsModalOpen] = useState(false)
@@ -69,16 +74,13 @@ const Map = () => {
   )
   const [isPlayAudio, setIsPlayAudio] = useState(false)
   const [isArriveModalOpen, setIsArriveModalOpen] = useState(false)
+  const [isClickTravel, setIsClickTravel] = useState(null)
 
   const dispatch = useDispatch()
 
   useEffect(() => {
-    if (sessionStarted === 'true') {
-      setIsSessionStarted(true)
-    } else {
-      setIsSessionStarted(false)
-    }
-
+    setIsSessionStarted(sessionStarted ==='true');
+    setIsClickTravel(isClickTraveled === 'true');
     if (selectedLandmarkData) {
       try {
         const landmarkData = JSON.parse(selectedLandmarkData)
@@ -87,13 +89,9 @@ const Map = () => {
         console.error('Error parsing selected landmark data:', error)
       }
     }
+    setIsRedirectedForms(isRedirected === 'true');
 
-    if (isRedirected === 'true') {
-      setIsRedirectedForms(true)
-    } else {
-      setIsRedirectedForms(false)
-    }
-  }, [sessionStarted, selectedLandmarkData, isRedirected])
+  }, [sessionStarted, selectedLandmarkData, isRedirected, isClickTraveled])
 
   useEffect(() => {
     const fetchData = async () => {
@@ -198,16 +196,18 @@ const Map = () => {
   }, [location, geoJSON])
 
   useEffect(() => {
+    
     if (
       isRedirectedForms &&
       selectedLandmark &&
       location &&
-      !hasFetchedDirections.current
+      !hasFetchedDirections.current &&
+      isClickTravel
     ) {
       fetchDirections()
       hasFetchedDirections.current = true
     }
-  }, [isRedirectedForms, location, selectedLandmark])
+  }, [isRedirectedForms, location, selectedLandmark, isClickTravel])
 
   const updateRemainingRoute = (nearestPoint) => {
     const route = routeGeoJSON.features[0].geometry.coordinates
@@ -268,7 +268,7 @@ const Map = () => {
     }
   }
 
-  const handleSessionStart = () => {
+  const handleSessionStart = (isClickTravel) => {
     let sessionId = null
     const currentStartDateTime = getCurrentDateTime()
     setForm((prevForm) => {
@@ -290,6 +290,7 @@ const Map = () => {
               sessionID: sessionId,
               sessionStarted: true,
               start: 'true',
+              isClickTravel: isClickTravel 
             },
           })
         })
@@ -306,6 +307,7 @@ const Map = () => {
 
   const handleSessionConfirmEnd = async () => {
     const currentEndDateTime = getCurrentDateTime()
+    setIsClickTravel(false)
     setForm((prevForm) => {
       const updatedForm = {
         ...prevForm,
@@ -318,13 +320,13 @@ const Map = () => {
           setIsModalOpen(false)
           router.push({
             pathname: '/questionaire',
-            params: {
-              location: {},
+            params: {              
               isRedirectedForms: false,
               selectedLandmarkData: null,
               sessionID: sessionID,
               sessionStarted: true,
               start: 'false',
+              isClickTravel: isClickTravel
             },
           })
         })
@@ -339,13 +341,14 @@ const Map = () => {
   const resetForm = () => {
     setForm(initialFormState)
   }
+
   const fetchDirections = async () => {
     if (!location || !selectedLandmark) {
       console.error('Current location or selected landmark is not available.')
       return
     }
     if (!isSessionStarted) {
-      handleSessionStart()
+      handleSessionStart(true)
       return
     }
     const selectedLandmarkCoords = selectedLandmark.geometry.coordinates
@@ -473,7 +476,7 @@ const Map = () => {
                 handlePress={
                   isSessionStarted ? handleSessionEnd : handleSessionStart
                 }
-                buttonStyle={`w-11/12 z-10 absolute mb-1 bottom-20  self-center ${isSessionStarted ? 'bg-red-500 ' : ''} md:bottom-16`}
+                buttonStyle={`w-11/12 z-10 absolute mb-1  self-center ${isSessionStarted ? 'bg-red-500 ' : ''} bottom-24 xs:bottom-20 sm:bottom-18 md:bottom-16 lg:bottom-14`}
                 textStyle="text-white"
               />
             )}
