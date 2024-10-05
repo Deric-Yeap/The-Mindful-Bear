@@ -78,7 +78,7 @@ const JournalAnalytics = () => {
         barStyle="light-content"
         backgroundColor={colors.mindfulBrown100}
       />
-      <BrownPageTitlePortion title="Mindful Journal Analytics" />
+      <BrownPageTitlePortion title="Mindful Journal Analytics" tabName="(tabs)" screenName="stats" />
       <Text
         style={{
           color: colors['mindful-brown-80'],
