@@ -50,7 +50,7 @@ const Home = () => {
   }
   return (
     <SafeAreaView className="flex-1 bg-optimistic-gray-10">
-      <ScrollView>
+      <ScrollView className="mb-12">
         <StatusBarComponent
           barStyle="light-content"
           backgroundColor="#251404"
@@ -84,7 +84,7 @@ const Home = () => {
             rightImage={require('../../assets/mindfulJournalMetricCard.png')}
           >
             <Text className="font-urbanist-semi-bold text-mindful-brown-80 text-lg">
-              {streak} {streak <= 1 ? "Day":"Days"} Streak
+              {streak} {streak <= 1 ? 'Day' : 'Days'} Streak
             </Text>
           </MetricCard>
 
