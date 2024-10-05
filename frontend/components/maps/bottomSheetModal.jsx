@@ -15,10 +15,6 @@ import AudioPlayer from './audioPlayer'
 import { useDispatch, useSelector } from 'react-redux'
 import { clearIsShownNav } from '../../redux/slices/isShownNavSlice'
 import {
-  setIsShownNav,
-  clearIsShownNav,
-} from '../../redux/slices/isShownNavSlice'
-import {
   createFavouriteLandmark,
   deleteFavouriteLandmark,
 } from '../../api/landmark'

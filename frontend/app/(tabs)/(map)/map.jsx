@@ -73,6 +73,7 @@ const Map = () => {
   )
   const [isPlayAudio, setIsPlayAudio] = useState(false)
   const [isArriveModalOpen, setIsArriveModalOpen] = useState(false)
+  const [isClickTravel, setIsClickTravel] = useState(false)
 
   const dispatch = useDispatch()
 
@@ -206,12 +207,13 @@ const Map = () => {
       isRedirectedForms &&
       selectedLandmark &&
       location &&
-      !hasFetchedDirections.current
+      !hasFetchedDirections.current &&
+      isClickTravel
     ) {
       fetchDirections()
       hasFetchedDirections.current = true
     }
-  }, [isRedirectedForms, location, selectedLandmark])
+  }, [isRedirectedForms, location, selectedLandmark, isClickTravel])
 
   const updateRemainingRoute = (nearestPoint) => {
     const route = routeGeoJSON.features[0].geometry.coordinates
