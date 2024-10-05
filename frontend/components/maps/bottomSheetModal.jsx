@@ -18,6 +18,7 @@ import {
   createFavouriteLandmark,
   deleteFavouriteLandmark,
 } from '../../api/landmark'
+
 import StatusBarComponent from '../darkThemStatusBar'
 
 const THRESHOLD = [3, 5, 10]
@@ -254,6 +255,7 @@ const BottomSheetModal = ({
               setHasArrived={setHasArrived}
               handleClose={handleClose}
               openCompletedModal={openCompletedModal}
+              landmarkId={landmarkId}
             />
           </View>
         ) : (

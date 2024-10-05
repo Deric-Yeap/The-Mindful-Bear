@@ -8,7 +8,8 @@ import { getCurrentDateTime } from '../../../common/getCurrentFormattedDateTime'
 import { getGeoJson } from '../../../common/getGeoJson'
 import { createSession, updateSession } from '../../../api/session'
 import { landmarkIcon } from '../../../assets/image'
-import { getLandmarks, updateLandmark } from '../../../api/landmark'
+import { getLandmarks} from '../../../api/landmark'
+import { incrementUserCount, decrementUserCount, getUserCount } from '../../../api/landmark'
 import { confirmModal } from '../../../assets/image'
 import Loading from '../../../components/loading'
 import BottomSheetModal from '../../../components/maps/bottomSheetModal'
@@ -145,12 +146,9 @@ const Map = () => {
             if (distanceToDestination <= 10) {
               setHasArrived(true)
               try {
-                updateLandmark(selectedLandmark.properties.landmark_id, {
-                  user_count:
-                    selectedLandmark.properties.landmark_user_count + 1,
-                })
+                incrementUserCount(selectedLandmark.properties.landmark_id)                
               } catch (error) {
-                console.error('Error updating landmarks:', error)
+                console.error('Error updating landmarkusercount:', error)
               }
               setIsTraveling(false)
               setSelectedLandmark(selectedLandmark)
