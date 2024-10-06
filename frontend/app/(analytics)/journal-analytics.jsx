@@ -59,10 +59,14 @@ const JournalAnalytics = () => {
   };
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: colors['optimistic-gray-10'] }}>
-      <StatusBarComponent barStyle="light-content" backgroundColor={colors.mindfulBrown100} />
-      <BrownPageTitlePortion title="Mindful Journal Analytics" />
-
+    <SafeAreaView
+      style={{ flex: 1, backgroundColor: colors['optimistic-gray-10'] }}
+    >
+      <StatusBarComponent
+        barStyle="light-content"
+        backgroundColor={colors.mindfulBrown100}
+      />
+      <BrownPageTitlePortion title="Mindful Journal Analytics" tabName="(tabs)" screenName="stats" />
       <ScrollView style={{ flex: 1 }}>
         <Text style={{ color: colors['mindful-brown-80'], fontWeight: 'bold', fontSize: 18, marginTop: 16, marginLeft: 12 }}>
           Filter by Period

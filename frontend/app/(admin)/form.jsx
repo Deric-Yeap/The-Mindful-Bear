@@ -11,7 +11,6 @@ import { colors } from '../../common/styles';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import Loading from '../../components/loading';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { deleteForm } from '../../api/form';
 import ConfirmModal from '../../components/confirmModal';
 import { confirmModal } from '../../assets/image';
 
@@ -20,10 +19,8 @@ const Forms = () => {
   const [error, setError] = useState(null);
   const [forms, setForms] = useState([]);
   const [likertOptions, setLikertOptions] = useState([]);
-  const [selectedOption, setSelectedOption] = useState(1);
-  const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
-  const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);
-  const [handleConfirmCallback, setHandleConfirmCallback] = useState(null);
+  const [selectedOption, setSelectedOption] = useState(1);  
+  
 
   const onSelectSwitch = (index) => {
     setSelectedOption(index);
@@ -103,28 +100,7 @@ const Forms = () => {
     });
   };
 
-  const handleDeleteForm = async (formId) => {
-    try {
-      setIsConfirmModalOpen(true);
-
-      const confirmDelete = new Promise((resolve) => {
-        const handleConfirm = () => {
-          setIsConfirmModalOpen(false);
-          resolve(true);
-        };
-        setHandleConfirmCallback(() => handleConfirm);
-      });
-
-      const result = await confirmDelete;
-      if (result) {
-        await deleteForm(formId);
-        setForms((prevForms) => prevForms.filter((form) => form.id !== formId));
-        setIsSuccessModalOpen(true);
-      }
-    } catch (error) {
-      console.error(`Error deleting form with ID: ${formId}`, error);
-    }
-  };
+  
 
   return (
     <SafeAreaView className="flex-1 bg-optimistic-gray-10">
@@ -176,9 +152,9 @@ const Forms = () => {
                 <View style={{ flex: 1 }}>
                   <View className="flex-row">
                     <Text className="text-mindful-brown-10 font-bold text-lg">{item.form_name}</Text>
-                    <TouchableOpacity onPress={() => handleDeleteForm(item.id)} className="ml-4">
+                    {/* <TouchableOpacity onPress={() => handleDeleteForm(item.id)} className="ml-4">
                       <Icon name="trash" size={24} color={colors.presentRed50} />
-                    </TouchableOpacity>
+                    </TouchableOpacity> */}
                   </View>
                   <Text className="text-mindful-brown-10 text-md font-bold">
                     {item.store_responses ? 'Store User Response' : "Don't Store Response"}
@@ -219,31 +195,6 @@ const Forms = () => {
         )
       )}
 
-      {isConfirmModalOpen && (
-        <ConfirmModal
-          isConfirmButton
-          isCancelButton
-          imageSource={confirmModal}
-          confirmButtonTitle="Confirm"
-          cancelButtonTitle="Cancel"
-          title="Are you sure?"
-          subTitle="Do you really want to delete this form?"
-          handleConfirm={handleConfirmCallback}
-          handleCancel={() => setIsConfirmModalOpen(false)}
-        />
-      )}
-
-      {isSuccessModalOpen && (
-        <ConfirmModal
-          isConfirmButton
-          isCancelButton={false}
-          imageSource={confirmModal}
-          confirmButtonTitle="Ok"
-          title="Form Deleted"
-          subTitle="Form has been successfully deleted!"
-          handleConfirm={() => setIsSuccessModalOpen(false)}
-        />
-      )}
     </SafeAreaView>
   );
 };

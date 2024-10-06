@@ -4,7 +4,7 @@ import { Audio } from 'expo-av'
 import { MaterialCommunityIcons } from '@expo/vector-icons'
 import { Image } from 'expo-image'
 import Slider from '@react-native-community/slider'
-
+import { decrementUserCount } from '../../api/landmark'
 const AudioPlayer = ({
   audioUri,
   imageUrl,
@@ -14,6 +14,7 @@ const AudioPlayer = ({
   setHasArrived,
   handleClose,
   openCompletedModal,
+  landmarkId,
 }) => {
   const [sound, setSound] = useState()
   const [isPlaying, setIsPlaying] = useState(false)
@@ -62,6 +63,13 @@ const AudioPlayer = ({
           setIsExercise(false)
           handleSheetChange(0)
           setHasArrived(false)
+          try{
+            decrementUserCount(landmarkId)
+          }
+          catch (error){
+            console.error('Error updating landmarkusercount:', error)
+          }
+          
           handleClose()
         }
 
