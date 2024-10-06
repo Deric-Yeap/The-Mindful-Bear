@@ -207,11 +207,14 @@ const JournalStats = ({ title = 'Journal Stats' }) => {
       }),
     ]).start()
   }, [fadeAnim, scaleAnim])
-  const handlePress = (startDate, endDateForAxios) => {
+  const handlePress = () => {
     router.push({
       pathname: '/(journal)/journal-history-filtered',
-      params: { start: startDate, end: endDateForAxios },
-    })
+      params: { 
+        start: startDate ? startDate.toISOString().split('T')[0] : null, 
+        end: endDateForAxios ? endDateForAxios.toISOString().split('T')[0] : null 
+      },
+    });
   }
 
   return (
