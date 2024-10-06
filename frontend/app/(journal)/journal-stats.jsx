@@ -11,6 +11,8 @@ import { Calendar } from 'react-native-calendars'
 import { journalEntriesByPeriod } from '../../api/journal'
 import LottieView from 'lottie-react-native'
 import { Dimensions } from 'react-native';
+import { useRouter } from 'expo-router'
+import { useRoute } from '@react-navigation/native';
 
 const JournalStats = ({ title = 'Journal Stats' }) => {
   const today = new Date()
@@ -21,7 +23,10 @@ const JournalStats = ({ title = 'Journal Stats' }) => {
   const [journals, setJournals] = useState([])
   const [loading, setLoading] = useState(true)
   const { width, height } = Dimensions.get('window');
-
+  const router = useRouter();
+  const route = useRoute();
+  
+  var { tabName, screenName } = route.params || null;   
   const handleOnPress = () => {
     setModalVisible(true)
   }
@@ -222,8 +227,9 @@ const JournalStats = ({ title = 'Journal Stats' }) => {
     <SafeAreaView className="bg-optimistic-gray-10 h-full p-4 space-y-4">
       <BackButton
         buttonStyle="mb-4"
-        tabName="(journal)"
-        screenName={'journal-home'}
+        // tabName="(journal)"
+        tabName={tabName}
+        screenName={screenName}
       />
       <View className="flex-row items-center justify-between">
         <View>
