@@ -214,12 +214,20 @@ class JournalEntriesByDateSerializer(serializers.Serializer):
         request = self.context.get('request')
         user = request.user if request and request.user else None
 
-        journals = Journal.objects.filter(user_id = user, upload_date__year=year, upload_date__month=month)
+        journals = Journal.objects.filter(user_id=user, upload_date__year=year, upload_date__month=month)
+
+        for journal in journals:
+            journal.upload_date = journal.upload_date + timedelta(hours=8)
+
         journal_dict = {}
 
         current_date = start_date
         while current_date <= end_date:
-            day_journals = journals.filter(upload_date__date=current_date.date()).order_by('-upload_date')
+            day_journals = [journal for journal in journals if journal.upload_date.date() == current_date.date()]
+            
+            for journal in day_journals:
+                journal.upload_date = journal.upload_date - timedelta(hours=8)
+            
             journal_dict[str(current_date.date())] = JournalGetSerializer(day_journals, many=True).data
             current_date += timedelta(days=1)
 
@@ -231,11 +239,11 @@ class JournalEntriesByDateSerializer(serializers.Serializer):
         month = request.data.get('month')
 
         journal_dict = self.get_journal_entries_by_date(int(year), int(month))
-        
+
         data = {
             'dates': journal_dict
         }
-        
+
         return data
     
   
