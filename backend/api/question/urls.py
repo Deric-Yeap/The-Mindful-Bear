@@ -1,5 +1,9 @@
-from django.urls import path
+from django.urls import path, include
 from . import views
+from rest_framework.routers import DefaultRouter
+
+router = DefaultRouter()
+router.register(r'', views.QuestionViewSet, basename='question')
 
 urlpatterns = [
     #This gets all questions for a particular form
@@ -8,6 +12,9 @@ urlpatterns = [
     path("getFormQuestions/<int:pk>/",views.FormGetQuestions.as_view(),name="form-get-questions"),
     path("create",views.CreateQuestion.as_view(),name="create-question"),
     path('questions/update/<int:QuestionID>/', views.UpdateQuestion.as_view(), name='update-question'),
-    path('questions/delete/<int:QuestionID>/', views.DeleteQuestion.as_view(), name='delete-question'),
+    path('delete/<int:pk>/', views.DeleteQuestion.as_view(), name='delete-question'),
+
+    # newcode
+    path('', include(router.urls)),
 
 ]

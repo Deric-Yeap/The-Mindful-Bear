@@ -132,9 +132,11 @@ class JournalCalendarSerializer(serializers.Serializer):
     def get_weekly_matrix(self, year, month):
         start_date = datetime(year, month, 1)
         end_date = (start_date + timedelta(days=31)).replace(day=1) - timedelta(days=1)
+        request = self.context.get('request')
+        user = request.user if request and request.user else None
 
         weeks = [[] for _ in range(6)]
-        journals = Journal.objects.filter(upload_date__year=year, upload_date__month=month)
+        journals = Journal.objects.filter(user_id = user,upload_date__year=year, upload_date__month=month)
 
         current_date = start_date
         week_index = 0
@@ -208,8 +210,10 @@ class JournalEntriesByDateSerializer(serializers.Serializer):
     def get_journal_entries_by_date(self, year, month):
         start_date = datetime(year, month, 1)
         end_date = (start_date + timedelta(days=31)).replace(day=1) - timedelta(days=1)
+        request = self.context.get('request')
+        user = request.user if request and request.user else None
 
-        journals = Journal.objects.filter(upload_date__year=year, upload_date__month=month)
+        journals = Journal.objects.filter(user_id = user, upload_date__year=year, upload_date__month=month)
         journal_dict = {}
 
         current_date = start_date
@@ -234,16 +238,21 @@ class JournalEntriesByDateSerializer(serializers.Serializer):
         return data
     
   
+
 class JournalEntriesByPeriodSerializer(serializers.Serializer):
-    
+    start_date = serializers.DateField()
+    end_date = serializers.DateField()
+
     def get_journal_entries_by_date_range(self, start_date, end_date):
+        request = self.context.get('request')
+        user = request.user if request and request.user else None
         # Filter journals based on the date range provided
-        journals = Journal.objects.filter(upload_date__date__range=(start_date, end_date))
+        journals = Journal.objects.filter(user_id = user, upload_date__date__range=(start_date, end_date))
         journal_dict = {}
 
         current_date = start_date
         while current_date <= end_date:
-            
+            # Retrieve journals for the current date and serialize them
             day_journals = journals.filter(upload_date__date=current_date).order_by('-upload_date')
             journal_dict[str(current_date.date())] = JournalGetSerializer(day_journals, many=True).data
             current_date += timedelta(days=1)
@@ -251,18 +260,11 @@ class JournalEntriesByPeriodSerializer(serializers.Serializer):
         return journal_dict
 
     def to_representation(self, instance):
-        request = self.context.get('request')
-        year = request.data.get('year')
-        month = request.data.get('month')
+        # Retrieve the start and end dates from the validated data
+        start_date = self.validated_data['start_date']
+        end_date = self.validated_data['end_date']
 
-        
-        start_date = f"{year}-{month}-01"
-        end_date = f"{year}-{month}-{(start_date + timedelta(days=31)).replace(day=1) - timedelta(days=1)}"  # Get the last day of the month
-
-        
-        start_date = serializers.DateField().to_internal_value(start_date)
-        end_date = serializers.DateField().to_internal_value(end_date)
-
+        # Get journal entries within the date range
         journal_dict = self.get_journal_entries_by_date_range(start_date, end_date)
 
         data = {

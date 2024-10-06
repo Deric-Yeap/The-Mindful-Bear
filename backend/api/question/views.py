@@ -1,7 +1,9 @@
 from rest_framework import generics
 from .models import Question, Form
-from .serializer import QuestionSerializer
+from .serializer import QuestionSerializer, NewQuestionSerializer
 from rest_framework.exceptions import ValidationError
+from rest_framework import viewsets, status
+from rest_framework.response import Response
 
 # User Side
 #This gets all questions for a particular form
@@ -38,3 +40,15 @@ class DeleteQuestion(generics.DestroyAPIView):
     queryset = Question.objects.all()
     serializer_class = QuestionSerializer
     lookup_field = "QuestionID"  # Change to the primary key field in your model
+
+# if above not using can delete?
+
+# newcode
+class QuestionViewSet(viewsets.ModelViewSet):
+    serializer_class = NewQuestionSerializer
+    queryset= Question.objects.all()
+
+    def destroy(self, request, *args, **kwargs):
+        instance = self.get_object()
+        instance.delete()
+        return Response(status=status.HTTP_200_OK)

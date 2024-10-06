@@ -81,3 +81,77 @@
      ```bash
      deactivate
      ```
+
+
+## Deployment
+
+### Build and Push Docker Image (Backend) to AWS ECR
+
+First, log in to the AWS ECR registry. Replace `{version}` with your specific version (e.g., `UAT1.3`).
+
+```sh
+aws ecr get-login-password --region ap-southeast-1 | docker login --username AWS --password-stdin 010928205024.dkr.ecr.ap-southeast-1.amazonaws.com
+```
+
+Next, build the Docker image:
+
+```sh
+docker build -t themindfulbear:{version} .
+```
+
+Tag the newly created image for ECR:
+
+```sh
+docker tag themindfulbear:{version} 010928205024.dkr.ecr.ap-southeast-1.amazonaws.com/themindfulbear:{version}
+```
+
+Push the Docker image to AWS ECR:
+
+```sh
+docker push 010928205024.dkr.ecr.ap-southeast-1.amazonaws.com/themindfulbear:{version}
+```
+
+## Deploy the Docker Container on Host
+
+Log in to AWS ECR on the host machine:
+
+```sh
+aws ecr get-login-password --region ap-southeast-1 | docker login --username AWS --password-stdin 010928205024.dkr.ecr.ap-southeast-1.amazonaws.com
+```
+
+Pull the latest image from AWS ECR:
+
+```sh
+docker pull 010928205024.dkr.ecr.ap-southeast-1.amazonaws.com/themindfulbear:{version}
+```
+
+Stop the existing container (if running):
+
+```sh
+docker stop mindfulbear_container_ssl
+```
+
+Remove the old container:
+
+```sh
+docker rm mindfulbear_container_ssl
+```
+
+Remove the old images:
+
+```sh
+docker images
+docker rmi {image_id}
+```
+
+Run the new container with SSL enabled:
+
+```sh
+docker run -d --name mindfulbear_container_ssl -p 443:443 --restart always 010928205024.dkr.ecr.ap-southeast-1.amazonaws.com/themindfulbear:{version}
+```
+
+See the logs:
+
+```sh
+docker logs -f mindfulbear_container_ssl
+```

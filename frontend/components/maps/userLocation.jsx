@@ -1,5 +1,10 @@
 import React, { useEffect, useState } from 'react'
-import { UserLocation, locationManager } from '@rnmapbox/maps'
+import {
+  UserLocation,
+  locationManager,
+  ShapeSource,
+  FillLayer,
+} from '@rnmapbox/maps'
 import circle from '@turf/circle'
 import * as Location from 'expo-location'
 
@@ -8,10 +13,23 @@ const UserLocationCustom = ({
   minDisplacement = 100,
   renderMode = 'normal',
   onUpdate,
+  setCurrentLocation,
 }) => {
   const [coordinates, setCoordinates] = useState(null)
   const [lastCoordinates, setLastCoordinates] = useState(null)
   const [interactionArea, setInteractionArea] = useState(null)
+  const [fillOpacity, setFillOpacity] = useState(0.3)
+  const interactionAreaRadius = 15
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      const now = Date.now()
+      const opacity = 0.2 + 0.3 * ((Math.sin(now / 500) + 1) / 2) // Range from 0.2 to 0.5
+      setFillOpacity(opacity)
+    }, 100)
+
+    return () => clearInterval(interval)
+  }, [interactionAreaRadius])
 
   useEffect(() => {
     const requestPermissions = async () => {
@@ -60,26 +78,41 @@ const UserLocationCustom = ({
 
     setCoordinates(currentCoordinates)
     setLastCoordinates(currentCoordinates)
-
+    if (setCurrentLocation) setCurrentLocation(currentCoordinates)
     if (onUpdate) onUpdate(location)
   }
 
   const generateInteractionArea = (coords) => {
     return {
       type: 'FeatureCollection',
-      features: [circle(coords, 25, { units: 'meters', steps: 30 })],
+      features: [
+        circle(coords, interactionAreaRadius, { units: 'meters', steps: 30 }),
+      ],
     }
   }
 
-  if (!visible || !coordinates) return null
+  if (!visible || !coordinates || !interactionArea) return null
 
   return (
-    <UserLocation
-      visible={true}
-      androidRenderMode={'compass'}
-      showsUserHeadingIndicator={true}
-      onUpdate={(newLocation) => {}}
-    />
+    <>
+      <UserLocation
+        visible={true}
+        androidRenderMode={'compass'}
+        showsUserHeadingIndicator={true}
+        onUpdate={(newLocation) => {}}
+      />
+
+      <ShapeSource id="interactionArea" shape={interactionArea}>
+        <FillLayer
+          id="interactionAreaFillLayer"
+          style={{
+            fillColor: 'rgba(0, 119, 238, 0.7)',
+            fillOpacity: fillOpacity,
+            fillOutlineColor: 'rgba(0, 119, 238, 0.9)',
+          }}
+        />
+      </ShapeSource>
+    </>
   )
 }
 

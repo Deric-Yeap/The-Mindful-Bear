@@ -9,6 +9,7 @@ const JournalLayout = () => {
         <Stack.Screen name="voice-journal" options={{ headerShown: false }} />
         <Stack.Screen name="text-journal" options={{ headerShown: false }} />
         <Stack.Screen name="journal-history" options={{ headerShown: false }} />
+        <Stack.Screen name="journal-history-filtered" options={{ headerShown: false }} />
         <Stack.Screen name="journal-stats" options={{ headerShown: false }} />
         <Stack.Screen name="[id]" options={{ headerShown: false }} />
         <Stack.Screen name="edit/[id]" options={{ headerShown: false }} />

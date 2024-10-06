@@ -1,5 +1,5 @@
 import { View, Text, TextInput, TouchableOpacity } from 'react-native'
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { SelectList } from 'react-native-dropdown-select-list'
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons'
 
@@ -13,8 +13,11 @@ const Dropdown = ({
   dropdownShown,
   notFoundText,
   errorMessage,
+  selectedValue,
   ...props
 }) => {
+  const [selected, setSelected] = useState(selectedValue || "");  
+
   return (
     <View className={`space-y-2 ${customStyles}`}>
       <Text className=" text-mindful-brown-80 font-urbanist-extra-bold text-lg">
@@ -22,7 +25,10 @@ const Dropdown = ({
       </Text>
       <View>
         <SelectList
-          setSelected={handleSelect}
+          setSelected={(value) => {
+            setSelected(value);
+            handleSelect(value); 
+          }}
           data={data}
           placeholder={placeHolder}
           save="key"
@@ -30,6 +36,9 @@ const Dropdown = ({
           dropdownStyles={{ borderRadius: 20 }}
           dropdownShown={dropdownShown}
           notFoundText={notFoundText}
+          defaultOption={
+            data.find((opt) => opt.key === selectedValue) || null
+          }
         />
       </View>
       {errorMessage && (

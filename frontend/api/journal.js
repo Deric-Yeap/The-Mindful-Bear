@@ -7,6 +7,9 @@ export const journalCalendarSumary = (data) => {
 export const journalCountByYear = (params) => {
   return axiosInstance.get('journal/journal_count_year/', { params })
 }
+export const journalCounts = (params) => {
+  return axiosInstance.get('journal/count/', { params })
+}
 
 export const journalEntriesByDate = (params) => {
   return axiosInstance.get('journal/journal_entries_by_date/', { params })
@@ -47,4 +50,8 @@ export const speechToText = (formData) => {
       'Content-Type': 'multipart/form-data',
     },
   })
+}
+
+export const journalStreak = () => {
+  return axiosInstance.get('journal/journal_streak/')
 }

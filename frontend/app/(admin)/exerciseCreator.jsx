@@ -5,7 +5,7 @@ import FormField from '../../components/formField';
 import BrownPageTitlePortion from '../../components/brownPageTitlePortion';
 import StatusBarComponent from '../../components/darkThemStatusBar';
 import CustomButton from '../../components/customButton';
-import { createExercise, updateExercise } from '../../api/exercise';
+import { createExercise, updateExercise, deleteExercise } from '../../api/exercise';
 import { getLandmarks } from '../../api/landmark';
 import ConfirmModal from '../../components/confirmModal';
 import { confirmModal } from '../../assets/image';
@@ -22,6 +22,7 @@ const ExerciseCreator = () => {
   if (exercise) {
     try {
       exercise = JSON.parse(exercise);
+      console.log(exercise);
     } catch (error) {
       console.error('Error parsing exercise:', error);
       exercise = null; 
@@ -42,60 +43,74 @@ const ExerciseCreator = () => {
   
   const [showSuccess, setShowSuccess] = useState(false);
   const [allLandmarksAssigned, setAllLandmarksAssigned] = useState(false);
+  const [modalMessage, setModalMessage] = useState('');
 
   useEffect(() => {
     const fetchLandmarks = async () => {
       try {
         const data = await getLandmarks();
-        const formattedData = data.map(item => ({ key: item.landmark_id, value: item.landmark_name, exercise_id: item.exercise.exercise_id })); 
-        console.log('all landmarks list',formattedData)
+        const formattedData = data.map(item => ({
+          key: item.landmark_id,
+          value: item.landmark_name,
+          exercise_id: item.exercise?.exercise_id,
+        }));
 
-        // Filter out landmarks that are already assigned to another exercise
-        const availableLandmarks = formattedData.filter(item => !item.exercise_id || (exercise && exercise.landmarks.includes(item.key)));
+        console.log('All landmarks list:', formattedData);
+
+        // Filter out landmarks that are already assigned to another exercise unless they belong to the current exercise
+        const availableLandmarks = formattedData.filter(
+          item => !item.exercise_id || (exercise && exercise.landmarks.includes(item.key))
+        );
+
         setLandmarkList(availableLandmarks);
-        console.log("available landmarks",availableLandmarks)
         setAllLandmarksAssigned(availableLandmarks.length === 0);
-        console.log("are all landmarks assigned?",allLandmarksAssigned);
-  
+
         if (exercise?.landmarks) {
-          setSelectedLandmarks(exercise.landmarks
-            .map(key => {
-              const foundLandmark = availableLandmarks.find(item => item.key === key);
-              return foundLandmark ? foundLandmark.value : null;
-            })
-            .filter(value => value !== null)
-          )
-          console.log(selectedLandmarks);
+          const selected = availableLandmarks
+            .filter(item => exercise.landmarks.includes(item.key))
+            .map(item => item.value); 
+
+          setSelectedLandmarks(selected);
+          console.log("Selected landmarks after setting:", selected);
         }
       } catch (error) {
         console.error(error);
       }
     };
-  
-    fetchLandmarks();    
+
+    fetchLandmarks();
   }, []);
 
   const handleSubmit = async () => {
+    console.log("SUBMIT");
     if (!exerciseName || !description || !audioFile?.uri) {
       Alert.alert('Please fill in all fields and upload an audio file.');
       return;
     }
 
+    // Map selectedLandmarks (names) back to keys for API submission
+    const landmarkKeys = selectedLandmarks.map(name => {
+      const landmark = landmarkList.find(item => item.value === name);
+      return landmark ? landmark.key : null;
+    }).filter(key => key !== null);
+
     const exerciseData = {
       exercise_name: exerciseName,
       description: description,
       audio_file: audioFile,
-      landmarks: selectedLandmarks.map(item => item.key),
-    };    
-    
+      landmarks: landmarkKeys,
+    };
+
     try {
       if (exercise) {
-        await updateExercise(exercise.exercise_id, exerciseData); 
-        setShowSuccess(true); 
+        await updateExercise(exercise.exercise_id, exerciseData);
+        setModalMessage("updated");
+        setShowSuccess(true);
       } else {
-        await createExercise(exerciseData); 
-        setShowSuccess(true); 
-        resetForm(); 
+        await createExercise(exerciseData);
+        setModalMessage("created");
+        setShowSuccess(true);
+        resetForm();
       }
     } catch (error) {
       console.error(error);
@@ -103,8 +118,18 @@ const ExerciseCreator = () => {
     }
   };
 
+  const handleDelete = async () => {
+    try {
+      await deleteExercise(exercise.exercise_id);
+      setModalMessage("deleted");
+      setShowSuccess(true);
+    } catch (error) {
+      console.error("Error deleting exercise:", error);
+    }
+  };
+
   const resetForm = () => {
-    setExerciseName('');    
+    setExerciseName('');
     setDescription('');
     setAudioFile({});
     setSelectedLandmarks([]);
@@ -117,20 +142,20 @@ const ExerciseCreator = () => {
   };
 
   const handleAudioUpload = async () => {
-    try {    
+    try {
       const result = await DocumentPicker.getDocumentAsync({
         type: 'audio/*',
         copyToCacheDirectory: true,
-      });      
+      });
 
       if (!result.canceled && result.assets && result.assets.length > 0) {
         const selectedFile = result.assets[0];
-  
+
         setAudioFile({
-          uri: selectedFile.uri,    
+          uri: selectedFile.uri,
           name: selectedFile.name,
           type: selectedFile.mimeType,
-        });        
+        });
       } else {
         console.error("Server returned an error:", result.error);
       }
@@ -140,61 +165,47 @@ const ExerciseCreator = () => {
   };
 
   const handleConfirm = () => {
-    setShowSuccess(false);   
-    if (exercise) {    
-      router.push('/exercisemanagement');  
-    }    
+    setShowSuccess(false);
+    if (exercise || modalMessage === "deleted") {
+      router.push('/exercisemanagement');
+    }
   };
 
   const handleLandmarkSelect = (newSelectedItems) => {
+    // Set selected items as an array of values (names) to match dropdown functionality
     setSelectedLandmarks(newSelectedItems);
   };
-
+  
   return (
     <SafeAreaView className="flex-1 bg-optimistic-gray-10">
       <StatusBarComponent barStyle="light-content" backgroundColor="#251404" />
       <BrownPageTitlePortion title="Exercise Management" />
-      <ScrollView contentContainerStyle={{ paddingBottom: 20 }}>
+      <ScrollView className="pb-20 mt-4">
         <FormField
           title="Exercise Name"
           iconName="form-select"
           value={exerciseName}
           handleChange={setExerciseName}
-          customStyles="mb-4 m-4"
+          customStyles="m-4"
         />
-        <View className="flex-row justify-between items-center">
-          <Text className="text-mindful-brown-80 font-urbanist-extra-bold text-lg mb-2 p-4">
-            Description
-          </Text>
-        </View>
         <FormField
+          title="Description"
           iconName="text-box-outline"
           value={description}
           handleChange={setDescription}
-          customStyles="mx-4"
+          customStyles="m-4"
         />
-        <View className="flex-row items-center my-4 px-4 w-full">
-          <TouchableOpacity className="bg-serenity-green-50 rounded-full py-2 px-4 mr-4 shadow-lg" onPress={handleAudioUpload}>
-            <Text className="text-white text-lg">Upload Audio</Text>
-          </TouchableOpacity>
+        <View className="flex-row items-center mb-4 px-4 justify-between w-full">
           <Text className="underline text-mindful-brown-100 text-lg">{truncateFileName(audioFile.name)}</Text>
+          <TouchableOpacity className="bg-serenity-green-50 rounded-full py-2 px-4 ml-4 shadow-lg" onPress={handleAudioUpload}>
+            <Text className="text-white text-lg">Upload Audio</Text>
+          </TouchableOpacity>          
         </View>  
-        <View className="flex-row items-center my-4 px-4 w-full">
-          {/* <MultiselectDropdown            
-            title="Assigned Landmarks"
-            data={landmarkList}
-            placeHolder="Select Landmarks"
-            handleSelect={handleLandmarkSelect}
-            selectedItems={selectedLandmarks}
-            disabled={false}
-          /> */}
-          {allLandmarksAssigned ? (
-            exercise ? (
-              <Text className="text-mindful-brown-100 text-lg">All landmarks have been assigned an exercise</Text>
-            ) : (
-              <View style={{ height: 20 }} /> // Blank space
-            )
-          ) : (
+        <View className="px-4 w-full mb-4">
+          {allLandmarksAssigned || !exercise ? (
+              <Text className="text-mindful-brown-100 font-urbanist-regular text-base text-center mb-4">All landmarks have been assigned an exercise</Text>
+            ) 
+          : (
             <MultiselectDropdown            
               title="Assigned Landmarks"
               data={landmarkList}
@@ -212,6 +223,13 @@ const ExerciseCreator = () => {
             title={exercise ? "Update Exercise" : "Create Exercise"}
           />
         </View>        
+        <View className="mb-4 px-4 w-full">
+          <CustomButton
+            className="mt-2 w-full"
+            handlePress={handleDelete}
+            title="Delete Exercise"
+          />
+        </View>         
       </ScrollView>
       {showSuccess && (
         <ConfirmModal
@@ -220,7 +238,7 @@ const ExerciseCreator = () => {
           imageSource={confirmModal}
           confirmButtonTitle={'Confirm'}
           title={'Success!'}
-          subTitle={`Exercise ${exercise ? 'updated' : 'created'} successfully.`}
+          subTitle={`Exercise ${modalMessage} successfully.`}
           handleConfirm={handleConfirm}
         />
       )}

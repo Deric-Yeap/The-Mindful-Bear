@@ -7,4 +7,9 @@ class QuestionSerializer(serializers.ModelSerializer):
         model = Question
         fields = ["questionID", "question", "order", "formID", "optionSet", "option_set_id"] 
 
+class NewQuestionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Question
+        fields = ["questionID", "question", "order", "formID", "optionSet"]
+
 

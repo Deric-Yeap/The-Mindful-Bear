@@ -54,6 +54,10 @@ const Landmark = () => {
     }
   }
 
+  const truncateName = (name, maxLength = 14) => {
+    return name.length > maxLength ? `${name.slice(0, maxLength)}...` : name;
+  }
+
   return (
     <SafeAreaView className="flex-1 bg-optimistic-gray-10">
       <StatusBarComponent
@@ -108,7 +112,7 @@ const Landmark = () => {
               />
               <View className="p-3 rounded-b-2xl bg-mindful-brown-60">
                 <Text className="text-white font-urbanist-bold text-lg">
-                  {landmark.landmark_name}
+                  {truncateName(landmark.landmark_name)}
                 </Text>
                 <View className="flex-row justify-between mt-2">
                   <Link

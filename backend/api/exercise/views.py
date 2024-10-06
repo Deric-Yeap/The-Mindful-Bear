@@ -117,7 +117,7 @@ class ExerciseUpdateDestroyView(generics.UpdateAPIView, generics.DestroyAPIView)
         serializer = ExerciseSerializer(instance)
         serialized_data = serializer.data
         instance.delete()
-        return Response(serialized_data, status=status.HTTP_204_NO_CONTENT)
+        return Response(serialized_data, status=status.HTTP_200_OK)
 
 
 

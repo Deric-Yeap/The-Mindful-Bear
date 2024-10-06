@@ -20,7 +20,7 @@ const CustomButton = ({
     >
       {title && (
         <Text
-          className={`font-urbanist-semi-bold text-lg mr-4 text-white ${textStyle}`}
+          className={`font-urbanist-semi-bold text-lg ${iconName ? 'mr-4' : ''} text-white ${textStyle}`}
         >
           {title}
         </Text>

@@ -7,7 +7,7 @@ const TabsLayout = () => {
     '(map)': 'Map',
     stats: 'Stats',
     settings: 'Settings',
-    admin: 'Admin',
+    '(admin)': 'Admin',
   }
 
   return (
