@@ -10,6 +10,7 @@ import NeutralBear from '../../assets/neutralBear.png';
 import NegativeBear from '../../assets/negativeBear.png';
 import Toggle from '../../components/toggle';
 import axiosInstance from '../../common/axiosInstance';
+import { journalCounts } from '../../api/journal'
 
 const JournalAnalytics = () => {
   const [selectedBear, setSelectedBear] = useState('Positive'); 
@@ -18,23 +19,26 @@ const JournalAnalytics = () => {
   const [loading, setLoading] = useState(false); 
   const [error, setError] = useState(null); 
   const optionList = ['daily', 'monthly', 'yearly'];
+  const periodSelected =  optionList[selectedOption - 1]
 
   useEffect(() => {
     const fetchJournalData = async () => {
-      setLoading(true);
-      setError(null);
+      setLoading(true); 
+      setError(null); 
       try {
-        const url = `journal/count?sentiment=${selectedBear}&period=${optionList[selectedOption - 1]}`;
-        const response = await axiosInstance.get(url);
+        const response = await journalCounts({
+          sentiment: selectedBear,
+          period: periodSelected,
+        });
   
         if (response && Array.isArray(response.counts)) {
           const transformedData = response.counts.map(item => ({
             value: item.count,
             label: item.date,
           }));
-          setLineData(transformedData);
+          setLineData(transformedData); 
         } else {
-          setError('No data found');
+          setError('No data found'); 
         }
       } catch (error) {
         if (error.response) {
@@ -43,12 +47,12 @@ const JournalAnalytics = () => {
           setError('An unexpected error occurred. Please try again.');
         }
       } finally {
-        setLoading(false);
+        setLoading(false); 
       }
     };
   
-    fetchJournalData();
-  }, [selectedBear, selectedOption]);
+    fetchJournalData(); 
+  }, [selectedBear, selectedOption]); 
 
   const onSelectSwitch = option => {
     setSelectedOption(option);
