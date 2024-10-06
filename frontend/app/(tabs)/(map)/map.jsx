@@ -8,7 +8,7 @@ import { getCurrentDateTime } from '../../../common/getCurrentFormattedDateTime'
 import { getGeoJson } from '../../../common/getGeoJson'
 import { createSession, updateSession } from '../../../api/session'
 import { landmarkIcon } from '../../../assets/image'
-import { getLandmarks } from '../../../api/landmark'
+import { getFavouriteLandmarks, getLandmarks } from '../../../api/landmark'
 import {
   incrementUserCount,
   decrementUserCount,
@@ -61,6 +61,7 @@ const Map = () => {
   const [isCompletedModalOpen, setIsCompletedModalOpen] = useState(false)
   const [isSessionStarted, setIsSessionStarted] = useState(false)
   const [landmarksData, setLandmarksData] = useState([])
+  const [favouriteLandmarks, setFavouriteLandmarks] = useState([])
   const [loading, setLoading] = useState(true)
   const [isBottomSheetOpen, setIsBottomSheetOpen] = useState(false)
   const [selectedLandmark, setSelectedLandmark] = useState(null)
@@ -101,7 +102,9 @@ const Map = () => {
     const fetchData = async () => {
       try {
         const response = await getLandmarks()
+        const favourites = await getFavouriteLandmarks()
         setLandmarksData(response)
+        setFavouriteLandmarks(favourites)
       } catch (error) {
         console.error('Error fetching landmarks:', error)
       } finally {
@@ -390,7 +393,7 @@ const Map = () => {
     }
   }
 
-  const geoJSON = getGeoJson(landmarksData)
+  const geoJSON = getGeoJson(landmarksData, favouriteLandmarks)
   return (
     <SafeAreaView className="h-full">
       <StatusBarComponent
