@@ -118,7 +118,7 @@ class Count(APIView):
         sentiment = request.query_params.get('sentiment', None)
         period = request.query_params.get('period', 'daily')  # Default to daily
 
-        # # Filter journals by user
+        # Filter journals by user (this line is commented out)
         # journals = Journal.objects.filter(user_id=request.user.user_id)
     
         journals = Journal.objects.all()
@@ -137,15 +137,24 @@ class Count(APIView):
                 .annotate(count=JournalCount('id'))
                 .order_by('upload_date__date')
             )
-            response_data['daily_counts'] = list(daily_counts)
+            response_data['counts'] = [{'date': entry['upload_date__date'].strftime('%d/%m/%Y'), 'count': entry['count']} for entry in daily_counts]
 
         elif period == 'monthly':
             monthly_counts = (
-                journals.values('upload_date__month')  # Group by the month part of upload_date
+                journals.values('upload_date__year', 'upload_date__month')  # Group by both year and month
                 .annotate(count=JournalCount('id'))
-                .order_by('upload_date__month')
+                .order_by('upload_date__year', 'upload_date__month')
             )
-            response_data['monthly_counts'] = list(monthly_counts)
+            month_names = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+    
+            # Format the output as "Jan 24", "Feb 24", etc.
+            response_data['counts'] = [
+                {
+                    'date': f"{month_names[entry['upload_date__month'] - 1]} {str(entry['upload_date__year'])[2:]}",  # Get the last two digits of the year
+                    'count': entry['count']
+                }
+                for entry in monthly_counts
+            ]
 
         elif period == 'yearly':
             yearly_counts = (
@@ -153,7 +162,7 @@ class Count(APIView):
                 .annotate(count=JournalCount('id'))  # Count journal entries per year
                 .order_by('upload_date__year')
             )
-            response_data['yearly_counts'] = list(yearly_counts)  # Return list of year and count
+            response_data['counts'] = [{'date': entry['upload_date__year'], 'count': entry['count']} for entry in yearly_counts]
 
         else:
             return Response({'error': 'Invalid period specified'}, status=status.HTTP_400_BAD_REQUEST)
