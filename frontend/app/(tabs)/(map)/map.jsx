@@ -486,8 +486,7 @@ const Map = () => {
             imageSource={confirmModal}
             confirmButtonTitle={'Confirm'}
             cancelButtonTitle={'Cancel'}
-            title={'Are you sure you want to end now'}
-            subTitle={'test'}
+            title={'Are you sure you want to end now?'}
             handleCancel={() => {
               setIsModalOpen(false)
             }}
