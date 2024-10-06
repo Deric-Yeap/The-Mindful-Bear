@@ -16,7 +16,7 @@ import { journalEntriesByDate } from '../../api/journal'
 import { monthNames, daysOfWeek } from '../../common/constants'
 import { adjustHexColor } from '../../common/hexColor'
 import Loading from '../../components/loading'
-
+import { useRoute } from '@react-navigation/native'
 const JournalHistoryFiltered = () => {
   const [journals, setJournals] = useState([])
   const [selectedDate, setSelectedDate] = useState(null)
@@ -26,7 +26,10 @@ const JournalHistoryFiltered = () => {
   const router = useRouter()
   const fadeAnim = useRef(new Animated.Value(0)).current
   const scaleAnim = useRef(new Animated.Value(0)).current
-  
+
+  const inputStartDate = useRoute().params.start
+  const inputEndDate = useRoute().params.end
+
   useEffect(() => {
     Animated.parallel([
       Animated.timing(fadeAnim, {
@@ -56,8 +59,8 @@ const JournalHistoryFiltered = () => {
     return dates;
 };
 
-  const startDate = '2024-10-1'
-  const endDate = '2024-10-2'
+  const startDate = inputStartDate
+  const endDate = inputEndDate
 
   const dateRange = getDatesBetween(startDate, endDate);
 
