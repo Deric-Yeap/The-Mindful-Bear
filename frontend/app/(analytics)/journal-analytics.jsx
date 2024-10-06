@@ -11,6 +11,7 @@ import NegativeBear from '../../assets/negativeBear.png';
 import Toggle from '../../components/toggle';
 import axiosInstance from '../../common/axiosInstance';
 import { journalCounts } from '../../api/journal'
+import Loading from '../../components/loading';
 
 const JournalAnalytics = () => {
   const [selectedBear, setSelectedBear] = useState('Positive'); 
@@ -53,7 +54,13 @@ const JournalAnalytics = () => {
   
     fetchJournalData(); 
   }, [selectedBear, selectedOption]); 
-
+  if (loading) {
+    return (
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: colors.optimisticGray10 }}>
+        <Loading />
+      </View>
+    );
+  }
   const onSelectSwitch = option => {
     setSelectedOption(option);
   };
