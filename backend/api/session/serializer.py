@@ -124,26 +124,34 @@ class SessionSplitSerializer(serializers.Serializer):
 
         if period == 'daily':
             delta = timedelta(days=1)
-        elif period == 'weekly':
-            current_date -= timedelta(days=current_date.weekday())  # Adjust to previous Monday
-            delta = timedelta(weeks=1)
+            # remove weekly, add yearly
+        # elif period == 'weekly':
+        #     current_date -= timedelta(days=current_date.weekday())  # Adjust to previous Monday
+        #     delta = timedelta(weeks=1)
         elif period == 'monthly':
             current_date = current_date.replace(day=1)  # Set to the first day of the month
         # No delta needed here since we'll calculate the next month on the fly
+        elif period == 'yearly':
+            current_date = current_date.replace(month=1, day=1)
         else:
             raise serializers.ValidationError("Invalid period specified.")
 
         # Loop through the date range by the specified period (daily, weekly, etc.)
         while current_date < end_date_sgt:
-            if period == 'weekly':
-                next_date = current_date + timedelta(weeks=1)
-                key = f"{current_date.date()}"
-            elif period == 'monthly':
-                key = f"{current_date.year}-{current_date.month:02d}"  # Format as YYYY-MM
+            # if period == 'weekly':
+            #     next_date = current_date + timedelta(weeks=1)
+            #     # dd/mm/YY
+            #     key = f"{current_date.date()}"
+            if period == 'monthly':
+                key = f"{current_date.year}-{current_date.month:02d}"  # Format as MMM-YY
+                key = current_date.strftime("%b-%y").title()
                 if current_date.month == 12:
                     next_date = datetime(current_date.year + 1, 1, 1, tzinfo=SGT)  # January next year
                 else:
                     next_date = datetime(current_date.year, current_date.month + 1, 1, tzinfo=SGT)  # First day of next month
+            elif period == 'yearly':
+                key = f"{current_date.year}"
+                next_date = datetime(current_date.year + 1, 1, 1, tzinfo=SGT)  # January next year
             else:
                 next_date = current_date + delta
                 key = f"{current_date.date()}"
