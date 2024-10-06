@@ -3,4 +3,5 @@ export const featureFlags = {
   isSurveyScores: false,
   isDiscoverArticles: false,
   isSearchBar: false,
+  isSettings: false,
 }
