@@ -104,7 +104,7 @@ const AnalyticsTabs = () => {
           </View>
           <View className="flex-1 ml-4">
             <Text className="font-urbanist-bold text-lg">
-              User Journal Stats
+              My Journal Stats
             </Text>
             <Text className="font-urbanist-regular">
               Sentiment analysis, frequency of journalling
