@@ -69,7 +69,7 @@ const AnalyticsTabs = () => {
         </View>
       </TouchableOpacity>
     </Link>,
-    <Link href="/admin/engagement-metrics" asChild key="engagement-metrics">
+    <Link href="/mindfulness-exercises-analytics" asChild key="engagement-metrics">
       <TouchableOpacity className="bg-white p-4 rounded-2xl">
         <View className="flex-row items-center justify-between">
           <View className="w-16 h-16 rounded-full bg-empathy-orange-20 flex items-center justify-center">

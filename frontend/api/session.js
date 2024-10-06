@@ -24,8 +24,6 @@ export const splitSession = async ({ period = 'daily', year, month } = {}) => {
 
     // Make the API request
     const response = await axiosInstance.get(url)
-    console.log("response",response)
-    console.log("Response Data:", response.dates) // Debugging log
 
 
     // Return the response data
