@@ -1,4 +1,4 @@
-import { View, Text, TouchableOpacity, Modal, Animated } from 'react-native'
+import { View, Text, TouchableOpacity, Modal, Animated, ScrollView } from 'react-native'
 import React, { useEffect, useState, useRef } from 'react'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { BarChart } from 'react-native-gifted-charts'
@@ -10,6 +10,7 @@ import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons'
 import { Calendar } from 'react-native-calendars'
 import { journalEntriesByPeriod } from '../../api/journal'
 import LottieView from 'lottie-react-native'
+import { Dimensions } from 'react-native';
 
 const JournalStats = ({ title = 'Journal Stats' }) => {
   const today = new Date()
@@ -19,6 +20,7 @@ const JournalStats = ({ title = 'Journal Stats' }) => {
   const [endDateForAxios, setEndDateForAxios] = useState(null)
   const [journals, setJournals] = useState([])
   const [loading, setLoading] = useState(true)
+  const { width, height } = Dimensions.get('window');
 
   const handleOnPress = () => {
     setModalVisible(true)
@@ -213,6 +215,7 @@ const JournalStats = ({ title = 'Journal Stats' }) => {
   }
 
   return (
+    <ScrollView className="flex-1">
     <SafeAreaView className="bg-optimistic-gray-10 h-full p-4 space-y-4">
       <BackButton
         buttonStyle="mb-4"
@@ -373,6 +376,7 @@ const JournalStats = ({ title = 'Journal Stats' }) => {
         )}
       </View>
     </SafeAreaView>
+    </ScrollView>
   )
 }
 

@@ -18,6 +18,8 @@ from rest_framework.exceptions import APIException
 from django.http import JsonResponse
 import nltk
 from nltk.sentiment import SentimentIntensityAnalyzer
+from datetime import timedelta
+
 
 # Download VADER lexicon if not already downloaded
 nltk.download('vader_lexicon')
@@ -98,6 +100,77 @@ class CountYearJournalView(APIView):
         journals = Journal.objects.filter(user_id=request.user.user_id, upload_date__year=year)
         return Response({'count': journals.count()}, status=status.HTTP_200_OK)
 
+from datetime import datetime
+from django.db.models import Count as JournalCount
+from rest_framework.response import Response
+from rest_framework import status
+from rest_framework.views import APIView
+
+from datetime import datetime
+from django.db.models import Count as JournalCount
+from rest_framework.response import Response
+from rest_framework import status
+from rest_framework.views import APIView
+
+class Count(APIView):
+    def get(self, request):
+        # Get parameters from the request
+        sentiment = request.query_params.get('sentiment', None)
+        period = request.query_params.get('period', 'daily')  # Default to daily
+
+        # Filter journals by user (this line is commented out)
+        # journals = Journal.objects.filter(user_id=request.user.user_id)
+    
+        journals = Journal.objects.all()
+
+        # Filter by sentiment if provided
+        if sentiment:
+            journals = journals.filter(sentiment_analysis_result=sentiment)
+
+        # Prepare response data
+        response_data = {}
+
+        # Apply period filtering
+        if period == 'daily':
+            daily_counts = (
+                journals.values('upload_date__date')  # Group by the date part of upload_date
+                .annotate(count=JournalCount('id'))
+                .order_by('upload_date__date')
+            )
+            response_data['counts'] = [{'date': entry['upload_date__date'].strftime('%d/%m/%Y'), 'count': entry['count']} for entry in daily_counts]
+
+        elif period == 'monthly':
+            monthly_counts = (
+                journals.values('upload_date__year', 'upload_date__month')  # Group by both year and month
+                .annotate(count=JournalCount('id'))
+                .order_by('upload_date__year', 'upload_date__month')
+            )
+            month_names = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+    
+            # Format the output as "Jan 24", "Feb 24", etc.
+            response_data['counts'] = [
+                {
+                    'date': f"{month_names[entry['upload_date__month'] - 1]} {str(entry['upload_date__year'])[2:]}",  # Get the last two digits of the year
+                    'count': entry['count']
+                }
+                for entry in monthly_counts
+            ]
+
+        elif period == 'yearly':
+            yearly_counts = (
+                journals.values('upload_date__year')  # Group by the year part of upload_date
+                .annotate(count=JournalCount('id'))  # Count journal entries per year
+                .order_by('upload_date__year')
+            )
+            response_data['counts'] = [{'date': entry['upload_date__year'], 'count': entry['count']} for entry in yearly_counts]
+
+        else:
+            return Response({'error': 'Invalid period specified'}, status=status.HTTP_400_BAD_REQUEST)
+
+        return Response(response_data, status=status.HTTP_200_OK)
+
+
+    
 class SpeechToTextView(APIView):
     def post(self, request):
         if 'audio_file' not in request.FILES:
