@@ -8,8 +8,8 @@ from load_csv_part1 import load_csv_files
 part_2_tables = [
     'journal_journal.csv',
     'journal_journal_emotion_id.csv',
-    'userSession_usersession_existing.csv',
-    'userSession_usersession_mock.csv'
+    # 'userSession_usersession_existing.csv',
+    # 'userSession_usersession_mock.csv'
 ]
 
 
