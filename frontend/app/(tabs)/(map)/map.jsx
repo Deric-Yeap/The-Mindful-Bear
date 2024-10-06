@@ -8,7 +8,8 @@ import { getCurrentDateTime } from '../../../common/getCurrentFormattedDateTime'
 import { getGeoJson } from '../../../common/getGeoJson'
 import { createSession, updateSession } from '../../../api/session'
 import { landmarkIcon } from '../../../assets/image'
-import { getLandmarks, updateLandmark } from '../../../api/landmark'
+import { getLandmarks} from '../../../api/landmark'
+import { incrementUserCount, decrementUserCount, getUserCount } from '../../../api/landmark'
 import { confirmModal } from '../../../assets/image'
 import Loading from '../../../components/loading'
 import BottomSheetModal from '../../../components/maps/bottomSheetModal'
@@ -22,6 +23,10 @@ import UserLocationCustom from '../../../components/maps/userLocation'
 import * as turf from '@turf/turf'
 import { Alert } from 'react-native'
 import StatusBarComponent from '../../../components/darkThemStatusBar'
+import { Dimensions } from 'react-native'
+
+const windowWidth = Dimensions.get('window').width
+const screenWidth = Dimensions.get('screen').width
 
 const initialFormState = {
   start_datetime: '',
@@ -45,6 +50,7 @@ const Map = () => {
     selectedLandmarkData,
     sessionID,
     sessionStarted,
+    isClickTravel: isClickTraveled,
   } = useLocalSearchParams()
   const [form, setForm] = useState(initialFormState)
   const [isModalOpen, setIsModalOpen] = useState(false)
@@ -67,16 +73,15 @@ const Map = () => {
   const [isRedirectedForms, setIsRedirectedForms] = useState(
     useLocalSearchParams()
   )
+  const [isPlayAudio, setIsPlayAudio] = useState(false)
+  const [isArriveModalOpen, setIsArriveModalOpen] = useState(false)
+  const [isClickTravel, setIsClickTravel] = useState(null)
 
   const dispatch = useDispatch()
 
   useEffect(() => {
-    if (sessionStarted === 'true') {
-      setIsSessionStarted(true)
-    } else {
-      setIsSessionStarted(false)
-    }
-
+    setIsSessionStarted(sessionStarted ==='true');
+    setIsClickTravel(isClickTraveled === 'true');
     if (selectedLandmarkData) {
       try {
         const landmarkData = JSON.parse(selectedLandmarkData)
@@ -85,13 +90,9 @@ const Map = () => {
         console.error('Error parsing selected landmark data:', error)
       }
     }
+    setIsRedirectedForms(isRedirected === 'true');
 
-    if (isRedirected === 'true') {
-      setIsRedirectedForms(true)
-    } else {
-      setIsRedirectedForms(false)
-    }
-  }, [sessionStarted, selectedLandmarkData, isRedirected])
+  }, [sessionStarted, selectedLandmarkData, isRedirected, isClickTraveled])
 
   useEffect(() => {
     const fetchData = async () => {
@@ -145,26 +146,18 @@ const Map = () => {
             if (distanceToDestination <= 10) {
               setHasArrived(true)
               try {
-                updateLandmark(selectedLandmark.properties.landmark_id, {
-                  user_count:
-                    selectedLandmark.properties.landmark_user_count + 1,
-                })
+                incrementUserCount(selectedLandmark.properties.landmark_id)                
               } catch (error) {
-                console.error('Error updating landmarks:', error)
+                console.error('Error updating landmarkusercount:', error)
               }
               setIsTraveling(false)
               setSelectedLandmark(selectedLandmark)
+              setIsArriveModalOpen(true)
 
               setIsBottomSheetOpen(true)
               if (isShownNav) {
                 dispatch(setIsShownNav())
               }
-
-              Alert.alert(
-                'Arrival Notification',
-                'You have arrived at the landmark!',
-                [{ text: 'OK' }]
-              )
             }
           }
           setPrevLocation(location)
@@ -186,7 +179,7 @@ const Map = () => {
           { units: 'meters' }
         )
 
-        const estimatedTime = distanceToLandmark / 1.4
+        const estimatedTime = Math.round(distanceToLandmark / 1.4 / 60)
 
         return {
           landmark_id: landmark.properties.landmark_id,
@@ -201,16 +194,18 @@ const Map = () => {
   }, [location, geoJSON])
 
   useEffect(() => {
+    
     if (
       isRedirectedForms &&
       selectedLandmark &&
       location &&
-      !hasFetchedDirections.current
+      !hasFetchedDirections.current &&
+      isClickTravel
     ) {
       fetchDirections()
       hasFetchedDirections.current = true
     }
-  }, [isRedirectedForms, location, selectedLandmark])
+  }, [isRedirectedForms, location, selectedLandmark, isClickTravel])
 
   const updateRemainingRoute = (nearestPoint) => {
     const route = routeGeoJSON.features[0].geometry.coordinates
@@ -264,8 +259,14 @@ const Map = () => {
       }
     }
   }
+  const handleIsArriveModalOpen = () => {
+    if (isArriveModalOpen) {
+      setIsArriveModalOpen(false)
+      setIsPlayAudio(true)
+    }
+  }
 
-  const handleSessionStart = () => {
+  const handleSessionStart = (isClickTravel) => {
     let sessionId = null
     const currentStartDateTime = getCurrentDateTime()
     setForm((prevForm) => {
@@ -287,6 +288,7 @@ const Map = () => {
               sessionID: sessionId,
               sessionStarted: true,
               start: 'true',
+              isClickTravel: isClickTravel 
             },
           })
         })
@@ -303,6 +305,7 @@ const Map = () => {
 
   const handleSessionConfirmEnd = async () => {
     const currentEndDateTime = getCurrentDateTime()
+    setIsClickTravel(false)
     setForm((prevForm) => {
       const updatedForm = {
         ...prevForm,
@@ -315,13 +318,13 @@ const Map = () => {
           setIsModalOpen(false)
           router.push({
             pathname: '/questionaire',
-            params: {
-              location: {},
+            params: {              
               isRedirectedForms: false,
               selectedLandmarkData: null,
               sessionID: sessionID,
               sessionStarted: true,
               start: 'false',
+              isClickTravel: isClickTravel
             },
           })
         })
@@ -336,13 +339,14 @@ const Map = () => {
   const resetForm = () => {
     setForm(initialFormState)
   }
+
   const fetchDirections = async () => {
     if (!location || !selectedLandmark) {
       console.error('Current location or selected landmark is not available.')
       return
     }
     if (!isSessionStarted) {
-      handleSessionStart()
+      handleSessionStart(true)
       return
     }
     const selectedLandmarkCoords = selectedLandmark.geometry.coordinates
@@ -387,6 +391,11 @@ const Map = () => {
   const geoJSON = getGeoJson(landmarksData)
   return (
     <SafeAreaView className="h-full">
+      <StatusBarComponent
+        barStyle="light-content"
+        backgroundColor="transparent"
+        translucent={true}
+      />
       <View className="flex-1 relative">
         {loading ? (
           <View className="flex-1 justify-center items-center">
@@ -465,7 +474,7 @@ const Map = () => {
                 handlePress={
                   isSessionStarted ? handleSessionEnd : handleSessionStart
                 }
-                buttonStyle={`w-11/12 z-10 absolute mb-1 bottom-20  self-center ${isSessionStarted ? 'bg-red-500 ' : ''} md:bottom-16`}
+                buttonStyle={`w-11/12 z-10 absolute mb-1  self-center ${isSessionStarted ? 'bg-red-500 ' : ''} bottom-24 xs:bottom-20 sm:bottom-18 md:bottom-16 lg:bottom-14`}
                 textStyle="text-white"
               />
             )}
@@ -504,8 +513,19 @@ const Map = () => {
             openCompletedModal={setIsCompletedModalOpen}
             handleTravel={fetchDirections}
             hasArrived={hasArrived}
+            isPlayAudio={isPlayAudio}
             setHasArrived={setHasArrived}
             distanceTimeEst={landmarkDistances}
+          />
+        )}
+        {hasArrived && isArriveModalOpen && (
+          <ConfirmModal
+            isConfirmButton={true}
+            isCancelButton={false}
+            imageSource={confirmModal}
+            confirmButtonTitle={'Start!'}
+            title={'You have arrived at the landmark!'}
+            handleConfirm={handleIsArriveModalOpen}
           />
         )}
       </View>

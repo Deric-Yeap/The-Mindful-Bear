@@ -81,7 +81,7 @@ export default () => ({
         '@bam.tech/react-native-app-security',
         {
           sslPinning: {
-            'themindfulbear.xyz': [
+            'www.themindfulbear.xyz': [
               '2wAy2q6RNZ+mJZYfLkrMVecVwxGtSNhkW7MUyPV0FoY=',
               'NYbU7PBwV4y9J67c4guWTki8FJ+uudrXL0a4V4aRcrg=',
             ],

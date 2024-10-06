@@ -1,4 +1,4 @@
-import { View, Text, TouchableOpacity, Modal, Animated } from 'react-native'
+import { View, Text, TouchableOpacity, Modal, Animated, ScrollView } from 'react-native'
 import React, { useEffect, useState, useRef } from 'react'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { BarChart } from 'react-native-gifted-charts'
@@ -10,10 +10,9 @@ import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons'
 import { Calendar } from 'react-native-calendars'
 import { journalEntriesByPeriod } from '../../api/journal'
 import LottieView from 'lottie-react-native'
+import { Dimensions } from 'react-native';
 
-const JournalStats = ({
-  title = 'Journal Stats',
-}) => {
+const JournalStats = ({ title = 'Journal Stats' }) => {
   const today = new Date()
   const [modalVisible, setModalVisible] = useState(false)
   const [startDate, setStartDate] = useState(null)
@@ -21,6 +20,7 @@ const JournalStats = ({
   const [endDateForAxios, setEndDateForAxios] = useState(null)
   const [journals, setJournals] = useState([])
   const [loading, setLoading] = useState(true)
+  const { width, height } = Dimensions.get('window');
 
   const handleOnPress = () => {
     setModalVisible(true)
@@ -170,7 +170,11 @@ const JournalStats = ({
         value: emotionCounts.Surprised || 0,
         frontColor: colors.empathyOrange40,
       },
-      { primaryEmotion: 'Sad', value: emotionCounts.Sad || 0, frontColor: '#507DBC' },
+      {
+        primaryEmotion: 'Sad',
+        value: emotionCounts.Sad || 0,
+        frontColor: '#507DBC',
+      },
       {
         primaryEmotion: 'Disgusted',
         value: emotionCounts.Disgusted || 0,
@@ -203,40 +207,47 @@ const JournalStats = ({
       }),
     ]).start()
   }, [fadeAnim, scaleAnim])
-  const handlePress = (startDate,endDateForAxios) => {
+  const handlePress = () => {
     router.push({
-        pathname: '/(journal)/journal-history-filtered',
-        params: { start: startDate, end: endDateForAxios },
+      pathname: '/(journal)/journal-history-filtered',
+      params: { 
+        start: startDate ? startDate.toISOString().split('T')[0] : null, 
+        end: endDateForAxios ? endDateForAxios.toISOString().split('T')[0] : null 
+      },
     });
-};
-
+  }
 
   return (
+    <ScrollView className="flex-1">
     <SafeAreaView className="bg-optimistic-gray-10 h-full p-4 space-y-4">
-      <BackButton buttonStyle="mb-4" tabName="(journal)" screenName={"journal-home"}/>
+      <BackButton
+        buttonStyle="mb-4"
+        tabName="(journal)"
+        screenName={'journal-home'}
+      />
       <View className="flex-row items-center justify-between">
         <View>
-        <View className="flex flex-row items-center">
-  <Text className="font-urbanist-extra-bold text-mindful-brown-80 text-4xl mb-1">
-    {title}
-  </Text>
-  <TouchableOpacity
-    onPress={handleOnPress}
-    className="w-16 h-16 rounded-full bg-empathy-orange-40 flex items-center justify-center -mt-4 ml-4" // Added ml-4 for spacing
-  >
-    <MaterialCommunityIcons
-      name="calendar-month-outline"
-      size={30}
-      color="white"
-    />
-  </TouchableOpacity>
-</View>
+          <View className="flex flex-row items-center">
+            <Text className="font-urbanist-extra-bold text-mindful-brown-80 text-4xl mb-1">
+              {title}
+            </Text>
+            <TouchableOpacity
+              onPress={handleOnPress}
+              className="w-16 h-16 rounded-full bg-empathy-orange-40 flex items-center justify-center -mt-4 ml-4" // Added ml-4 for spacing
+            >
+              <MaterialCommunityIcons
+                name="calendar-month-outline"
+                size={30}
+                color="white"
+              />
+            </TouchableOpacity>
+          </View>
           <Text className="font-urbanist-light text-mindful-brown-80 text-xl">
             {startDate && endDate
               ? `Selected Range: ${startDate.toLocaleDateString('en-GB')} - ${endDate.toLocaleDateString('en-GB')}`
               : startDate
                 ? `Selected Date: ${startDate.toLocaleDateString('en-GB')}`
-                :null}
+                : null}
           </Text>
         </View>
       </View>
@@ -249,7 +260,7 @@ const JournalStats = ({
           setModalVisible(false)
           setStartDate(null)
           setEndDate(null)
-          setEndDateForAxios(null) 
+          setEndDateForAxios(null)
         }}
       >
         <View className="flex-1 justify-center items-center bg-black bg-opacity-50">
@@ -323,54 +334,52 @@ const JournalStats = ({
               source={require('../../assets/bearSleeping.json')}
               autoPlay
               loop
-               className="w-30 h-40 mt-5"
+              className="w-30 h-40 mt-5"
             />
-
-            
           </>
-          
-
         ) : (
           <View className="relative mt-2">
-         <BarChart
-        data={barData}
-        height={400}
-        barWidth={30}
-        barBorderRadius={20}
-        frontColor="lightgray"
-        yAxisThickness={0} 
-        xAxisThickness={0}
-        isAnimated
-        yAxisMaxValue={maxValue}
-        stepValue={stepValue}
-        noOfSections={noOfSections}
-        yAxisLabelTexts={Array.from({ length: noOfSections + 1 }, (_, i) =>
-          (i * stepValue).toString()
+            <BarChart
+              data={barData}
+              height={400}
+              barWidth={30}
+              barBorderRadius={20}
+              frontColor="lightgray"
+              yAxisThickness={0}
+              xAxisThickness={0}
+              isAnimated
+              yAxisMaxValue={maxValue}
+              stepValue={stepValue}
+              noOfSections={noOfSections}
+              yAxisLabelTexts={Array.from(
+                { length: noOfSections + 1 },
+                (_, i) => (i * stepValue).toString()
+              )}
+              xAxisLabelTexts={[]}
+              scrollAnimation={true}
+            />
+            <View className="flex flex-row justify-between ml-3 mr-11 ">
+              {barData.map((item, index) => (
+                <Text
+                  key={index}
+                  className="text-center text-sm -mx-1 transform rotate-[-40deg] w-16"
+                >
+                  {item.primaryEmotion}
+                </Text>
+              ))}
+            </View>
+          </View>
         )}
-        xAxisLabelTexts={[]} 
-        scrollAnimation = {true}
-      />
-          <View className="flex flex-row justify-between ml-3 mr-11 ">
-        {barData.map((item, index) => (
-          <Text
-            key={index}
-            className="text-center text-sm -mx-1 transform rotate-[-40deg] w-16"
-          >
-            {item.primaryEmotion} 
-          </Text>
-        ))}
-      </View>
-    </View>
-        )}
-        {startDate && (
+        {startDate && innerEmotionsArray.length !== 0 && (
           <CustomButton
             title="View Journal Entries"
-            handlePress={(handlePress)}
+            handlePress={handlePress}
             buttonStyle="w-full mt-10"
           />
         )}
       </View>
     </SafeAreaView>
+    </ScrollView>
   )
 }
 

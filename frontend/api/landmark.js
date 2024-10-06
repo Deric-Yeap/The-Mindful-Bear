@@ -85,3 +85,15 @@ export const deleteFavouriteLandmark = async (id) => {
 export const getFavouriteLandmarks = async () => {
     return axiosInstance.get('favourite/list')
 }
+
+export const getUserCount = async (landmarkId) => {
+    return axiosInstance.get(`landmarkUserCount/${landmarkId}`);
+}
+
+export const incrementUserCount = async (landmarkId) => {
+    return axiosInstance.patch(`landmarkUserCount/${landmarkId}/increment`);
+}
+
+export const decrementUserCount = async (landmarkId) => {
+    return axiosInstance.patch(`landmarkUserCount/${landmarkId}/decrement`);
+}

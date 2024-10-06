@@ -135,6 +135,13 @@ module.exports = {
       inset: {
         18: '4.5rem',
       },
+      screens: {
+        xs: '365dp', // Max width for extra small devices (e.g., older iPhones, small Android phones)
+        sm: '456dp', // Max width for small devices (e.g., Pixel 8)
+        md: '540dp', // Max width for medium devices (e.g., iPhone 11/12/13, Pixel 6/7)
+        lg: '768dp', // Max width for large devices (e.g., iPhone 12 Pro Max, larger Android devices)
+        xl: '1024dp', // Max width for extra-large devices (e.g., tablets, larger screens)
+      },
     },
   },
   plugins: [],

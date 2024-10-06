@@ -1,11 +1,11 @@
-import { View, Text, ScrollView, StatusBar } from 'react-native'
+import { View, Text, ScrollView, StatusBar,Image } from 'react-native'
 import { useState } from 'react'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { setTokens } from '../../redux/slices/authSlice'
 import { setUserDetails } from '../../redux/slices/userSlice'
 import { useDispatch, useSelector } from 'react-redux'
 import { router } from 'expo-router'
-
+import logo from '../../assets/mindfulBearLogo.png'
 import CustomButton from '../../components/customButton'
 import FormField from '../../components/formField'
 import { login, getMe } from '../../api/user'
@@ -61,7 +61,15 @@ const SignIn = () => {
           <Loading />
         </View>
       )}
-      <View className="min-h-[78vh] mt-[25vh] items-center mx-5">
+      <View className="min-h-[78vh] mt-[13vh] items-center mx-5">
+      <Image 
+                source={logo} 
+                className="w-auto h-64 mb-0" 
+                resizeMode="contain" 
+            />
+              <Text className="font-urbanist-extra-bold text-3xl text-mindful-brown-80 pb-3">
+         The Mindful Bear
+        </Text>
         <Text className="font-urbanist-extra-bold text-3xl text-mindful-brown-80 pb-10">
           Sign In
         </Text>
