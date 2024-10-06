@@ -7,6 +7,7 @@ from ..emotion.serializer import EmotionSerializer
 from datetime import datetime, timedelta
 from collections import defaultdict
 from collections import Counter
+import pytz
 
 
 
@@ -136,31 +137,31 @@ class JournalCalendarSerializer(serializers.Serializer):
         user = request.user if request and request.user else None
 
         weeks = [[] for _ in range(6)]
-        journals = Journal.objects.filter(user_id = user,upload_date__year=year, upload_date__month=month)
+        journals = Journal.objects.filter(user_id=user, upload_date__year=year, upload_date__month=month)
+
+        adjusted_journals = []
+        for journal in journals:
+            journal.upload_date = journal.upload_date + timedelta(hours=8)
+            adjusted_journals.append(journal)
 
         current_date = start_date
         week_index = 0
 
         # Fill initial nulls for the first week
-        for _ in range(start_date.weekday()): 
+        for _ in range(start_date.weekday()):
             weeks[week_index].append(None)
 
         while current_date <= end_date:
             if current_date.weekday() == 0 and current_date != start_date:
                 week_index += 1
 
-            day_journals = journals.filter(upload_date__date=current_date.date())
-            if day_journals.exists():
-               
-                journal = day_journals.first()
-                
-               
-                sentiments = [j.sentiment_analysis_result for j in day_journals if j.sentiment_analysis_result]
+            day_journals = [journal for journal in adjusted_journals if journal.upload_date.date() == current_date.date()]
+            if day_journals:
+                journal = day_journals[0]
 
-                
+                sentiments = [j.sentiment_analysis_result for j in day_journals if j.sentiment_analysis_result]
                 sentiment_counts = Counter(sentiments)
 
-               
                 positive_count = sentiment_counts.get('Positive', 0)
                 negative_count = sentiment_counts.get('Negative', 0)
                 neutral_count = sentiment_counts.get('Neutral', 0)
@@ -169,24 +170,24 @@ class JournalCalendarSerializer(serializers.Serializer):
                     highest_sentiment = 'Positive'
                 elif negative_count > positive_count:
                     highest_sentiment = 'Negative'
-                elif positive_count == negative_count:
-                    highest_sentiment = 'Neutral' 
-                elif neutral_count > negative_count:
-                    highest_sentiment = 'Negative' 
-                elif neutral_count > positive_count:
-                    highest_sentiment = 'Positive'
                 else:
-                    highest_sentiment = None  
+                    highest_sentiment = 'Neutral'  # Adjusted condition for neutrality
 
                 journal.sentiment_analysis_result = highest_sentiment
-                
-                weeks[week_index].append(journal)
+
+                journal_data = {
+                    "id": journal.id,
+                    "upload_date": journal.upload_date.isoformat(),
+                    "sentiment_analysis_result": highest_sentiment
+                }
+
+                weeks[week_index].append(journal_data)
             else:
                 weeks[week_index].append({'sentiment_analysis_result': None})
 
             current_date += timedelta(days=1)
 
-      
+        # Fill the last week with nulls if less than 7 days
         while len(weeks[-1]) < 7:
             weeks[-1].append(None)
 
@@ -198,11 +199,11 @@ class JournalCalendarSerializer(serializers.Serializer):
         month = request.data.get('month')
 
         weeks = self.get_weekly_matrix(int(year), int(month))
-        
+
         data = {
-            'weeks': [[JournalSummarySerializer(journal).data if isinstance(journal, Journal) else journal for journal in week] for week in weeks]
+            'weeks': [[JournalSummarySerializer(journal).data if isinstance(journal, dict) and 'id' in journal else journal for journal in week] for week in weeks]
         }
-        
+
         return data
     
 class JournalEntriesByDateSerializer(serializers.Serializer):
