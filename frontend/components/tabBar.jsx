@@ -4,6 +4,7 @@ import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons'
 import { colors } from '../common/styles'
 import { getMe } from '../api/user'
 import { useSelector } from 'react-redux'
+import { featureFlags } from '../common/featureFlags'
 
 const TabBar = ({ state, descriptors, navigation }) => {
   const icons = {
@@ -13,6 +14,7 @@ const TabBar = ({ state, descriptors, navigation }) => {
     settings: (props) => <MaterialCommunityIcons name="cog" {...props} />,
     '(admin)': (props) => <MaterialCommunityIcons name="account" {...props} />,
   }
+
   const user = useSelector((state) => state.user)
   const [notIncludedRoutes, setNotIncludedRoutes] = useState([
     '_sitemap',
@@ -36,7 +38,9 @@ const TabBar = ({ state, descriptors, navigation }) => {
     }
 
     fetchUser()
-  }, [])
+  }, [user.isStaff])
+
+  // Check if the settings tab should be included
 
   return (
     <View className="absolute bottom-5 left-0 right-0">
@@ -52,8 +56,12 @@ const TabBar = ({ state, descriptors, navigation }) => {
                 ? options.title
                 : route.name
 
-          // Check if the current route is excluded
-          if (notIncludedRoutes.includes(route.name)) return null
+          if (
+            notIncludedRoutes.includes(route.name) ||
+            (route.name === 'settings' && !featureFlags.isSettings)
+          ) {
+            return null
+          }
 
           const isFocused = state.index === index
           const handleNavigation = () => {

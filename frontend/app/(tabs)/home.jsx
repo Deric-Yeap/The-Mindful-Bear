@@ -5,7 +5,7 @@ import { SafeAreaView } from 'react-native-safe-area-context'
 import { Link } from 'expo-router'
 import { Image } from 'expo-image'
 import { useSelector } from 'react-redux'
-
+import { featureFlags } from '../../common/featureFlags'
 import TopBrownSearchBar from '../../components/topBrownSearchBar'
 import MetricCard from '../../components/metricCard'
 import { colors } from '../../common/styles'
@@ -87,22 +87,27 @@ const Home = () => {
               {streak} {streak <= 1 ? 'Day' : 'Days'} Streak
             </Text>
           </MetricCard>
-
+          {featureFlags.isDiscoverArticles && (
+            <>
+              <Text className="text-mindful-brown-100 font-urbanist-extra-bold text-xl mb-4">
+                Discover Articles
+              </Text>
+              <MetricCard
+                route="/(article)/article-discovery"
+                iconName="book-plus-outline"
+                iconColor={colors.kindPurple50}
+                circleStyle="bg-kind-purple-10"
+                title="Article Discovery Made Easy"
+              >
+                <Text className="font-urbanist-semi-bold text-mindful-brown-80 text-lg">
+                  Effortlessly search and find articles that inspire and inform.
+                </Text>
+              </MetricCard>
+            </>
+          )}
           <Text className="text-mindful-brown-100 font-urbanist-extra-bold text-xl mb-4">
-            Discover Articles
+            Favourite Landmarks
           </Text>
-          <MetricCard
-            route="/(article)/article-discovery"
-            iconName="book-plus-outline"
-            iconColor={colors.kindPurple50}
-            circleStyle="bg-kind-purple-10"
-            title="Article Discovery Made Easy"
-          >
-            <Text className="font-urbanist-semi-bold text-mindful-brown-80 text-lg">
-              Effortlessly search and find articles that inspire and inform.
-            </Text>
-          </MetricCard>
-
           <MetricCard
             route="/favourite"
             iconName="book-plus-outline"

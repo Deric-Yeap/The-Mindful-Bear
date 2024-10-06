@@ -125,7 +125,7 @@ const BottomSheetModal = ({
   const bottomSheetRef = useRef(null)
   const snapPoints = useMemo(() => ['60%', '95%'], [])
   const [currentSnapIndex, setCurrentSnapIndex] = useState(0)
-  const [isFavorite, setIsFavorite] = useState(false)
+  const [isFavorite, setIsFavorite] = useState(data.is_favorite || false)
   const [isExercise, setIsExercise] = useState(false)
   const dispatch = useDispatch()
 

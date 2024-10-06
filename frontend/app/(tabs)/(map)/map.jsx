@@ -8,8 +8,12 @@ import { getCurrentDateTime } from '../../../common/getCurrentFormattedDateTime'
 import { getGeoJson } from '../../../common/getGeoJson'
 import { createSession, updateSession } from '../../../api/session'
 import { landmarkIcon } from '../../../assets/image'
-import { getLandmarks} from '../../../api/landmark'
-import { incrementUserCount, decrementUserCount, getUserCount } from '../../../api/landmark'
+import { getFavouriteLandmarks, getLandmarks } from '../../../api/landmark'
+import {
+  incrementUserCount,
+  decrementUserCount,
+  getUserCount,
+} from '../../../api/landmark'
 import { confirmModal } from '../../../assets/image'
 import Loading from '../../../components/loading'
 import BottomSheetModal from '../../../components/maps/bottomSheetModal'
@@ -57,6 +61,7 @@ const Map = () => {
   const [isCompletedModalOpen, setIsCompletedModalOpen] = useState(false)
   const [isSessionStarted, setIsSessionStarted] = useState(false)
   const [landmarksData, setLandmarksData] = useState([])
+  const [favouriteLandmarks, setFavouriteLandmarks] = useState([])
   const [loading, setLoading] = useState(true)
   const [isBottomSheetOpen, setIsBottomSheetOpen] = useState(false)
   const [selectedLandmark, setSelectedLandmark] = useState(null)
@@ -80,8 +85,8 @@ const Map = () => {
   const dispatch = useDispatch()
 
   useEffect(() => {
-    setIsSessionStarted(sessionStarted ==='true');
-    setIsClickTravel(isClickTraveled === 'true');
+    setIsSessionStarted(sessionStarted === 'true')
+    setIsClickTravel(isClickTraveled === 'true')
     if (selectedLandmarkData) {
       try {
         const landmarkData = JSON.parse(selectedLandmarkData)
@@ -90,15 +95,16 @@ const Map = () => {
         console.error('Error parsing selected landmark data:', error)
       }
     }
-    setIsRedirectedForms(isRedirected === 'true');
-
+    setIsRedirectedForms(isRedirected === 'true')
   }, [sessionStarted, selectedLandmarkData, isRedirected, isClickTraveled])
 
   useEffect(() => {
     const fetchData = async () => {
       try {
         const response = await getLandmarks()
+        const favourites = await getFavouriteLandmarks()
         setLandmarksData(response)
+        setFavouriteLandmarks(favourites)
       } catch (error) {
         console.error('Error fetching landmarks:', error)
       } finally {
@@ -146,7 +152,7 @@ const Map = () => {
             if (distanceToDestination <= 10) {
               setHasArrived(true)
               try {
-                incrementUserCount(selectedLandmark.properties.landmark_id)                
+                incrementUserCount(selectedLandmark.properties.landmark_id)
               } catch (error) {
                 console.error('Error updating landmarkusercount:', error)
               }
@@ -194,7 +200,6 @@ const Map = () => {
   }, [location, geoJSON])
 
   useEffect(() => {
-    
     if (
       isRedirectedForms &&
       selectedLandmark &&
@@ -288,7 +293,7 @@ const Map = () => {
               sessionID: sessionId,
               sessionStarted: true,
               start: 'true',
-              isClickTravel: isClickTravel 
+              isClickTravel: isClickTravel,
             },
           })
         })
@@ -318,13 +323,13 @@ const Map = () => {
           setIsModalOpen(false)
           router.push({
             pathname: '/questionaire',
-            params: {              
+            params: {
               isRedirectedForms: false,
               selectedLandmarkData: null,
               sessionID: sessionID,
               sessionStarted: true,
               start: 'false',
-              isClickTravel: isClickTravel
+              isClickTravel: isClickTravel,
             },
           })
         })
@@ -388,7 +393,7 @@ const Map = () => {
     }
   }
 
-  const geoJSON = getGeoJson(landmarksData)
+  const geoJSON = getGeoJson(landmarksData, favouriteLandmarks)
   return (
     <SafeAreaView className="h-full">
       <StatusBarComponent
@@ -461,10 +466,7 @@ const Map = () => {
                   </Mapbox.ShapeSource>
                 )}
                 {centerOfLineString && (
-                  <Mapbox.Camera
-                    zoomLevel={15}
-                    centerCoordinate={centerOfLineString}
-                  />
+                  <Mapbox.Camera zoomLevel={18} centerCoordinate={location} />
                 )}
               </Mapbox.MapView>
             </View>
@@ -487,8 +489,7 @@ const Map = () => {
             imageSource={confirmModal}
             confirmButtonTitle={'Confirm'}
             cancelButtonTitle={'Cancel'}
-            title={'Are you sure you want to end now'}
-            subTitle={'test'}
+            title={'Are you sure you want to end now?'}
             handleCancel={() => {
               setIsModalOpen(false)
             }}
