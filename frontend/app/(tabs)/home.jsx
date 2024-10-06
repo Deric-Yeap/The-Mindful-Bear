@@ -105,7 +105,9 @@ const Home = () => {
               </MetricCard>
             </>
           )}
-
+          <Text className="text-mindful-brown-100 font-urbanist-extra-bold text-xl mb-4">
+            Favourite Landmarks
+          </Text>
           <MetricCard
             route="/favourite"
             iconName="book-plus-outline"
