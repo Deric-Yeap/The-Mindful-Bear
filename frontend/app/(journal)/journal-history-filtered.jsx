@@ -50,6 +50,9 @@ const JournalHistoryFiltered = () => {
     let currentDate = new Date(startDate);
     const end = new Date(endDate);
 
+    if (isNaN(end.getTime())) {
+      return [currentDate.toISOString().split('T')[0]]; // Return only the start date
+  }
 
     while (currentDate <= end) {
         dates.push(currentDate.toISOString().split('T')[0]); // Push the date in YYYY-MM-DD format
@@ -63,7 +66,7 @@ const JournalHistoryFiltered = () => {
   const endDate = inputEndDate
 
   const dateRange = getDatesBetween(startDate, endDate);
-
+  console.log(dateRange)
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true)
