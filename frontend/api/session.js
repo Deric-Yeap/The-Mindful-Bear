@@ -5,6 +5,5 @@ export const createSession = async (data) => {
 }
 
 export const updateSession = async (data, sessionId) => {
-  console.log(sessionId)
   return axiosInstance.put(`session/update/${sessionId}/`, data)
 }

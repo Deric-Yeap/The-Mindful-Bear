@@ -1,181 +1,193 @@
-import React, { useEffect, useState } from 'react';
-import { View, Text, TouchableOpacity, ScrollView, Alert } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import FormField from '../../components/formField';
-import BrownPageTitlePortion from '../../components/brownPageTitlePortion';
-import StatusBarComponent from '../../components/darkThemStatusBar';
-import CustomButton from '../../components/customButton';
-import { createExercise, updateExercise, deleteExercise } from '../../api/exercise';
-import { getLandmarks } from '../../api/landmark';
-import ConfirmModal from '../../components/confirmModal';
-import { confirmModal } from '../../assets/image';
-import { useRoute } from '@react-navigation/native';
-import { useRouter } from 'expo-router';
-import * as DocumentPicker from 'expo-document-picker';
-import MultiselectDropdown from '../../components/multiselectDropdown';
+import React, { useEffect, useState } from 'react'
+import { View, Text, TouchableOpacity, ScrollView, Alert } from 'react-native'
+import { SafeAreaView } from 'react-native-safe-area-context'
+import FormField from '../../components/formField'
+import BrownPageTitlePortion from '../../components/brownPageTitlePortion'
+import StatusBarComponent from '../../components/darkThemStatusBar'
+import CustomButton from '../../components/customButton'
+import {
+  createExercise,
+  updateExercise,
+  deleteExercise,
+} from '../../api/exercise'
+import { getLandmarks } from '../../api/landmark'
+import ConfirmModal from '../../components/confirmModal'
+import { confirmModal } from '../../assets/image'
+import { useRoute } from '@react-navigation/native'
+import { useRouter } from 'expo-router'
+import * as DocumentPicker from 'expo-document-picker'
+import MultiselectDropdown from '../../components/multiselectDropdown'
 
 const ExerciseCreator = () => {
-  const route = useRoute();
-  const router = useRouter();
-  var { exercise } = route.params || {}; 
+  const route = useRoute()
+  const router = useRouter()
+  var { exercise } = route.params || {}
 
   if (exercise) {
     try {
-      exercise = JSON.parse(exercise);
-      console.log(exercise);
+      exercise = JSON.parse(exercise)
     } catch (error) {
-      console.error('Error parsing exercise:', error);
-      exercise = null; 
+      console.error('Error parsing exercise:', error)
+      exercise = null
     }
   }
 
-  const [exerciseName, setExerciseName] = useState(exercise?.exercise_name || '');
-  const [description, setDescription] = useState(exercise?.description || '');
+  const [exerciseName, setExerciseName] = useState(
+    exercise?.exercise_name || ''
+  )
+  const [description, setDescription] = useState(exercise?.description || '')
   const [audioFile, setAudioFile] = useState(
-    exercise ? { 
-      uri: exercise.file_url, 
-      name: exercise.audio_url?.split('/').pop(), 
-      type: `audio/${exercise.audio_url?.split('.').pop()}` 
-    } : {}
-  );  
-  const [landmarkList, setLandmarkList] = useState([]);
-  const [selectedLandmarks, setSelectedLandmarks] = useState([]);
-  
-  const [showSuccess, setShowSuccess] = useState(false);
-  const [allLandmarksAssigned, setAllLandmarksAssigned] = useState(false);
-  const [modalMessage, setModalMessage] = useState('');
+    exercise
+      ? {
+          uri: exercise.file_url,
+          name: exercise.audio_url?.split('/').pop(),
+          type: `audio/${exercise.audio_url?.split('.').pop()}`,
+        }
+      : {}
+  )
+  const [landmarkList, setLandmarkList] = useState([])
+  const [selectedLandmarks, setSelectedLandmarks] = useState([])
+
+  const [showSuccess, setShowSuccess] = useState(false)
+  const [allLandmarksAssigned, setAllLandmarksAssigned] = useState(false)
+  const [modalMessage, setModalMessage] = useState('')
 
   useEffect(() => {
     const fetchLandmarks = async () => {
       try {
-        const data = await getLandmarks();
-        const formattedData = data.map(item => ({
+        const data = await getLandmarks()
+        const formattedData = data.map((item) => ({
           key: item.landmark_id,
           value: item.landmark_name,
           exercise_id: item.exercise?.exercise_id,
-        }));
-
-        console.log('All landmarks list:', formattedData);
+        }))
 
         // Filter out landmarks that are already assigned to another exercise unless they belong to the current exercise
         const availableLandmarks = formattedData.filter(
-          item => !item.exercise_id || (exercise && exercise.landmarks.includes(item.key))
-        );
+          (item) =>
+            !item.exercise_id ||
+            (exercise && exercise.landmarks.includes(item.key))
+        )
 
-        setLandmarkList(availableLandmarks);
-        setAllLandmarksAssigned(availableLandmarks.length === 0);
+        setLandmarkList(availableLandmarks)
+        setAllLandmarksAssigned(availableLandmarks.length === 0)
 
         if (exercise?.landmarks) {
           const selected = availableLandmarks
-            .filter(item => exercise.landmarks.includes(item.key))
-            .map(item => item.value); 
+            .filter((item) => exercise.landmarks.includes(item.key))
+            .map((item) => item.value)
 
-          setSelectedLandmarks(selected);
-          console.log("Selected landmarks after setting:", selected);
+          setSelectedLandmarks(selected)
         }
       } catch (error) {
-        console.error(error);
+        console.error(error)
       }
-    };
+    }
 
-    fetchLandmarks();
-  }, []);
+    fetchLandmarks()
+  }, [])
 
   const handleSubmit = async () => {
-    console.log("SUBMIT");
     if (!exerciseName || !description || !audioFile?.uri) {
-      Alert.alert('Please fill in all fields and upload an audio file.');
-      return;
+      Alert.alert('Please fill in all fields and upload an audio file.')
+      return
     }
 
     // Map selectedLandmarks (names) back to keys for API submission
-    const landmarkKeys = selectedLandmarks.map(name => {
-      const landmark = landmarkList.find(item => item.value === name);
-      return landmark ? landmark.key : null;
-    }).filter(key => key !== null);
+    const landmarkKeys = selectedLandmarks
+      .map((name) => {
+        const landmark = landmarkList.find((item) => item.value === name)
+        return landmark ? landmark.key : null
+      })
+      .filter((key) => key !== null)
 
     const exerciseData = {
       exercise_name: exerciseName,
       description: description,
       audio_file: audioFile,
       landmarks: landmarkKeys,
-    };
+    }
 
     try {
       if (exercise) {
-        await updateExercise(exercise.exercise_id, exerciseData);
-        setModalMessage("updated");
-        setShowSuccess(true);
+        await updateExercise(exercise.exercise_id, exerciseData)
+        setModalMessage('updated')
+        setShowSuccess(true)
       } else {
-        await createExercise(exerciseData);
-        setModalMessage("created");
-        setShowSuccess(true);
-        resetForm();
+        await createExercise(exerciseData)
+        setModalMessage('created')
+        setShowSuccess(true)
+        resetForm()
       }
     } catch (error) {
-      console.error(error);
-      Alert.alert(`Error ${exercise ? 'updating' : 'creating'} exercise:`, error.message);
+      console.error(error)
+      Alert.alert(
+        `Error ${exercise ? 'updating' : 'creating'} exercise:`,
+        error.message
+      )
     }
-  };
+  }
 
   const handleDelete = async () => {
     try {
-      await deleteExercise(exercise.exercise_id);
-      setModalMessage("deleted");
-      setShowSuccess(true);
+      await deleteExercise(exercise.exercise_id)
+      setModalMessage('deleted')
+      setShowSuccess(true)
     } catch (error) {
-      console.error("Error deleting exercise:", error);
+      console.error('Error deleting exercise:', error)
     }
-  };
+  }
 
   const resetForm = () => {
-    setExerciseName('');
-    setDescription('');
-    setAudioFile({});
-    setSelectedLandmarks([]);
-  };
+    setExerciseName('')
+    setDescription('')
+    setAudioFile({})
+    setSelectedLandmarks([])
+  }
 
   const truncateFileName = (fileName) => {
-    if (!fileName) return "No Audio File";
-    const maxLength = 20;
-    return fileName.length > maxLength ? `${fileName.substring(0, maxLength)}...` : fileName;
-  };
+    if (!fileName) return 'No Audio File'
+    const maxLength = 20
+    return fileName.length > maxLength
+      ? `${fileName.substring(0, maxLength)}...`
+      : fileName
+  }
 
   const handleAudioUpload = async () => {
     try {
       const result = await DocumentPicker.getDocumentAsync({
         type: 'audio/*',
         copyToCacheDirectory: true,
-      });
+      })
 
       if (!result.canceled && result.assets && result.assets.length > 0) {
-        const selectedFile = result.assets[0];
+        const selectedFile = result.assets[0]
 
         setAudioFile({
           uri: selectedFile.uri,
           name: selectedFile.name,
           type: selectedFile.mimeType,
-        });
+        })
       } else {
-        console.error("Server returned an error:", result.error);
+        console.error('Server returned an error:', result.error)
       }
     } catch (error) {
-      console.error("Error picking audio file:", error);
+      console.error('Error picking audio file:', error)
     }
-  };
+  }
 
   const handleConfirm = () => {
-    setShowSuccess(false);
-    if (exercise || modalMessage === "deleted") {
-      router.push('/exercisemanagement');
+    setShowSuccess(false)
+    if (exercise || modalMessage === 'deleted') {
+      router.push('/exercisemanagement')
     }
-  };
+  }
 
   const handleLandmarkSelect = (newSelectedItems) => {
     // Set selected items as an array of values (names) to match dropdown functionality
-    setSelectedLandmarks(newSelectedItems);
-  };
-  
+    setSelectedLandmarks(newSelectedItems)
+  }
+
   return (
     <SafeAreaView className="flex-1 bg-optimistic-gray-10">
       <StatusBarComponent barStyle="light-content" backgroundColor="#251404" />
@@ -196,17 +208,23 @@ const ExerciseCreator = () => {
           customStyles="m-4"
         />
         <View className="flex-row items-center mb-4 px-4 justify-between w-full">
-          <Text className="underline text-mindful-brown-100 text-lg">{truncateFileName(audioFile.name)}</Text>
-          <TouchableOpacity className="bg-serenity-green-50 rounded-full py-2 px-4 ml-4 shadow-lg" onPress={handleAudioUpload}>
+          <Text className="underline text-mindful-brown-100 text-lg">
+            {truncateFileName(audioFile.name)}
+          </Text>
+          <TouchableOpacity
+            className="bg-serenity-green-50 rounded-full py-2 px-4 ml-4 shadow-lg"
+            onPress={handleAudioUpload}
+          >
             <Text className="text-white text-lg">Upload Audio</Text>
-          </TouchableOpacity>          
-        </View>  
+          </TouchableOpacity>
+        </View>
         <View className="px-4 w-full mb-4">
           {allLandmarksAssigned || !exercise ? (
-              <Text className="text-mindful-brown-100 font-urbanist-regular text-base text-center mb-4">All landmarks have been assigned an exercise</Text>
-            ) 
-          : (
-            <MultiselectDropdown            
+            <Text className="text-mindful-brown-100 font-urbanist-regular text-base text-center mb-4">
+              All landmarks have been assigned an exercise
+            </Text>
+          ) : (
+            <MultiselectDropdown
               title="Assigned Landmarks"
               data={landmarkList}
               placeHolder="Select Landmarks"
@@ -220,16 +238,16 @@ const ExerciseCreator = () => {
           <CustomButton
             className="mt-2 w-full"
             handlePress={handleSubmit}
-            title={exercise ? "Update Exercise" : "Create Exercise"}
+            title={exercise ? 'Update Exercise' : 'Create Exercise'}
           />
-        </View>        
+        </View>
         <View className="mb-4 px-4 w-full">
           <CustomButton
             className="mt-2 w-full"
             handlePress={handleDelete}
             title="Delete Exercise"
           />
-        </View>         
+        </View>
       </ScrollView>
       {showSuccess && (
         <ConfirmModal
@@ -243,7 +261,7 @@ const ExerciseCreator = () => {
         />
       )}
     </SafeAreaView>
-  );
-};
+  )
+}
 
-export default ExerciseCreator;
+export default ExerciseCreator
