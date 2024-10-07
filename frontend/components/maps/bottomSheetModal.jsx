@@ -211,7 +211,7 @@ const BottomSheetModal = ({
           className="flex-row items-center w-full  xs:mt-2"
           id="landmark-name-frame"
         >
-          <Text className="text-2xl xs:text-3xl font-urbanist-bold text-white mr-5">
+          <Text className="text-2xl xs:text-3xl font-urbanist-bold text-white mr-5 max-w-[80%]">
             {isExercise ? data.exercise_name : data.landmark_name}
           </Text>
           <TouchableOpacity onPress={toggleHeartColor}>
