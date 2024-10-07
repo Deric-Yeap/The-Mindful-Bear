@@ -4,5 +4,7 @@ export const featureFlags = {
   isDiscoverArticles: false,
   isSearchBar: false,
   isFavouriteLandmarks: true,
+  isSettingsDanger: false,
   isSettings: false,
+  isSettingsSecurity: false,
 }
