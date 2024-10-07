@@ -5,25 +5,13 @@ from .models import OptionSet
 from rest_framework.response import Response
 from rest_framework.exceptions import NotFound, ValidationError
 
-class OptionFormGet(generics.ListCreateAPIView):
+class OptionSetView(generics.ListCreateAPIView, generics.RetrieveAPIView):
     queryset = OptionSet.objects.all()
     serializer_class = OptionSetSerializer
 
     def get(self, request, *args, **kwargs):
         try:
-            return super().get(request, *args, **kwargs)
-        except Exception as e:
-            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-        
-class OptionSetDetail(generics.RetrieveAPIView):
-    queryset = OptionSet.objects.all()
-    serializer_class = OptionSetSerializer
-
-    def get(self, request, *args, **kwargs):
-        try:
-            option_set = self.get_object()  # Retrieve the OptionSet instance
-            serializer = self.get_serializer(option_set)  # Serialize the OptionSet instance
-            return Response(serializer.data, status=status.HTTP_200_OK)  # Return serialized data
+            return self.retrieve(request, *args, **kwargs) if 'pk' in kwargs else self.list(request, *args, **kwargs)
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 

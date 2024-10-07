@@ -13,30 +13,16 @@ export const getForms = async () => {
 }
 
 async function fetchOptionSet(optionSetId) {
-  return axiosInstance.get(`option/getOptions/${optionSetId}`);  
+  return axiosInstance.get(`option/getOptions/${optionSetId}`);
 }
 
 async function fetchOptionSetName(optionSetId) {
-  return axiosInstance.get(`option_set/get/${optionSetId}`);  
+  return axiosInstance.get(`option_set/get/${optionSetId}`);
 }
 
 export const getFormQuestions = async (formId) => {
-  response = await axiosInstance.get(`form/get-form-and-questions/${formId}`);
-  const formName = response.form_name
-  const storeResponses = response.store_responses
-  const isCompulsory = response.is_compulsory
-  const isPresession = response.is_presession
-  const isPostsession = response.is_postsession        
-  response = response.questions;
-  const questionsWithOptions = await Promise.all(
-    response.map(async (item) => {
-      const optionSet = await fetchOptionSet(item.optionSet);  
-      const optionSetName = await fetchOptionSetName(item.optionSet)
-      return { ...item, optionValues: optionSet, optionSetName: optionSetName.description };  
-    })
-  );  
-  return {formName, storeResponses, isCompulsory, isPresession, isPostsession, questionsWithOptions};
-}
+  return axiosInstance.get(`form/get-form-and-questions/${formId}`);
+};
 
 export const setFormQuestion = async (sessionId, formId, answers) => {    
   const formattedAnswers = Object.keys(answers).map(questionId => ({

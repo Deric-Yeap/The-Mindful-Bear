@@ -60,7 +60,7 @@ const CreateForm = () => {
             is_compulsory: form.isCompulsory,
             is_presession: form.isPresession,
             is_postsession: form.isPostsession,
-            questions: form.questionsWithOptions || [{ question: '', optionSet: '' }]
+            questions: form.questions || [{ question: '', optionSet: '' }]
           })          
           setIsUpdateMode(true)
           setFormId(formId) 
