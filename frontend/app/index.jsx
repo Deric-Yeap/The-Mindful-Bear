@@ -6,6 +6,7 @@ import CustomButton from '../components/customButton';
 import { useDispatch, useSelector } from 'react-redux';
 import { setUserDetails } from '../redux/slices/userSlice';
 import { useEffect, useState } from 'react';
+import Loading from '../components/loading';
 
 const backgroundImage = require('../assets/landingPage.png'); 
 
@@ -41,7 +42,7 @@ export default function App() {
   if (loading) {
     return (
       <SafeAreaView className="flex-1 justify-center items-center">
-        <Text>Loading...</Text>
+        <Loading /> 
       </SafeAreaView>
     );
   }
