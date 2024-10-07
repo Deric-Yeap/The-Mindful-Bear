@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import { View, Text, ScrollView } from 'react-native'
 import SettingsItem from '../../components/settingsItem'
 import StatusBarComponent from '../../components/darkThemStatusBar'
@@ -6,9 +6,34 @@ import TopBrownSearchBar from '../../components/topBrownSearchBar'
 import { colors } from '../../common/styles'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { featureFlags } from '../../common/featureFlags'
+import { clearUserDetails } from '../../redux/slices/userSlice'
+import ConfirmModal from '../../components/confirmModal'
+import { confirmModal } from '../../assets/image'
+import { useRouter } from 'expo-router'
+
 const SettingsPage = () => {
+  const router = useRouter()
+  const [isShowLogoutModal, setIsShowLogoutModal] = useState(false)
+  const handleLogout = () => {
+    clearUserDetails()
+    router.push('/sign-in')
+  }
   return (
     <SafeAreaView className="bg-optimistic-gray-10 flex-1">
+      {isShowLogoutModal && (
+        <ConfirmModal
+          isConfirmButton={true}
+          isCancelButton={true}
+          imageSource={confirmModal}
+          confirmButtonTitle={'Yes'}
+          cancelButtonTitle={'No'}
+          title={'Are you sure you want to log out?'}
+          handleConfirm={handleLogout}
+          handleCancel={() => {
+            setIsShowLogoutModal(false)
+          }}
+        />
+      )}
       <ScrollView>
         <StatusBarComponent
           barStyle="light-content"
@@ -84,7 +109,12 @@ const SettingsPage = () => {
             <Text className="text-mindful-brown-80 font-urbanist-bold text-lg mb-4">
               Logout
             </Text>
-            <SettingsItem title="Log Out" iconName="logout" href="/logout" />
+            <SettingsItem
+              title="Log Out"
+              iconName="logout"
+              href="logout"
+              setIsShowLogoutModal={setIsShowLogoutModal}
+            />
           </View>
         </View>
       </ScrollView>
