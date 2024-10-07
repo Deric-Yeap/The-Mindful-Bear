@@ -151,9 +151,9 @@ const BottomSheetModal = ({
   const toggleHeartColor = async () => {
     try {
       if (isFavorite) {
-        deleteFavouriteLandmark(landmarkId)
+        await deleteFavouriteLandmark(landmarkId)
       } else {
-        createFavouriteLandmark(landmarkId)
+        await createFavouriteLandmark(landmarkId)
       }
       setIsFavorite(!isFavorite)
     } catch (error) {
