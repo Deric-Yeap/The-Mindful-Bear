@@ -416,10 +416,10 @@ const Map = () => {
                 rotateEnabled={true}
               >
                 <Mapbox.Camera
-                  centerCoordinate={[103.8348, 1.2804]}
+                  centerCoordinate={location}
                   zoomLevel={17.0}
                   animationMode="flyto"
-                  animationDuration={1000}
+                  animationDuration={500}
                   pitch={60}
                 />
                 <UserLocationCustom
