@@ -3,6 +3,6 @@ export const featureFlags = {
   isSurveyScores: false,
   isDiscoverArticles: false,
   isSearchBar: false,
-  isFavouriteLandmarks: false,
+  isFavouriteLandmarks: true,
   isSettings: false,
 }
