@@ -89,6 +89,8 @@ console.log(cutoffDate)
  // Function to calculate linear regression (trendline)
  const calculateTrendline = (data) => {
   const n = data.length;
+  if (n === 0) return []; // Avoid calculation if no data
+
   const sumX = data.reduce((sum, _, index) => sum + index, 0);
   const sumY = data.reduce((sum, point) => sum + point.value, 0);
   const sumXY = data.reduce((sum, point, index) => sum + index * point.value, 0);
@@ -187,9 +189,9 @@ const calculateAverageLine = (data) => {
             <LineChart
                 areaChart
                 curved
-                data={sessionNumLineData}
-                data2={averageLineDataSessions}
-                data3={trendlineDataSessions}
+                data={sessionNumLineData.length > 1 ? sessionNumLineData : null}
+                data2={averageLineDataSessions.length > 1 ? averageLineDataSessions : null}
+                data3={trendlineDataSessions.length > 1 ? trendlineDataSessions : null}
                 // Ensure this is your data
                 width={chartWidth} // Make chart width dynamic based on data
                 height={250}
@@ -263,9 +265,9 @@ const calculateAverageLine = (data) => {
             <LineChart
                   areaChart
                   curved
-                  data={sessionDurationLineData} // Ensure this is your data
-                  data2={averageLineDataDuration}
-                  data3={trendlineDataDuration}
+                  data={sessionDurationLineData.length > 1 ? sessionDurationLineData : null} // Ensure this is your data
+                  data2={averageLineDataDuration.length > 1 ? averageLineDataDuration : null}
+                  data3={trendlineDataDuration.length > 1 ? trendlineDataDuration : null}
                   width={chartWidth} // Make chart width dynamic based on data
                   height={250}
                   showVerticalLines

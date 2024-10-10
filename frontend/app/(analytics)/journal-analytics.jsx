@@ -80,11 +80,12 @@ const JournalAnalytics = () => {
   // Function to calculate linear regression (trendline)
   const calculateTrendline = (data) => {
    const n = data.length;
+   if (n === 0) return []; // Avoid calculation if no data
    const sumX = data.reduce((sum, _, index) => sum + index, 0);
    const sumY = data.reduce((sum, point) => sum + point.value, 0);
    const sumXY = data.reduce((sum, point, index) => sum + index * point.value, 0);
    const sumX2 = data.reduce((sum, _, index) => sum + index * index, 0);
- 
+    print("sumX",sumX)
    const slope = (n * sumXY - sumX * sumY) / (n * sumX2 - sumX * sumX);
    const intercept = (sumY - slope * sumX) / n;
  
@@ -171,9 +172,9 @@ const JournalAnalytics = () => {
               <LineChart
                 areaChart
                 curved
-                data={lineData}
-                data2={averageLineData}
-                data3={trendlineData}
+                data={lineData.length > 1 ? lineData : null}
+                data2={averageLineData.length > 1 ? averageLineData : null}
+                data3={trendlineData.length > 1 ? trendlineData : null}
                  // Ensure this is your data
                 width={chartWidth} // Make chart width dynamic based on data
                 height={250}
