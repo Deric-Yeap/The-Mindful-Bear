@@ -217,7 +217,7 @@ const calculateAverageLine = (data) => {
                 fontSize="12"
                 fontWeight="bold"
               >
-                {`Average: ${averageDataSessionsValue}`} Display the calculated average */}
+                {`Average: ${averageDataSessionsValue}`} 
               </Text>
             </Svg>
            

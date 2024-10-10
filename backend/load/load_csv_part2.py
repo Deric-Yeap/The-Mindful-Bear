@@ -7,7 +7,7 @@ from load_csv_part1 import load_csv_files
 # Part 2 tables (with dependencies)
 part_2_tables = [
     'journal_journal.csv',
-    'journal_journal_emotion_id.csv',
+    # 'journal_journal_emotion_id.csv',
     # 'userSession_usersession_existing.csv',
     # 'userSession_usersession_mock.csv'
 ]

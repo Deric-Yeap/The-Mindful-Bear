@@ -9,35 +9,35 @@ engine = create_engine(f'sqlite:///{sqlite_file}')
 csv_folder = 'csv'
 # Define tables for initial loading without dependencies
 initial_tables = [
-    'auth_group.csv',
-    'django_content_type.csv',
-    'auth_permission.csv',
-    'auth_group_permissions.csv',
-    'user_customuser_existing.csv',
-    'user_customuser_mock.csv',
-    'django_migrations.csv',
-    # 'django_admin_log.csv',
-    'user_customuser_groups_existing.csv',
-    'user_customuser_groups_mock.csv',
-    'color_color.csv'
+    # 'auth_group.csv',
+    # 'django_content_type.csv',
+    # 'auth_permission.csv',
+    # 'auth_group_permissions.csv',
+    # 'user_customuser_existing.csv',
+    # 'user_customuser_mock.csv',
+    # 'django_migrations.csv',
+    # # 'django_admin_log.csv',
+    # 'user_customuser_groups_existing.csv',
+    # 'user_customuser_groups_mock.csv',
+    # 'color_color.csv'
 ]
 
 
 
 # Part 1 tables (independent and with dependencies)
 part_1_tables = [
-    'emotion_emotion.csv',
-    'gender_gender.csv',
-    'department_department.csv',
-    'optionSet_optionset.csv',
-    'option_option.csv',
-    'question_question.csv',
-    'session_session_existing.csv',
-    'session_session_mock.csv',
-    'form_form.csv',
-    'formQuestion_formquestion.csv',
-    'exercise_exercise.csv',
-    'landmark_landmark.csv'
+    # 'emotion_emotion.csv',
+    # 'gender_gender.csv',
+    # 'department_department.csv',
+    # 'optionSet_optionset.csv',
+    # 'option_option.csv',
+    # 'question_question.csv',
+    # 'session_session_existing.csv',
+    # 'session_session_mock.csv',
+    # 'form_form.csv',
+    # 'formQuestion_formquestion.csv',
+    # 'exercise_exercise.csv',
+    # 'landmark_landmark.csv'
 ]
 
 
