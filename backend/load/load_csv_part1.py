@@ -33,7 +33,7 @@ part_1_tables = [
     # 'option_option.csv',
     # 'question_question.csv',
     # 'session_session_existing.csv',
-    # 'session_session_mock.csv',
+    'session_session_mock.csv',
     # 'form_form.csv',
     # 'formQuestion_formquestion.csv',
     # 'exercise_exercise.csv',

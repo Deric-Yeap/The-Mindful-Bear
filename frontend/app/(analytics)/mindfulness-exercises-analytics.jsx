@@ -18,7 +18,12 @@ const MindfulnessExercisesAnalytics = () => {
   const optionList = ['daily', 'monthly', 'yearly'];
   const periodSelected =  optionList[selectedOption - 1]
   const [selectedOption, setSelectedOption] = useState(1);
-
+  const today = new Date();
+  const thirtyDaysAgo = new Date();
+  thirtyDaysAgo.setDate(today.getDate() - 30);
+  // Format the cutoff date to a comparable format (YYYY-MM-DD)
+  const cutoffDate = thirtyDaysAgo.toISOString().split('T')[0]; 
+console.log(cutoffDate)
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true); 
@@ -26,8 +31,12 @@ const MindfulnessExercisesAnalytics = () => {
       const period = optionList[selectedOption - 1]; // Get the period based on selected option
       try {
         response = await splitSession({ period })
-        console.log("response",response)
-        const formattedSessionNumData = Object.keys(response.dates).map((date) => ({
+        // console.log("response",response)
+        
+
+        // Format the data for the line chart
+       
+           const formattedSessionNumData = Object.keys(response.dates).map((date) => ({
           value: response.dates[date].session_count || 0, // Use session_count or default to 0
           label: date
         }));
@@ -36,10 +45,16 @@ const MindfulnessExercisesAnalytics = () => {
           value: response.dates[date].average_duration || 0, // Use session_count or default to 0
           label: date
         }));
-      
-        // Update the state with the formatted data
+         // Update the state with the formatted data
          setSessionNumLineData(formattedSessionNumData)
          setSessionDurationLineData(formattedSessionDurationData)
+         console.log("formattedSessionNumData ",formattedSessionNumData)
+          console.log("formattedSessionDurationData",formattedSessionDurationData)
+
+        
+
+    
+       
       } catch (error) {
         if (error.response) {
           setError(`Error: ${error.response.data.message || 'An error occurred.'}`);
@@ -88,10 +103,20 @@ const MindfulnessExercisesAnalytics = () => {
   }));
 };
 
+
 // Function to calculate average line
 const calculateAverageLine = (data) => {
-  const averageValue = data.reduce((sum, point) => sum + point.value, 0) / data.length;
-  return data.map(point => ({
+  // Filter data for the last 30 days
+  const filteredData = data.filter(point => {
+    const pointDate = new Date(point.label); // Assuming point.label is a date string
+    return pointDate >= thirtyDaysAgo && pointDate <= today;
+  });
+
+  // Calculate the average value from the filtered data
+  const averageValue = filteredData.reduce((sum, point) => sum + point.value, 0) / filteredData.length || 0; // Prevent division by zero
+
+  // Return the average line data
+  return filteredData.map(point => ({
     value: averageValue,
     label: point.label,
   }));
@@ -209,7 +234,7 @@ const calculateAverageLine = (data) => {
                 
               />
               
-            <Svg height="250" width={chartWidth}>
+            {/* <Svg height="250" width={chartWidth}>
               <Text
                 x={chartWidth - 50} // X-position of the label
                 y={yCoordinateNumBasedOnAverage} // Y-position based on the average value
@@ -220,7 +245,7 @@ const calculateAverageLine = (data) => {
                 {`Average: ${averageDataSessionsValue}`} 
               </Text>
             </Svg>
-           
+            */}
             
             </View>
           </ScrollView>

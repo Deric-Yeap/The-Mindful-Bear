@@ -194,27 +194,31 @@ class SessionSplitSerializer(serializers.Serializer):
         SGT = pytz.timezone('Asia/Singapore')
          # Get all sessions if year and month are not provided
         sessions = Session.objects.all()
-
-        if year and month:
-            # If year and month are provided, filter by the month
-            year = int(year)
-            month = int(month)
-            start_date = datetime(year, month, 1, tzinfo=SGT)
-
-            if month == 12:
-                end_date = datetime(year + 1, 1, 1, tzinfo=SGT) - timedelta(microseconds=1)
-            else:
-                end_date = datetime(year, month + 1, 1, tzinfo=SGT) - timedelta(microseconds=1)
-
-            sessions = sessions.filter(start_datetime__gte=start_date, start_datetime__lt=end_date)
+        if period == 'daily':
+             # Calculate start and end dates for the last 30 days
+            end_date = datetime.now(tz=SGT)
+            start_date = end_date - timedelta(days=30)
         else:
-            # If no year and month, use the full date range of all sessions
-            if sessions.exists():
-                start_date = sessions.order_by('start_datetime').first().start_datetime
-                end_date = sessions.order_by('-start_datetime').first().start_datetime
+            if year and month:
+                # If year and month are provided, filter by the month
+                year = int(year)
+                month = int(month)
+                start_date = datetime(year, month, 1, tzinfo=SGT)
+
+                if month == 12:
+                    end_date = datetime(year + 1, 1, 1, tzinfo=SGT) - timedelta(microseconds=1)
+                else:
+                    end_date = datetime(year, month + 1, 1, tzinfo=SGT) - timedelta(microseconds=1)
+
+                sessions = sessions.filter(start_datetime__gte=start_date, start_datetime__lt=end_date)
             else:
-                start_date = datetime.now(tz=SGT)
-                end_date = datetime.now(tz=SGT)
+                # If no year and month, use the full date range of all sessions
+                if sessions.exists():
+                    start_date = sessions.order_by('start_datetime').first().start_datetime
+                    end_date = sessions.order_by('-start_datetime').first().start_datetime
+                else:
+                    start_date = datetime.now(tz=SGT)
+                    end_date = datetime.now(tz=SGT)
 
         # Get the session data for the specified period
         session_dict = self.get_sessions_by_period(start_date, end_date, period)
