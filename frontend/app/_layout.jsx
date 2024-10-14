@@ -26,6 +26,7 @@ import {
   Urbanist_800ExtraBold_Italic,
   Urbanist_900Black_Italic,
 } from '@expo-google-fonts/urbanist'
+import { BackHandler } from 'react-native'
 
 SplashScreen.preventAutoHideAsync()
 
@@ -60,7 +61,17 @@ const RootLayout = () => {
   // if (!loaded && !error) {
   //   return null
   // }
+  useEffect(() => {
+    const onBackPress = () => {
+      return true
+    }
 
+    BackHandler.addEventListener('hardwareBackPress', onBackPress)
+
+    return () => {
+      BackHandler.removeEventListener('hardwareBackPress', onBackPress)
+    }
+  }, [])
   useEffect(() => {
     const handleDeepLink = (event) => {
       const { url } = event

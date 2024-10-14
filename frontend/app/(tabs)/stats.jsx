@@ -10,7 +10,6 @@ import { featureFlags } from '../../common/featureFlags'
 import AnalyticsTabs from '../../components/analytics/analyticsTabs'
 
 const analytics = () => {
-  console.log(featureFlags.isMindfulnessExercise, featureFlags.isSurveyScores)
   return (
     <SafeAreaView className="bg-optimistic-gray-10 flex-1">
       <StatusBarComponent

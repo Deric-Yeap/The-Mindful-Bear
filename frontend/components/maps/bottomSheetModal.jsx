@@ -125,7 +125,7 @@ const BottomSheetModal = ({
   const bottomSheetRef = useRef(null)
   const snapPoints = useMemo(() => ['60%', '95%'], [])
   const [currentSnapIndex, setCurrentSnapIndex] = useState(0)
-  const [isFavorite, setIsFavorite] = useState(false)
+  const [isFavorite, setIsFavorite] = useState(data.is_favorite || false)
   const [isExercise, setIsExercise] = useState(false)
   const dispatch = useDispatch()
 
@@ -151,9 +151,9 @@ const BottomSheetModal = ({
   const toggleHeartColor = async () => {
     try {
       if (isFavorite) {
-        deleteFavouriteLandmark(landmarkId)
+        await deleteFavouriteLandmark(landmarkId)
       } else {
-        createFavouriteLandmark(landmarkId)
+        await createFavouriteLandmark(landmarkId)
       }
       setIsFavorite(!isFavorite)
     } catch (error) {
@@ -211,7 +211,7 @@ const BottomSheetModal = ({
           className="flex-row items-center w-full  xs:mt-2"
           id="landmark-name-frame"
         >
-          <Text className="text-2xl xs:text-3xl font-urbanist-bold text-white mr-5">
+          <Text className="text-2xl xs:text-3xl font-urbanist-bold text-white mr-5 max-w-[80%]">
             {isExercise ? data.exercise_name : data.landmark_name}
           </Text>
           <TouchableOpacity onPress={toggleHeartColor}>

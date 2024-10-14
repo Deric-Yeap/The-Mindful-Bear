@@ -11,7 +11,7 @@ export default () => ({
     userInterfaceStyle: 'light',
     splash: {
       image: './assets/splash.png',
-      resizeMode: 'contain',
+      resizeMode: 'cover',
       backgroundColor: '#ffffff',
     },
     extra: {

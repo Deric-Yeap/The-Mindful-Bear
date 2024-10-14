@@ -50,7 +50,7 @@ const AnalyticsTabs = () => {
     ),
   ]
   const staffViews = [
-    <Link href="/journal-analytics" asChild key="journal-analytics">
+    <Link href={{ pathname: '/journal-analytics', query: { previousScreen: 'stats' } }} asChild key="journal-analytics">
       <TouchableOpacity className="bg-white p-4 rounded-2xl mb-4">
         <View className="flex-row items-center justify-between">
           <View className="w-16 h-16 rounded-full bg-mindful-brown-20 flex items-center justify-center">
@@ -92,7 +92,16 @@ const AnalyticsTabs = () => {
     </Link>,
   ]
   const nonStaffViews = [
-    <Link href="/journal-stats" asChild key="journal-stats">
+    <Link
+      href={{
+        pathname: '/journal-stats',
+        params: { tabName: '(tabs)',
+          screenName: 'stats'
+         },
+      }}
+      asChild
+      key="journal-stats"
+    >
       <TouchableOpacity className="bg-white p-4 rounded-2xl mb-4">
         <View className="flex-row items-center justify-between">
           <View className="w-16 h-16 rounded-full bg-mindful-brown-20 flex items-center justify-center">

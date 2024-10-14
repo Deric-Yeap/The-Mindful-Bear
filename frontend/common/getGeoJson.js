@@ -1,4 +1,5 @@
-export const getGeoJson = (landmarks) => {
+export const getGeoJson = (landmarks, favouriteLandmarks) => {
+  const favouriteLandmarkIds = favouriteLandmarks.map((fav) => fav.landmark_id)
   const features = landmarks.map((marker) => ({
     type: 'Feature',
     geometry: {
@@ -20,6 +21,7 @@ export const getGeoJson = (landmarks) => {
       exercise_description: marker.exercise
         ? marker.exercise.description
         : null,
+      is_favorite: favouriteLandmarkIds.includes(marker.landmark_id),
     },
   }))
 

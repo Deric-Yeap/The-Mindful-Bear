@@ -9,10 +9,9 @@ import { useLocalSearchParams } from 'expo-router'
 import CustomButton from '../../../components/customButton'
 import { colors } from '../../../common/styles'
 import Loading from '../../../components/loading'
-import ConfirmModal from '../../../components/confirmModal' 
+import ConfirmModal from '../../../components/confirmModal'
 import { confirmModal } from '../../../assets/image'
-import { router } from 'expo-router';
-
+import { router } from 'expo-router'
 
 const UpdateScale = () => {
   const { scaleID } = useLocalSearchParams()
@@ -21,7 +20,7 @@ const UpdateScale = () => {
   const [options, setOptions] = useState([])
   const [error, setError] = useState(null)
   const [description, setDescription] = useState({ description: '' })
-  const [errors, setErrors] = useState({ description: '', options: [] });
+  const [errors, setErrors] = useState({ description: '', options: [] })
   const [hasChanges, setHasChanges] = useState(false)
   const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false)
   const [isNoChangesModalOpen, setIsNoChangesModalOpen] = useState(false)
@@ -48,30 +47,30 @@ const UpdateScale = () => {
   }
 
   const validateForm = () => {
-    let valid = true;
-    const newErrors = { description: '', options: [] };
-    if ((description.description.slice(15).length)===0) {
-        newErrors.description = 'Please input scale name.';
-        valid = false;
+    let valid = true
+    const newErrors = { description: '', options: [] }
+    if (description.description.slice(15).length === 0) {
+      newErrors.description = 'Please input scale name.'
+      valid = false
     }
 
     options.forEach((option, index) => {
-        if (!option.description.trim()) {
-          newErrors[`options${option.value}`] = `Option ${option.value} cannot be empty.`;
-            valid = false;
-        } 
-    });
-    
+      if (!option.description.trim()) {
+        newErrors[`options${option.value}`] =
+          `Option ${option.value} cannot be empty.`
+        valid = false
+      }
+    })
 
-    setErrors(newErrors);
-    return valid;
-};
+    setErrors(newErrors)
+    return valid
+  }
 
   const handleSave = async () => {
     if (!validateForm()) {
-      Alert.alert('Validation Error', 'Please fill out all required fields.');
-      return; 
-  }
+      Alert.alert('Validation Error', 'Please fill out all required fields.')
+      return
+    }
 
     if (!hasChanges) {
       setIsNoChangesModalOpen(true)
@@ -82,9 +81,7 @@ const UpdateScale = () => {
     try {
       if (previousDescription !== description.description) {
         const url = `/option_set/update/${scaleID}/`
-        console.log(
-          `Updating scale ID: ${scaleID} with new description: ${description.description}`
-        )
+
         await axiosInstance.put(url, {
           description: description.description,
         })
@@ -100,9 +97,7 @@ const UpdateScale = () => {
             previousOption.description !== option.description
           ) {
             const url = `/option/update/${option.id}/`
-            console.log(
-              `Updating option ID: ${option.id} with new value: ${option.description}`
-            )
+
             return await axiosInstance.put(url, {
               description: option.description,
               value: option.value,
@@ -132,50 +127,49 @@ const UpdateScale = () => {
 
   const confirmDeleteScale = async () => {
     try {
-        const url = `/option_set/delete/${scaleID}/`;
-        console.log('Attempting to delete scale with URL:', url);
-        
-        const response = await axiosInstance.delete(url);
-        
-        // Log the response for debugging
-        console.log('Delete response:', response);
+      const url = `/option_set/delete/${scaleID}/`
 
-            setOptions([]);
-            setDescription({ description: '' });
-            setSuccessMessage('Scale deleted successfully!');
-            setIsSuccessModalOpen(true);
-      
+      const response = await axiosInstance.delete(url)
+
+      setOptions([])
+      setDescription({ description: '' })
+      setSuccessMessage('Scale deleted successfully!')
+      setIsSuccessModalOpen(true)
     } catch (error) {
-        console.error('Error deleting scale:', error);
-        
-        if (error.response) {
-            // Server responded with a status other than 2xx
-            setError(`Error deleting scale: ${error.response.data.message || 'Please try again.'}`);
-        } else if (error.request) {
-            // Request was made but no response received
-            console.error('Request details:', error.request);
-            setError('Error: No response from server. Please check your network connection.');
-        } else {
-            // Something else happened
-            setError(`Error: ${error.message}`);
-        }
+      console.error('Error deleting scale:', error)
+
+      if (error.response) {
+        // Server responded with a status other than 2xx
+        setError(
+          `Error deleting scale: ${error.response.data.message || 'Please try again.'}`
+        )
+      } else if (error.request) {
+        // Request was made but no response received
+        console.error('Request details:', error.request)
+        setError(
+          'Error: No response from server. Please check your network connection.'
+        )
+      } else {
+        // Something else happened
+        setError(`Error: ${error.message}`)
+      }
     } finally {
-        setDeleteConfirmationModalOpen(false);
-        setLoading(false);
+      setDeleteConfirmationModalOpen(false)
+      setLoading(false)
     }
-};
+  }
 
-useEffect(() => {
+  useEffect(() => {
     const fetchForms = async () => {
-        setLoading(true);
-        if (!scaleID) {
-            return;
-        }
-        // Fetch logic here
-    };
+      setLoading(true)
+      if (!scaleID) {
+        return
+      }
+      // Fetch logic here
+    }
 
-    fetchForms();
-}, [scaleID]);
+    fetchForms()
+  }, [scaleID])
 
   useEffect(() => {
     const fetchForms = async () => {
@@ -265,9 +259,9 @@ useEffect(() => {
             customStyles={`mb-1 ${errors.description ? 'border-red-500' : ''}`}
             editable={true}
           />
-           {errors.description && (
-                    <Text style={{ color: 'red' }}>{errors.description}</Text>
-                )}
+          {errors.description && (
+            <Text style={{ color: 'red' }}>{errors.description}</Text>
+          )}
         </View>
 
         <View className="mx-4 mt-4">
@@ -275,7 +269,7 @@ useEffect(() => {
             .slice()
             .sort((a, b) => a.value - b.value)
             .map((option, index) => {
-              const hasError = !!errors[`options${index}`];
+              const hasError = !!errors[`options${index}`]
               return (
                 <View key={option.id} className="mb-4">
                   <View className="flex-row items-center">
@@ -293,9 +287,9 @@ useEffect(() => {
                   </View>
                   {hasError && (
                     <Text style={{ color: 'red', marginLeft: '10%' }}>
-                         {errors[`options${index}`]}
+                      {errors[`options${index}`]}
                     </Text>
-                )}
+                  )}
                 </View>
               )
             })}
@@ -343,7 +337,7 @@ useEffect(() => {
           subTitle={successMessage}
           handleConfirm={() => {
             setIsSuccessModalOpen(false)
-            router.push('../form'); 
+            router.push('../form')
           }}
         />
       )}

@@ -14,8 +14,8 @@ import { router } from 'expo-router' // Import router from expo-router
 import { Link } from 'expo-router'
 import StatusBarComponent from '../../components/darkThemStatusBar'
 import { colors } from '../../common/styles'
-import Loading from '../../components/loading'; 
-import Icon from 'react-native-vector-icons/FontAwesome';
+import Loading from '../../components/loading'
+import Icon from 'react-native-vector-icons/FontAwesome'
 
 const ExerciseManagement = () => {
   const [loading, setLoading] = useState(true) // Loading state
@@ -26,7 +26,6 @@ const ExerciseManagement = () => {
     const fetchExercises = async () => {
       try {
         const response = await axiosInstance.get('exercise/get')
-        console.log('Full response:', response)
         setExercises(response) // Directly set the response since it's already an array
       } catch (error) {
         console.error(
@@ -44,12 +43,18 @@ const ExerciseManagement = () => {
 
   if (loading) {
     return (
-      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: colors.optimisticGray10 }}>
-        <Loading /> 
+      <View
+        style={{
+          flex: 1,
+          justifyContent: 'center',
+          alignItems: 'center',
+          backgroundColor: colors.optimisticGray10,
+        }}
+      >
+        <Loading />
       </View>
-    );
+    )
   }
-
 
   if (error) {
     return (
@@ -60,7 +65,6 @@ const ExerciseManagement = () => {
   }
 
   const handleExercisePress = (exercise) => {
-    console.log(`Navigating to exercise details:`, exercise)
     router.push({
       pathname: '/exerciseCreator',
       params: { exercise: JSON.stringify(exercise) },
@@ -69,10 +73,10 @@ const ExerciseManagement = () => {
 
   return (
     <SafeAreaView className="flex-1 bg-optimistic-gray-10">
-    <StatusBarComponent
-      barStyle="light-content"
-      backgroundColor={colors.mindfulBrown100}
-    />
+      <StatusBarComponent
+        barStyle="light-content"
+        backgroundColor={colors.mindfulBrown100}
+      />
       <ScrollView className="flex-1 bg-optimistic-gray-10">
         <TopBrownSearchBar title="Exercise Management" />
 
@@ -100,7 +104,10 @@ const ExerciseManagement = () => {
                 {exercise.exercise_name}
               </Text>
               <View style={{ justifyContent: 'center', alignItems: 'center' }}>
-                <Text className="text-white font-urbanist-bold text-xl"> &#41; </Text>
+                <Text className="text-white font-urbanist-bold text-xl">
+                  {' '}
+                  &#41;{' '}
+                </Text>
               </View>
             </TouchableOpacity>
           ))}

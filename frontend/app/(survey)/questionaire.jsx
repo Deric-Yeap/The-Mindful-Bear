@@ -70,6 +70,7 @@ const Questionaire = () => {
         selectedLandmarkData: selectedLandmarkData, 
         sessionID: sessionID,
         sessionStarted: sessionStarted,        
+        isClickTravel: isClickTravel,
         start: start,
         completedForms: JSON.stringify(updatedCompletedForms),        
       },
