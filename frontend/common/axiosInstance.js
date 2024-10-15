@@ -1,7 +1,7 @@
 import axios from 'axios'
 import { store } from '../redux/store'
 import { Platform } from 'react-native'
-
+// 
 const baseURL = 'https://themindfulbear.xyz/api/'
 // const baseURL =
 //   Platform.OS === 'ios'

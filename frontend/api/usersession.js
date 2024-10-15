@@ -25,9 +25,8 @@ export const splitSession = async ({ period = 'daily', year, month } = {}) => {
     // Make the API request
     const response = await axiosInstance.get(url)
 
-
     // Return the response data
-    return response
+    return response.data
   } catch (error) {
     console.error('Error fetching session split data:', error)
     throw error
@@ -36,5 +35,6 @@ export const splitSession = async ({ period = 'daily', year, month } = {}) => {
 
 
 export const updateSession = async (data, sessionId) => {
+  console.log(sessionId)
   return axiosInstance.put(`session/update/${sessionId}/`, data)
 }
