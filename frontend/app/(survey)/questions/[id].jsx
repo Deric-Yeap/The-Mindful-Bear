@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, Pressable, ScrollView, TextInput } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { getFormQuestions } from '../../../api/form';
+import { getFormQuestions, getFormName } from '../../../api/form';
 import LoadingPage from '../../../components/loading'; 
 import { setFormQuestion } from '../../../api/form';
 import { FontAwesome } from '@expo/vector-icons';
@@ -28,6 +28,7 @@ const QuestionPage = () => {
     sessionID, 
     sessionStarted,     
     start,
+    isClickTravel,
     completedForms: initialCompletedForms } = useLocalSearchParams();  
   const [completedForms, setCompletedForms] = useState(() => {
     try {
@@ -44,22 +45,22 @@ const QuestionPage = () => {
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [loading, setLoading] = useState(true);
   
-  let formName = "";
+
   let questionsWithOptions = [];
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        ({ formName, questionsWithOptions } = await getFormQuestions(id));        
-        setQuestions(questionsWithOptions);    
-        setFormTitle(formName);
+        const fetchedQuestions = await getFormQuestions(id);                
+        const sortedQuestions = fetchedQuestions.questions.sort((a, b) => a.order - b.order);
+        setQuestions(sortedQuestions);         
+        setFormTitle(fetchedQuestions.form_name);
         setLoading(false); 
       } catch (error) {
         console.error('Error fetching form data:', error);
         setLoading(false); 
       }
     };
-
     fetchData();
   }, []);
 
@@ -84,6 +85,7 @@ const QuestionPage = () => {
               sessionID: sessionID,
               sessionStarted: true,               
               start: start,
+              isClickTravel: isClickTravel,
               completedForms: JSON.stringify(completedForms),              
             },
           });
@@ -117,8 +119,8 @@ const QuestionPage = () => {
           <Text className="text-mindful-brown-100 text-xl font-urbanist-extra-bold mb-6">
             {currentQuestion.question}
           </Text>
-          {currentQuestion.optionSetName === "Likert" || currentQuestion.optionValues.length > 0 ? (
-            currentQuestion.optionValues.map((option) => (
+          {currentQuestion.optionSet.description === "Likert" || currentQuestion.optionSet.options.length > 0 ? (
+            currentQuestion.optionSet.options.map((option) => (
               <Pressable
                 key={option.id}
                 onPress={() => handleAnswerChange(currentQuestion.questionID, option.value)}
@@ -139,7 +141,7 @@ const QuestionPage = () => {
                 />
               </Pressable>
             ))
-          ) : currentQuestion.optionSetName === "Rating" ? (
+          ) : currentQuestion.optionSet.description === "Rating" ? (
             <View className="flex flex-row justify-between items-center p-4 mx-6">
               {[1, 2, 3, 4, 5].map((rating) => (
                 <Pressable

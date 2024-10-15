@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react'
 import { View, Text, TouchableOpacity, ScrollView, Alert } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { useRoute } from '@react-navigation/native'
-import { router } from 'expo-router';
+import { router } from 'expo-router'
 import StatusBarComponent from '../../components/darkThemStatusBar'
 import BrownPageTitlePortion from '../../components/brownPageTitlePortion'
 import FormField from '../../components/formField'
@@ -13,12 +13,11 @@ import { listOptionSet } from '../../api/option-set'
 import { colors } from '../../common/styles'
 import { deleteQuestion, editQuestion } from '../../api/question'
 import ConfirmModal from '../../components/confirmModal'
-import { deleteForm } from '../../api/form';
+import { deleteForm } from '../../api/form'
 
 const UpdateForm = () => {
   const route = useRoute()
   const formId = route.params.formId
-  console.log('Form ID:', formId)
 
   const [formName, setFormName] = useState('')
   const [storeResponses, setStoreResponses] = useState(false)
@@ -27,20 +26,19 @@ const UpdateForm = () => {
   const [editable, setEditable] = useState(false)
   const [isDeleteModalVisible, setIsDeleteModalVisible] = useState(false)
   const [questionToDelete, setQuestionToDelete] = useState(null)
-  const [isEditSuccessModalVisible, setIsEditSuccessModalVisible] = useState(false)
+  const [isEditSuccessModalVisible, setIsEditSuccessModalVisible] =
+    useState(false)
   const [questionChanges, setQuestionChanges] = useState({})
   const [noChangeError, setNoChangeError] = useState({})
-  const [handleConfirmCallback, setHandleConfirmCallback] = useState(null);
-  const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
-  const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);
+  const [handleConfirmCallback, setHandleConfirmCallback] = useState(null)
+  const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false)
+  const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false)
 
   const fetchFormDetails = async () => {
     try {
-      console.log('Fetching form details for Form ID:', formId)
       const response = await axiosInstance.get(
         `/form/get-form-and-questions/${formId}`
       )
-      console.log('Form details fetched:', response)
 
       const formDetails = response
       setFormName(formDetails.form_name)
@@ -52,10 +50,9 @@ const UpdateForm = () => {
           optionSet_id: q.optionSet || '',
         }))
       )
-      console.log('Questions after setting state:', formDetails.questions)
 
       const optionSetResponse = await listOptionSet()
-      console.log('Option Set Response:', optionSetResponse)
+
       setResponseTypeList(optionSetResponse)
     } catch (error) {
       console.error('Error fetching form details:', error)
@@ -86,7 +83,7 @@ const UpdateForm = () => {
 
     try {
       const question = questions.find((q) => q.questionID === questionId)
-      console.log('Saving changes for Question ID:', questionId)
+
       await editQuestion(questionId, {
         question: question.question,
         optionSet: question.optionSet,
@@ -104,7 +101,6 @@ const UpdateForm = () => {
     if (questionToDelete) {
       try {
         const response = await deleteQuestion(questionToDelete)
-        console.log(response)
         fetchFormDetails() // Fetch the form details again after deletion
         setIsDeleteModalVisible(false)
         setQuestionToDelete(null)
@@ -122,25 +118,25 @@ const UpdateForm = () => {
 
   const handleDeleteForm = async (formId) => {
     try {
-      setIsConfirmModalOpen(true);
+      setIsConfirmModalOpen(true)
 
       const confirmDelete = new Promise((resolve) => {
         const handleConfirm = () => {
-          setIsConfirmModalOpen(false);
-          resolve(true);
-        };
-        setHandleConfirmCallback(() => handleConfirm);
-      });
+          setIsConfirmModalOpen(false)
+          resolve(true)
+        }
+        setHandleConfirmCallback(() => handleConfirm)
+      })
 
-      const result = await confirmDelete;
+      const result = await confirmDelete
       if (result) {
-        await deleteForm(formId);        
-        setIsSuccessModalOpen(true);
+        await deleteForm(formId)
+        setIsSuccessModalOpen(true)
       }
     } catch (error) {
-      console.error(`Error deleting form with ID: ${formId}`, error);
+      console.error(`Error deleting form with ID: ${formId}`, error)
     }
-  };
+  }
 
   return (
     <SafeAreaView className="flex-1 bg-optimistic-gray-10">
@@ -166,7 +162,10 @@ const UpdateForm = () => {
           </Text>
           <TouchableOpacity
             className="flex-1 flex-row items-center justify-end"
-            onPress={() => editable && handleChange(setStoreResponses, 'storeResponses')(!storeResponses)}
+            onPress={() =>
+              editable &&
+              handleChange(setStoreResponses, 'storeResponses')(!storeResponses)
+            }
           >
             <View
               className={`w-6 h-6 rounded border-2 border-mindful-brown-80 ${
@@ -325,7 +324,7 @@ const UpdateForm = () => {
           title="Form Deleted"
           subTitle="Form has been successfully deleted!"
           handleConfirm={() => {
-            setIsSuccessModalOpen(false);
+            setIsSuccessModalOpen(false)
             router.push('/form')
           }}
         />

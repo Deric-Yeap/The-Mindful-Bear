@@ -3,7 +3,9 @@ from rest_framework import generics, status
 from rest_framework.response import Response
 from rest_framework.exceptions import NotFound, ValidationError
 from .models import Form
+from ..question.models import Question
 from .serializer import FormSerializer, FormAndQuestionCreateSerializer, FormAndQuestionViewSerializer
+from django.db.models import Prefetch
 
 class FormGet(generics.ListCreateAPIView):
     queryset = Form.objects.all()
@@ -86,10 +88,14 @@ class FormAndQuestionCreateView(generics.CreateAPIView):
             return Response(response_data, status=status.HTTP_201_CREATED)
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-        
-
 class FormAndQuestionView(generics.RetrieveUpdateAPIView):
-    queryset = Form.objects.all()
+    # Modified queryset with detailed use of select_related and prefetch_related
+    queryset = Form.objects.prefetch_related(
+        Prefetch(
+            'question_set',
+            queryset=Question.objects.select_related('optionSet').prefetch_related('optionSet__options')
+        )
+    ).all()
     serializer_class = FormAndQuestionViewSerializer
     lookup_field = "pk"
 
@@ -102,7 +108,6 @@ class FormAndQuestionView(generics.RetrieveUpdateAPIView):
             return Response({"error": "Form not found."}, status=status.HTTP_404_NOT_FOUND)
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
     def update(self, request, *args, **kwargs):
         try:
             instance = self.get_object()  

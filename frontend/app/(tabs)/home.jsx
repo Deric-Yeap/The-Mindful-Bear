@@ -105,21 +105,25 @@ const Home = () => {
               </MetricCard>
             </>
           )}
-          <Text className="text-mindful-brown-100 font-urbanist-extra-bold text-xl mb-4">
-            Favourite Landmarks
-          </Text>
-          <MetricCard
-            route="/favourite"
-            iconName="book-plus-outline"
-            iconColor={colors.empathyOrange40}
-            circleStyle="bg-empathy-orange-10"
-            title="Favourite Landmarks"
-            rightImage={require('../../assets/mindfulJournalMetricCard.png')}
-          >
-            <Text className="font-urbanist-semi-bold text-mindful-brown-80 text-lg">
-              View your favourite landmarks here.
-            </Text>
-          </MetricCard>
+          {featureFlags.isFavouriteLandmarks && (
+            <>
+              <Text className="text-mindful-brown-100 font-urbanist-extra-bold text-xl mb-4">
+                Favourite Landmarks
+              </Text>
+              <MetricCard
+                route="/favourite"
+                iconName="book-plus-outline"
+                iconColor={colors.empathyOrange40}
+                circleStyle="bg-empathy-orange-10"
+                title="Favourite Landmarks"
+                rightImage={require('../../assets/mindfulJournalMetricCard.png')}
+              >
+                <Text className="font-urbanist-semi-bold text-mindful-brown-80 text-lg">
+                  View your favourite landmarks here.
+                </Text>
+              </MetricCard>
+            </>
+           )}
         </View>
       </ScrollView>
     </SafeAreaView>

@@ -36,6 +36,5 @@ export const splitSession = async ({ period = 'daily', year, month } = {}) => {
 
 
 export const updateSession = async (data, sessionId) => {
-  console.log(sessionId)
   return axiosInstance.put(`session/update/${sessionId}/`, data)
 }

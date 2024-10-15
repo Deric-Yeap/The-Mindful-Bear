@@ -1,4 +1,10 @@
-import { View, Text, TextInput, TouchableOpacity } from 'react-native'
+import {
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  ScrollView,
+} from 'react-native'
 import { useEffect, useState } from 'react'
 import { Audio } from 'expo-av'
 import { router } from 'expo-router'
@@ -192,89 +198,91 @@ const VoiceJournal = () => {
         buttonStyle={`rounded-full w-[15vw] h-[15vw] bg-mindful-brown-80`}
         iconSize={35}
       />
-      <Text className="font-urbanist-extra-bold text-mindful-brown-80 text-4xl text-center flex-wrap w-[80vw] pb-5 pt-16">
-        Select your emotions!
-      </Text>
-      {emotions.length > 0 && (
-        <View className="space-y-4 my-2">
-          <View>
-            <Text className="font-urbanist-bold text-lg">
-              Select your emotion
-            </Text>
-            <TouchableOpacity onPress={() => setIsEmotionModalVisible(true)}>
-              <Text className="font-urbanist-semi-bold text-serenity-green-60">
-                View Wheel of Emotions
+      <ScrollView className="h-full">
+        <Text className="font-urbanist-extra-bold text-mindful-brown-80 text-4xl text-center flex-wrap w-[80vw] pb-5 pt-16">
+          Select your emotions!
+        </Text>
+        {emotions.length > 0 && (
+          <View className="space-y-4 my-2">
+            <View>
+              <Text className="font-urbanist-bold text-lg">
+                Select your emotion
               </Text>
-            </TouchableOpacity>
-            <View className="flex flex-wrap flex-row">
-              {emotions
-                .filter((emotion) => emotion.level === 'Inner')
-                .map((emotion) => (
-                  <TouchableOpacity
-                    key={emotion.id}
-                    className="flex-row items-center bg-white rounded-full px-3 py-2 m-1 space-x-3 flex-grow-0 flex-shrink"
-                    onPress={() => {
-                      setSelectedEmotion(emotion.id)
-                      setSelectedFeelings([])
-                    }}
-                  >
-                    <Text className="font-urbanist-semi-bold text-mindful-brown-80">
-                      {emotion.name}
-                    </Text>
-                    <View
-                      className={`h-4 w-4 rounded-full border border-black mr-2 ${
-                        selectedEmotion === emotion.id
-                          ? 'bg-mindful-brown-80'
-                          : 'bg-white'
-                      }`}
-                    />
-                  </TouchableOpacity>
-                ))}
+              <TouchableOpacity onPress={() => setIsEmotionModalVisible(true)}>
+                <Text className="font-urbanist-semi-bold text-serenity-green-60">
+                  View Wheel of Emotions
+                </Text>
+              </TouchableOpacity>
+              <View className="flex flex-wrap flex-row">
+                {emotions
+                  .filter((emotion) => emotion.level === 'Inner')
+                  .map((emotion) => (
+                    <TouchableOpacity
+                      key={emotion.id}
+                      className="flex-row items-center bg-white rounded-full px-3 py-2 m-1 space-x-3 flex-grow-0 flex-shrink"
+                      onPress={() => {
+                        setSelectedEmotion(emotion.id)
+                        setSelectedFeelings([])
+                      }}
+                    >
+                      <Text className="font-urbanist-semi-bold text-mindful-brown-80">
+                        {emotion.name}
+                      </Text>
+                      <View
+                        className={`h-4 w-4 rounded-full border border-black mr-2 ${
+                          selectedEmotion === emotion.id
+                            ? 'bg-mindful-brown-80'
+                            : 'bg-white'
+                        }`}
+                      />
+                    </TouchableOpacity>
+                  ))}
+              </View>
             </View>
-          </View>
 
-          <View>
-            <Text className="font-urbanist-bold text-lg">
-              Select associated feelings
-            </Text>
-            <View className="flex flex-wrap flex-row">
-              {emotions
-                .filter((emotion) => emotion.parentID === selectedEmotion)
-                .map((emotion) => (
-                  <TouchableOpacity
-                    key={emotion.id}
-                    className="flex-row items-center bg-white rounded-full px-3 py-2 m-1 space-x-3 flex-grow-0 flex-shrink"
-                    onPress={() => {
-                      setSelectedFeelings((prev) => {
-                        if (prev.includes(emotion.id)) {
-                          return prev.filter((id) => id !== emotion.id)
-                        } else {
-                          return [...prev, emotion.id]
-                        }
-                      })
-                    }}
-                  >
-                    <Text className="font-urbanist-semi-bold text-mindful-brown-80">
-                      {emotion.name}
-                    </Text>
-                    <View
-                      className={`h-4 w-4 rounded-md border border-black mr-2 ${
-                        selectedFeelings.includes(emotion.id)
-                          ? 'bg-mindful-brown-80'
-                          : 'bg-white'
-                      }`}
-                    />
-                  </TouchableOpacity>
-                ))}
+            <View>
+              <Text className="font-urbanist-bold text-lg">
+                Select associated feelings
+              </Text>
+              <View className="flex flex-wrap flex-row">
+                {emotions
+                  .filter((emotion) => emotion.parentID === selectedEmotion)
+                  .map((emotion) => (
+                    <TouchableOpacity
+                      key={emotion.id}
+                      className="flex-row items-center bg-white rounded-full px-3 py-2 m-1 space-x-3 flex-grow-0 flex-shrink"
+                      onPress={() => {
+                        setSelectedFeelings((prev) => {
+                          if (prev.includes(emotion.id)) {
+                            return prev.filter((id) => id !== emotion.id)
+                          } else {
+                            return [...prev, emotion.id]
+                          }
+                        })
+                      }}
+                    >
+                      <Text className="font-urbanist-semi-bold text-mindful-brown-80">
+                        {emotion.name}
+                      </Text>
+                      <View
+                        className={`h-4 w-4 rounded-md border border-black mr-2 ${
+                          selectedFeelings.includes(emotion.id)
+                            ? 'bg-mindful-brown-80'
+                            : 'bg-white'
+                        }`}
+                      />
+                    </TouchableOpacity>
+                  ))}
+              </View>
             </View>
           </View>
-        </View>
-      )}
-      <CustomButton
-        title="Create Journal"
-        buttonStyle="mb-4 mt-2"
-        handlePress={() => handleSubmit()}
-      />
+        )}
+        <CustomButton
+          title="Create Journal"
+          buttonStyle="mb-4 mt-2 mb-3"
+          handlePress={() => handleSubmit()}
+        />
+      </ScrollView>
     </View>
   )
 

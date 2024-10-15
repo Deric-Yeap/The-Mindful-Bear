@@ -1,4 +1,11 @@
-import { View, Text, TouchableOpacity, Modal, Animated, ScrollView } from 'react-native'
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  Modal,
+  Animated,
+  ScrollView,
+} from 'react-native'
 import React, { useEffect, useState, useRef } from 'react'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { BarChart } from 'react-native-gifted-charts'
@@ -10,7 +17,9 @@ import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons'
 import { Calendar } from 'react-native-calendars'
 import { journalEntriesByPeriod } from '../../api/journal'
 import LottieView from 'lottie-react-native'
-import { Dimensions } from 'react-native';
+import { Dimensions } from 'react-native'
+import { useRouter } from 'expo-router'
+import { useRoute } from '@react-navigation/native'
 
 const JournalStats = ({ title = 'Journal Stats' }) => {
   const today = new Date()
@@ -20,8 +29,11 @@ const JournalStats = ({ title = 'Journal Stats' }) => {
   const [endDateForAxios, setEndDateForAxios] = useState(null)
   const [journals, setJournals] = useState([])
   const [loading, setLoading] = useState(true)
-  const { width, height } = Dimensions.get('window');
+  const { width, height } = Dimensions.get('window')
+  const router = useRouter()
+  const route = useRoute()
 
+  var { tabName, screenName } = route.params || null
   const handleOnPress = () => {
     setModalVisible(true)
   }
@@ -210,175 +222,192 @@ const JournalStats = ({ title = 'Journal Stats' }) => {
   const handlePress = () => {
     router.push({
       pathname: '/(journal)/journal-history-filtered',
-      params: { 
-        start: startDate ? startDate.toISOString().split('T')[0] : null, 
-        end: endDateForAxios ? endDateForAxios.toISOString().split('T')[0] : null 
+      params: {
+        start: startDate ? startDate.toISOString().split('T')[0] : null,
+        end: endDateForAxios
+          ? endDateForAxios.toISOString().split('T')[0]
+          : null,
       },
-    });
+    })
   }
 
   return (
     <ScrollView className="flex-1">
-    <SafeAreaView className="bg-optimistic-gray-10 h-full p-4 space-y-4">
-      <BackButton
-        buttonStyle="mb-4"
-        tabName="(journal)"
-        screenName={'journal-home'}
-      />
-      <View className="flex-row items-center justify-between">
-        <View>
-          <View className="flex flex-row items-center">
-            <Text className="font-urbanist-extra-bold text-mindful-brown-80 text-4xl mb-1">
-              {title}
+      <SafeAreaView className="bg-optimistic-gray-10 h-full p-4 space-y-4">
+        <BackButton
+          buttonStyle="mb-4"
+          // tabName="(journal)"
+          tabName={tabName}
+          screenName={screenName}
+        />
+        <View className="flex-row items-center justify-between">
+          <View>
+            <View className="flex flex-row items-center">
+              <Text className="font-urbanist-extra-bold text-mindful-brown-80 text-4xl mb-1">
+                {title}
+              </Text>
+              <TouchableOpacity
+                onPress={handleOnPress}
+                className="w-16 h-16 rounded-full bg-empathy-orange-40 flex items-center justify-center -mt-4 ml-4" // Added ml-4 for spacing
+              >
+                <MaterialCommunityIcons
+                  name="calendar-month-outline"
+                  size={30}
+                  color="white"
+                />
+              </TouchableOpacity>
+            </View>
+            <Text className="font-urbanist-light text-mindful-brown-80 text-xl">
+              {startDate && endDate
+                ? `Selected Range: ${startDate.toLocaleDateString('en-GB')} - ${endDate.toLocaleDateString('en-GB')}`
+                : startDate
+                  ? `Selected Date: ${startDate.toLocaleDateString('en-GB')}`
+                  : null}
             </Text>
-            <TouchableOpacity
-              onPress={handleOnPress}
-              className="w-16 h-16 rounded-full bg-empathy-orange-40 flex items-center justify-center -mt-4 ml-4" // Added ml-4 for spacing
-            >
-              <MaterialCommunityIcons
-                name="calendar-month-outline"
-                size={30}
-                color="white"
+          </View>
+        </View>
+
+        <Modal
+          animationType="slide"
+          transparent={true}
+          visible={modalVisible}
+          onRequestClose={() => {
+            setModalVisible(false)
+            setStartDate(null)
+            setEndDate(null)
+            setEndDateForAxios(null)
+          }}
+        >
+          <View className="flex-1 justify-center items-center bg-black bg-opacity-50">
+            <View className="bg-white rounded-lg w-80 p-4 shadow-lg">
+              <Calendar
+                style={{
+                  borderWidth: 1,
+                  borderColor: 'gray',
+                  height: 350,
+                  borderRadius: 10,
+                  overflow: 'hidden',
+                }}
+                current={today.toISOString().split('T')[0]}
+                onDayPress={handleDayPress}
+                markingType={'period'}
+                markedDates={getMarkedDates()}
               />
-            </TouchableOpacity>
+              <TouchableOpacity
+                onPress={() => setModalVisible(false)}
+                className="mt-4 p-2 bg-empathy-orange-40 rounded-md flex items-center justify-center"
+              >
+                <Text className="text-white font-bold">Close</Text>
+              </TouchableOpacity>
+            </View>
           </View>
-          <Text className="font-urbanist-light text-mindful-brown-80 text-xl">
-            {startDate && endDate
-              ? `Selected Range: ${startDate.toLocaleDateString('en-GB')} - ${endDate.toLocaleDateString('en-GB')}`
-              : startDate
-                ? `Selected Date: ${startDate.toLocaleDateString('en-GB')}`
-                : null}
-          </Text>
-        </View>
-      </View>
+        </Modal>
 
-      <Modal
-        animationType="slide"
-        transparent={true}
-        visible={modalVisible}
-        onRequestClose={() => {
-          setModalVisible(false)
-          setStartDate(null)
-          setEndDate(null)
-          setEndDateForAxios(null)
+        <View className="pb-20">
+          {startDate && innerEmotionsArray.length === 0 ? ( // Check if emotions array is empty
+            <>
+              <View className="flex-row justify-center items-center">
+                <View className="bg-mindful-brown-80 max-w-[550px] p-3 rounded-lg relative text">
+                  <Animated.Text
+                    style={{
+                      opacity: fadeAnim,
+                      paddingTop: 5,
+                      color: 'white',
+                      fontSize: 16,
+                    }}
+                  >
+                    Hey! There are no journal entries for this period.
+                  </Animated.Text>
+                </View>
+              </View>
+
+              <LottieView
+                source={require('../../assets/bearSleeping.json')}
+                autoPlay
+                loop
+                className="w-30 h-40 mt-5"
+              />
+            </>
+          ) : !startDate ? (
+            <>
+              <View className="flex-row justify-center items-center">
+                <View className="bg-mindful-brown-80 max-w-[250px] p-3 rounded-lg relative">
+                  <Animated.Text
+                    style={{
+                      opacity: fadeAnim,
+                      paddingTop: 5,
+                      color: 'white',
+                      fontSize: 16,
+                    }}
+                  >
+                    Hey! Please Select a date range
+                  </Animated.Text>
+                </View>
+              </View>
+
+              <LottieView
+                source={require('../../assets/bearSleeping.json')}
+                autoPlay
+                loop
+                className="w-30 h-40 mt-5"
+              />
+            </>
+          ) : (
+        <View style={{ width: '100%', alignItems: 'center', marginTop: 8}}>
+    <View style={{ alignItems: 'center'}}>
+        <BarChart
+          data={barData}
+          height={400} // Fixed height
+          barWidth={30} // Set bar width
+          barBorderRadius={20}
+          frontColor="lightgray"
+          yAxisThickness={0}
+          xAxisThickness={0}
+          isAnimated // Keep animation enabled
+          yAxisMaxValue={maxValue}
+          stepValue={stepValue}
+          noOfSections={noOfSections}
+          yAxisLabelTexts={Array.from(
+            { length: noOfSections + 1 },
+            (_, i) => (i * stepValue).toString()
+          )}
+          xAxisLabelTexts={barData.map(item => {
+            const label = item.primaryEmotion;
+            return label.length > 10 ? `${label.substring(0, 10)}...` : label; // Adjust length as needed
+          })}// Leave empty if you want to use custom labels below
+
+          xAxisLabelTextStyle={{
+            transform: [{ rotate: '0deg' }], // Consistent rotation angle for all labels
+            textAlign: 'center',
+            overflow: 'visible',
+            color: colors.mindfulBrown100,
+            width:100,
+            paddingRight:37,
+            paddingTop:0,
+            whiteSpace: 'nowrap',
+          
         }}
-      >
-        <View className="flex-1 justify-center items-center bg-black bg-opacity-50">
-          <View className="bg-white rounded-lg w-80 p-4 shadow-lg">
-            <Calendar
-              style={{
-                borderWidth: 1,
-                borderColor: 'gray',
-                height: 350,
-                borderRadius: 10,
-                overflow: 'hidden',
-              }}
-              current={today.toISOString().split('T')[0]}
-              onDayPress={handleDayPress}
-              markingType={'period'}
-              markedDates={getMarkedDates()}
-            />
-            <TouchableOpacity
-              onPress={() => setModalVisible(false)}
-              className="mt-4 p-2 bg-empathy-orange-40 rounded-md flex items-center justify-center"
-            >
-              <Text className="text-white font-bold">Close</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      </Modal>
-
-      <View className="pb-20">
-        {startDate && innerEmotionsArray.length === 0 ? ( // Check if emotions array is empty
-          <>
-            <View className="flex-row justify-center items-center">
-              <View className="bg-mindful-brown-80 max-w-[550px] p-3 rounded-lg relative text">
-                <Animated.Text
-                  style={{
-                    opacity: fadeAnim,
-                    paddingTop: 5,
-                    color: 'white',
-                    fontSize: 16,
-                  }}
-                >
-                  Hey! There are no journal entries for this period.
-                </Animated.Text>
-              </View>
-            </View>
-
-            <LottieView
-              source={require('../../assets/bearSleeping.json')}
-              autoPlay
-              loop
-              className="w-30 h-40 mt-5"
-            />
-          </>
-        ) : !startDate ? (
-          <>
-            <View className="flex-row justify-center items-center">
-              <View className="bg-mindful-brown-80 max-w-[250px] p-3 rounded-lg relative">
-                <Animated.Text
-                  style={{
-                    opacity: fadeAnim,
-                    paddingTop: 5,
-                    color: 'white',
-                    fontSize: 16,
-                  }}
-                >
-                  Hey! Please Select a date range
-                </Animated.Text>
-              </View>
-            </View>
-
-            <LottieView
-              source={require('../../assets/bearSleeping.json')}
-              autoPlay
-              loop
-              className="w-30 h-40 mt-5"
-            />
-          </>
-        ) : (
-          <View className="relative mt-2">
-            <BarChart
-              data={barData}
-              height={400}
-              barWidth={30}
-              barBorderRadius={20}
-              frontColor="lightgray"
-              yAxisThickness={0}
-              xAxisThickness={0}
-              isAnimated
-              yAxisMaxValue={maxValue}
-              stepValue={stepValue}
-              noOfSections={noOfSections}
-              yAxisLabelTexts={Array.from(
-                { length: noOfSections + 1 },
-                (_, i) => (i * stepValue).toString()
-              )}
-              xAxisLabelTexts={[]}
-              scrollAnimation={true}
-            />
-            <View className="flex flex-row justify-between ml-3 mr-11 ">
-              {barData.map((item, index) => (
-                <Text
-                  key={index}
-                  className="text-center text-sm -mx-1 transform rotate-[-40deg] w-16"
-                >
-                  {item.primaryEmotion}
-                </Text>
-              ))}
-            </View>
-          </View>
-        )}
-        {startDate && innerEmotionsArray.length !== 0 && (
-          <CustomButton
-            title="View Journal Entries"
-            handlePress={handlePress}
-            buttonStyle="w-full mt-10"
-          />
-        )}
+          style={{ 
+            width: '100%', 
+            height: '100%', 
+          }}
+          disableScroll={true} // Disable horizontal scrolling
+          labelsDistanceFromXaxis={10} // Adjust distance from X-axis
+          xAxisLabelRotation={45} // Rotate labels for better visibility
+          xAxisLabelStyle={{ fontSize: 10 }} // Adjust font size as needed
+        />
       </View>
-    </SafeAreaView>
+    </View>
+          )}
+          {startDate && innerEmotionsArray.length !== 0 && (
+            <CustomButton
+              title="View Journal Entries"
+              handlePress={handlePress}
+              buttonStyle="w-full mt-10"
+            />
+          )}
+        </View>
+      </SafeAreaView>
     </ScrollView>
   )
 }

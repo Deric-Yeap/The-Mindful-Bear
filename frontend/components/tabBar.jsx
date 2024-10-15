@@ -56,10 +56,7 @@ const TabBar = ({ state, descriptors, navigation }) => {
                 ? options.title
                 : route.name
 
-          if (
-            notIncludedRoutes.includes(route.name) ||
-            (route.name === 'settings' && !featureFlags.isSettings)
-          ) {
+          if (notIncludedRoutes.includes(route.name)) {
             return null
           }
 

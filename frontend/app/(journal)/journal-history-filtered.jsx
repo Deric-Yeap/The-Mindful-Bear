@@ -46,23 +46,26 @@ const JournalHistoryFiltered = () => {
   }, [fadeAnim, scaleAnim])
 
   const getDatesBetween = (startDate, endDate) => {
-    const dates = [];
-    let currentDate = new Date(startDate);
-    const end = new Date(endDate);
+    const dates = []
+    let currentDate = new Date(startDate)
+    const end = new Date(endDate)
 
-
-    while (currentDate <= end) {
-        dates.push(currentDate.toISOString().split('T')[0]); // Push the date in YYYY-MM-DD format
-        currentDate.setDate(currentDate.getDate() + 1);
+    if (isNaN(end.getTime())) {
+      return [currentDate.toISOString().split('T')[0]] // Return only the start date
     }
 
-    return dates;
-};
+    while (currentDate <= end) {
+      dates.push(currentDate.toISOString().split('T')[0]) // Push the date in YYYY-MM-DD format
+      currentDate.setDate(currentDate.getDate() + 1)
+    }
+
+    return dates
+  }
 
   const startDate = inputStartDate
   const endDate = inputEndDate
 
-  const dateRange = getDatesBetween(startDate, endDate);
+  const dateRange = getDatesBetween(startDate, endDate)
 
   useEffect(() => {
     const fetchData = async () => {
@@ -73,9 +76,9 @@ const JournalHistoryFiltered = () => {
           month: currentMonth,
         })
         setJournals(response)
-         // Set the first date as selected
-         if (dateRange.length > 0) {
-          setSelectedDate(dateRange[0]); 
+        // Set the first date as selected
+        if (dateRange.length > 0) {
+          setSelectedDate(dateRange[0])
         }
       } catch (error) {
         console.error(error)
@@ -135,33 +138,33 @@ const JournalHistoryFiltered = () => {
           className="flex-row py-1 h-[8vh] space-x-4"
         >
           {dateRange.map((date) => {
-                const journalsForDate = journals[date] || []; // Get journals for the current date
-                const journalCount = journalsForDate.length;
+            const journalsForDate = journals[date] || [] // Get journals for the current date
+            const journalCount = journalsForDate.length
 
-                const journalDate = new Date(date);
-                const dayOfWeek = daysOfWeek[(journalDate.getDay() + 6) % 7];
-                const dayOfMonth = journalDate.getDate();
-                const isSelected = selectedDate === date; // Check if the date is selected
+            const journalDate = new Date(date)
+            const dayOfWeek = daysOfWeek[(journalDate.getDay() + 6) % 7]
+            const dayOfMonth = journalDate.getDate()
+            const isSelected = selectedDate === date // Check if the date is selected
 
-                return (
-                    <TouchableOpacity
-                        key={date} // Use date as a unique identifier
-                        onPress={() => setSelectedDate(date)} // Set the selected date
-                        className={`h-full w-[5vh] rounded-t-full rounded-b-full items-center justify-center ${isSelected ? 'bg-white' : 'bg-mindful-brown-30'}`}
-                    >
-                        <Text
-                            className={`font-urbanist-extra-bold ${isSelected ? 'text-mindful-brown-80' : 'text-optimistic-gray-60'}`}
-                        >
-                            {monthNames[currentMonth - 1].substring(0, 3)}
-                        </Text>
-                        <Text
-                            className={`font-urbanist-extra-bold text-lg ${isSelected ? 'text-mindful-brown-80' : 'text-optimistic-gray-60'}`}
-                        >
-                            {dayOfMonth} 
-                        </Text>
-                    </TouchableOpacity>
-                );
-            })}
+            return (
+              <TouchableOpacity
+                key={date} // Use date as a unique identifier
+                onPress={() => setSelectedDate(date)} // Set the selected date
+                className={`h-full w-[5vh] rounded-t-full rounded-b-full items-center justify-center ${isSelected ? 'bg-white' : 'bg-mindful-brown-30'}`}
+              >
+                <Text
+                  className={`font-urbanist-extra-bold ${isSelected ? 'text-mindful-brown-80' : 'text-optimistic-gray-60'}`}
+                >
+                  {monthNames[currentMonth - 1].substring(0, 3)}
+                </Text>
+                <Text
+                  className={`font-urbanist-extra-bold text-lg ${isSelected ? 'text-mindful-brown-80' : 'text-optimistic-gray-60'}`}
+                >
+                  {dayOfMonth}
+                </Text>
+              </TouchableOpacity>
+            )
+          })}
         </ScrollView>
       </View>
       <ScrollView className="p-4 flex-1 py-5">
@@ -258,27 +261,26 @@ const JournalHistoryFiltered = () => {
               })
             ) : (
               <View className="flex-1 justify-center items-center">
-              <View className=" bg-mindful-brown-80 max-w-[400px] p-3 mt-8 rounded-lg relative">
-              <Animated.Text 
-                style={{
-                  opacity: fadeAnim,
-                  paddingTop: 1,
-                  color: 'white',
-                  fontSize: 16,
-                fontFamily: 'Urbanist'
-                }}
-              >
-               No journals for the selected day.
-              </Animated.Text>
-            </View>
-              <LottieView
-                source={require('../../assets/bearSleeping.json')}
-                autoPlay
-                loop
-                style={{ width: 120, height: 160, marginBottom: 10 }} // Use style instead of className for LottieView
-              />
-            </View>
-              
+                <View className=" bg-mindful-brown-80 max-w-[400px] p-3 mt-8 rounded-lg relative">
+                  <Animated.Text
+                    style={{
+                      opacity: fadeAnim,
+                      paddingTop: 1,
+                      color: 'white',
+                      fontSize: 16,
+                      fontFamily: 'Urbanist',
+                    }}
+                  >
+                    No journals for the selected day.
+                  </Animated.Text>
+                </View>
+                <LottieView
+                  source={require('../../assets/bearSleeping.json')}
+                  autoPlay
+                  loop
+                  style={{ width: 120, height: 160, marginBottom: 10 }} // Use style instead of className for LottieView
+                />
+              </View>
             )}
           </View>
         </View>
