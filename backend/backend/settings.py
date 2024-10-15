@@ -17,7 +17,7 @@ import os
 
 load_dotenv()
 
-testing = True
+testing = False
 
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.

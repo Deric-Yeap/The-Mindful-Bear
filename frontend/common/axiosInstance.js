@@ -2,11 +2,11 @@ import axios from 'axios'
 import { store } from '../redux/store'
 import { Platform } from 'react-native'
 // 
-// const baseURL = 'http://localhost:8000/api/'
-const baseURL =
-  Platform.OS === 'ios'
-    ? 'http://localhost:8000/api/'
-    : 'http://10.0.2.2:8000/api/'
+const baseURL = 'https://themindfulbear.xyz/api/'
+// const baseURL =
+//   Platform.OS === 'ios'
+//     ? 'http://localhost:8000/api/'
+//     : 'http://10.0.2.2:8000/api/'
 
 const axiosInstance = axios.create({
   baseURL: baseURL,
