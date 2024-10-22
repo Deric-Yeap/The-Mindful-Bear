@@ -8,7 +8,7 @@ import logo from '../../assets/mindfulBearLogo.png';
 import { useRouter } from 'expo-router'; // Import useRouter from expo-router
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 
-const JournalHome = () => {
+const ArticleDiscovery = () => {
   const router = useRouter(); // Use useRouter hook
   const [searchTerm, setSearchTerm] = useState('');
 
@@ -92,4 +92,4 @@ const JournalHome = () => {
   );
 };
 
-export default JournalHome;
+export default ArticleDiscovery;
