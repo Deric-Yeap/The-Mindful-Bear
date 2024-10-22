@@ -3,7 +3,7 @@ import { View, Text, ScrollView, TouchableOpacity } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { useSelector } from 'react-redux'
 import TopBrownSearchBar from '../../components/topBrownSearchBar'
-import ArticleCard from '../../components/articleCard' // Ensure you import MetricCard correctly
+import ArticleCard from '../../components/articleCard'
 import { colors } from '../../common/styles'
 import StatusBarComponent from '../../components/darkThemStatusBar'
 import Loading from '../../components/loading'
@@ -17,7 +17,7 @@ const ArticleResult = () => {
   const [streak, setStreak] = useState(0)
   const handleSearch = () => {
     // Navigate to the article result screen
-    router. push('/(article)/article-result');
+    // router. push('/(article)/article-result');
   }
 
   useEffect(() => {

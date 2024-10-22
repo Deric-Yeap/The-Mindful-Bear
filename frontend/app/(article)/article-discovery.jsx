@@ -48,13 +48,20 @@ const ArticleDiscovery = () => {
             style={{
               width: 300,
               height: 300,
-              marginBottom: 20,
               marginTop: -(screenHeight * 0.25),  // Dynamically adjust based on 25% of the screen height
             }}
             resizeMode="contain"
           />
 
-          {/* Search bar moved below the image */}
+          {/* Text label for the search bar moved below the image */}
+          <Text
+           
+          className="text-mindful-brown-80 font-urbanist-extra-bold text-xl mb-2 mt-2 ml-6"
+          >
+            Search for Articles Here
+          </Text>
+
+          {/* Search bar moved below the text */}
           <View style={{ paddingHorizontal: 20, marginTop: 10, width: screenWidth * 0.9 }}>
             <View style={{ flexDirection: 'row', alignItems: 'center' }}>
               <TextInput
