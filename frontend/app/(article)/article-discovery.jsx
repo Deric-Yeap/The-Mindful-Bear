@@ -5,15 +5,16 @@ import StatusBarComponent from '../../components/darkThemStatusBar';
 import BackButton from '../../components/backButton';
 import { Dimensions } from 'react-native';
 import logo from '../../assets/mindfulBearLogo.png';
-import { useNavigation } from '@react-navigation/native';
+import { useRouter } from 'expo-router'; // Import useRouter from expo-router
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 
 const JournalHome = () => {
-  const navigation = useNavigation();
+  const router = useRouter(); // Use useRouter hook
   const [searchTerm, setSearchTerm] = useState('');
 
   const handleSearch = () => {
-    console.log(searchTerm);
+    // Navigate to the article result screen
+    router.push(`/article-result?query=${encodeURIComponent(searchTerm)}`);
   };
 
   const screenHeight = Dimensions.get('window').height;
@@ -76,7 +77,7 @@ const JournalHome = () => {
                   backgroundColor: '#6D4C41',  // slightly darker brown
                   borderRadius: 50,
                 }}
-                onPress={handleSearch}
+                onPress={handleSearch}  // Update the onPress handler
               >
                 <MaterialIcons name="search" size={24} color="#F7F4F2" />
               </TouchableOpacity>
