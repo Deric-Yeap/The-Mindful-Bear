@@ -16,13 +16,20 @@ from ..common.audio import transcribe
 from rest_framework.exceptions import APIException
 # analyzer/views.py
 from django.http import JsonResponse
-import nltk
-from nltk.sentiment import SentimentIntensityAnalyzer
+# import nltk
+# from nltk.sentiment import SentimentIntensityAnalyzer
 from datetime import timedelta
 
+from transformers import AutoTokenizer, AutoModelForSequenceClassification
+from scipy.special import softmax
+import torch
 
+# Load the model and tokenizer once, to avoid reloading every time
+MODEL = "cardiffnlp/twitter-roberta-base-sentiment"
+tokenizer = AutoTokenizer.from_pretrained(MODEL)
+model = AutoModelForSequenceClassification.from_pretrained(MODEL)
 # Download VADER lexicon if not already downloaded
-nltk.download('vader_lexicon')
+# nltk.download('vader_lexicon')
 
 class JournalListView(APIView):
     def get(self, request):
@@ -35,22 +42,56 @@ class JournalListView(APIView):
         
         if serializer.is_valid():
             journal_text = serializer.validated_data['journal_text']
-            sentiment_result = self.analyze_sentiment(journal_text)  # Remove self as the first argument
+             # Preprocess the text (e.g., handle "not not")
+            cleaned_text = self.preprocess_text(journal_text)
+            print(cleaned_text)
+
+            sentiment_result = self.analyze_sentiment(cleaned_text)  # Remove self as the first argument
             serializer.validated_data['sentiment_analysis_result'] = sentiment_result
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
     
+    def polarity_scores_roberta(self, text):
+        # Tokenize and encode the text
+        encoded_text = tokenizer(text, return_tensors='pt')
+        output = model(**encoded_text)
+        scores = output[0][0].detach().numpy()
+        scores = softmax(scores)
+        scores_dict = {
+            'roberta_neg': scores[0],
+            'roberta_neu': scores[1],
+            'roberta_pos': scores[2]
+        }
+        return scores_dict
 
+    def preprocess_text(self, text):
+        # Handle double negation or any other text processing here
+        if "not not" in text:
+            text = text.replace("not not", "")
+        return text
     def analyze_sentiment(self, text):
-        sid = SentimentIntensityAnalyzer()
-        polarity_scores = sid.polarity_scores(text)
+
+        # Get sentiment analysis from RoBERTa
+        roberta_scores = self.polarity_scores_roberta(text)
+
+        #Calculate roberta_compound
+        roberta_compound = roberta_scores['roberta_pos'] - roberta_scores['roberta_neg']
+
+        #Get RoBERTa sentiment analysis
+        roberta_sentiment_analysis = (
+            'Positive' if roberta_compound > 0.05 else ('Negative' if roberta_compound < -0.05 else 'Neutral')
+        )
+
+        return roberta_sentiment_analysis
+        # sid = SentimentIntensityAnalyzer()
+        # polarity_scores = sid.polarity_scores(text)
         
-        if polarity_scores['compound'] >= 0.05:
-            return 'Positive'
-        elif polarity_scores['compound'] <= -0.05:
-            return 'Negative'
-        else:
-            return 'Neutral'
+        # if polarity_scores['compound'] >= 0.05:
+        #     return 'Positive'
+        # elif polarity_scores['compound'] <= -0.05:
+        #     return 'Negative'
+        # else:
+        #     return 'Neutral'
     
 class UploadFileView(APIView):
     parser_classes = [MultiPartParser, FormParser]
