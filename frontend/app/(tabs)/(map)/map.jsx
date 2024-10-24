@@ -25,7 +25,6 @@ import {
 } from '../../../redux/slices/isShownNavSlice'
 import UserLocationCustom from '../../../components/maps/userLocation'
 import * as turf from '@turf/turf'
-import { Alert } from 'react-native'
 import StatusBarComponent from '../../../components/darkThemStatusBar'
 import { Dimensions } from 'react-native'
 
@@ -417,7 +416,7 @@ const Map = () => {
               >
                 <Mapbox.Camera
                   centerCoordinate={location}
-                  zoomLevel={17.0}
+                  zoomLevel={18.0}
                   animationMode="flyto"
                   animationDuration={500}
                   pitch={60}
