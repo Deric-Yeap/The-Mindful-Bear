@@ -70,7 +70,10 @@ INSTALLED_APPS = [
     "api.color",
     "api.formSession",
     "api.favourite",
-    "api.landmarkUserCount"
+    "api.landmarkUserCount",
+    "api.achievementPoint",
+    "api.avatar",
+    "api.userAvatar"
 ]
 
 REST_FRAMEWORK = {

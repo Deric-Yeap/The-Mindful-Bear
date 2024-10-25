@@ -1,0 +1,105 @@
+id,name,content_type_id,codename
+1,Can add log entry,1,add_logentry
+2,Can change log entry,1,change_logentry
+3,Can delete log entry,1,delete_logentry
+4,Can view log entry,1,view_logentry
+5,Can add permission,2,add_permission
+6,Can change permission,2,change_permission
+7,Can delete permission,2,delete_permission
+8,Can view permission,2,view_permission
+9,Can add group,3,add_group
+10,Can change group,3,change_group
+11,Can delete group,3,delete_group
+12,Can view group,3,view_group
+13,Can add content type,4,add_contenttype
+14,Can change content type,4,change_contenttype
+15,Can delete content type,4,delete_contenttype
+16,Can view content type,4,view_contenttype
+17,Can add session,5,add_session
+18,Can change session,5,change_session
+19,Can delete session,5,delete_session
+20,Can view session,5,view_session
+21,Can add custom user,6,add_customuser
+22,Can change custom user,6,change_customuser
+23,Can delete custom user,6,delete_customuser
+24,Can view custom user,6,view_customuser
+25,Can add landmark,7,add_landmark
+26,Can change landmark,7,change_landmark
+27,Can delete landmark,7,delete_landmark
+28,Can view landmark,7,view_landmark
+29,Can add exercise,8,add_exercise
+30,Can change exercise,8,change_exercise
+31,Can delete exercise,8,delete_exercise
+32,Can view exercise,8,view_exercise
+33,Can add form,9,add_form
+34,Can change form,9,change_form
+35,Can delete form,9,delete_form
+36,Can view form,9,view_form
+37,Can add question,10,add_question
+38,Can change question,10,change_question
+39,Can delete question,10,delete_question
+40,Can view question,10,view_question
+41,Can add response,11,add_response
+42,Can change response,11,change_response
+43,Can delete response,11,delete_response
+44,Can view response,11,view_response
+45,Can add session,12,add_session
+46,Can change session,12,change_session
+47,Can delete session,12,delete_session
+48,Can view session,12,view_session
+49,Can add form session,13,add_formsession
+50,Can change form session,13,change_formsession
+51,Can delete form session,13,delete_formsession
+52,Can view form session,13,view_formsession
+53,Can add journal,14,add_journal
+54,Can change journal,14,change_journal
+55,Can delete journal,14,delete_journal
+56,Can view journal,14,view_journal
+57,Can add Token,15,add_token
+58,Can change Token,15,change_token
+59,Can delete Token,15,delete_token
+60,Can view Token,15,view_token
+61,Can add Token,16,add_tokenproxy
+62,Can change Token,16,change_tokenproxy
+63,Can delete Token,16,delete_tokenproxy
+64,Can view Token,16,view_tokenproxy
+65,Can add form question,17,add_formquestion
+66,Can change form question,17,change_formquestion
+67,Can delete form question,17,delete_formquestion
+68,Can view form question,17,view_formquestion
+69,Can add gender,18,add_gender
+70,Can change gender,18,change_gender
+71,Can delete gender,18,delete_gender
+72,Can view gender,18,view_gender
+73,Can add department,19,add_department
+74,Can change department,19,change_department
+75,Can delete department,19,delete_department
+76,Can view department,19,view_department
+77,Can add Password Reset Token,20,add_resetpasswordtoken
+78,Can change Password Reset Token,20,change_resetpasswordtoken
+79,Can delete Password Reset Token,20,delete_resetpasswordtoken
+80,Can view Password Reset Token,20,view_resetpasswordtoken
+81,Can add option set,21,add_optionset
+82,Can change option set,21,change_optionset
+83,Can delete option set,21,delete_optionset
+84,Can view option set,21,view_optionset
+85,Can add option,22,add_option
+86,Can change option,22,change_option
+87,Can delete option,22,delete_option
+88,Can view option,22,view_option
+89,Can add emotion,23,add_emotion
+90,Can change emotion,23,change_emotion
+91,Can delete emotion,23,delete_emotion
+92,Can view emotion,23,view_emotion
+93,Can add color,24,add_color
+94,Can change color,24,change_color
+95,Can delete color,24,delete_color
+96,Can view color,24,view_color
+97,Can add user session,25,add_usersession
+98,Can change user session,25,change_usersession
+99,Can delete user session,25,delete_usersession
+100,Can view user session,25,view_usersession
+101,Can add journal emotion,26,add_journalemotion
+102,Can change journal emotion,26,change_journalemotion
+103,Can delete journal emotion,26,delete_journalemotion
+104,Can view journal emotion,26,view_journalemotion

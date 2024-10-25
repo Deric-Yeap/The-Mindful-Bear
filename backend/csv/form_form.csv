@@ -1,0 +1,5 @@
+id,form_name,store_responses,is_compulsory,is_postsession,is_presession
+3,SMS,FALSE,TRUE,TRUE,TRUE
+4,Feedback,TRUE,FALSE,TRUE,FALSE
+5,PSS,FALSE,TRUE,FALSE,TRUE
+6,General Questions,TRUE,FALSE,FALSE,FALSE

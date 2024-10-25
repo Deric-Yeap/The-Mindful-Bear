@@ -1,24 +1,19 @@
-import React, { useState, useEffect } from 'react'
-import {
-  View,
-  Text,
-  ScrollView,
-  Image,
-  TouchableOpacity,
-  ActivityIndicator,
-} from 'react-native'
-import { SafeAreaView } from 'react-native-safe-area-context'
-import BrownPageTitlePortion from '../../components/brownPageTitlePortion'
-import StatusBarComponent from '../../components/darkThemStatusBar'
-import { colors } from '../../common/styles'
-import { LineChart } from 'react-native-gifted-charts'
-import PositiveBear from '../../assets/positiveBear.png'
-import NeutralBear from '../../assets/neutralBear.png'
-import NegativeBear from '../../assets/negativeBear.png'
-import Toggle from '../../components/toggle'
-import axiosInstance from '../../common/axiosInstance'
+import React, { useState, useEffect } from 'react';
+import { View, Text, ScrollView, Image, TouchableOpacity, ActivityIndicator, Dimensions } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import BrownPageTitlePortion from '../../components/brownPageTitlePortion';
+import StatusBarComponent from '../../components/darkThemStatusBar';
+import { colors } from '../../common/styles';
+import { LineChart } from 'react-native-gifted-charts';
+import PositiveBear from '../../assets/positiveBear.png';
+import NeutralBear from '../../assets/neutralBear.png';
+import NegativeBear from '../../assets/negativeBear.png';
+import Toggle from '../../components/toggle';
+import axiosInstance from '../../common/axiosInstance';
 import { journalCounts } from '../../api/journal'
 import Loading from '../../components/loading'
+import { Svg } from 'react-native-svg';
+
 
 const JournalAnalytics = () => {
   const [selectedBear, setSelectedBear] = useState('Positive')
@@ -75,15 +70,51 @@ const JournalAnalytics = () => {
       >
         <Loading />
       </View>
-    )
+    );
   }
   const onSelectSwitch = (option) => {
     setSelectedOption(option)
   }
 
-  const handlePress = (bearType) => {
-    setSelectedBear(bearType)
-  }
+  const handlePress = bearType => {
+    setSelectedBear(bearType);
+  };
+   // Inside your MindfulnessExercisesAnalytics component
+   const screenWidth = Dimensions.get('window').width;
+
+   // Use the number of data points to determine the chart width
+   const chartWidth = Math.max(screenWidth, lineData.length * 100); // Ensure at least the screen width
+   console.log("chartWidth",chartWidth)
+ 
+  // Function to calculate linear regression (trendline)
+  const calculateTrendline = (data) => {
+   const n = data.length;
+   if (n === 0) return []; // Avoid calculation if no data
+   const sumX = data.reduce((sum, _, index) => sum + index, 0);
+   const sumY = data.reduce((sum, point) => sum + point.value, 0);
+   const sumXY = data.reduce((sum, point, index) => sum + index * point.value, 0);
+   const sumX2 = data.reduce((sum, _, index) => sum + index * index, 0);
+    print("sumX",sumX)
+   const slope = (n * sumXY - sumX * sumY) / (n * sumX2 - sumX * sumX);
+   const intercept = (sumY - slope * sumX) / n;
+ 
+   return data.map((_, index) => ({
+     value: slope * index + intercept,
+     label: data[index].label,
+   }));
+ };
+ 
+ // Function to calculate average line
+ const calculateAverageLine = (data) => {
+   const averageValue = data.reduce((sum, point) => sum + point.value, 0) / data.length;
+   return data.map(point => ({
+     value: averageValue,
+     label: point.label,
+   }));
+ };
+ 
+  const averageLineData = selectedOption === 1 ? calculateAverageLine(lineData) : [];
+   const trendlineData = selectedOption !== 1 ? calculateTrendline(lineData) : [];
 
   return (
     <SafeAreaView
@@ -181,8 +212,12 @@ const JournalAnalytics = () => {
               <LineChart
                 areaChart
                 curved
-                data={lineData}
-                height={300} // Increased height for more space
+                data={lineData.length > 1 ? lineData : null}
+                data2={averageLineData.length > 1 ? averageLineData : null}
+                data3={trendlineData.length > 1 ? trendlineData : null}
+                 // Ensure this is your data
+                width={chartWidth} // Make chart width dynamic based on data
+                height={250}
                 showVerticalLines
                 spacing={70}
                 initialSpacing={0}
@@ -190,21 +225,30 @@ const JournalAnalytics = () => {
                 hideDataPoints
                 dataPointsColor1={colors.mindfulBrown100}
                 startFillColor1={colors.mindfulBrown50}
-                startOpacity={0.8}
-                endOpacity={0.3}
+                startOpacity1={0.8}
+                endOpacity1={0.3}
+                // To avoid any shadow or transparency effects on the second dataset
+                startOpacity2={0} 
+                endOpacity2={0}   
+                startOpacity3={0} 
+                endOpacity3={0}  
+                // Make the average & trendline line dashed
+                strokeDashArray2={[4, 4]}
+                strokeDashArray3={[4, 4]}
                 xAxisTickCount={5} // Adjust based on your data
                 xAxisLabelTextStyle={{
-                  transform: [{ rotate: '-15deg' }], // Consistent rotation angle for all labels
-                  textAlign: 'center',
-                  overflow: 'visible',
-                  fontSize: lineData.length > 10 ? 11 : 11,
-                  color: colors.mindfulBrown100,
-                  fontWeight: 'bold',
+                    transform: [{ rotate: '-15deg' }], // Consistent rotation angle for all labels
+                    textAlign: 'center',
+                    overflow: 'visible',
+                    fontSize: lineData.length > 10 ? 8 : 11,
+                    color: colors.mindfulBrown100,
+                    fontWeight: 'bold',
                 }}
                 xAxisLabelContainerStyle={{
-                  paddingBottom: 60, // Fixed padding for bottom space
-                  paddingHorizontal: lineData.length > 10 ? 15 : 7,
-                  paddingTop: -20,
+                    paddingBottom: 60, // Fixed padding for bottom space
+                    paddingHorizontal: lineData.length > 10 ? 15 : 7,
+                    paddingTop: -20,
+                    paddingLeft: 20,
                 }}
                 hideXAxis={false}
               />

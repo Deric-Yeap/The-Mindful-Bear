@@ -37,4 +37,7 @@ urlpatterns = [
     path("api/userSession/", include("api.userSession.urls")),
     path("api/favourite/", include("api.favourite.urls")),
     path("api/landmarkUserCount/", include("api.landmarkUserCount.urls")), 
+    path("api/achievementPoint/", include("api.achievementPoint.urls")),
+    path("api/avatar/", include("api.avatar.urls")),
+    path("api/userAvatar/", include("api.userAvatar.urls"))
 ]
