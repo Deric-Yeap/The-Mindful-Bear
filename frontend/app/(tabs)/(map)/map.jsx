@@ -27,6 +27,7 @@ import UserLocationCustom from '../../../components/maps/userLocation'
 import * as turf from '@turf/turf'
 import StatusBarComponent from '../../../components/darkThemStatusBar'
 import { Dimensions } from 'react-native'
+import { postPoints } from '../../../api/achievementPoint'
 
 const windowWidth = Dimensions.get('window').width
 const screenWidth = Dimensions.get('screen').width
@@ -337,6 +338,10 @@ const Map = () => {
         })
 
       return updatedForm
+    })
+    const postPointsResponse = await postPoints({
+      points: 50,
+      description: 'Mindfulness Session Completed',
     })
   }
 
