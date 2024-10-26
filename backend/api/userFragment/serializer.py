@@ -1,36 +1,32 @@
 from rest_framework import serializers
-
 from ..avatar.serializer import AvatarSerializer
 from ..user.serializer import CustomUserSerializer
-from rest_framework.exceptions import ValidationError
-from .models import UserAvatar
+from .models import UserFragment
 from ..user.models import CustomUser
 from ..avatar.models import Avatar
 
 
 
-class UserAvatarSerializer(serializers.ModelSerializer):
+class UserFragmentSerializer(serializers.ModelSerializer):
     user = CustomUserSerializer()
     avatar = AvatarSerializer()
     class Meta:
-        model = UserAvatar
-        fields = ['id','user', 'avatar','is_selected']
+        model = UserFragment
+        fields = ['id','user', 'avatar', 'quantity']
 
-
-
-
-class UserAvatarCreateSerializer(serializers.ModelSerializer):
+class UserFragmentCreateSerializer(serializers.ModelSerializer):
     user = serializers.PrimaryKeyRelatedField(queryset=CustomUser.objects.all())
     avatar = serializers.PrimaryKeyRelatedField(queryset=Avatar.objects.all())
     class Meta:
-        model = UserAvatar
-        fields = ['id','user', 'avatar','is_selected']
+        model = UserFragment
+        fields = ['id','user', 'avatar', 'quantity']
     def create(self, validated_data):
         request = self.context.get('request')
         user = validated_data['user']
-        userAvatar = UserAvatar.objects.create(
+        userAvatar = UserFragment.objects.create(
             avatar=validated_data['avatar'],
             user=user,  
+            quantity = validated_data['quantity']
         )
         return userAvatar
     def to_representation(self, instance):
@@ -41,12 +37,12 @@ class UserAvatarCreateSerializer(serializers.ModelSerializer):
 
 
 
-class UserAvatarUpdateSerializer(serializers.ModelSerializer):
+class UserFragmentUpdateSerializer(serializers.ModelSerializer):
     user = serializers.PrimaryKeyRelatedField(queryset=CustomUser.objects.all())
     avatar = serializers.PrimaryKeyRelatedField(queryset=Avatar.objects.all())
     class Meta:
-        model = UserAvatar
-        fields = ['id','user', 'avatar','is_selected']
+        model = UserFragment
+        fields = ['id','user', 'avatar', 'quantity']
 
     def update(self, instance, validated_data):
         request = self.context.get('request')
