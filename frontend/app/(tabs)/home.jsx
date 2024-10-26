@@ -139,6 +139,18 @@ const Home = () => {
               View your points history.
             </Text>
           </MetricCard>
+          <MetricCard
+            route="/(avatar)"
+            iconName="account"
+            iconColor={colors.empathyOrange40}
+            circleStyle="bg-empathy-orange-10"
+            title="My Avatars"
+            rightImage={require('../../assets/mindfulJournalMetricCard.png')}
+          >
+            <Text className="font-urbanist-semi-bold text-mindful-brown-80 text-lg">
+              Manage your avatars
+            </Text>
+          </MetricCard>
         </View>
       </ScrollView>
     </SafeAreaView>
