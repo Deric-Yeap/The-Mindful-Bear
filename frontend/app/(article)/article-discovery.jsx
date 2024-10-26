@@ -7,6 +7,7 @@ import { Dimensions } from 'react-native';
 import logo from '../../assets/mindfulBearLogo.png';
 import { useRouter } from 'expo-router'; // Import useRouter from expo-router
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
+import { colors } from '../../common/styles'
 
 const ArticleDiscovery = () => {
   const router = useRouter(); // Use useRouter hook
@@ -58,36 +59,45 @@ const ArticleDiscovery = () => {
            
           className="text-mindful-brown-80 font-urbanist-extra-bold text-xl mb-2 mt-2 ml-6"
           >
-            Search for Articles Here
+            How may I help you?
           </Text>
 
           {/* Search bar moved below the text */}
           <View style={{ paddingHorizontal: 20, marginTop: 10, width: screenWidth * 0.9 }}>
             <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-              <TextInput
-                placeholder="Search anything..."
-                placeholderTextColor="#F7F4F2"
-                value={searchTerm}
-                onChangeText={setSearchTerm}
-                style={{
-                  flex: 1,
-                  backgroundColor: '#795548',  // mindful brown
-                  padding: 12,
-                  borderRadius: 50,
-                  color: 'white',
-                }}
-              />
+            <TextInput
+  placeholder="Search anything..."
+  placeholderTextColor="#F7F4F2"
+  value={searchTerm}
+  onChangeText={setSearchTerm}
+  style={{
+    flex: 1,
+    backgroundColor: colors.serenityGreen60, // Matching mindful brown color
+    padding: 12,
+    borderRadius: 50,
+    color: 'white',
+    borderWidth: 2,           // Matching border thickness
+    borderColor: '#F7F4F2',   // Matching border color
+  }}
+/>
               <TouchableOpacity
-                style={{
-                  marginLeft: 10,
-                  padding: 12,
-                  backgroundColor: '#6D4C41',  // slightly darker brown
-                  borderRadius: 50,
-                }}
-                onPress={handleSearch}  // Update the onPress handler
-              >
-                <MaterialIcons name="search" size={24} color="#F7F4F2" />
-              </TouchableOpacity>
+  style={{
+    marginLeft: 10,
+    padding: 12,
+    backgroundColor: colors.serenityGreen70,
+    borderRadius: 50,
+    borderWidth: 2,        // Set border thickness
+    borderColor: '#F7F4F2', // Set border color
+    elevation: 3,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+  }}
+  onPress={handleSearch}
+>
+  <MaterialIcons name="search" size={24} color="#F7F4F2" />
+</TouchableOpacity>
             </View>
           </View>
 

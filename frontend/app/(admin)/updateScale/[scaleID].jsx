@@ -246,7 +246,7 @@ const UpdateScale = () => {
       />
       <BrownPageTitlePortion title="Form Management" />
       <ScrollView contentContainerStyle={{ paddingBottom: 20 }}>
-        <View className="mx-4">
+        <View className="mx-4 mt-4">
           <FormField
             title="Scale Name"
             iconName="form-select"
