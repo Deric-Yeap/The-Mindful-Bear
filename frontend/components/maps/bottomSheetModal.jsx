@@ -5,6 +5,7 @@ import {
   TouchableOpacity,
   StyleSheet,
   Dimensions,
+  Pressable,
 } from 'react-native'
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons'
 import { colors } from '../../common/styles'
@@ -18,8 +19,7 @@ import {
   createFavouriteLandmark,
   deleteFavouriteLandmark,
 } from '../../api/landmark'
-
-import StatusBarComponent from '../darkThemStatusBar'
+import CustomRadioButton from '../customRadioButton'
 
 const THRESHOLD = [3, 5, 10]
 
@@ -127,6 +127,7 @@ const BottomSheetModal = ({
   const [currentSnapIndex, setCurrentSnapIndex] = useState(0)
   const [isFavorite, setIsFavorite] = useState(data.is_favorite || false)
   const [isExercise, setIsExercise] = useState(false)
+  const [isForceStart, setIsForceStart] = useState(false)
   const dispatch = useDispatch()
 
   const handleClose = () => {
@@ -167,6 +168,9 @@ const BottomSheetModal = ({
     } else {
       setIsExercise(true)
     }
+  }
+  const handleForceStartToggle = () => {
+    setIsForceStart(!isForceStart)
   }
 
   useEffect(() => {
@@ -282,6 +286,28 @@ const BottomSheetModal = ({
             </Text>
           </View>
         )}
+        <View
+          id="force-start-row"
+          className="flex-row justify-between items-center mt-3"
+        >
+          <Pressable
+            onPress={handleForceStartToggle}
+            className={`flex flex-row justify-between items-center px-3 py-2 rounded-xl bg-mindful-brown-60 ${
+              isForceStart ? 'bg-[#24211E]' : ''
+            }`}
+          >
+            <Text
+              className={`font-urbanist-bold mr-2 ${isForceStart ? 'text-white' : 'text-white'}`}
+            >
+              Force Start
+            </Text>
+            <CustomRadioButton
+              map={true}
+              selected={isForceStart}
+              onPress={handleForceStartToggle}
+            />
+          </Pressable>
+        </View>
         <View
           id="landmark-button-frame"
           className="flex-row mt-3  justify-between"
