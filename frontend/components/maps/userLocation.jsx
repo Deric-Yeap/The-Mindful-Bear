@@ -33,7 +33,7 @@ const UserLocationCustom = ({
   useEffect(() => {
     const interval = setInterval(() => {
       const now = Date.now()
-      const opacity = 0.2 + 0.3 * ((Math.sin(now / 500) + 1) / 2) // Range from 0.2 to 0.5
+      const opacity = 0.2 + 0.3 * ((Math.sin(now / 500) + 1) / 2)
       setFillOpacity(opacity)
     }, 100)
 
@@ -76,7 +76,6 @@ const UserLocationCustom = ({
       try {
         const userAvatars = await getUserAvatars(user.userId)
         const selectedAvatar = userAvatars.find((avatar) => avatar.is_selected)
-        console.log(selectedAvatar)
         if (selectedAvatar) {
           setUserAvatar(selectedAvatar.avatar.avatar_url)
         } else {
@@ -133,11 +132,11 @@ const UserLocationCustom = ({
         <MarkerView coordinate={coordinates}>
           <View
             style={{
-              transform: [{ rotate: `${heading}deg` }], // Rotate based on heading
+              transform: [{ rotate: `${heading}deg` }],
             }}
           >
             <LottieView
-              source={{ uri: userAvatar }} // Correctly format the URI
+              source={{ uri: userAvatar }}
               className="w-14 h-14 z-20"
               autoPlay
             />
