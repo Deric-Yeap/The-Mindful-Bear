@@ -46,6 +46,7 @@ const QuestionPage = () => {
   const [answers, setAnswers] = useState({})
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0)
   const [loading, setLoading] = useState(true)
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
   let questionsWithOptions = []
 
@@ -75,10 +76,12 @@ const QuestionPage = () => {
   }
 
   const handleNextQuestion = async () => {
+    if (isSubmitting) return
     if (currentQuestionIndex < questions.length - 1) {
       setCurrentQuestionIndex(currentQuestionIndex + 1)
-    } else {
-      try {
+    } else {      
+      try {        
+        setIsSubmitting(true)
         await setFormQuestion(sessionID, id, answers)
         router.push({
           pathname: `/questionaire`,
