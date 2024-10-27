@@ -59,7 +59,7 @@ class BulkFormQuestionSerializer(serializers.Serializer):
 
         if not form.store_responses:
             aggregated_score = (
-                sum(valid_responses) / len(valid_responses)
+                sum(valid_responses)
                 if valid_responses else 0
             )
 
