@@ -66,6 +66,7 @@ const Map = () => {
   const [remainingRouteGeoJSON, setRemainingRouteGeoJSON] = useState(null)
   const [hasArrived, setHasArrived] = useState(false)
   const [landmarkDistances, setLandmarkDistances] = useState([])
+  const [isForceStart, setIsForceStart] = useState(false)
   const hasFetchedDirections = useRef(false)
   const [isRedirectedForms, setIsRedirectedForms] = useState(
     useLocalSearchParams()
@@ -350,6 +351,23 @@ const Map = () => {
       handleSessionStart(true)
       return
     }
+    console.log(isForceStart)
+    if (isForceStart && isSessionStarted) {
+      setHasArrived(true)
+      try {
+        incrementUserCount(selectedLandmark.properties.landmark_id)
+      } catch (error) {
+        console.error('Error updating landmark usercount:', error)
+      }
+      setIsTraveling(false)
+      setSelectedLandmark(selectedLandmark)
+      setIsArriveModalOpen(true)
+
+      setIsBottomSheetOpen(true)
+      if (isShownNav) {
+        dispatch(setIsShownNav())
+      }
+    }
     const selectedLandmarkCoords = selectedLandmark.geometry.coordinates
 
     try {
@@ -511,6 +529,8 @@ const Map = () => {
             handleTravel={fetchDirections}
             hasArrived={hasArrived}
             isPlayAudio={isPlayAudio}
+            isForceStart={isForceStart}
+            setIsForceStart={setIsForceStart}
             setHasArrived={setHasArrived}
             distanceTimeEst={landmarkDistances}
           />

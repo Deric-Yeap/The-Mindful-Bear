@@ -53,6 +53,8 @@ const BottomSheetModal = ({
   handleTravel,
   hasArrived,
   setHasArrived,
+  isForceStart,
+  setIsForceStart,
   isPlayAudio,
   distanceTimeEst,
 }) => {
@@ -127,7 +129,7 @@ const BottomSheetModal = ({
   const [currentSnapIndex, setCurrentSnapIndex] = useState(0)
   const [isFavorite, setIsFavorite] = useState(data.is_favorite || false)
   const [isExercise, setIsExercise] = useState(false)
-  const [isForceStart, setIsForceStart] = useState(false)
+
   const dispatch = useDispatch()
 
   const handleClose = () => {
@@ -135,6 +137,7 @@ const BottomSheetModal = ({
       dispatch(clearIsShownNav())
     }
     setIsExercise(false)
+    setIsForceStart(false)
     handleModalOpen(false)
   }
   const handleSheetChange = (index) => {
