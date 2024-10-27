@@ -521,6 +521,7 @@ const Map = () => {
             isPlayAudio={isPlayAudio}
             setHasArrived={setHasArrived}
             distanceTimeEst={landmarkDistances}
+            sessionID={sessionID}
           />
         )}
         {hasArrived && isArriveModalOpen && (

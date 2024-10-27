@@ -14,9 +14,11 @@ class UserSessionSerializer(serializers.ModelSerializer):
         model = UserSession
          # Adding SGT-converted fields
         
-        fields = ["id","start_datetime","end_datetime","start_datetime_sgt","end_datetime_sgt",
-            "user","session","landmark"]
-            
+        fields = ["id", "start_datetime", "end_datetime", "start_datetime_sgt", "end_datetime_sgt",
+                  "user", "session", "landmark"]
+        extra_kwargs = {
+            "user": {"read_only": True}
+        }  
     def validate_start_datetime(self, value):
         if self.instance and self.instance.start_datetime != value:
             raise serializers.ValidationError("start_datetime cannot be modified")
