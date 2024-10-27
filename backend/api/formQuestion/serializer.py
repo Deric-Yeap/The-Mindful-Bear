@@ -22,13 +22,11 @@ class BulkFormQuestionSerializer(serializers.Serializer):
         form_id = validated_data.get("FormID")
         questions_data = validated_data.get("data")
 
-        # Validate and get the session object
         try:
             session = Session.objects.get(pk=session_id)
         except Session.DoesNotExist:
             raise ValidationError({"SessionID": f"Session with id {session_id} not found."})
 
-        # Validate and get the form object
         try:
             form = Form.objects.get(pk=form_id)
         except Form.DoesNotExist:
@@ -37,18 +35,15 @@ class BulkFormQuestionSerializer(serializers.Serializer):
         form_questions = []
         valid_responses = []
 
-        # Process each question in the data list
         for item in questions_data:
             question_id = item.get('QuestionID')
             response = item.get('Response')
 
-            # Validate and get the question object
             try:
                 question = Question.objects.get(pk=question_id)
             except Question.DoesNotExist:
                 raise ValidationError({"QuestionID": f"Question with id {question_id} not found."})
 
-            # Create the FormQuestion object but don't save yet
             form_question = FormQuestion(
                 QuestionID=question,
                 SessionID=session,
@@ -56,24 +51,22 @@ class BulkFormQuestionSerializer(serializers.Serializer):
             )
             form_questions.append(form_question)
 
-            # Collect responses that are integers for aggregation
             if response.isdigit():
                 valid_responses.append(int(response))
 
-        # Perform the bulk create for FormQuestion instances
-        FormQuestion.objects.bulk_create(form_questions)
+        if form.store_responses:
+            FormQuestion.objects.bulk_create(form_questions)
 
-        # Calculate aggregatedScore as the average of valid integer responses
-        aggregated_score = (
-            sum(valid_responses) / len(valid_responses)
-            if valid_responses else 0
-        )
+        if not form.store_responses:
+            aggregated_score = (
+                sum(valid_responses) / len(valid_responses)
+                if valid_responses else 0
+            )
 
-        # Create the FormSession instance
-        FormSession.objects.create(
-            SessionID=session,
-            FormID=form,
-            aggregatedScore=str(aggregated_score)
-        )
+            FormSession.objects.create(
+                SessionID=session,
+                FormID=form,
+                aggregatedScore=str(aggregated_score)
+            )
 
-        return form_questions
+        return form_questions if form.store_responses else []
