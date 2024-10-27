@@ -5,12 +5,14 @@ from nltk.corpus import stopwords
 
 
 
+
 def ensure_nltk_resources():
     resources = [
-        ('corpora/stopwords.zip', 'stopwords'),
-        ('corpora/wordnet.zip', 'wordnet'),
-        ('taggers/averaged_perceptron_tagger_eng', 'averaged_perceptron_tagger_eng'),
-        ('tokenizers/punkt', 'punkt'),
+        ('stopwords', 'stopwords'),
+        ('wordnet', 'wordnet'),
+        ('punkt', 'punkt'),
+        ('averaged_perceptron_tagger', 'averaged_perceptron_tagger')
+
     ]
 
     for resource, package in resources:
@@ -19,14 +21,12 @@ def ensure_nltk_resources():
         except LookupError:
             nltk.download(package, quiet=True)
 
-# Call this function at the start of your application or before you use nltk features
-
 
 def extract_key_concepts(text):
     # Ensure stopwords are downloaded only once
     ensure_nltk_resources()
     lemmatizer = WordNetLemmatizer()
-    stopwords_set = set(stopwords.words('english'))
+    stop_words = set(stopwords.words('english'))
     
     """Extract key concepts and entities from text"""
     # Tokenize and tag parts of speech
@@ -36,7 +36,7 @@ def extract_key_concepts(text):
     # Extract noun phrases and important terms
     key_terms = []
     for word, tag in pos_tags:
-        if (tag.startswith('NN') or tag.startswith('JJ')) and word not in stopwords_set:
+        if (tag.startswith('NN') or tag.startswith('JJ')) and word not in stop_words:
             key_terms.append(lemmatizer.lemmatize(word))
-    
+
     return set(key_terms)
