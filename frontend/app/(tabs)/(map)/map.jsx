@@ -9,11 +9,7 @@ import { getGeoJson } from '../../../common/getGeoJson'
 import { createSession, updateSession } from '../../../api/session'
 import { landmarkIcon } from '../../../assets/image'
 import { getFavouriteLandmarks, getLandmarks } from '../../../api/landmark'
-import {
-  incrementUserCount,
-  decrementUserCount,
-  getUserCount,
-} from '../../../api/landmark'
+import { incrementUserCount } from '../../../api/landmark'
 import { confirmModal } from '../../../assets/image'
 import Loading from '../../../components/loading'
 import BottomSheetModal from '../../../components/maps/bottomSheetModal'
@@ -26,11 +22,7 @@ import {
 import UserLocationCustom from '../../../components/maps/userLocation'
 import * as turf from '@turf/turf'
 import StatusBarComponent from '../../../components/darkThemStatusBar'
-import { Dimensions } from 'react-native'
 import { postPoints } from '../../../api/achievementPoint'
-
-const windowWidth = Dimensions.get('window').width
-const screenWidth = Dimensions.get('screen').width
 
 const initialFormState = {
   start_datetime: '',
