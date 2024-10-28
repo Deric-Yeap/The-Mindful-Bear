@@ -75,7 +75,14 @@ class FormAndQuestionViewSerializer(serializers.ModelSerializer):
 
             # Update or create questions
             for question_data in questions_data:
-                option_set_id = question_data['optionSet']
+                option_set_data = question_data['optionSet']
+                if isinstance(option_set_data, int):
+                    option_set_id = option_set_data
+                elif isinstance(option_set_data, dict):
+                    option_set_id = option_set_data.get('id')
+                    if not option_set_id:
+                        raise serializers.ValidationError({'questions': 'OptionSet object must contain an id.'})
+                        
                 try:
                     option_set = OptionSet.objects.get(id=option_set_id)
                 except OptionSet.DoesNotExist:
@@ -101,6 +108,7 @@ class FormAndQuestionViewSerializer(serializers.ModelSerializer):
     
     def to_representation(self, instance):
         """Customize the response to include questions in the representation."""
+        instance.refresh_from_db()
         response = super().to_representation(instance)
         response['questions'] = QuestionSerializer(instance.question_set.all(), many=True).data
         return response
