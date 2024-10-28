@@ -318,3 +318,10 @@ class JournalEntryViewSet(viewsets.ViewSet):
         journal = get_object_or_404(Journal, pk=pk)
         journal.delete()
         return Response({'message': 'Journal entry deleted successfully.'}, status=status.HTTP_200_OK)
+
+class JournalClassificationView(APIView):
+    def post(self, request):
+        text = request.data.get('text')
+        journals = Journal.objects.all()
+        journalTexts = [journal.journal_text for journal in journals] #just a random example, transform your own data to return
+        return Response({"result": journalTexts}, status=status.HTTP_200_OK)
