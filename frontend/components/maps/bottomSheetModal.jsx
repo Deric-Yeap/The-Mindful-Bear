@@ -55,6 +55,7 @@ const BottomSheetModal = ({
   setHasArrived,
   isPlayAudio,
   distanceTimeEst,
+  sessionID,
 }) => {
   const landmarkDistancesMap = {}
   distanceTimeEst.forEach((item) => {
@@ -256,6 +257,7 @@ const BottomSheetModal = ({
               handleClose={handleClose}
               openCompletedModal={openCompletedModal}
               landmarkId={landmarkId}
+              sessionID={sessionID}
             />
           </View>
         ) : (

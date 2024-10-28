@@ -1,9 +1,8 @@
 import React, { useState, useEffect } from 'react'
-import { View, Text, Pressable, ScrollView, TextInput } from 'react-native'
+import { View, Text, Pressable, ScrollView, TextInput, Image } from 'react-native'
 import { useLocalSearchParams, useRouter } from 'expo-router'
-import { getFormQuestions, getFormName } from '../../../api/form'
+import { getFormQuestions, setFormQuestion, createLandmarkRatings } from '../../../api/form'
 import LoadingPage from '../../../components/loading'
-import { setFormQuestion } from '../../../api/form'
 import { FontAwesome } from '@expo/vector-icons'
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons'
 
@@ -46,22 +45,37 @@ const QuestionPage = () => {
   const [answers, setAnswers] = useState({})
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0)
   const [loading, setLoading] = useState(true)
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
   let questionsWithOptions = []
 
   useEffect(() => {
     const fetchData = async () => {
-      try {
-        const fetchedQuestions = await getFormQuestions(id)
-        const sortedQuestions = fetchedQuestions.questions.sort(
-          (a, b) => a.order - b.order
-        )
-        setQuestions(sortedQuestions)
-        setFormTitle(fetchedQuestions.form_name)
-        setLoading(false)
-      } catch (error) {
-        console.error('Error fetching form data:', error)
-        setLoading(false)
+
+      if (id === "88"){
+        try {         
+          const fetchedQuestions = await createLandmarkRatings(sessionID)
+          setQuestions(fetchedQuestions.questions)
+          setFormTitle(fetchedQuestions.form_name)
+          setLoading(false)
+        } catch (error) {
+          console.error('Error fetching form data:', error)
+          setLoading(false)
+        }
+      }
+      else{
+        try {
+          const fetchedQuestions = await getFormQuestions(id)          
+          const sortedQuestions = fetchedQuestions.questions.sort(
+            (a, b) => a.order - b.order
+          )
+          setQuestions(sortedQuestions)
+          setFormTitle(fetchedQuestions.form_name)
+          setLoading(false)
+        } catch (error) {
+          console.error('Error fetching form data:', error)
+          setLoading(false)
+        }
       }
     }
     fetchData()
@@ -75,10 +89,12 @@ const QuestionPage = () => {
   }
 
   const handleNextQuestion = async () => {
+    if (isSubmitting) return
     if (currentQuestionIndex < questions.length - 1) {
       setCurrentQuestionIndex(currentQuestionIndex + 1)
-    } else {
-      try {
+    } else {      
+      try {        
+        setIsSubmitting(true)
         await setFormQuestion(sessionID, id, answers)
         router.push({
           pathname: `/questionaire`,
@@ -172,27 +188,38 @@ const QuestionPage = () => {
               </Pressable>
             ))
           ) : currentQuestion.optionSet.description === 'Rating' ? (
-            <View className="flex flex-row justify-between items-center p-4 mx-6">
-              {[1, 2, 3, 4, 5].map((rating) => (
-                <Pressable
-                  key={rating}
-                  onPress={() =>
-                    handleAnswerChange(currentQuestion.questionID, rating)
-                  }
-                  className="mx-1"
-                >
-                  <FontAwesome
-                    name="star"
-                    size={40}
-                    color={
-                      answers[currentQuestion.questionID] >= rating
-                        ? '#F4C430'
-                        : '#E0E0E0'
-                    } // Highlight selected stars in gold, others in grey
-                  />
-                </Pressable>
-              ))}
-            </View>
+            <View className="flex flex-col items-center mx-2">
+    {/* Display the image if available */}
+    {currentQuestion.image_file_url && (
+      <Image
+        source={{ uri: currentQuestion.image_file_url }}
+        className="w-full h-60 mb-4 rounded" // Adjust width, height, and styling as needed
+        resizeMode="cover"
+      />
+    )}
+
+    <View className="flex flex-row justify-between items-center">
+      {[1, 2, 3, 4, 5].map((rating) => (
+        <Pressable
+          key={rating}
+          onPress={() =>
+            handleAnswerChange(currentQuestion.questionID, rating)
+          }
+          className="mx-2"
+        >
+          <FontAwesome
+            name="star"
+            size={40}
+            color={
+              answers[currentQuestion.questionID] >= rating
+                ? '#F4C430'
+                : '#E0E0E0'
+            } // Highlight selected stars in gold, others in grey
+          />
+        </Pressable>
+      ))}
+    </View>
+  </View>
           ) : (
             <TextInput
               className="bg-white p-4 m-2 border border-gray-300 rounded-md text-base"

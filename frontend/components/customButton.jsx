@@ -10,6 +10,7 @@ const CustomButton = ({
   iconName,
   iconSize,
   isLoading,
+  disabled,
 }) => {
   return (
     <TouchableOpacity
@@ -17,6 +18,7 @@ const CustomButton = ({
       style={{ shadowColor: colors.mindfulBrown100 }}
       onPress={handlePress}
       activeOpacity={0.8}
+      disabled={disabled}
     >
       {title && (
         <Text
