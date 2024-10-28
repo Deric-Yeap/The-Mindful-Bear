@@ -53,11 +53,8 @@ const QuestionPage = () => {
     const fetchData = async () => {
 
       if (id === "88"){
-        try {
-         console.log("HLLO")
+        try {         
           const fetchedQuestions = await createLandmarkRatings(sessionID)
-          console.log("FILTERED")
-          console.log(fetchedQuestions)
           setQuestions(fetchedQuestions.questions)
           setFormTitle(fetchedQuestions.form_name)
           setLoading(false)
@@ -68,9 +65,7 @@ const QuestionPage = () => {
       }
       else{
         try {
-          const fetchedQuestions = await getFormQuestions(id)
-          console.log(fetchedQuestions)
-          console.log(JSON.stringify(fetchedQuestions, null, 2))
+          const fetchedQuestions = await getFormQuestions(id)          
           const sortedQuestions = fetchedQuestions.questions.sort(
             (a, b) => a.order - b.order
           )
