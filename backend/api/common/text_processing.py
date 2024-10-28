@@ -1,27 +1,15 @@
 # backend/api/common/text_processing.py
-import joblib
-from sklearn.feature_extraction.text import TfidfVectorizer
-from sklearn.linear_model import LogisticRegression
-from sklearn.multioutput import MultiOutputClassifier
 import re
-import pandas as pd
+from nltk.corpus import stopwords
+from nltk.stem import WordNetLemmatizer
+import nltk
 
-# Load pre-trained model and vectorizer
-tfidf_vectorizer = joblib.load('path/to/tfidf_vectorizer.pkl')
-multi_label_model = joblib.load('path/to/multi_label_model.pkl')
+nltk.download('stopwords')
+nltk.download('wordnet')
 
 def preprocess_text(text):
-    # Add text preprocessing code here (e.g., removing punctuation, lowercasing, etc.)
+    lemmatizer = WordNetLemmatizer()
+    stop_words = set(stopwords.words('english'))
     text = re.sub(r'[^\w\s]', '', text.lower())
-    return text
-
-def classify_text(journal_text):
-    # Preprocess text
-    processed_text = preprocess_text(journal_text)
-
-    # Transform text to fit the model
-    text_tfidf = tfidf_vectorizer.transform([processed_text])
-
-    # Predict topics
-    predicted_labels = multi_label_model.predict(text_tfidf)
-    return predicted_labels
+    words = text.split()
+    return ' '.join([lemmatizer.lemmatize(word) for word in words if word not in stop_words])

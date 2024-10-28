@@ -17,3 +17,4 @@ pandas
 textblob
 transformers
 gunicorn
+scikit-learn
