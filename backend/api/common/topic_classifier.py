@@ -24,7 +24,7 @@ def classify_text(journal_text):
     predicted_labels = [label_columns[i] for i, value in enumerate(prediction[0]) if value == 1]
     
     # Step 3: Identify top 2-word keywords using CountVectorizer
-    top_keywords = []
+    top_keywords = {}
     if processed_text:  # Check if processed_text has content after preprocessing
         try:
             count_vectorizer = CountVectorizer(ngram_range=(2, 2), max_features=10)
@@ -33,20 +33,29 @@ def classify_text(journal_text):
             keyword_counts = text_counts.toarray().sum(axis=0)
             
             # Map keywords with their frequency counts
-            keywords = sorted(
+            keywords_with_counts = sorted(
                 zip(feature_names, keyword_counts),
                 key=lambda x: x[1],
                 reverse=True
             )
-            top_keywords = [kw for kw, _ in keywords]  # Only get the keywords, not their counts
+            # Prepare the top keywords list with count information
+            for label in predicted_labels:
+                top_keywords[label] = [{"keyword": kw, "count": count} for kw, count in keywords_with_counts]
         except ValueError as e:
             print(f"Keyword extraction skipped due to: {e}")
     
-    # Print for debugging (optional)
-    print(f"Predicted topics: {predicted_labels}")
-    print(f"Top keywords: {top_keywords}")
-    
-    return {
-        "topics": predicted_labels,
-        "keywords": top_keywords
+    # Format the response for frontend
+    response_data = {
+        "topics": [
+            {
+                "topic": label,
+                "keywords": top_keywords.get(label, [])
+            }
+            for label in predicted_labels
+        ]
     }
+
+    # Print for debugging (optional)
+    print(f"Response Data: {response_data}")
+    
+    return response_data

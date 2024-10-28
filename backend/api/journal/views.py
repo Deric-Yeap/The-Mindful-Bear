@@ -344,11 +344,16 @@ class JournalClassificationView(APIView):
             classified_entries.append({
                 'journal_text': journal_text,
                 'predicted_topics': classification["topics"],
-                'keywords': classification["keywords"]
             })
         
         # Return the response as a JSON object
-        return Response({"classified_entries": classified_entries}, status=status.HTTP_200_OK)
+        return Response({
+        'code': 200,
+        'data': {
+            'classified_entries': classified_entries
+        },
+        'error_description': None
+    }, status=status.HTTP_200_OK)
 
 
 class AllJournalsView(APIView):
