@@ -1,30 +1,52 @@
-# This script loads the saved model and vectorizer, which are used to classify new journal entries.
-
+# topic_classifier.py
 import os
 import joblib
 from api.common.text_processing import preprocess_text
-# Import the shared preprocessing function
+from sklearn.feature_extraction.text import CountVectorizer
 
 # Paths
 VECTORIZER_PATH = os.path.join(os.path.dirname(__file__), "../ml/tfidf_vectorizer.pkl")
 MODEL_PATH = os.path.join(os.path.dirname(__file__), "../ml/multi_label_model.pkl")
+LABELS_PATH = os.path.join(os.path.dirname(__file__), "../ml/label_columns.pkl")
 
-# Load pre-trained model and vectorizer
+# Load pre-trained model, vectorizer, and labels
 tfidf_vectorizer = joblib.load(VECTORIZER_PATH)
 multi_label_model = joblib.load(MODEL_PATH)
+label_columns = joblib.load(LABELS_PATH)
 
-#The function transforms the text into TF-IDF format, uses the model to get predictions, 
-# and then returns a list of the predicted categories.
 def classify_text(journal_text):
+    # Step 1: Preprocess and vectorize the journal text
     processed_text = preprocess_text(journal_text)
     text_tfidf = tfidf_vectorizer.transform([processed_text])
-    prediction = multi_label_model.predict(text_tfidf)
-
-    label_columns = multi_label_model.classes_ #provides a list of all possible labels (classes) that the model can predict
     
-    #predicted_labels uses the prediction output to select the labels that apply to this specific journal entry.
-    predicted_labels = [label_columns[i] for i in range(len(prediction[0])) if prediction[0][i] == 1] 
-    return predicted_labels
-
-
-
+    # Step 2: Predict topic labels
+    prediction = multi_label_model.predict(text_tfidf)
+    predicted_labels = [label_columns[i] for i, value in enumerate(prediction[0]) if value == 1]
+    
+    # Step 3: Identify top 2-word keywords using CountVectorizer
+    top_keywords = []
+    if processed_text:  # Check if processed_text has content after preprocessing
+        try:
+            count_vectorizer = CountVectorizer(ngram_range=(2, 2), max_features=10)
+            text_counts = count_vectorizer.fit_transform([processed_text])
+            feature_names = count_vectorizer.get_feature_names_out()
+            keyword_counts = text_counts.toarray().sum(axis=0)
+            
+            # Map keywords with their frequency counts
+            keywords = sorted(
+                zip(feature_names, keyword_counts),
+                key=lambda x: x[1],
+                reverse=True
+            )
+            top_keywords = [kw for kw, _ in keywords]  # Only get the keywords, not their counts
+        except ValueError as e:
+            print(f"Keyword extraction skipped due to: {e}")
+    
+    # Print for debugging (optional)
+    print(f"Predicted topics: {predicted_labels}")
+    print(f"Top keywords: {top_keywords}")
+    
+    return {
+        "topics": predicted_labels,
+        "keywords": top_keywords
+    }

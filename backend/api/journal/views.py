@@ -319,16 +319,40 @@ class JournalEntryViewSet(viewsets.ViewSet):
         journal.delete()
         return Response({'message': 'Journal entry deleted successfully.'}, status=status.HTTP_200_OK)
 
+from ..common.topic_classifier import classify_text
+
 class JournalClassificationView(APIView):
-    def post(self, request):
-        text = request.data.get('text')
+    #def post(self, request):
+        #text = request.data.get('text')
+        #journals = Journal.objects.all()
+        #journalTexts = [journal.journal_text for journal in journals] #just a random example, transform your own data to return
+       # journal['predicted_labels'] = classify_text(journal_text)
+        #return Response({"result": journalTexts}, status=status.HTTP_200_OK)
+    def get(self, request):
+        # Fetch all journal entries from the database
         journals = Journal.objects.all()
-        journalTexts = [journal.journal_text for journal in journals] #just a random example, transform your own data to return
-        return Response({"result": journalTexts}, status=status.HTTP_200_OK)
+
+        # Prepare a list to store each journal entry with its classifications
+        classified_entries = []
+
+        # Iterate over each journal entry to classify it and find keywords
+        for journal in journals:
+            journal_text = journal.journal_text  # Assuming `journal_text` is the field with the journal content
+            classification = classify_text(journal_text)  # Use updated classify_text function
+            
+            # Append the classified entry as a dictionary to the list
+            classified_entries.append({
+                'journal_text': journal_text,
+                'predicted_topics': classification["topics"],
+                'keywords': classification["keywords"]
+            })
+        
+        # Return the response as a JSON object
+        return Response({"classified_entries": classified_entries}, status=status.HTTP_200_OK)
 
 
 class AllJournalsView(APIView):
-    def get(self, request):
+    def post(self, request):
         # Retrieve all journal entries without filtering by user
         journals = Journal.objects.all()
         
