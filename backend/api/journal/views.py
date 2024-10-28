@@ -319,9 +319,18 @@ class JournalEntryViewSet(viewsets.ViewSet):
         journal.delete()
         return Response({'message': 'Journal entry deleted successfully.'}, status=status.HTTP_200_OK)
 
-class JournalClassificationView(APIView):
-    def post(self, request):
-        text = request.data.get('text')
+class AllJournalsView(APIView):
+    def get(self, request):
+        # Retrieve all journal entries without filtering by user
         journals = Journal.objects.all()
-        journalTexts = [journal.journal_text for journal in journals] #just a random example, transform your own data to return
-        return Response({"result": journalTexts}, status=status.HTTP_200_OK)
+        
+        # Serialize the data for each journal entry
+        serializer = JournalGetSerializer(journals, many=True)
+        
+        # Optional: Classify each journal entry's text and add predicted labels
+        for journal in serializer.data:
+            journal_text = journal['journal_text']  # Ensure 'journal_text' is the correct field
+            journal['predicted_labels'] = classify_text(journal_text)  # Add classification labels to the data
+        
+        # Return the serialized data with classifications
+        return Response(serializer.data, status=status.HTTP_200_OK)
