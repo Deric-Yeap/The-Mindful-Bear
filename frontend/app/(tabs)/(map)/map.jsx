@@ -508,7 +508,13 @@ const Map = () => {
             confirmButtonTitle={'Confirm'}
             title={'+100'}
             subTitle={'Great Job!'}
-            handleConfirm={() => setIsCompletedModalOpen(false)}
+            handleConfirm={async () => {
+              setIsCompletedModalOpen(false)
+              const postPointsResponse = await postPoints({
+                points: 100,
+                description: 'Exercise Completed',
+              })
+            }}
           />
         )}
         {isBottomSheetOpen && selectedLandmark && (
