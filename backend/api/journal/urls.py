@@ -11,8 +11,8 @@ from .views import (
     JournalEntryViewSet,
     JournalStreakView,
     Count,
+    AllJournalsView #for topic classifier model
 )
-from .journal_views import JournalClassificationView  # Import the new classification view
 
 # Initialize the router for viewsets
 router = DefaultRouter()
@@ -29,6 +29,6 @@ urlpatterns = [
     path("journal_entries_by_date/", JournalEntriesByDateView.as_view()),
     path('journal_entries_by_period/', JournalEntriesByPeriodView.as_view(), name='journal-entries-by-period'),
     path("journal_streak/", JournalStreakView.as_view()),
-    path('classify/', JournalClassificationView.as_view(), name='journal-classification'),  # New classification endpoint
+    path('all_journals/', AllJournalsView.as_view(), name='all-journals'),  # New classification endpoint
     path('', include(router.urls)),
 ]

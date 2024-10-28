@@ -1,4 +1,7 @@
 # backend/api/common/text_processing.py
+#This function cleans and standardizes the text, transforming it into a simpler format that retains essential information. 
+#It removes punctuation, lowercases the text, lemmatizes words, and removes common words (stopwords).
+
 import re
 from nltk.corpus import stopwords
 from nltk.stem import WordNetLemmatizer

@@ -37,6 +37,5 @@ urlpatterns = [
     path("api/userSession/", include("api.userSession.urls")),
     path("api/favourite/", include("api.favourite.urls")),
     path("api/landmarkUserCount/", include("api.landmarkUserCount.urls")), 
-     path("api/journal/", include("api.journal.urls")),  # This points to the journal app routes
 
 ]

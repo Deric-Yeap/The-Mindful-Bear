@@ -277,3 +277,37 @@ class JournalEntryViewSet(viewsets.ViewSet):
         journal = get_object_or_404(Journal, pk=pk)
         journal.delete()
         return Response({'message': 'Journal entry deleted successfully.'}, status=status.HTTP_200_OK)
+
+# Newly added code from for topic classifier model to get journals
+from ..common.topic_classifier import classify_text
+
+#class JournalClassificationView(APIView):
+    #def post(self, request):
+        #text = request.data.get("text", "")
+        
+        #if not text:
+           # return Response({"error": "Text input is required"}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Classify the input text
+        #predicted_labels = classify_text(text)
+
+        # Return the predictions as a JSON response
+        #return Response({"predicted_labels": predicted_labels}, status=status.HTTP_200_OK)
+
+class AllJournalsView(APIView):
+    def get(self, request):
+        # Retrieve all journal entries without filtering by user
+        journals = Journal.objects.all()
+        
+        # Serialize the data for each journal entry
+        serializer = JournalGetSerializer(journals, many=True)
+        
+        # Optional: Classify each journal entry's text and add predicted labels
+        for journal in serializer.data:
+            journal_text = journal['journal_text']  # Ensure 'journal_text' is the correct field
+            journal['predicted_labels'] = classify_text(journal_text)  # Add classification labels to the data
+        
+        # Return the serialized data with classifications
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+
