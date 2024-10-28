@@ -8,7 +8,7 @@ class CustomUserSerializer(serializers.ModelSerializer):
     department = DepartmentSerializer()    
     class Meta:
         model = CustomUser
-        fields = ['user_id', 'email', 'date_of_birth', 'gender', 'department', 'is_staff', 'name']
+        fields = ['user_id', 'email', 'date_of_birth', 'gender', 'department', 'is_staff', 'name', 'last_login', 'login_streak']
 
 class UserCreateSerializer(serializers.ModelSerializer):
     confirm_password = serializers.CharField(write_only=True)

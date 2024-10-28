@@ -1,15 +1,16 @@
-import { View, Text, ScrollView, StatusBar,Image } from 'react-native'
+import { View, Text, ScrollView, StatusBar, Image } from 'react-native'
 import { useState } from 'react'
-import { SafeAreaView } from 'react-native-safe-area-context'
 import { setTokens } from '../../redux/slices/authSlice'
 import { setUserDetails } from '../../redux/slices/userSlice'
 import { useDispatch, useSelector } from 'react-redux'
 import { router } from 'expo-router'
 import logo from '../../assets/mindfulBearLogo.png'
+
 import CustomButton from '../../components/customButton'
 import FormField from '../../components/formField'
 import { login, getMe } from '../../api/user'
 import Loading from '../../components/loading'
+import { collectedLogin, postPoints } from '../../api/achievementPoint'
 
 const SignIn = () => {
   const [isLoading, setIsLoading] = useState(false)
@@ -38,6 +39,13 @@ const SignIn = () => {
       )
       const user = await getMe()
       dispatch(setUserDetails(user))
+      const collectedLoginResponse = await collectedLogin()
+      if (!collectedLoginResponse.collected_login) {
+        const postPointsResponse = await postPoints({
+          points: 10 + (user.login_streak - 1) * 5,
+          description: 'Login',
+        })
+      }
       if (user.is_staff) {
         router.push('/admin')
       } else {
@@ -62,13 +70,13 @@ const SignIn = () => {
         </View>
       )}
       <View className="min-h-[78vh] mt-[13vh] items-center mx-5">
-      <Image 
-                source={logo} 
-                className="w-auto h-64 mb-0" 
-                resizeMode="contain" 
-            />
-              <Text className="font-urbanist-extra-bold text-3xl text-mindful-brown-80 pb-3">
-         The Mindful Bear
+        <Image
+          source={logo}
+          className="w-auto h-64 mb-0"
+          resizeMode="contain"
+        />
+        <Text className="font-urbanist-extra-bold text-3xl text-mindful-brown-80 pb-3">
+          The Mindful Bear
         </Text>
         <Text className="font-urbanist-extra-bold text-3xl text-mindful-brown-80 pb-10">
           Sign In

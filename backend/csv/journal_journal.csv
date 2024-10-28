@@ -1,4 +1,4 @@
-﻿id,audio_file_path,journal_text,sentiment_analysis_result,upload_date,user_id_id,title
+id,audio_file_path,journal_text,sentiment_analysis_result,upload_date,user_id_id,title
 92,exercises/1/2024_09_20/Landmark_1_brian.mp3,"It was heartwarming to see a patient smile after weeks of treatment. They mentioned feeling truly cared for, and moments like these remind me of the purpose behind every compassionate gesture.",Positive,2024-09-14 14:59:58,10,Negative Journal 92
 93,exercises/1/2024_09_20/Landmark_1_brian.mp3,"A patient’s family thanked me today, saying that my care helped their loved one’s progressive recovery. Knowing I’m trusted means everything.",Positive,2024-08-31 20:52:50,10,Negative Journal 93
 94,exercises/1/2024_09_20/Landmark_1_brian.mp3,"Today, I received positive feedback from a patient who felt genuinely satisfied with the attention they received. It’s incredibly motivating to see my efforts make a difference.",Positive,2024-09-03 04:35:34,10,Negative Journal 94
@@ -250,4 +250,3 @@
 340,exercises/1/2024_09_20/Landmark_1_brian.mp3,"Today, I practiced a new language skill I’m learning, and it felt rewarding to see progress. I can now form basic sentences, and it’s exciting to feel growth. Language learning is challenging, but the small wins keep me motivated. I look forward to becoming more fluent.",Positive,2024-09-23 09:18:16,39,Negative Journal 340
 341,exercises/1/2024_09_20/Landmark_1_brian.mp3,I spent some time today organizing my digital photos. It was fun revisiting old memories and seeing how much has changed. There’s something fulfilling about bringing order to the chaos of digital files. It’s a project I’ll continue until everything’s organized.,Positive,2024-09-03 20:28:33,39,Negative Journal 341
 342,exercises/1/2024_09_20/Landmark_1_brian.mp3,Took a stroll around the neighborhood to enjoy the changing seasons. The colors and sounds of nature are so soothing. Being present in the moment reminded me of the beauty in everyday life. I feel refreshed and ready to take on the week.,Positive,2024-08-26 07:57:58,39,Negative Journal 342
-,,,,,,

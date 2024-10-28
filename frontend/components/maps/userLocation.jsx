@@ -4,9 +4,13 @@ import {
   locationManager,
   ShapeSource,
   FillLayer,
+  MarkerView,
 } from '@rnmapbox/maps'
 import circle from '@turf/circle'
 import * as Location from 'expo-location'
+import LottieView from 'lottie-react-native'
+import { View } from 'react-native'
+import { mindfulBear } from '../../assets/image'
 
 const UserLocationCustom = ({
   visible = true,
@@ -17,6 +21,7 @@ const UserLocationCustom = ({
 }) => {
   const [coordinates, setCoordinates] = useState(null)
   const [lastCoordinates, setLastCoordinates] = useState(null)
+  const [heading, setHeading] = useState(0)
   const [interactionArea, setInteractionArea] = useState(null)
   const [fillOpacity, setFillOpacity] = useState(0.3)
   const interactionAreaRadius = 15
@@ -64,8 +69,7 @@ const UserLocationCustom = ({
 
   const onLocationUpdate = (location) => {
     if (!location || !location.coords) return
-
-    const { longitude, latitude } = location.coords
+    const { longitude, latitude, heading: userHeading } = location.coords
     const currentCoordinates = [longitude, latitude]
 
     if (
@@ -75,7 +79,9 @@ const UserLocationCustom = ({
     ) {
       setInteractionArea(generateInteractionArea(currentCoordinates))
     }
-
+    if (typeof userHeading === 'number') {
+      setHeading(userHeading)
+    }
     setCoordinates(currentCoordinates)
     setLastCoordinates(currentCoordinates)
     if (setCurrentLocation) setCurrentLocation(currentCoordinates)
@@ -99,8 +105,22 @@ const UserLocationCustom = ({
         visible={true}
         androidRenderMode={'compass'}
         showsUserHeadingIndicator={true}
-        onUpdate={(newLocation) => {}}
-      />
+        onUpdate={onLocationUpdate}
+      >
+        <MarkerView coordinate={coordinates}>
+          <View
+            style={{
+              transform: [{ rotate: `${heading}deg` }], // Rotate based on heading
+            }}
+          >
+            <LottieView
+              source={mindfulBear}
+              className="w-14 h-14 z-20"
+              autoPlay
+            />
+          </View>
+        </MarkerView>
+      </UserLocation>
 
       <ShapeSource id="interactionArea" shape={interactionArea}>
         <FillLayer

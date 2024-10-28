@@ -1,10 +1,12 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, useRef } from 'react'
 import { View, TouchableOpacity, Text } from 'react-native'
 import { Audio } from 'expo-av'
 import { MaterialCommunityIcons } from '@expo/vector-icons'
 import { Image } from 'expo-image'
 import Slider from '@react-native-community/slider'
 import { decrementUserCount } from '../../api/landmark'
+import { createUserSession } from '../../api/usersession'
+import { getCurrentDateTime } from '../../common/getCurrentFormattedDateTime'
 const AudioPlayer = ({
   audioUri,
   imageUrl,
@@ -15,12 +17,14 @@ const AudioPlayer = ({
   handleClose,
   openCompletedModal,
   landmarkId,
+  sessionID,
 }) => {
   const [sound, setSound] = useState()
   const [isPlaying, setIsPlaying] = useState(false)
   const [playbackStatus, setPlaybackStatus] = useState(null)
   const [positionMillis, setPositionMillis] = useState(0)
   const [durationMillis, setDurationMillis] = useState(1)
+  const startDatetimeRef = useRef(null)
   const handlePlayPause = async () => {
     try {
       if (isPlaying) {
@@ -36,6 +40,9 @@ const AudioPlayer = ({
           setPlaybackStatus(status)
           setIsPlaying(true)
           newSound.setOnPlaybackStatusUpdate(onPlaybackStatusUpdate)
+          if (!startDatetimeRef.current) {            
+            startDatetimeRef.current = getCurrentDateTime()
+          }
         } else {
           if (positionMillis == durationMillis) {
             setPositionMillis(0)
@@ -45,6 +52,9 @@ const AudioPlayer = ({
           }
           await sound.playAsync()
           setIsPlaying(true)
+          if (!startDatetimeRef.current) {            
+            startDatetimeRef.current = getCurrentDateTime()
+          }
         }
       }
     } catch (error) {
@@ -65,9 +75,16 @@ const AudioPlayer = ({
           setHasArrived(false)
           try{
             decrementUserCount(landmarkId)
+            const endDatetime = getCurrentDateTime()
+            createUserSession({
+              end_datetime: endDatetime,
+              start_datetime: startDatetimeRef.current,
+              session: sessionID,
+              landmark: landmarkId
+            })
           }
           catch (error){
-            console.error('Error updating landmarkusercount:', error)
+            console.error('Error updating landmarkusercount and userSession:', error)
           }
           
           handleClose()

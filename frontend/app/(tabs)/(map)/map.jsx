@@ -9,11 +9,7 @@ import { getGeoJson } from '../../../common/getGeoJson'
 import { createSession, updateSession } from '../../../api/session'
 import { landmarkIcon } from '../../../assets/image'
 import { getFavouriteLandmarks, getLandmarks } from '../../../api/landmark'
-import {
-  incrementUserCount,
-  decrementUserCount,
-  getUserCount,
-} from '../../../api/landmark'
+import { incrementUserCount } from '../../../api/landmark'
 import { confirmModal } from '../../../assets/image'
 import Loading from '../../../components/loading'
 import BottomSheetModal from '../../../components/maps/bottomSheetModal'
@@ -25,12 +21,8 @@ import {
 } from '../../../redux/slices/isShownNavSlice'
 import UserLocationCustom from '../../../components/maps/userLocation'
 import * as turf from '@turf/turf'
-import { Alert } from 'react-native'
 import StatusBarComponent from '../../../components/darkThemStatusBar'
-import { Dimensions } from 'react-native'
-
-const windowWidth = Dimensions.get('window').width
-const screenWidth = Dimensions.get('screen').width
+import { postPoints } from '../../../api/achievementPoint'
 
 const initialFormState = {
   start_datetime: '',
@@ -339,6 +331,10 @@ const Map = () => {
 
       return updatedForm
     })
+    const postPointsResponse = await postPoints({
+      points: 50,
+      description: 'Mindfulness Session Completed',
+    })
   }
 
   const resetForm = () => {
@@ -417,7 +413,7 @@ const Map = () => {
               >
                 <Mapbox.Camera
                   centerCoordinate={location}
-                  zoomLevel={17.0}
+                  zoomLevel={18.0}
                   animationMode="flyto"
                   animationDuration={500}
                   pitch={60}
@@ -504,7 +500,13 @@ const Map = () => {
             confirmButtonTitle={'Confirm'}
             title={'+100'}
             subTitle={'Great Job!'}
-            handleConfirm={() => setIsCompletedModalOpen(false)}
+            handleConfirm={async () => {
+              setIsCompletedModalOpen(false)
+              const postPointsResponse = await postPoints({
+                points: 100,
+                description: 'Exercise Completed',
+              })
+            }}
           />
         )}
         {isBottomSheetOpen && selectedLandmark && (
@@ -517,6 +519,7 @@ const Map = () => {
             isPlayAudio={isPlayAudio}
             setHasArrived={setHasArrived}
             distanceTimeEst={landmarkDistances}
+            sessionID={sessionID}
           />
         )}
         {hasArrived && isArriveModalOpen && (
