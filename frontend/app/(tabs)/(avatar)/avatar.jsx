@@ -3,29 +3,46 @@ import { View, Text, SafeAreaView, ScrollView } from 'react-native'
 import { mindfulBear } from '../../../assets/image'
 import AvatarCard from '../../../components/avatar/avatarCard'
 import BackButton from '../../../components/backButton'
-import { getUserAvatars } from '../../../api/userAvatar'
+import { getUserAvatars, updateUserAvatar } from '../../../api/userAvatar'
 import { StatusBar } from 'react-native'
 import Loading from '../../../components/loading'
 import { useSelector } from 'react-redux'
+import ConfirmModal from '../../../components/confirmModal'
 
 const Avatar = () => {
   const [isLoading, setIsLoading] = useState(false)
   const [userAvatars, setUserAvatars] = useState([])
   const user = useSelector((state) => state.user)
-  console.log(user)
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        setIsLoading(true)
-        const userAvatars = await getUserAvatars(user.userId)
-        setUserAvatars(userAvatars)
-      } catch (error) {
-        console.error(error)
-      } finally {
-        setIsLoading(false)
-      }
+  const [showConfirmModal, setShowConfirmModal] = useState(false)
+  const [selectedAvatar, setSelectedAvatar] = useState(false)
+
+  const fetchData = async () => {
+    try {
+      setIsLoading(true)
+      const userAvatars = await getUserAvatars(user.userId)
+      setUserAvatars(userAvatars)
+    } catch (error) {
+      console.error(error)
+    } finally {
+      setIsLoading(false)
+    }
+  }
+  const equipAvatar = async () => {
+    const userAvatarData = {
+      user: user.userId,
+      avatar: selectedAvatar.id,
+      is_selected: true,
     }
 
+    try {
+      await updateUserAvatar(selectedAvatar.id, userAvatarData)
+      await fetchData()
+      setShowConfirmModal(false)
+    } catch (error) {
+      console.error('Error updating avatar:', error)
+    }
+  }
+  useEffect(() => {
     fetchData()
   }, [])
 
@@ -39,7 +56,6 @@ const Avatar = () => {
       </View>
     )
   }
-  console.log(userAvatars)
   return (
     <SafeAreaView className="flex-1 p-4 bg-mindful-brown-10 mt-14">
       <View id="title-row" className="flex flex-row items-center mb-6">
@@ -56,15 +72,29 @@ const Avatar = () => {
                 isPurchaseButton={false}
                 imageSource={{ uri: avatar.avatar.avatar_url }}
                 title={avatar.avatar.title || 'No Title'}
-                handleConfirm={() =>
-                  console.log('Avatar selected:', avatar.avatar.title)
-                }
+                handleConfirm={() => {
+                  setShowConfirmModal(true)
+                  setSelectedAvatar(avatar)
+                }}
                 isSelected={avatar.is_selected}
               />
             </View>
           ))}
         </View>
       </ScrollView>
+      {showConfirmModal && (
+        <ConfirmModal
+          isConfirmButton={true}
+          isCancelButton={true}
+          confirmButtonTitle={'Confirm'}
+          cancelButtonTitle={'Cancel'}
+          title={'Are you sure you want to select this avatar?'}
+          handleConfirm={equipAvatar}
+          handleCancel={() => {
+            setShowConfirmModal(false)
+          }}
+        />
+      )}
     </SafeAreaView>
   )
 }

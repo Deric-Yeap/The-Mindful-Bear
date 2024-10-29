@@ -5,19 +5,7 @@ import { getFormQuestions, setFormQuestion, createLandmarkRatings } from '../../
 import LoadingPage from '../../../components/loading'
 import { FontAwesome } from '@expo/vector-icons'
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons'
-
-const CustomRadioButton = ({ selected, onPress }) => {
-  return (
-    <Pressable
-      className={`h-6 w-6 rounded-full justify-center items-center ${
-        selected ? 'border-white' : 'border-mindful-brown-100'
-      } border-2`}
-      onPress={onPress}
-    >
-      {selected && <View className="h-3 w-3 rounded-full bg-white" />}
-    </Pressable>
-  )
-}
+import CustomRadioButton from '../../../components/customRadioButton'
 
 const QuestionPage = () => {
   const router = useRouter()
@@ -29,6 +17,7 @@ const QuestionPage = () => {
     sessionStarted,
     start,
     isClickTravel,
+    isForceStart,
     completedForms: initialCompletedForms,
   } = useLocalSearchParams()
   const [completedForms, setCompletedForms] = useState(() => {
@@ -105,6 +94,7 @@ const QuestionPage = () => {
             sessionStarted: true,
             start: start,
             isClickTravel: isClickTravel,
+            isForceStart: isForceStart,
             completedForms: JSON.stringify(completedForms),
           },
         })
