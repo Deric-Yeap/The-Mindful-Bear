@@ -19,6 +19,7 @@ import Loading from '../../components/loading'
 import ConfirmModal from '../../components/confirmModal'
 import BackButton from '../../components/backButton'
 import emotionWheelImg from '../../assets/emotionWheel.jpg'
+import { postPoints } from '../../api/achievementPoint'
 
 const VoiceJournal = () => {
   const [recording, setRecording] = useState()
@@ -101,6 +102,10 @@ const VoiceJournal = () => {
     })
     try {
       const response = await audioUpload(formData)
+      const postPointsResponse = await postPoints({
+        points: 10,
+        description: 'Journal Entry',
+      })
       setIsLoading(false)
       setIsModalVisible(true)
     } catch (error) {

@@ -17,7 +17,7 @@ class AchievementPointViewSet(viewsets.ModelViewSet):
             return super().create(request, *args, **kwargs)
         except ValidationError as e:
             error_message = e.detail[0] if isinstance(e.detail, list) else str(e.detail)
-            return Response({"error": error_message}, status=status.HTTP_200_OK)
+            return Response({"detail": error_message}, status=status.HTTP_400_BAD_REQUEST)
     
     def list(self, request, *args, **kwargs):
         user = request.user
