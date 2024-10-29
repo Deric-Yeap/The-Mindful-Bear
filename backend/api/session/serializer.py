@@ -102,29 +102,43 @@ class SessionSplitSerializer(serializers.Serializer):
     #         print("current_date",current_date)
     #         period_sessions = sessions.filter(start_datetime__gte=current_date.astimezone(UTC), 
     #                                           start_datetime__lt=next_date.astimezone(UTC))
-        # def get_average_duration(self, sessions):
-        #     session_dict = {}
-        #     # Calculate the session count
-        #     session_count = sessions['session_count']
-        #     # Calculate the average duration of sessions
+    def get_average_duration(self, period_sessions):
+        session_dict = {}
+        # Calculate the session count
+        # Calculate the average duration of sessions
+        sgt_format = '%Y-%m-%d %H:%M:%S'
+
+
+        for key, data in period_sessions.items():
+            # Assuming each session in 'sessions' has 'start_datetime' and 'end_datetime' fields
+            session_details = data['sessions']
+            total_duration_seconds = sum(
+            (datetime.strptime(session['end_datetime_sgt'], sgt_format) - datetime.strptime(session['start_datetime_sgt'], sgt_format)).total_seconds()  for session in data['sessions']
+                        )
+            total_duration_minutes = total_duration_seconds / 60  # Convert to minutes
             
-        #     # Calculate the total duration of sessions in minutes
-        #     total_duration_seconds = sum([(session.end_datetime - session.start_datetime).total_seconds() for session in sessions])
-        #     total_duration_minutes = total_duration_seconds / 60  # Convert to minutes
+            # Add the total duration to the period data if needed
+            session_count = data['session_count'] 
 
-        #     avg_duration = total_duration_minutes / session_count if session_count > 0 else 0
+            # Print out results for each period
+            print(f"Period: {key}")
+            print(f"Total Duration (minutes): {total_duration_minutes}")
 
-        #     # Prepare the data for this period
-        #     session_dict[key] = {
-        #         'session_count': session_count,
-        #         'average_duration': avg_duration,  # Convert to minutes
-        #         'sessions': SessionSerializer(period_sessions, many=True).data  # Serialize the sessions
-        #     }
-            
-        #     # Move to the next period
-        #     current_date = next_date.astimezone(SGT)  # Ensure current_date is UTC
+        
+        # # Calculate the total duration of sessions in minutes
+        # total_duration_seconds = sum([(session.end_datetime - session.start_datetime).total_seconds() for session in session_details])
+        # total_duration_minutes = total_duration_seconds / 60  # Convert to minutes
 
-        # return session_dict
+            avg_duration = total_duration_minutes / session_count if session_count > 0 else 0
+
+            # Prepare the data for this period
+            session_dict[key] = {
+                'session_count': session_count,
+                'average_duration': avg_duration,  # Convert to minutes
+                'sessions': session_details # Serialize the sessions
+            }
+        print("session_dict",session_dict)
+        return session_dict
 
     def to_representation(self, instance):
         request = self.context.get('request')
@@ -161,9 +175,10 @@ class SessionSplitSerializer(serializers.Serializer):
                     end_date = datetime.now(tz=SGT)
 
         # Get the session data for the specified period
-        session_dict = get_sessions_by_period(start_date, end_date, period)
-
-
+        session_data = get_sessions_by_period(start_date, end_date, period)
+        print("session data",session_data)
+        session_dict =  self.get_average_duration(session_data)
+            
         
         data = {
             'period': period,
@@ -196,6 +211,32 @@ class SessionSplitSerializer(serializers.Serializer):
 #                         "physical_tiredness_after": 1.0,
 #                         "start_datetime_sgt": "2024-10-08 13:56:51",
 #                         "end_datetime_sgt": "2024-10-08 13:56:51"
+#                     },
+# {
+#                         "id": 338,
+#                         "start_datetime": "2024-10-08T09:04:42.971000Z",
+#                         "end_datetime": "2024-10-08T09:08:38.859000Z",
+#                         "pss_before": 1.0,
+#                         "pss_after": 1.0,
+#                         "sms_before": null,
+#                         "sms_after": null,
+#                         "physical_tiredness_before": 1.0,
+#                         "physical_tiredness_after": 1.0,
+#                         "start_datetime_sgt": "2024-10-08 17:04:42",
+#                         "end_datetime_sgt": "2024-10-08 17:08:38"
+#                     },
+#                     {
+#                         "id": 339,
+#                         "start_datetime": "2024-10-09T03:49:29.261000Z",
+#                         "end_datetime": "2024-10-09T03:52:54.332000Z",
+#                         "pss_before": 1.0,
+#                         "pss_after": 1.0,
+#                         "sms_before": null,
+#                         "sms_after": null,
+#                         "physical_tiredness_before": 1.0,
+#                         "physical_tiredness_after": 1.0,
+#                         "start_datetime_sgt": "2024-10-09 11:49:29",
+#                         "end_datetime_sgt": "2024-10-09 11:52:54"
 #                     },
 
 class SessionUpdateSerializer(serializers.ModelSerializer):
