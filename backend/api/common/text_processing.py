@@ -20,10 +20,12 @@ stop_words.update(custom_stop_words)
 def split_sentences(text):
     # Split text into sentences using punctuation as delimiters
     sentences = re.split(r'(?<=[.!?])\s+', text)
+    print(f"Split text into sentences: {sentences}")
     return sentences
 
 def preprocess_for_keywords(sentence):
     # Process the sentence for keyword extraction only, applying stopword removal and lemmatization
     words = re.sub(r'[^\w\s]', '', sentence.lower()).split()
     keywords = [lemmatizer.lemmatize(word) for word in words if word not in stop_words]
+    print(f"Keywords extracted from '{sentence}': {keywords}")
     return " ".join(keywords)

@@ -322,6 +322,7 @@ class JournalEntryViewSet(viewsets.ViewSet):
 
 from ..common.topic_classifier import classify_text
 from ..common.text_processing import split_sentences 
+from collections import defaultdict
 
 class JournalClassificationView(APIView):
     #def post(self, request):
@@ -331,38 +332,41 @@ class JournalClassificationView(APIView):
        # journal['predicted_labels'] = classify_text(journal_text)
         #return Response({"result": journalTexts}, status=status.HTTP_200_OK)
    def get(self, request):
-        # Fetch all journal entries from the database
         journals = Journal.objects.all()
+        aggregated_topic_keywords = defaultdict(lambda: defaultdict(int))
 
-        # Prepare a list to store classified sentences for each journal entry
-        classified_entries = []
-
+        # Process each journal entry and accumulate keyword counts
         for journal in journals:
-            journal_text = journal.journal_text  # Assuming `journal_text` is the field with the journal content
+            journal_text = journal.journal_text
+            print(f"Processing journal entry: '{journal_text}'")
+            topic_keyword_counts = classify_text(journal_text)
 
-            # Split the journal entry into sentences
-            sentences = split_sentences(journal_text)  # Now using split_sentences instead of preprocess_text
-            sentence_classifications = []
+            # Aggregate counts across all journal entries
+            for topic, keywords in topic_keyword_counts.items():
+                for keyword, count in keywords.items():
+                    aggregated_topic_keywords[topic][keyword] += count
 
-            for sentence in sentences:
-                # Check if the sentence is not empty before passing to classify_text
-                if sentence:
-                    # Classify each sentence individually
-                    classification = classify_text(sentence)  # Now passing one sentence at a time, which is a string
-                    sentence_classifications.append({
-                        'sentence': sentence,
-                        'predicted_topics': classification["topics"]
-                    })
-
-            classified_entries.append({
-                'journal_text': journal_text,
-                'classified_sentences': sentence_classifications,
+        # Prepare the final output format
+        formatted_output = []
+        for topic, keywords in aggregated_topic_keywords.items():
+            # Sort keywords by count and select top 10
+            sorted_keywords = sorted(keywords.items(), key=lambda x: x[1], reverse=True)[:10]
+            formatted_output.append({
+                "topic": topic,
+                "top_reasons": [
+                    {
+                        "reason": keyword,
+                        "mentions": count
+                    }
+                    for keyword, count in sorted_keywords
+                ]
             })
 
+        # Return response
         return Response({
             'code': 200,
             'data': {
-                'classified_entries': classified_entries
+                'classified_entries': formatted_output
             },
             'error_description': None
         }, status=status.HTTP_200_OK)
