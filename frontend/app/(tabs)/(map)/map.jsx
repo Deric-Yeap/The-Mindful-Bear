@@ -43,6 +43,7 @@ const Map = () => {
   const router = useRouter()
   const {
     isRedirectedForms: isRedirected,
+    isForceStart: isForceStarted,
     selectedLandmarkData,
     sessionID,
     sessionStarted,
@@ -80,6 +81,7 @@ const Map = () => {
   useEffect(() => {
     setIsSessionStarted(sessionStarted === 'true')
     setIsClickTravel(isClickTraveled === 'true')
+    setIsForceStart(isForceStarted === 'true')
     if (selectedLandmarkData) {
       try {
         const landmarkData = JSON.parse(selectedLandmarkData)
@@ -89,7 +91,13 @@ const Map = () => {
       }
     }
     setIsRedirectedForms(isRedirected === 'true')
-  }, [sessionStarted, selectedLandmarkData, isRedirected, isClickTraveled])
+  }, [
+    sessionStarted,
+    selectedLandmarkData,
+    isRedirected,
+    isClickTraveled,
+    isForceStarted,
+  ])
 
   useEffect(() => {
     const fetchData = async () => {
@@ -143,20 +151,7 @@ const Map = () => {
             )
 
             if (distanceToDestination <= 10) {
-              setHasArrived(true)
-              try {
-                incrementUserCount(selectedLandmark.properties.landmark_id)
-              } catch (error) {
-                console.error('Error updating landmarkusercount:', error)
-              }
-              setIsTraveling(false)
-              setSelectedLandmark(selectedLandmark)
-              setIsArriveModalOpen(true)
-
-              setIsBottomSheetOpen(true)
-              if (isShownNav) {
-                dispatch(setIsShownNav())
-              }
+              startExercise()
             }
           }
           setPrevLocation(location)
@@ -198,12 +193,19 @@ const Map = () => {
       selectedLandmark &&
       location &&
       !hasFetchedDirections.current &&
-      isClickTravel
+      isClickTravel &&
+      isForceStart
     ) {
       fetchDirections()
       hasFetchedDirections.current = true
     }
-  }, [isRedirectedForms, location, selectedLandmark, isClickTravel])
+  }, [
+    isRedirectedForms,
+    location,
+    selectedLandmark,
+    isClickTravel,
+    isForceStart,
+  ])
 
   const updateRemainingRoute = (nearestPoint) => {
     const route = routeGeoJSON.features[0].geometry.coordinates
@@ -267,6 +269,8 @@ const Map = () => {
   const handleSessionStart = (isClickTravel) => {
     let sessionId = null
     const currentStartDateTime = getCurrentDateTime()
+    console.log('sessin')
+    console.log(isForceStart)
     setForm((prevForm) => {
       const updatedForm = {
         ...prevForm,
@@ -287,6 +291,7 @@ const Map = () => {
               sessionStarted: true,
               start: 'true',
               isClickTravel: isClickTravel,
+              isForceStart: isForceStart,
             },
           })
         })
@@ -304,6 +309,7 @@ const Map = () => {
   const handleSessionConfirmEnd = async () => {
     const currentEndDateTime = getCurrentDateTime()
     setIsClickTravel(false)
+    setIsForceStart(false)
     setForm((prevForm) => {
       const updatedForm = {
         ...prevForm,
@@ -323,6 +329,7 @@ const Map = () => {
               sessionStarted: true,
               start: 'false',
               isClickTravel: isClickTravel,
+              isForceStart: isForceStart,
             },
           })
         })
@@ -342,6 +349,22 @@ const Map = () => {
     setForm(initialFormState)
   }
 
+  const startExercise = () => {
+    setHasArrived(true)
+    try {
+      incrementUserCount(selectedLandmark.properties.landmark_id)
+    } catch (error) {
+      console.error('Error updating landmark usercount:', error)
+    }
+    setIsTraveling(false)
+    setSelectedLandmark(selectedLandmark)
+    setIsArriveModalOpen(true)
+
+    setIsBottomSheetOpen(true)
+    if (isShownNav) {
+      dispatch(setIsShownNav())
+    }
+  }
   const fetchDirections = async () => {
     if (!location || !selectedLandmark) {
       console.error('Current location or selected landmark is not available.')
@@ -353,20 +376,8 @@ const Map = () => {
     }
     console.log(isForceStart)
     if (isForceStart && isSessionStarted) {
-      setHasArrived(true)
-      try {
-        incrementUserCount(selectedLandmark.properties.landmark_id)
-      } catch (error) {
-        console.error('Error updating landmark usercount:', error)
-      }
-      setIsTraveling(false)
-      setSelectedLandmark(selectedLandmark)
-      setIsArriveModalOpen(true)
-
-      setIsBottomSheetOpen(true)
-      if (isShownNav) {
-        dispatch(setIsShownNav())
-      }
+      startExercise()
+      return
     }
     const selectedLandmarkCoords = selectedLandmark.geometry.coordinates
 

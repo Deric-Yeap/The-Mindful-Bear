@@ -6,15 +6,16 @@ import { useSelector } from 'react-redux'
 import { setIsShownNav } from '../../redux/slices/isShownNavSlice'
 
 const Questionaire = () => {
-  const {    
+  const {
     isRedirectedForms,
     selectedLandmarkData,
     sessionID,
-    sessionStarted,      
+    sessionStarted,
     start,
     isClickTravel,
-    completedForms: initialCompletedForms,    
-  } = useLocalSearchParams()  
+    isForceStart,
+    completedForms: initialCompletedForms,
+  } = useLocalSearchParams()
   const isShownNav = useSelector((state) => state.isShownNav).isShownNav
   const [forms, setForms] = useState([])
   const [completedForms, setCompletedForms] = useState(() => {
@@ -62,17 +63,19 @@ const Questionaire = () => {
 
   const navigateToForm = (formId) => {
     const updatedCompletedForms = [...completedForms, formId]
-
+    console.log('form')
+    console.log(isForceStart)
     router.push({
       pathname: `/questions/${formId}`,
-      params: {        
+      params: {
         isRedirectedForms: isRedirectedForms,
-        selectedLandmarkData: selectedLandmarkData, 
+        selectedLandmarkData: selectedLandmarkData,
         sessionID: sessionID,
-        sessionStarted: sessionStarted,        
+        sessionStarted: sessionStarted,
         isClickTravel: isClickTravel,
+        isForceStart: isForceStart,
         start: start,
-        completedForms: JSON.stringify(updatedCompletedForms),        
+        completedForms: JSON.stringify(updatedCompletedForms),
       },
     })
   }
@@ -87,14 +90,16 @@ const Questionaire = () => {
         if (!isShownNav) {
           dispatch(setIsShownNav())
         }
+        console.log(isForceStart)
         router.push({
           pathname: '/map',
-          params: {            
+          params: {
             isRedirectedForms: isRedirectedForms,
-            selectedLandmarkData: selectedLandmarkData, 
+            selectedLandmarkData: selectedLandmarkData,
             sessionID: sessionID,
-            sessionStarted: true,     
-            isClickTravel: isClickTravel       
+            sessionStarted: true,
+            isClickTravel: isClickTravel,
+            isForceStart: isForceStart,
           },
         })
       } else {

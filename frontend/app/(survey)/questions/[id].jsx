@@ -18,6 +18,7 @@ const QuestionPage = () => {
     sessionStarted,
     start,
     isClickTravel,
+    isForceStart,
     completedForms: initialCompletedForms,
   } = useLocalSearchParams()
   const [completedForms, setCompletedForms] = useState(() => {
@@ -77,6 +78,7 @@ const QuestionPage = () => {
             sessionStarted: true,
             start: start,
             isClickTravel: isClickTravel,
+            isForceStart: isForceStart,
             completedForms: JSON.stringify(completedForms),
           },
         })
