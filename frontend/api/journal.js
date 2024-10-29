@@ -55,3 +55,7 @@ export const speechToText = (formData) => {
 export const journalStreak = () => {
   return axiosInstance.get('journal/journal_streak/')
 }
+
+export const getJournalClassification = () => {
+  return axiosInstance.get('journal/journal_classification/');
+};
