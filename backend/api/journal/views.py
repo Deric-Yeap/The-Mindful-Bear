@@ -1,3 +1,4 @@
+#C:\The-Mindful-Bear\backend\api\journal\views.py
 import json
 import pandas as pd
 from textblob import TextBlob
@@ -320,6 +321,7 @@ class JournalEntryViewSet(viewsets.ViewSet):
         return Response({'message': 'Journal entry deleted successfully.'}, status=status.HTTP_200_OK)
 
 from ..common.topic_classifier import classify_text
+from ..common.text_processing import split_sentences 
 
 class JournalClassificationView(APIView):
     #def post(self, request):
@@ -328,46 +330,39 @@ class JournalClassificationView(APIView):
         #journalTexts = [journal.journal_text for journal in journals] #just a random example, transform your own data to return
        # journal['predicted_labels'] = classify_text(journal_text)
         #return Response({"result": journalTexts}, status=status.HTTP_200_OK)
-    def get(self, request):
+   def get(self, request):
         # Fetch all journal entries from the database
         journals = Journal.objects.all()
 
-        # Prepare a list to store each journal entry with its classifications
+        # Prepare a list to store classified sentences for each journal entry
         classified_entries = []
 
-        # Iterate over each journal entry to classify it and find keywords
         for journal in journals:
             journal_text = journal.journal_text  # Assuming `journal_text` is the field with the journal content
-            classification = classify_text(journal_text)  # Use updated classify_text function
-            
-            # Append the classified entry as a dictionary to the list
+
+            # Split the journal entry into sentences
+            sentences = split_sentences(journal_text)  # Now using split_sentences instead of preprocess_text
+            sentence_classifications = []
+
+            for sentence in sentences:
+                # Check if the sentence is not empty before passing to classify_text
+                if sentence:
+                    # Classify each sentence individually
+                    classification = classify_text(sentence)  # Now passing one sentence at a time, which is a string
+                    sentence_classifications.append({
+                        'sentence': sentence,
+                        'predicted_topics': classification["topics"]
+                    })
+
             classified_entries.append({
                 'journal_text': journal_text,
-                'predicted_topics': classification["topics"],
+                'classified_sentences': sentence_classifications,
             })
-        
-        # Return the response as a JSON object
+
         return Response({
-        'code': 200,
-        'data': {
-            'classified_entries': classified_entries
-        },
-        'error_description': None
-    }, status=status.HTTP_200_OK)
-
-
-class AllJournalsView(APIView):
-    def post(self, request):
-        # Retrieve all journal entries without filtering by user
-        journals = Journal.objects.all()
-        
-        # Serialize the data for each journal entry
-        serializer = JournalGetSerializer(journals, many=True)
-        
-        # Optional: Classify each journal entry's text and add predicted labels
-        for journal in serializer.data:
-            journal_text = journal['journal_text']  # Ensure 'journal_text' is the correct field
-            journal['predicted_labels'] = classify_text(journal_text)  # Add classification labels to the data
-        
-        # Return the serialized data with classifications
-        return Response(serializer.data, status=status.HTTP_200_OK)
+            'code': 200,
+            'data': {
+                'classified_entries': classified_entries
+            },
+            'error_description': None
+        }, status=status.HTTP_200_OK)

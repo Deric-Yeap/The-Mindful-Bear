@@ -1,3 +1,4 @@
+#C:\The-Mindful-Bear\backend\api\journal\urls.py
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 from .views import (JournalListView, UploadFileView, JournalCalendarView, CountYearJournalView,

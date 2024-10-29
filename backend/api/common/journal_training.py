@@ -8,7 +8,7 @@ from sklearn.multioutput import MultiOutputClassifier
 from nltk.corpus import stopwords
 from nltk.stem import WordNetLemmatizer
 import nltk
-from .text_processing import preprocess_text
+from .text_processing import preprocess_for_keywords
 
 nltk.download('stopwords')
 nltk.download('wordnet')
@@ -23,7 +23,7 @@ LABELS_PATH = os.path.join(os.path.dirname(__file__), "../ml/label_columns.pkl")
 def train_and_save_model():
     # Load and preprocess training data
     training_data = pd.read_csv(TRAINING_DATA_PATH)
-    training_data['processed_sentence'] = training_data['journal_sentence'].apply(preprocess_text)
+    training_data['processed_sentence'] = training_data['journal_sentence'].apply(preprocess_for_keywords)
 
     # Prepare features and labels
     X = training_data['processed_sentence']
