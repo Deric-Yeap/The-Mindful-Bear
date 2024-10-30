@@ -1,18 +1,17 @@
-import React, { useState, useEffect } from 'react';
-import { View, ScrollView, TouchableOpacity } from 'react-native';
+import { View, ScrollView, TextInput, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useRouter } from 'expo-router';
 import TopBrownSearchBar from '../../components/topBrownSearchBar';
 import ArticleCard from '../../components/articleCard';
 import StatusBarComponent from '../../components/darkThemStatusBar';
 import Loading from '../../components/loading';
 import { journalStreak } from '../../api/journal';
-
+import { useRoute } from '@react-navigation/native'
+import React, { useState } from 'react';
 const articles = [
   {
     id: 1,
     title: "Mindful Journal",
-    imageUrl: "https://i.pinimg.com/enabled_lo/564x/5c/c7/4b/5cc74b542c4315e3bc2cb6288007001b.jpg",
+    imageUrl: "https://valor-dictus.com/wp-content/uploads/2023/12/Screenshot-2023-12-01-12.24.59-PM.png",
     content: "Detailed article content about mindful journaling...",
   },
   {
@@ -25,24 +24,25 @@ const articles = [
 ];
 
 const ArticleResult = () => {
-  const router = useRouter();
-  const [loading, setLoading] = useState(false);
-  const [streak, setStreak] = useState(0);
-
+  const route = useRoute()
+  const query = route.params.query
+  const [queryInput, setQuery] = useState('')
   const handleArticlePress = (article) => {
-    console.log(`Navigating to article with ID: ${article.id}`); // Debugging log
-    router.push(`/(article)/article-detail?id=${article.id}`);
-    
+    route.push({
+      // pathname: '/article-detail',
+      // params: { id: article.id },
+    });
   };
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: '#f8f5f1' }}>
       <ScrollView style={{ marginBottom: 48 }}>
         <StatusBarComponent barStyle="light-content" backgroundColor="#251404" />
-        <TopBrownSearchBar title="Article Finder" />
+        <TopBrownSearchBar title="Article Finder" value={query} onChangeText={setQuery} />
         <View style={{ backgroundColor: '#f8f5f1', padding: 16, borderRadius: 8, marginBottom: 16 }}>
           {articles.map((article) => (
-            <TouchableOpacity 
+            <TouchableOpacity
+            keyExtractor={(item) => item.key.toString()}
               key={article.id}
               onPress={() => handleArticlePress(article)}
             >
