@@ -8,6 +8,7 @@ class Question(models.Model):
     order = models.IntegerField('Order', default=0)
     formID = models.ForeignKey(Form, blank=True, null=True, on_delete=models.CASCADE)
     optionSet = models.ForeignKey(OptionSet, blank=True, null=True, on_delete=models.CASCADE)
+    reverse_score = models.BooleanField('ReverseScore', default=False)
 
     def __str__(self):
         return str(self.id)

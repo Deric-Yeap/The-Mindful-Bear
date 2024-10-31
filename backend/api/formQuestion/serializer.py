@@ -52,7 +52,10 @@ class BulkFormQuestionSerializer(serializers.Serializer):
             form_questions.append(form_question)
 
             if response.isdigit():
-                valid_responses.append(int(response))
+                score = int(response)
+                if question.reverse_score:
+                    score = 4 - score
+                valid_responses.append(score)
 
         if form.store_responses:
             FormQuestion.objects.bulk_create(form_questions)
