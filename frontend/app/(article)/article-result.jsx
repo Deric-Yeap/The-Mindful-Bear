@@ -38,7 +38,8 @@ const ArticleResult = () => {
           title: article.title,
           imageUrl: article.article_image_url,
           content: article.processed_contents,
-          pdfUrl: article.article_pdf_url
+          pdfUrl: article.article_pdf_url,
+          topic: article.topic
         }));
         setArticles(formattedArticles);
       } catch (error) {
@@ -85,6 +86,7 @@ const ArticleResult = () => {
               <ArticleCard
                 title={article.title}
                 imageSource={{ uri: article.imageUrl }}
+                category = {article.topic}
               />
             </TouchableOpacity>
           ))}
