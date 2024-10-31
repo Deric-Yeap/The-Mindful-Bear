@@ -6,6 +6,8 @@ from django.conf import settings
 from ..common.s3 import create_presigned_url, upload_fileobj, make_file_upload_path, delete_s3_object
 from urllib.parse import quote
 from ..common.processContents import extract_key_concepts
+import re
+import os
 
 
 class ArticleSerializer(serializers.ModelSerializer):
@@ -35,8 +37,12 @@ class ArticleCreateSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         article_pdf_url = validated_data.pop('article_pdf_url')        
-        user = self.context['request'].user    
-        file_name, object_path = make_file_upload_path("articles", user, quote(article_pdf_url.name))                
+        user = self.context['request'].user   
+        # Split into name and extension, clean name, then rejoin
+        name, ext = os.path.splitext(article_pdf_url.name)
+        clean_name = re.sub(r'[^a-zA-Z0-9]', '', name)
+        clean_file_name = clean_name + ext
+        file_name, object_path = make_file_upload_path("articles", user, quote(clean_file_name)) 
         bucket = settings.AWS_STORAGE_BUCKET_NAME
         file_url = upload_fileobj(article_pdf_url, bucket, object_path)
         if not file_url:        
