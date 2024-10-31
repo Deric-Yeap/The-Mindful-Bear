@@ -156,11 +156,23 @@ const Questionaire = () => {
                   resizeMode="contain"
                 />
 
-                {/* Text Content */}
-                <View className="flex-1">
+               {/* Text Content */}
+               <View className="flex-1">
                   <Text className="text-xl font-urbanist-bold text-mindful-brown-100 ml-4 mt-4">
                     {form.form_name} {isCompulsory ? '' : '(Optional)'}
                   </Text>
+                  {form.description && (
+                    
+                    <Text className="text-lg text-mindful-brown-90 font-urbanist-semi-bold mx-4 mt-1"  style={{
+                      textShadowColor: 'rgba(255, 255, 255, 0.3)', 
+                      textShadowOffset: { width: 1, height: 1 }, 
+                      textShadowRadius: 1, 
+                      lineHeight: 20
+                    }}>
+                      {form.description}
+                    </Text>
+                    
+                  )}
                 </View>
               </TouchableOpacity>
             )
