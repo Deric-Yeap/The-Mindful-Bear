@@ -48,6 +48,7 @@ const Map = () => {
     sessionID,
     sessionStarted,
     isClickTravel: isClickTraveled,
+    isGeneric,
   } = useLocalSearchParams()
   const [form, setForm] = useState(initialFormState)
   const [isModalOpen, setIsModalOpen] = useState(false)
@@ -292,6 +293,7 @@ const Map = () => {
               start: 'true',
               isClickTravel: isClickTravel,
               isForceStart: isForceStart,
+              isGeneric: isGeneric
             },
           })
         })
@@ -330,6 +332,7 @@ const Map = () => {
               start: 'false',
               isClickTravel: isClickTravel,
               isForceStart: isForceStart,
+              isGeneric: isGeneric,
             },
           })
         })

@@ -15,6 +15,7 @@ const Questionaire = () => {
     isClickTravel,
     isForceStart,
     completedForms: initialCompletedForms,
+    isGeneric,
   } = useLocalSearchParams()
   const isShownNav = useSelector((state) => state.isShownNav).isShownNav
   const [forms, setForms] = useState([])
@@ -39,12 +40,19 @@ const Questionaire = () => {
     const fetchData = async () => {
       try {
         const response = await getForms()
-        if (start === 'true') {
+  
+        let filteredForms;
+        console.log(isGeneric)
+        if (isGeneric === 'true') {          
+          filteredForms = response.filter((form) =>
+            ['General Questions', 'Feedback', 'Landmark Ratings'].includes(form.form_name)
+          )
+        } else if (start === 'true') {
           filteredForms = response.filter((form) => form.is_presession)
         } else {
           filteredForms = response.filter((form) => form.is_postsession)
         }
-
+  
         setForms(filteredForms)
       } catch (error) {
         console.error('Error fetching form data:', error)
@@ -76,8 +84,31 @@ const Questionaire = () => {
         isForceStart: isForceStart,
         start: start,
         completedForms: JSON.stringify(updatedCompletedForms),
+        isGeneric: isGeneric
       },
     })
+  }
+  const handleSkip = () => {
+    if (start === 'true') {
+      if (!isShownNav) {
+        dispatch(setIsShownNav())
+      }
+      router.push({
+        pathname: '/map',
+        params: {
+          isRedirectedForms: isRedirectedForms,
+          selectedLandmarkData: selectedLandmarkData,
+          sessionID: sessionID,
+          sessionStarted: true,
+          isClickTravel: isClickTravel,
+          isForceStart: isForceStart,
+          isGeneric: true
+
+        },
+      })
+    } else {
+      router.push('/home')     
+    }
   }
 
   const handleStart = () => {
@@ -89,8 +120,7 @@ const Questionaire = () => {
       if (start === 'true') {
         if (!isShownNav) {
           dispatch(setIsShownNav())
-        }
-        console.log(isForceStart)
+        }        
         router.push({
           pathname: '/map',
           params: {
@@ -114,9 +144,21 @@ const Questionaire = () => {
     <ScrollView className="flex-1 bg-optimistic-gray-10">
       <View className="flex-1 p-6 bg-optimistic-gray-10">
         {/* Title */}
-        <Text className="text-center text-2xl font-urbanist-bold text-mindful-brown-90">
-          {start === 'true' ? 'Before We Begin...' : 'Before We End...'}
-        </Text>
+        <View className="relative items-center">
+          <Text className="text-2xl font-urbanist-bold text-mindful-brown-90">
+            {start === 'true' ? 'Before We Begin...' : 'Before We End...'}
+          </Text>
+          {start === 'true' && (
+            <TouchableOpacity
+              onPress={handleSkip}
+              className="absolute right-0"
+            >
+              <Text className="text-lg font-urbanist-bold text-present-red-60">
+                Skip
+              </Text>
+            </TouchableOpacity>
+          )}
+        </View>
         {/* Subtitle */}
         <Text className="text-center text-lg font-urbanist-bold text-optimistic-gray-80 mt-4 mb-8">
           We will be assessing your mood based on the following questionnaires.

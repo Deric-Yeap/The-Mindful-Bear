@@ -5,7 +5,19 @@ import { getFormQuestions, setFormQuestion, createLandmarkRatings } from '../../
 import LoadingPage from '../../../components/loading'
 import { FontAwesome } from '@expo/vector-icons'
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons'
-import CustomRadioButton from '../../../components/customRadioButton'
+
+const CustomRadioButton = ({ selected, onPress }) => {
+  return (
+    <Pressable
+      className={`h-6 w-6 rounded-full justify-center items-center ${
+        selected ? 'border-white' : 'border-mindful-brown-100'
+      } border-2`}
+      onPress={onPress}
+    >
+      {selected && <View className="h-3 w-3 rounded-full bg-white" />}
+    </Pressable>
+  )
+}
 
 const QuestionPage = () => {
   const router = useRouter()
@@ -17,8 +29,8 @@ const QuestionPage = () => {
     sessionStarted,
     start,
     isClickTravel,
-    isForceStart,
     completedForms: initialCompletedForms,
+    isGeneric,
   } = useLocalSearchParams()
   const [completedForms, setCompletedForms] = useState(() => {
     try {
@@ -94,8 +106,8 @@ const QuestionPage = () => {
             sessionStarted: true,
             start: start,
             isClickTravel: isClickTravel,
-            isForceStart: isForceStart,
             completedForms: JSON.stringify(completedForms),
+            isGeneric: isGeneric
           },
         })
       } catch (error) {
@@ -105,7 +117,7 @@ const QuestionPage = () => {
   }
 
   const currentQuestion = questions[currentQuestionIndex]
-  const isOptionSelected = answers[currentQuestion?.questionID] !== undefined
+  const isOptionSelected = answers[currentQuestion?.questionID] !== undefined || questions.length === 0
 
   const LikertEmoticons = {
     0: 'emoticon-dead-outline',
@@ -135,7 +147,48 @@ const QuestionPage = () => {
           <Text className="text-mindful-brown-100 text-xl font-urbanist-extra-bold mb-6">
             {currentQuestion.question}
           </Text>
-          {currentQuestion.optionSet.description === 'Likert' ||
+          {currentQuestion.optionSet.description === 'Yes - No' ? (
+            <View className="flex flex-row justify-between mt-6">
+            <Pressable
+              className={`flex-1 p-4 rounded-xl m-2 flex-row items-center justify-center ${
+                answers[currentQuestion.questionID] === 'Yes'
+                  ? 'bg-serenity-green-50 border'
+                  : 'bg-white border border-gray-300'
+              }`}
+              onPress={() => handleAnswerChange(currentQuestion.questionID, 'Yes')}
+            >
+              <Text
+                className={`text-lg font-urbanist-bold ${
+                  answers[currentQuestion.questionID] === 'Yes'
+                    ? 'text-serenity-green-100'
+                    : 'text-mindful-brown-100'
+                }`}
+              >
+                Yes
+              </Text>
+            </Pressable>
+          
+            <Pressable
+              className={`flex-1 p-4 rounded-xl m-2 flex-row items-center justify-center ${
+                answers[currentQuestion.questionID] === 'No'
+                  ? 'bg-present-red-50 border'
+                  : 'bg-white border border-gray-300'
+              }`}
+              onPress={() => handleAnswerChange(currentQuestion.questionID, 'No')}
+            >
+              <Text
+                className={`text-lg font-urbanist-bold ${
+                  answers[currentQuestion.questionID] === 'No'
+                    ? 'text-present-red-100'
+                    : 'text-mindful-brown-100'
+                }`}
+              >
+                No
+              </Text>
+            </Pressable>
+          </View>
+          
+          ) : currentQuestion.optionSet.description === 'Likert' ||
           currentQuestion.optionSet.options.length > 0 ? (
             currentQuestion.optionSet.options.map((option) => (
               <Pressable
@@ -179,37 +232,37 @@ const QuestionPage = () => {
             ))
           ) : currentQuestion.optionSet.description === 'Rating' ? (
             <View className="flex flex-col items-center mx-2">
-    {/* Display the image if available */}
-    {currentQuestion.image_file_url && (
-      <Image
-        source={{ uri: currentQuestion.image_file_url }}
-        className="w-full h-60 mb-4 rounded" // Adjust width, height, and styling as needed
-        resizeMode="cover"
-      />
-    )}
+            {/* Display the image if available */}
+            {currentQuestion.image_file_url && (
+              <Image
+                source={{ uri: currentQuestion.image_file_url }}
+                className="w-full h-60 mb-4 rounded" // Adjust width, height, and styling as needed
+                resizeMode="cover"
+              />
+            )}
 
-    <View className="flex flex-row justify-between items-center">
-      {[1, 2, 3, 4, 5].map((rating) => (
-        <Pressable
-          key={rating}
-          onPress={() =>
-            handleAnswerChange(currentQuestion.questionID, rating)
-          }
-          className="mx-2"
-        >
-          <FontAwesome
-            name="star"
-            size={40}
-            color={
-              answers[currentQuestion.questionID] >= rating
-                ? '#F4C430'
-                : '#E0E0E0'
-            } // Highlight selected stars in gold, others in grey
-          />
-        </Pressable>
-      ))}
-    </View>
-  </View>
+            <View className="flex flex-row justify-between items-center">
+              {[1, 2, 3, 4, 5].map((rating) => (
+                <Pressable
+                  key={rating}
+                  onPress={() =>
+                    handleAnswerChange(currentQuestion.questionID, rating)
+                  }
+                  className="mx-2"
+                >
+                  <FontAwesome
+                    name="star"
+                    size={40}
+                    color={
+                      answers[currentQuestion.questionID] >= rating
+                        ? '#F4C430'
+                        : '#E0E0E0'
+                    } // Highlight selected stars in gold, others in grey
+                  />
+                </Pressable>
+              ))}
+            </View>
+          </View>
           ) : (
             <TextInput
               className="bg-white p-4 m-2 border border-gray-300 rounded-md text-base"
