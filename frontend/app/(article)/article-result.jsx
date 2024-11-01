@@ -20,11 +20,11 @@ const ArticleResult = () => {
   const query = route.params.query
   const [queryInput, setQuery] = useState('')
 
-  const handleArticlePress = (article) => {
-    console.log(`Navigating to article with ID: ${article.id}`); // Debugging log
-    router.push(`/(article)/article-detail?id=${article.id}`);
+  // const handleArticlePress = (article) => {
+  //   console.log(`Navigating to article with ID: ${article.id}`); // Debugging log
+  //   router.push(`/(article)/article-detail?id=${article.id}`);
     
-  };
+  // };
 
   useEffect(() => {
     const fetchArticles = async () => {
@@ -80,14 +80,14 @@ const ArticleResult = () => {
         <View style={{ backgroundColor: '#f8f5f1', padding: 16, borderRadius: 8, marginBottom: 16 }}>
           {articles.map((article) => (
             <TouchableOpacity 
-              // key={article.id}
+              key={article.id}
               // onPress={() => handleArticlePress(article)}
               
             >
               <ArticleCard
                 title={article.title}
                 imageSource={{ uri: article.imageUrl }}
-                uri={article.article_pdf_url}
+                pdfUrl={article.pdfUrl}
                 id = {article.id}
                 category = {article.topic}
               />

@@ -4,17 +4,19 @@ import { View, Text, Image, StyleSheet, TouchableOpacity, Modal } from 'react-na
 
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import { colors } from '../common/styles';
+import PdfViewer from '../app/(article)/article-pdf-viewer';
 
-const ArticleCard = ({ route, title, imageSource, description, category, uri, id}) => {
+const ArticleCard = ({ route, title, imageSource, description, category, pdfUrl, id}) => {
 
   const [showPdfViewer, setShowPdfViewer] = useState(false);
 
   
   const handleArticlePress = () => {
     console.log(`Navigating to article with ID: ${id}`);
-    if (uri) {
+    console.log("uri", pdfUrl);
+    if (pdfUrl) {
       // Navigate to the PDF Viewer if PDF URL is present
-      console.log("url", uri);
+      console.log("url", pdfUrl);
       setShowPdfViewer(true);
     } else {
       // Navigate to article detail if no PDF URL
@@ -58,7 +60,7 @@ const ArticleCard = ({ route, title, imageSource, description, category, uri, id
         animationType="slide"
         onRequestClose={handleClosePdfViewer}
         >
-        <PdfViewer pdfUrl={uri} onClose={handleClosePdfViewer} />
+        <PdfViewer pdfUrl={pdfUrl} onClose={handleClosePdfViewer} />
         </Modal>
     </View>
     
