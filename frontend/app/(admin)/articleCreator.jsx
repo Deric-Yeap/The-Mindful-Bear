@@ -1,235 +1,159 @@
-import React, { useEffect, useState } from 'react'
+import React, { useState } from 'react'
 import { View, Text, TouchableOpacity, ScrollView, Alert } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import FormField from '../../components/formField'
 import BrownPageTitlePortion from '../../components/brownPageTitlePortion'
 import StatusBarComponent from '../../components/darkThemStatusBar'
 import CustomButton from '../../components/customButton'
-import {
-  createExercise,
-  updateExercise,
-  deleteExercise,
-} from '../../api/exercise'
-import { getLandmarks } from '../../api/landmark'
+import axiosInstance from '../../common/axiosInstance'
 import ConfirmModal from '../../components/confirmModal'
 import { confirmModal } from '../../assets/image'
 import { useRoute } from '@react-navigation/native'
 import { useRouter } from 'expo-router'
 import * as DocumentPicker from 'expo-document-picker'
-import MultiselectDropdown from '../../components/multiselectDropdown'
 
 const ArticleCreator = () => {
-  const route = useRoute()
   const router = useRouter()
-  var { exercise } = route.params || {}
-
-  if (exercise) {
-    try {
-      exercise = JSON.parse(exercise)
-    } catch (error) {
-      console.error('Error parsing exercise:', error)
-      exercise = null
-    }
-  }
-
-  const [articleName, setArticleName] = useState(exercise?.exercise_name || '')
-  const [content, setDescription] = useState(exercise?.content || '')
-  const [audioFile, setAudioFile] = useState(
-    exercise
-      ? {
-          uri: exercise.file_url,
-          name: exercise.audio_url?.split('/').pop(),
-          type: `audio/${exercise.audio_url?.split('.').pop()}`,
-        }
-      : {}
-  )
-  const [landmarkList, setLandmarkList] = useState([])
-  const [selectedLandmarks, setSelectedLandmarks] = useState([])
+  
+  const [title, setTitle] = useState('')
+  const [content, setContent] = useState('')
+  const [topic, setTopic] = useState('')
+  const [articleImageUrl, setArticleImageUrl] = useState('')
+  const [pdfFile, setPdfFile] = useState(null)
   const [showSuccess, setShowSuccess] = useState(false)
-  const [allLandmarksAssigned, setAllLandmarksAssigned] = useState(false)
   const [modalMessage, setModalMessage] = useState('')
 
-  useEffect(() => {
-    const fetchLandmarks = async () => {
-      try {
-        const data = await getLandmarks()
-        const formattedData = data.map((item) => ({
-          key: item.landmark_id,
-          value: item.landmark_name,
-          exercise_id: item.exercise?.exercise_id,
-        }))
-
-        const availableLandmarks = formattedData.filter(
-          (item) =>
-            !item.exercise_id ||
-            (exercise && exercise.landmarks.includes(item.key))
-        )
-
-        setLandmarkList(availableLandmarks)
-        setAllLandmarksAssigned(availableLandmarks.length === 0)
-
-        if (exercise?.landmarks) {
-          const selected = availableLandmarks
-            .filter((item) => exercise.landmarks.includes(item.key))
-            .map((item) => item.value)
-
-          setSelectedLandmarks(selected)
-        }
-      } catch (error) {
-        console.error(error)
-      }
-    }
-
-    fetchLandmarks()
-  }, [])
-
   const handleSubmit = async () => {
-    if (!articleName || !content || !audioFile?.uri) {
-      Alert.alert('Please fill in all fields and upload an audio file.')
+    if (!title || !content || !topic || !articleImageUrl) {
+      Alert.alert('Please fill in all required fields and provide an image URL.')
       return
     }
 
-    const landmarkKeys = selectedLandmarks
-      .map((name) => {
-        const landmark = landmarkList.find((item) => item.value === name)
-        return landmark ? landmark.key : null
-      })
-      .filter((key) => key !== null)
+    if (!pdfFile) {
+      Alert.alert('Please upload a PDF file.')
+      return
+    }
 
-    const exerciseData = {
-      exercise_name: articleName,
-      content: content,
-      audio_file: audioFile,
-      landmarks: landmarkKeys,
+    const formData = new FormData()
+    formData.append('title', title)
+    formData.append('content', content)
+    formData.append('topic', topic)
+    formData.append('article_image_url', articleImageUrl)
+    
+    if (pdfFile) {
+      formData.append('article_pdf_url', {
+        uri: pdfFile.uri,
+        name: pdfFile.name,
+        type: pdfFile.type
+      })
     }
 
     try {
-      if (exercise) {
-        await updateExercise(exercise.exercise_id, exerciseData)
-        setModalMessage('updated')
-        setShowSuccess(true)
-      } else {
-        await createExercise(exerciseData)
-        setModalMessage('created')
-        setShowSuccess(true)
-        resetForm()
-      }
+      await axiosInstance.post('article/create', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      })
+      setModalMessage('created')
+      setShowSuccess(true)
+      resetForm()
     } catch (error) {
       console.error(error)
       Alert.alert(
-        `Error ${exercise ? 'updating' : 'creating'} exercise:`,
-        error.message
+        'Error creating article:',
+        error.response?.data?.message || JSON.stringify(error.response?.data)
       )
     }
   }
 
-  const handleDelete = async () => {
-    try {
-      await deleteExercise(exercise.exercise_id)
-      setModalMessage('deleted')
-      setShowSuccess(true)
-    } catch (error) {
-      console.error('Error deleting exercise:', error)
-    }
-  }
-
   const resetForm = () => {
-    setArticleName('')
-    setDescription('')
-    setAudioFile({})
-    setSelectedLandmarks([])
-  }
-
-  const truncateFileName = (fileName) => {
-    if (!fileName) return 'No Audio File'
-    const maxLength = 20
-    return fileName.length > maxLength
-      ? `${fileName.substring(0, maxLength)}...`
-      : fileName
+    setTitle('')
+    setContent('')
+    setTopic('')
+    setArticleImageUrl('')
+    setPdfFile(null)
   }
 
   const handlePDFUpload = async () => {
     try {
       const result = await DocumentPicker.getDocumentAsync({
-        type: 'audio/*',
+        type: 'application/pdf',
         copyToCacheDirectory: true,
       })
 
       if (!result.canceled && result.assets && result.assets.length > 0) {
         const selectedFile = result.assets[0]
-
-        setAudioFile({
+        setPdfFile({
           uri: selectedFile.uri,
           name: selectedFile.name,
-          type: selectedFile.mimeType,
+          type: 'application/pdf',
         })
-      } else {
-        console.error('Server returned an error:', result.error)
       }
     } catch (error) {
-      console.error('Error picking audio file:', error)
+      console.error('Error picking PDF file:', error)
     }
   }
 
   const handleConfirm = () => {
     setShowSuccess(false)
-    if (exercise || modalMessage === 'deleted') {
-      router.push('/exercisemanagement')
-    }
-  }
-
-  const handleLandmarkSelect = (newSelectedItems) => {
-    setSelectedLandmarks(newSelectedItems)
+    router.push('/articlemanagement')
   }
 
   return (
     <SafeAreaView className="flex-1 bg-optimistic-gray-10">
       <StatusBarComponent barStyle="light-content" backgroundColor="#251404" />
-      <BrownPageTitlePortion title="Article Management" />
+      <BrownPageTitlePortion title="Article Creation" />
       <ScrollView className="pb-20 mt-4">
         <FormField
           title="Article Title"
           iconName="form-select"
-          value={articleName}
-          handleChange={setArticleName}
+          value={title}
+          handleChange={setTitle}
           customStyles="m-4"
         />
         <FormField
           title="Content"
           iconName="text-box-outline"
           value={content}
-          handleChange={setDescription}
+          handleChange={setContent}
           customStyles="m-4"
         />
         <FormField
           title="Topic"
           iconName="text-box-outline"
-          value={content}
+          value={topic}
+          handleChange={setTopic}
           customStyles="m-4"
         />
         <FormField
           title="Image Address"
           iconName="text-box-outline"
-          value={content}
+          value={articleImageUrl}
+          handleChange={setArticleImageUrl}
           customStyles="m-4"
+          placeholder="Enter image URL"
         />
-        <View className="flex-row items-center mb-4 px-4 justify-between w-full">
-          <Text className="text-xl font-bold">or</Text>
+
+        <View className="px-4 w-full mb-4">
+          <Text className="text-mindful-brown-100 text-xl font-bold mb-4">
+            PDF Document
+          </Text>
           <TouchableOpacity
-            className="bg-serenity-green-50 rounded-full py-2 px-4 ml-4 shadow-lg"
+            className="bg-serenity-green-50 rounded-full py-2 flex-row justify-center items-center shadow-lg"
             onPress={handlePDFUpload}
           >
-            <Text className="text-white text-lg">Upload Article Image</Text>
+            <Text className="text-white text-lg">
+              {pdfFile ? 'Change PDF' : 'Upload PDF'}
+            </Text>
           </TouchableOpacity>
+          {pdfFile && (
+            <Text className="text-mindful-brown-100 text-sm mt-2 text-center">
+              Selected: {pdfFile.name}
+            </Text>
+          )}
         </View>
-        <Text className="text-xl font-bold">Article Image</Text>
-        <TouchableOpacity
-          className="bg-serenity-green-50 rounded-full min-h-[50px] flex flex-row justify-center items-center"
-          onPress={handlePDFUpload}
-        >
-          <Text className="text-white text-lg">Upload PDF</Text>
-        </TouchableOpacity>
-        <View className="mb-4 px-4 w-full mt-5">
+
+        <View className="mb-4 px-4 w-full">
           <CustomButton
             className="mt-2 w-full"
             handlePress={handleSubmit}
@@ -244,7 +168,7 @@ const ArticleCreator = () => {
           imageSource={confirmModal}
           confirmButtonTitle={'Confirm'}
           title={'Success!'}
-          subTitle={`Exercise ${modalMessage} successfully.`}
+          subTitle={`Article ${modalMessage} successfully.`}
           handleConfirm={handleConfirm}
         />
       )}
