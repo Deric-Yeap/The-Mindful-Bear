@@ -56,6 +56,7 @@ export const journalStreak = () => {
   return axiosInstance.get('journal/journal_streak/')
 }
 
-export const getJournalClassification = () => {
-  return axiosInstance.get('journal/journal_classification/');
+export const getJournalClassification = (params = {}) => {
+  return axiosInstance.get('journal/journal_classification/', { params });
 };
+

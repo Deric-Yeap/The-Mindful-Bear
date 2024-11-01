@@ -25,6 +25,9 @@ from transformers import AutoTokenizer, AutoModelForSequenceClassification
 from scipy.special import softmax
 import torch
 
+#for filter of topic classification model
+from datetime import datetime
+
 # Load the model and tokenizer once, to avoid reloading every time
 MODEL = "cardiffnlp/twitter-roberta-base-sentiment"
 tokenizer = AutoTokenizer.from_pretrained(MODEL)
@@ -332,7 +335,20 @@ class JournalClassificationView(APIView):
        # journal['predicted_labels'] = classify_text(journal_text)
         #return Response({"result": journalTexts}, status=status.HTTP_200_OK)
    def get(self, request):
-        journals = Journal.objects.all()
+        year = request.query_params.get('year')
+        month = request.query_params.get('month')
+
+        # Filter by year and month if provided
+        if year and month:
+            try:
+                year = int(year)
+                month = int(month)
+                journals = Journal.objects.filter(upload_date__year=year, upload_date__month=month)
+            except ValueError:
+                return Response({"error": "Year and month must be integers."}, status=status.HTTP_400_BAD_REQUEST)
+        else:
+            journals = Journal.objects.all()
+            
         aggregated_topic_keywords = defaultdict(lambda: defaultdict(int))
 
         # Process each journal entry and accumulate keyword counts

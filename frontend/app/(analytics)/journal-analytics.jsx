@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { View, Text, ScrollView, Image, TouchableOpacity, ActivityIndicator, Dimensions } from 'react-native';
+import { View, Text, ScrollView, Image, TouchableOpacity, ActivityIndicator, Dimensions, TextInput } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import BrownPageTitlePortion from '../../components/brownPageTitlePortion';
 import StatusBarComponent from '../../components/darkThemStatusBar';
@@ -27,6 +27,11 @@ const JournalAnalytics = () => {
   const periodSelected = optionList[selectedOption - 1];
   const screenWidth = Dimensions.get('window').width;
   const chartWidth = Math.max(screenWidth, lineData.length * 100);
+
+  //filter for topic classification
+  const [year, setYear] = useState('');
+  const [month, setMonth] = useState('');
+  const [entries, setEntries] = useState([]);
 
   useEffect(() => {
     const fetchJournalData = async () => {
@@ -56,28 +61,31 @@ const JournalAnalytics = () => {
     fetchJournalData();
   }, [selectedBear, selectedOption]);
 
+  //Topic classification: Fetch classification data with optional year and month filtering
+  const fetchClassificationData = async () => {
+    try {
+      const params = {};
+      if (year) params.year = year;
+      if (month) params.month = month;
+
+      const response = await getJournalClassification(params); // Correct API call
+      console.log("Full response from getJournalClassification:", response);
+
+      const entries = response?.data?.classified_entries;
+      if (Array.isArray(entries)) {
+        setClassificationData(entries);
+      } else {
+        console.warn("Unexpected response structure:", response);
+        setClassificationData([]);
+      }
+    } catch (error) {
+      console.error("Failed to fetch classification data:", error);
+    }
+  };
+
   useEffect(() => {
-    const fetchClassificationData = async () => {
-        try {
-            const response = await getJournalClassification();
-            console.log("Full response from getJournalClassification:", response);
-
-            // Update to correctly access classified_entries
-            const entries = response?.data?.classified_entries;
-            if (Array.isArray(entries)) {
-                setClassificationData(entries);
-            } else {
-                console.warn("Unexpected response structure:", response);
-                setClassificationData([]);  // Set to empty if unexpected
-            }
-        } catch (error) {
-            console.error("Failed to fetch classification data:", error);
-        }
-    };
-
     fetchClassificationData();
-}, []);
-
+  }, [year, month]); // Trigger re-fetch when year or month changes
 
 
   const onSelectSwitch = (option) => {
@@ -200,6 +208,35 @@ const JournalAnalytics = () => {
             />
           </ScrollView>
         )}
+
+                {/* Filter by Month and Year Section for Classification */}
+                <Text className="text-mindful-brown-100 font-urbanist-extra-bold text-xl mb-2 mt-2 ml-6">
+          Filter by Month and Year
+        </Text>
+        <View style={{ flexDirection: 'row', justifyContent: 'space-around', alignItems: 'center', marginBottom: 10 }}>
+          <View style={{ alignItems: 'center' }}>
+            <Text>Year</Text>
+            <TextInput
+              style={{ borderWidth: 1, borderColor: colors.zenYellow20, padding: 5, width: 80, textAlign: 'center' }}
+              placeholder="YYYY"
+              keyboardType="numeric"
+              value={year}
+              onChangeText={(text) => setYear(text)}
+            />
+          </View>
+          <View style={{ alignItems: 'center' }}>
+            <Text>Month</Text>
+            <TextInput
+              style={{ borderWidth: 1, borderColor: colors.zenYellow20, padding: 5, width: 80, textAlign: 'center' }}
+              placeholder="MM"
+              keyboardType="numeric"
+              value={month}
+              onChangeText={(text) => setMonth(text)}
+            />
+          </View>
+          <CustomButton onPress={fetchClassificationData} title="Apply Filter" />
+        </View>
+
 
         {/* topic classification */}
         <View style={{ paddingVertical: 20 }}>
