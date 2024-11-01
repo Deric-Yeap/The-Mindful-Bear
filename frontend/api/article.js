@@ -7,10 +7,7 @@ export const createArticle = async (articleData) => {
     return axiosInstance.post('article/create', articleData)
 }
 
-// export const updateArticle = async (id, articleData) => {
-//     return axiosInstance.put(`article/${id}`, articleData)
-// }
 
-// export const deleteArticle = async (id) => {
-//     return axiosInstance.delete(`article/${id}`)
-// }
+export const deleteArticle = async (id) => {
+    return axiosInstance.delete(`article/delete/${id}`)
+}
