@@ -14,12 +14,17 @@ const articles = [
     title: "Mindful Journal",
     imageUrl: "https://i.pinimg.com/enabled_lo/564x/5c/c7/4b/5cc74b542c4315e3bc2cb6288007001b.jpg",
     content: "Detailed article content about mindful journaling...",
+    topic: "Mindfulness",
+    article_pdf_url: "articles/1/2024_10_25/bSOnIZIf_Stress%20and%20Anxiety%20-%20Doctor%20Q%26A%20-%20HealthXchange.pdf",
+
   },
   {
     id: 2,
     title: "Coping with Depression",
     imageUrl: "https://www.helpguide.org/wp-content/uploads/2023/02/Coping-with-Depression-scaled.jpeg",
     content: "Article content about coping mechanisms...",
+    topic: "Depression",
+    article_pdf_url: "articles/1/2024_10_27/DEJiVCyn_Stress%20and%20Anxiety%20-%20Doctor%20Q%26A%20-%20HealthXchange.pdf",
   },
   // Add more articles as needed
 ];
@@ -29,11 +34,14 @@ const ArticleResult = () => {
   const [loading, setLoading] = useState(false);
   const [streak, setStreak] = useState(0);
 
-  const handleArticlePress = (article) => {
-    console.log(`Navigating to article with ID: ${article.id}`); // Debugging log
-    router.push(`/(article)/article-detail?id=${article.id}`);
-    
-  };
+  // const handleArticlePress = (article) => {
+  //   console.log(`Navigating to article with ID: ${article.id}`); // Debugging log
+  //   router.push(`/(article)/article-detail?id=${article.id}`);
+  // useEffect(() => {
+  //   console.log('ArticleResult mounted');
+  // }, []);
+  // };
+  
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: '#f8f5f1' }}>
@@ -43,12 +51,15 @@ const ArticleResult = () => {
         <View style={{ backgroundColor: '#f8f5f1', padding: 16, borderRadius: 8, marginBottom: 16 }}>
           {articles.map((article) => (
             <TouchableOpacity 
-              key={article.id}
-              onPress={() => handleArticlePress(article)}
+              // key={article.id}
+              // onPress={() => handleArticlePress(article)}
+              
             >
               <ArticleCard
                 title={article.title}
                 imageSource={{ uri: article.imageUrl }}
+                uri={article.article_pdf_url}
+                id = {article.id}
               />
             </TouchableOpacity>
           ))}

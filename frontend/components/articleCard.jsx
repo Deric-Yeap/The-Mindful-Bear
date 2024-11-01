@@ -1,23 +1,49 @@
-import React from 'react';
-import { View, Text, Image, StyleSheet, TouchableOpacity } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
+import React, { useState }from 'react';
+import { View, Text, Image, StyleSheet, TouchableOpacity, Modal } from 'react-native';
 
-const ArticleCard = ({ route, title, imageSource, description }) => {
-  const navigation = useNavigation();
 
+const ArticleCard = ({ title, imageSource, description, uri,id }) => {
+  const [showPdfViewer, setShowPdfViewer] = useState(false);
+
+  
+  const handleArticlePress = () => {
+    console.log(`Navigating to article with ID: ${id}`);
+    if (uri) {
+      // Navigate to the PDF Viewer if PDF URL is present
+      console.log("url", uri);
+      setShowPdfViewer(true);
+    } else {
+      // Navigate to article detail if no PDF URL
+      // router.push(`/(article)/article-detail?id=${article.id}`);
+      console.log("error", "No PDF URL found for the article");
+    }
+  };
+  const handleClosePdfViewer = () => {
+    setShowPdfViewer(false);
+  };
   return (
-    <TouchableOpacity
-      style={styles.cardContainer}
-      onPress={() => navigation.navigate(route)}
-    >
-      <Image source={imageSource} style={styles.image} resizeMode="cover" />
-      <View style={styles.cardBody}>
-        <View style={styles.row}>
-          <Text style={styles.cardTitle}>{title}</Text>
+    <View>
+      <TouchableOpacity
+        style={styles.cardContainer}
+        onPress={handleArticlePress}
+      
+      >
+        <Image source={imageSource} style={styles.image} resizeMode="cover" />
+        <View style={styles.cardBody}>
+          <View style={styles.row}>
+            <Text style={styles.cardTitle}>{title}</Text>
+          </View>
+          <Text style={styles.description}>{description}</Text>
         </View>
-        <Text style={styles.description}>{description}</Text>
-      </View>
-    </TouchableOpacity>
+      </TouchableOpacity>
+        <Modal
+        visible={showPdfViewer}
+        animationType="slide"
+        onRequestClose={handleClosePdfViewer}
+        >
+        <PdfViewer pdfUrl={uri} onClose={handleClosePdfViewer} />
+        </Modal>
+    </View>
   );
 };
 
