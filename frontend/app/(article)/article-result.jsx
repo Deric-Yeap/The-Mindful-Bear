@@ -2,6 +2,7 @@ import { View, ScrollView, TextInput, TouchableOpacity, Text } from 'react-nativ
 import { SafeAreaView } from 'react-native-safe-area-context';
 import TopBrownSearchBar from '../../components/topBrownSearchBar';
 import ArticleCard from '../../components/articleCard';
+import { useRouter } from 'expo-router';
 import StatusBarComponent from '../../components/darkThemStatusBar';
 import Loading from '../../components/loading';
 import { useRoute } from '@react-navigation/native'
@@ -19,12 +20,11 @@ const ArticleResult = () => {
   const [currentQuery, setCurrentQuery] = useState(initialQuery) 
   const [searchInput, setSearchInput] = useState(initialQuery)  
 
-  const handleArticlePress = (article) => {
-    route.push({
-      // pathname: '/article-detail',
-      // params: { id: article.id },
-    });
-  };
+  // const handleArticlePress = (article) => {
+  //   console.log(`Navigating to article with ID: ${article.id}`); // Debugging log
+  //   router.push(`/(article)/article-detail?id=${article.id}`);
+    
+  // };
 
   const performSearch = async (searchQuery) => {
     setLoading(true);
@@ -85,14 +85,15 @@ const ArticleResult = () => {
         <View style={{ backgroundColor: '#f8f5f1', padding: 16, borderRadius: 8, marginBottom: 16 }}>
           {articles.length > 0 ? (
             articles.map((article) => (
-              <TouchableOpacity
-                key={article.id}
-                onPress={() => handleArticlePress(article)}
-              >
+              <TouchableOpacity 
+                key={article.id}              
+                >
                 <ArticleCard
                   title={article.title}
                   imageSource={{ uri: article.imageUrl }}
-                  category={article.topic}
+                  pdfUrl={article.pdfUrl}
+                id = {article.id}
+                category={article.topic}
                 />
               </TouchableOpacity>
             ))
