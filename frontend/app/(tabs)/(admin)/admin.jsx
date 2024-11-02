@@ -97,6 +97,26 @@ export default function Admin() {
                 </View>
               </TouchableOpacity>
             </Link>
+            
+          </View>
+          <View className="flex-row justify-between mb-4">
+            <Link href="/articleManagement" asChild>
+              <TouchableOpacity className="flex-1 bg-serenity-green-50 p-2 rounded-2xl mr-2">
+                <View className="items-start">
+                  <Text className="text-serenity-green-10 font-urbanist-bold text-lg">
+                    Article
+                  </Text>
+                </View>
+                <View className="items-center justify-center mt-2">
+                  <MaterialCommunityIcons
+                    name="newspaper-variant-multiple-outline"
+                    size={128}
+                    color={colors.serenityGreen20}
+                  />
+                </View>
+              </TouchableOpacity>
+            </Link>
+            
           </View>
 
           <Text className="text-mindful-brown-100 font-urbanist-bold text-xl mb-4">
@@ -121,6 +141,7 @@ export default function Admin() {
                   />
                 </View>
               </TouchableOpacity>
+              
             </Link>
             <Link href="/admin/department" asChild>
               <TouchableOpacity className="flex-1 bg-kind-purple-30 p-2 rounded-2xl ml-2">

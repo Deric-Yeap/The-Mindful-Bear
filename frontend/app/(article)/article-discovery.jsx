@@ -5,19 +5,23 @@ import StatusBarComponent from '../../components/darkThemStatusBar';
 import BackButton from '../../components/backButton';
 import { Dimensions } from 'react-native';
 import logo from '../../assets/mindfulBearLogo.png';
-import { useNavigation } from '@react-navigation/native';
+import { useRouter } from 'expo-router'; 
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
+import { colors } from '../../common/styles'
 
-const JournalHome = () => {
-  const navigation = useNavigation();
+const ArticleDiscovery = () => {
+  const router = useRouter(); 
   const [searchTerm, setSearchTerm] = useState('');
 
   const handleSearch = () => {
-    console.log(searchTerm);
+    router.push({
+      pathname: '/article-result',
+      params: { query: searchTerm },
+    });
   };
 
   const screenHeight = Dimensions.get('window').height;
-  const screenWidth = Dimensions.get('window').width;  // Get the screen width dynamically
+  const screenWidth = Dimensions.get('window').width;
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: '#BEE2F8' }}>
@@ -35,25 +39,28 @@ const JournalHome = () => {
             marginTop: screenHeight / 3,
             paddingVertical: 30,
             paddingHorizontal: 20,
-            borderTopLeftRadius: screenWidth * 0.7,  // Make the rounding dynamic
+            borderTopLeftRadius: screenWidth * 0.7,
             borderTopRightRadius: screenWidth * 0.7,
-            width: screenWidth * 1.5,  // Adjust to ensure the shape looks centered
-            left: -(screenWidth * 0.25),  // Center the shape horizontally
+            width: screenWidth * 1.5,
+            left: -(screenWidth * 0.25),
           }}
         >
-          {/* Image component */}
           <Image
             source={logo}
             style={{
               width: 300,
               height: 300,
-              marginBottom: 20,
-              marginTop: -(screenHeight * 0.25),  // Dynamically adjust based on 25% of the screen height
+              marginTop: -(screenHeight * 0.25),
             }}
             resizeMode="contain"
           />
 
-          {/* Search bar moved below the image */}
+          <Text
+            className="text-mindful-brown-80 font-urbanist-extra-bold text-xl mb-2 mt-2 ml-6"
+          >
+            How may I help you?
+          </Text>
+
           <View style={{ paddingHorizontal: 20, marginTop: 10, width: screenWidth * 0.9 }}>
             <View style={{ flexDirection: 'row', alignItems: 'center' }}>
               <TextInput
@@ -63,18 +70,27 @@ const JournalHome = () => {
                 onChangeText={setSearchTerm}
                 style={{
                   flex: 1,
-                  backgroundColor: '#795548',  // mindful brown
+                  backgroundColor: colors.serenityGreen60,
                   padding: 12,
                   borderRadius: 50,
                   color: 'white',
+                  borderWidth: 2,
+                  borderColor: '#F7F4F2',
                 }}
               />
               <TouchableOpacity
                 style={{
                   marginLeft: 10,
                   padding: 12,
-                  backgroundColor: '#6D4C41',  // slightly darker brown
+                  backgroundColor: colors.serenityGreen70,
                   borderRadius: 50,
+                  borderWidth: 2,
+                  borderColor: '#F7F4F2',
+                  elevation: 3,
+                  shadowColor: '#000',
+                  shadowOffset: { width: 0, height: 2 },
+                  shadowOpacity: 0.2,
+                  shadowRadius: 4,
                 }}
                 onPress={handleSearch}
               >
@@ -82,7 +98,6 @@ const JournalHome = () => {
               </TouchableOpacity>
             </View>
           </View>
-
         </View>
 
         <StatusBarComponent barStyle="dark-content" backgroundColor="#BEE2F8" />
@@ -91,4 +106,4 @@ const JournalHome = () => {
   );
 };
 
-export default JournalHome;
+export default ArticleDiscovery;

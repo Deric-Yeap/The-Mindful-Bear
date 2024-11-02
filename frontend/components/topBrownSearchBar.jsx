@@ -1,16 +1,16 @@
 import React, { useState } from 'react'
-import { View, Text, TextInput, TouchableOpacity } from 'react-native'
+import { View, TextInput, TouchableOpacity } from 'react-native'
 import MaterialIcons from '@expo/vector-icons/MaterialIcons'
 import BackButton from '../components/backButton'
 import { useNavigation } from '@react-navigation/native'
 import { featureFlags } from '../common/featureFlags'
 
-const TopBrownSearchBar = ({ title }) => {
+const TopBrownSearchBar = ({ title, value, onChangeText, onSearch }) => {
   const navigation = useNavigation()
-  const [searchTerm, setSearchTerm] = useState('')
+  const [searchTerm, setSearchTerm] = useState(value)
 
   const handleSearch = () => {
-    console.log(searchTerm)
+    onSearch(searchTerm)
   }
 
   return (
@@ -22,7 +22,11 @@ const TopBrownSearchBar = ({ title }) => {
             placeholder="Search anything..."
             placeholderTextColor="#F7F4F2"
             value={searchTerm}
-            onChangeText={setSearchTerm}
+            onChangeText={(text) => {
+              setSearchTerm(text)
+              onChangeText(text)
+            }}
+            onSubmitEditing={handleSearch}
             className="flex-1 bg-mindful-brown-70 p-3 rounded-full text-white"
           />
           <TouchableOpacity

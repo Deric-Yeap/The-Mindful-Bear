@@ -1,5 +1,6 @@
 {
     "java.project.sourcePaths": [
         "frontend/app/(tabs)"
-    ]
+    ],
+    "git.ignoreLimitWarning": true
 }

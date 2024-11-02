@@ -74,6 +74,7 @@ INSTALLED_APPS = [
     "api.achievementPoint",
     "api.avatar",
     "api.userAvatar",
+    "api.article",
     "api.userFragment"
 ]
 
