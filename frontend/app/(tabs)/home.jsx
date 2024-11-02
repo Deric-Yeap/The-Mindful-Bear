@@ -123,7 +123,34 @@ const Home = () => {
                 </Text>
               </MetricCard>
             </>
-           )}
+          )}
+          <Text className="text-mindful-brown-100 font-urbanist-extra-bold text-xl mb-4">
+            Achievement
+          </Text>
+          <MetricCard
+            route="/(points)/points-history"
+            iconName="diamond-stone"
+            iconColor={colors.empathyOrange40}
+            circleStyle="bg-empathy-orange-10"
+            title="Points Earned"
+            rightImage={require('../../assets/mindfulJournalMetricCard.png')}
+          >
+            <Text className="font-urbanist-semi-bold text-mindful-brown-80 text-lg">
+              View your points history.
+            </Text>
+          </MetricCard>
+          <MetricCard
+            route="/(avatar)"
+            iconName="account"
+            iconColor={colors.empathyOrange40}
+            circleStyle="bg-empathy-orange-10"
+            title="My Avatars"
+            rightImage={require('../../assets/mindfulJournalMetricCard.png')}
+          >
+            <Text className="font-urbanist-semi-bold text-mindful-brown-80 text-lg">
+              Manage your avatars
+            </Text>
+          </MetricCard>
         </View>
       </ScrollView>
     </SafeAreaView>

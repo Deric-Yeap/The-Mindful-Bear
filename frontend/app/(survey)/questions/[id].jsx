@@ -1,9 +1,8 @@
 import React, { useState, useEffect } from 'react'
-import { View, Text, Pressable, ScrollView, TextInput } from 'react-native'
+import { View, Text, Pressable, ScrollView, TextInput, Image } from 'react-native'
 import { useLocalSearchParams, useRouter } from 'expo-router'
-import { getFormQuestions, getFormName } from '../../../api/form'
+import { getFormQuestions, setFormQuestion, createLandmarkRatings } from '../../../api/form'
 import LoadingPage from '../../../components/loading'
-import { setFormQuestion } from '../../../api/form'
 import { FontAwesome } from '@expo/vector-icons'
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons'
 
@@ -31,6 +30,7 @@ const QuestionPage = () => {
     start,
     isClickTravel,
     completedForms: initialCompletedForms,
+    isGeneric,
   } = useLocalSearchParams()
   const [completedForms, setCompletedForms] = useState(() => {
     try {
@@ -46,22 +46,37 @@ const QuestionPage = () => {
   const [answers, setAnswers] = useState({})
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0)
   const [loading, setLoading] = useState(true)
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
   let questionsWithOptions = []
 
   useEffect(() => {
     const fetchData = async () => {
-      try {
-        const fetchedQuestions = await getFormQuestions(id)
-        const sortedQuestions = fetchedQuestions.questions.sort(
-          (a, b) => a.order - b.order
-        )
-        setQuestions(sortedQuestions)
-        setFormTitle(fetchedQuestions.form_name)
-        setLoading(false)
-      } catch (error) {
-        console.error('Error fetching form data:', error)
-        setLoading(false)
+
+      if (id === "88"){
+        try {         
+          const fetchedQuestions = await createLandmarkRatings(sessionID)
+          setQuestions(fetchedQuestions.questions)
+          setFormTitle(fetchedQuestions.form_name)
+          setLoading(false)
+        } catch (error) {
+          console.error('Error fetching form data:', error)
+          setLoading(false)
+        }
+      }
+      else{
+        try {
+          const fetchedQuestions = await getFormQuestions(id)          
+          const sortedQuestions = fetchedQuestions.questions.sort(
+            (a, b) => a.order - b.order
+          )
+          setQuestions(sortedQuestions)
+          setFormTitle(fetchedQuestions.form_name)
+          setLoading(false)
+        } catch (error) {
+          console.error('Error fetching form data:', error)
+          setLoading(false)
+        }
       }
     }
     fetchData()
@@ -75,10 +90,12 @@ const QuestionPage = () => {
   }
 
   const handleNextQuestion = async () => {
+    if (isSubmitting) return
     if (currentQuestionIndex < questions.length - 1) {
       setCurrentQuestionIndex(currentQuestionIndex + 1)
-    } else {
-      try {
+    } else {      
+      try {        
+        setIsSubmitting(true)
         await setFormQuestion(sessionID, id, answers)
         router.push({
           pathname: `/questionaire`,
@@ -90,6 +107,7 @@ const QuestionPage = () => {
             start: start,
             isClickTravel: isClickTravel,
             completedForms: JSON.stringify(completedForms),
+            isGeneric: isGeneric
           },
         })
       } catch (error) {
@@ -99,7 +117,7 @@ const QuestionPage = () => {
   }
 
   const currentQuestion = questions[currentQuestionIndex]
-  const isOptionSelected = answers[currentQuestion?.questionID] !== undefined
+  const isOptionSelected = answers[currentQuestion?.questionID] !== undefined || questions.length === 0
 
   const LikertEmoticons = {
     0: 'emoticon-dead-outline',
@@ -129,7 +147,48 @@ const QuestionPage = () => {
           <Text className="text-mindful-brown-100 text-xl font-urbanist-extra-bold mb-6">
             {currentQuestion.question}
           </Text>
-          {currentQuestion.optionSet.description === 'Likert' ||
+          {currentQuestion.optionSet.description === 'Yes - No' ? (
+            <View className="flex flex-row justify-between mt-6">
+            <Pressable
+              className={`flex-1 p-4 rounded-xl m-2 flex-row items-center justify-center ${
+                answers[currentQuestion.questionID] === 'Yes'
+                  ? 'bg-serenity-green-50 border'
+                  : 'bg-white border border-gray-300'
+              }`}
+              onPress={() => handleAnswerChange(currentQuestion.questionID, 'Yes')}
+            >
+              <Text
+                className={`text-lg font-urbanist-bold ${
+                  answers[currentQuestion.questionID] === 'Yes'
+                    ? 'text-serenity-green-100'
+                    : 'text-mindful-brown-100'
+                }`}
+              >
+                Yes
+              </Text>
+            </Pressable>
+          
+            <Pressable
+              className={`flex-1 p-4 rounded-xl m-2 flex-row items-center justify-center ${
+                answers[currentQuestion.questionID] === 'No'
+                  ? 'bg-present-red-50 border'
+                  : 'bg-white border border-gray-300'
+              }`}
+              onPress={() => handleAnswerChange(currentQuestion.questionID, 'No')}
+            >
+              <Text
+                className={`text-lg font-urbanist-bold ${
+                  answers[currentQuestion.questionID] === 'No'
+                    ? 'text-present-red-100'
+                    : 'text-mindful-brown-100'
+                }`}
+              >
+                No
+              </Text>
+            </Pressable>
+          </View>
+          
+          ) : currentQuestion.optionSet.description === 'Likert' ||
           currentQuestion.optionSet.options.length > 0 ? (
             currentQuestion.optionSet.options.map((option) => (
               <Pressable
@@ -172,14 +231,24 @@ const QuestionPage = () => {
               </Pressable>
             ))
           ) : currentQuestion.optionSet.description === 'Rating' ? (
-            <View className="flex flex-row justify-between items-center p-4 mx-6">
+            <View className="flex flex-col items-center mx-2">
+            {/* Display the image if available */}
+            {currentQuestion.image_file_url && (
+              <Image
+                source={{ uri: currentQuestion.image_file_url }}
+                className="w-full h-60 mb-4 rounded" // Adjust width, height, and styling as needed
+                resizeMode="cover"
+              />
+            )}
+
+            <View className="flex flex-row justify-between items-center">
               {[1, 2, 3, 4, 5].map((rating) => (
                 <Pressable
                   key={rating}
                   onPress={() =>
                     handleAnswerChange(currentQuestion.questionID, rating)
                   }
-                  className="mx-1"
+                  className="mx-2"
                 >
                   <FontAwesome
                     name="star"
@@ -193,6 +262,7 @@ const QuestionPage = () => {
                 </Pressable>
               ))}
             </View>
+          </View>
           ) : (
             <TextInput
               className="bg-white p-4 m-2 border border-gray-300 rounded-md text-base"

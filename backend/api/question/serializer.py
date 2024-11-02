@@ -7,7 +7,7 @@ class QuestionSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Question
-        fields = ["questionID", "question", "order", "formID", "optionSet"]
+        fields = ["questionID", "question", "order", "formID", "optionSet", "reverse_score"]
 
     def get_optionSet(self, obj):
         if obj.optionSet:
@@ -17,6 +17,6 @@ class QuestionSerializer(serializers.ModelSerializer):
 class NewQuestionSerializer(serializers.ModelSerializer):
     class Meta:
         model = Question
-        fields = ["questionID", "question", "order", "formID", "optionSet"]
+        fields = ["questionID", "question", "order", "formID", "optionSet", "reverse_score"]
 
 

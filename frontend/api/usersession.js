@@ -38,3 +38,7 @@ export const updateSession = async (data, sessionId) => {
   console.log(sessionId)
   return axiosInstance.put(`session/update/${sessionId}/`, data)
 }
+
+export const createUserSession = async (data) => {
+  return axiosInstance.post('userSession/create/', data)
+}

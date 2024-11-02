@@ -11,7 +11,7 @@ class AvatarSerializer(serializers.ModelSerializer):
     avatar_url = serializers.SerializerMethodField()
     class Meta:
         model = Avatar
-        fields = ['avatar_id', 'avatar_url', 'fragments_required', 'drop_rate']
+        fields = ['avatar_id', 'avatar_url', 'fragments_required', 'drop_rate', 'title']
 
     def get_avatar_url(self, obj):
         if obj.avatar_url:
@@ -23,7 +23,7 @@ class AvatarCreateSerializer(serializers.ModelSerializer):
 
     class Meta: 
         model = Avatar
-        fields = ['avatar_id', 'avatar_url', 'fragments_required', 'drop_rate']
+        fields = ['avatar_id', 'avatar_url', 'fragments_required', 'drop_rate','title']
 
     def validate_avatar_url(self, value):
         if not value.name.endswith(('.json')):
@@ -43,6 +43,7 @@ class AvatarCreateSerializer(serializers.ModelSerializer):
             avatar_url=object_path,
             fragments_required=validated_data['fragments_required'],
             drop_rate=validated_data['drop_rate'],
+            title=validated_data['title']
 
         )
 
@@ -57,10 +58,11 @@ class AvatarUpdateSerializer(serializers.ModelSerializer):
     avatar_url = serializers.FileField(write_only=True, required=False)
     fragments_required = serializers.IntegerField(required=False)
     drop_rate = serializers.DecimalField(max_digits=5, decimal_places=2,required=False)
+    title = serializers.CharField(required=False)
 
     class Meta:
         model = Avatar
-        fields = ['avatar_id', 'avatar_url', 'fragments_required', 'drop_rate']
+        fields = ['avatar_id', 'avatar_url', 'fragments_required', 'drop_rate','title']
 
     def validate_avatar_url(self, value):
         if not value.name.endswith(('.json')):

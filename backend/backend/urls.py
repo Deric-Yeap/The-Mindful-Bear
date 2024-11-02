@@ -34,6 +34,7 @@ urlpatterns = [
     path("api/question/", include("api.question.urls")),
     path("api/session/", include("api.session.urls")),
     path("api/formQuestion/", include("api.formQuestion.urls")),
+    path("api/formSession/", include("api.formSession.urls")),
     path("api/userSession/", include("api.userSession.urls")),
     path("api/favourite/", include("api.favourite.urls")),
     path("api/landmarkUserCount/", include("api.landmarkUserCount.urls")), 
@@ -41,4 +42,5 @@ urlpatterns = [
     path("api/avatar/", include("api.avatar.urls")),
     path("api/userAvatar/", include("api.userAvatar.urls")),
     path("api/article/", include("api.article.urls"))
+    path("api/userFragment/", include("api.userFragment.urls"))
 ]

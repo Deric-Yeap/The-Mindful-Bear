@@ -15,3 +15,11 @@ export const create = (data) => {
 export const getExercises = async () => {
   return axiosInstance.get('users/exercises/')
 }
+
+export const getSessionExercises = async (sessionId) => {
+  return axiosInstance.get(`users/session-exercises/${sessionId}`)
+}
+
+export const getSessionLandmarks = async (sessionId) => {
+  return axiosInstance.get(`users/landmark-exercises/${sessionId}`)
+}
