@@ -15,21 +15,21 @@ const PdfViewer = ({ pdfUrl,onClose }) => {
 
   console.log('onclose', pdfUrl.onClose);
   console.log('Encoded PDF URL:', encodedPdfUrl)
-  // const injectedJavaScript = `
-  // const meta = document.createElement('meta');
-  // meta.setAttribute('name', 'viewport');
-  // meta.setAttribute('content', 'width=device-width, initial-scale=1, user-scalable=no');
-  // document.head.appendChild(meta);
+  const injectedJavaScript = `
+  const meta = document.createElement('meta');
+  meta.setAttribute('name', 'viewport');
+  meta.setAttribute('content', 'width=device-width, initial-scale=1, user-scalable=no');
+  document.head.appendChild(meta);
 
-  // document.body.style.display = 'flex';
-  // document.body.style.justifyContent = 'center';
-  // document.body.style.alignItems = 'center';
-  // document.body.style.padding = '0';
-  // document.body.style.margin = '0';
-  // document.documentElement.style.height = '100%';
-  // document.body.style.height = '100%';
-  // true;
-  // `;
+  document.body.style.display = 'flex';
+  document.body.style.justifyContent = 'center';
+  document.body.style.alignItems = 'center';
+  document.body.style.padding = '0';
+  document.body.style.margin = '0';
+  document.documentElement.style.height = '100%';
+  document.body.style.height = '100%';
+  true;
+  `;
   const googleDocsViewerUrl = `https://docs.google.com/viewer?url=${encodeURIComponent(encodedPdfUrl)}&embedded=true`;
   console.log('Google Docs Viewer URL:', googleDocsViewerUrl);
   // useEffect(() => {
@@ -44,15 +44,10 @@ const PdfViewer = ({ pdfUrl,onClose }) => {
     <SafeAreaView className="flex-1 bg-f8f5f1">
     <ScrollView className="flex-1" contentContainerStyle={{ flexGrow: 1 }}>
       <StatusBarComponent barStyle="light-content" backgroundColor="#251404" />
-      {/* <BackButton
-        buttonStyle=" left-4 top-12 z-10"
-        className="absolute"
-        tabName="(article)"
-        screenName="article-result"
-      /> */}
+      
       <TopBrownSearchBar title="Article Display" />
       <TouchableOpacity className="absolute left-4 top-2 z-10 bg-mindful-brown-80 p-3 rounded-full opacity-0" onPress={onClose}>
-        <Text className="text-white text-lg font-bold">BA</Text>
+        <Text className="text-white text-lg font-bold">      </Text>
     </TouchableOpacity>
       
     <SafeAreaView className="flex-1 bg-white">
@@ -66,7 +61,7 @@ const PdfViewer = ({ pdfUrl,onClose }) => {
         onLoad={() => console.log('PDF loaded')}
         onError={(error) => console.log('Cannot load PDF', error)}
         startInLoadingState={true}
-        // injectedJavaScript={injectedJavaScript}
+        injectedJavaScript={injectedJavaScript}
         renderLoading={() => <ActivityIndicator size="large" color="#0000ff" 
   />}
         />
