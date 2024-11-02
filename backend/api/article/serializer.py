@@ -117,4 +117,28 @@ class ArticleUpdateSerializer(serializers.ModelSerializer):
         representation = super().to_representation(instance)
         representation['article_pdf_url'] = instance.article_pdf_url
         return representation
+    
 
+class SearchQuerySerializer(serializers.Serializer):
+    query = serializers.CharField(required=True)
+    top_k = serializers.IntegerField(required=False, default=5)
+
+class SearchResultItemSerializer(serializers.Serializer):
+    article_id = serializers.IntegerField()
+    title = serializers.CharField()
+    topic = serializers.CharField()
+    processed_contents = serializers.CharField()
+    article_pdf_url = serializers.CharField()
+    article_image_url = serializers.CharField()
+    score = serializers.FloatField() 
+
+class IntentSerializer(serializers.Serializer):
+    primary_intent = serializers.CharField()
+    confidence = serializers.FloatField()
+    all_intents = serializers.DictField(
+        child=serializers.FloatField()
+    )
+
+class SearchResultSerializer(serializers.Serializer):
+    intent = IntentSerializer()
+    results = SearchResultItemSerializer(many=True)
