@@ -7,5 +7,6 @@ urlpatterns = [
     path("getUserFragmentById/<int:pk>", views.UserFragmentGetByIdView.as_view(), name="user-fragment-get-by-id"),
     path("getUserFragmentByUserId/<int:user_id>", views.UserFragmentGetByUserIdView.as_view(), name="user-fragment-get-by-user-id"),
     path("update/<int:pk>", views.UserFragmentUpdateDestroyView.as_view(), name="user-fragment-update"),
-    path("delete/<int:pk>", views.UserFragmentUpdateDestroyView.as_view(), name="user-fragment-delete")
+    path("delete/<int:pk>", views.UserFragmentUpdateDestroyView.as_view(), name="user-fragment-delete"),
+    path("gachaFragment", views.GachaFragmentView.as_view(), name="gacha-fragment"),
 ]
