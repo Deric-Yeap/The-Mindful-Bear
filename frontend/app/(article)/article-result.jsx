@@ -76,13 +76,12 @@ const ArticleResult = () => {
     <SafeAreaView style={{ flex: 1, backgroundColor: '#f8f5f1' }}>
       <ScrollView style={{ marginBottom: 48 }}>
         <StatusBarComponent barStyle="light-content" backgroundColor="#251404" />
+
         <TopBrownSearchBar title="Article Finder" value={query} onChangeText={setQuery} />
         <View style={{ backgroundColor: '#f8f5f1', padding: 16, borderRadius: 8, marginBottom: 16 }}>
           {articles.map((article) => (
             <TouchableOpacity 
-              key={article.id}
-              // onPress={() => handleArticlePress(article)}
-              
+              key={article.id}              
             >
               <ArticleCard
                 title={article.title}
