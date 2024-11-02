@@ -1,6 +1,9 @@
 from django.shortcuts import render
 from rest_framework import generics, status
 from rest_framework.response import Response
+
+from ..user.models import CustomUser
+from ..avatar.models import Avatar
 from .models import UserAvatar
 from .serializer import UserAvatarCreateSerializer, UserAvatarSerializer, UserAvatarUpdateSerializer
 
@@ -38,13 +41,21 @@ class UserAvatarGetByUserIdView(generics.ListAPIView):
     serializer_class = UserAvatarSerializer
     def get_queryset(self):
         user_id = self.kwargs.get('user_id')
-        print(user_id)
         return UserAvatar.objects.filter(user_id=user_id)
-
     def list(self, request, *args, **kwargs):
+        user_id = self.kwargs.get('user_id')
         queryset = self.get_queryset()
         if not queryset.exists():
-            return Response({'detail': 'No avatars found for this user.'}, status=status.HTTP_404_NOT_FOUND)
+            try:
+                user = CustomUser.objects.get(user_id=user_id)
+                default_avatar = Avatar.objects.get(avatar_id=2)
+                UserAvatar.objects.create(user=user, avatar=default_avatar, is_selected=True)
+                queryset = self.get_queryset()
+            except (CustomUser.DoesNotExist, Avatar.DoesNotExist):
+                return Response(
+                    {'detail': 'User or default avatar does not exist.'},
+                    status=status.HTTP_404_NOT_FOUND
+                )
         serializer = self.get_serializer(queryset, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 

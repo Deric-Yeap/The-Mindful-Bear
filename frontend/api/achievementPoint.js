@@ -1,11 +1,11 @@
 import axiosInstance from '../common/axiosInstance'
 
 export const listAchievementPointRecord = () => {
-  return axiosInstance.get('achievementPoint/')
+  return axiosInstance.get('achievementPoint')
 }
 
 export const sumPoints = () => {
-  return axiosInstance.get('achievementPoint/sum-points/')
+  return axiosInstance.get('achievementPoint/sum-points')
 
 }
 export const collectedLogin = () => {

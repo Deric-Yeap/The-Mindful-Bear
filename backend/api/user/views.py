@@ -15,6 +15,8 @@ from datetime import datetime, timedelta
 from ..exercise.serializer import ExerciseSerializer
 from ..exercise.models import Exercise
 from django.db.models import F
+from ..landmark.serializer import LandmarkSerializer
+from ..landmark.models import Landmark
 
 # Create your views here.
 class UserCreateView(generics.CreateAPIView):
@@ -121,3 +123,29 @@ class UserExercisesView(generics.ListAPIView):
         ).distinct()
 
         return exercises
+    
+class SessionExercisesView(generics.ListAPIView):
+    serializer_class = ExerciseSerializer
+
+    def get_queryset(self):        
+        user = self.request.user 
+        session_id = self.kwargs['session_id']        
+        exercises = Exercise.objects.filter(
+            landmarks__usersessions__user_id=user.user_id,
+            landmarks__usersessions__session_id=session_id
+        ).distinct()
+
+        return exercises
+
+class SessionLandmarksView(generics.ListAPIView):
+    serializer_class = LandmarkSerializer
+
+    def get_queryset(self):        
+        user = self.request.user 
+        session_id = self.kwargs['session_id'] 
+        landmarks = Landmark.objects.filter(
+            usersessions__user_id=user.user_id,
+            usersessions__session_id=session_id
+        ).distinct()
+
+        return landmarks

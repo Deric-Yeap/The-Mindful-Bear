@@ -6,7 +6,7 @@ class Form(models.Model):
     is_compulsory = models.BooleanField('Is Compulsory?', null=False, default=False)
     is_presession = models.BooleanField('Is Pre-Session?', null=False, default=False)
     is_postsession = models.BooleanField('Is Post-Session?', null=False, default=False)
-
+    description = models.TextField('Description', blank=True, null=True)
     def __str__(self):
         return str(self.id)
 

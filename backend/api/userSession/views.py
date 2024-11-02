@@ -4,9 +4,11 @@ from .models import UserSession
 from .serializer import UserSessionSerializer, UserSessionSplitSerializer, UserSessionUpdateSerializer
 
 class UserSessionCreate(generics.CreateAPIView):
-    # Create a new session
     queryset = UserSession.objects.all()
     serializer_class = UserSessionSerializer
+
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)
 
 class UserSessionList(generics.ListCreateAPIView):
    

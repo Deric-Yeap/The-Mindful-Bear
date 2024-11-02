@@ -20,6 +20,7 @@ const TabBar = ({ state, descriptors, navigation }) => {
     '_sitemap',
     '+not-found',
     '(admin)',
+    '(avatar)',
   ])
 
   const isShownNav = useSelector((state) => state.isShownNav).isShownNav

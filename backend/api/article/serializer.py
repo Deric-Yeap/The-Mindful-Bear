@@ -48,12 +48,14 @@ class ArticleCreateSerializer(serializers.ModelSerializer):
         if not file_url:        
             raise serializers.ValidationError("File upload to S3 failed")
         
+        # Combine title and processed_contents
+        combined_text = validated_data['title'] + ' ' + validated_data['processed_contents']
         
-       
+        # Extract key concepts from the combined text
+        key_concepts = extract_key_concepts(combined_text)
         
-        processed_contents = validated_data.get('processed_contents', '')
-        key_concepts = extract_key_concepts(processed_contents)
-        validated_data['processed_contents'] = ', '.join(key_concepts)  # Store key concepts as a string
+        # Update processed_contents with the extracted key concepts
+        validated_data['processed_contents'] = key_concepts
         
         article = Article.objects.create(
             article_pdf_url=object_path,
@@ -64,7 +66,6 @@ class ArticleCreateSerializer(serializers.ModelSerializer):
         )
 
         return article
-
     def to_representation(self, instance):
         representation = super().to_representation(instance)
         representation['article_pdf_url'] = instance.article_pdf_url  
@@ -116,4 +117,28 @@ class ArticleUpdateSerializer(serializers.ModelSerializer):
         representation = super().to_representation(instance)
         representation['article_pdf_url'] = instance.article_pdf_url
         return representation
+    
 
+class SearchQuerySerializer(serializers.Serializer):
+    query = serializers.CharField(required=True)
+    top_k = serializers.IntegerField(required=False, default=5)
+
+class SearchResultItemSerializer(serializers.Serializer):
+    article_id = serializers.IntegerField()
+    title = serializers.CharField()
+    topic = serializers.CharField()
+    processed_contents = serializers.CharField()
+    article_pdf_url = serializers.CharField()
+    article_image_url = serializers.CharField()
+    score = serializers.FloatField() 
+
+class IntentSerializer(serializers.Serializer):
+    primary_intent = serializers.CharField()
+    confidence = serializers.FloatField()
+    all_intents = serializers.DictField(
+        child=serializers.FloatField()
+    )
+
+class SearchResultSerializer(serializers.Serializer):
+    intent = IntentSerializer()
+    results = SearchResultItemSerializer(many=True)

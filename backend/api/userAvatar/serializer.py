@@ -14,9 +14,7 @@ class UserAvatarSerializer(serializers.ModelSerializer):
     avatar = AvatarSerializer()
     class Meta:
         model = UserAvatar
-        fields = ['id','user', 'avatar']
-
-
+        fields = ['id','user', 'avatar','is_selected']
 
 
 class UserAvatarCreateSerializer(serializers.ModelSerializer):
@@ -24,15 +22,18 @@ class UserAvatarCreateSerializer(serializers.ModelSerializer):
     avatar = serializers.PrimaryKeyRelatedField(queryset=Avatar.objects.all())
     class Meta:
         model = UserAvatar
-        fields = ['id','user', 'avatar']
+        fields = ['id','user', 'avatar','is_selected']
     def create(self, validated_data):
         request = self.context.get('request')
         user = validated_data['user']
-        userAvatar = UserAvatar.objects.create(
-            avatar=validated_data['avatar'],
-            user=user,  
-        )
-        return userAvatar
+        is_selected = validated_data.get('is_selected', False)
+        if is_selected:
+            UserAvatar.objects.filter(user=user).update(is_selected=False)
+        if UserAvatar.objects.filter(user=user).count() == 0:
+            validated_data['is_selected'] = True if validated_data['avatar'].id == 2 else False
+        user_avatar = UserAvatar.objects.create(**validated_data)
+        return user_avatar
+    
     def to_representation(self, instance):
         representation = super().to_representation(instance)
         representation['user'] = CustomUserSerializer(instance.user).data
@@ -42,21 +43,23 @@ class UserAvatarCreateSerializer(serializers.ModelSerializer):
 
 
 class UserAvatarUpdateSerializer(serializers.ModelSerializer):
-    user = serializers.PrimaryKeyRelatedField(queryset=CustomUser.objects.all())
-    avatar = serializers.PrimaryKeyRelatedField(queryset=Avatar.objects.all())
+    user = serializers.PrimaryKeyRelatedField(queryset=CustomUser.objects.all(), required=True)
+    avatar = serializers.PrimaryKeyRelatedField(queryset=Avatar.objects.all(),required=False)
     class Meta:
         model = UserAvatar
-        fields = ['id','user', 'avatar']
+        fields = ['id','user', 'avatar','is_selected']
 
     def update(self, instance, validated_data):
         request = self.context.get('request')
+        is_selected = validated_data.get('is_selected', instance.is_selected)
         if 'user' in validated_data:
-            user = validated_data['user'] 
+            user = validated_data['user']
         if isinstance(user, CustomUser):
-            instance.user = user 
+            instance.user = user
         else:
-            return serializers.ValidationError({"user": "Invalid user provided"})
-
+            raise ValidationError("Provided user is not a valid CustomUser instance.")
+        if is_selected:
+            UserAvatar.objects.filter(user=user).update(is_selected=False)
         for attr, value in validated_data.items():
             if attr != 'user':  
                 setattr(instance, attr, value)

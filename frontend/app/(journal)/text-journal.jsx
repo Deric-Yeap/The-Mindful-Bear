@@ -20,6 +20,7 @@ import ConfirmModal from '../../components/confirmModal'
 import emotionWheelImg from '../../assets/emotionWheel.jpg'
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons'
 import { colors } from '../../common/styles'
+import { postPoints } from '../../api/achievementPoint'
 
 const TextJournal = () => {
   const [form, setForm] = useState({
@@ -100,13 +101,16 @@ const TextJournal = () => {
     if (!validateForm()) {
       return
     }
-
     setIsLoading(true)
     let emotionList = [...selectedFeelings]
     emotionList.push(selectedEmotion)
     const updatedForm = { ...form, emotion_id: emotionList }
     try {
       const response = await createJournal(updatedForm)
+      const postPointsResponse = await postPoints({
+        points: 10,
+        description: 'Journal Entry',
+      })
       setIsLoading(false)
       setIsModalVisible(true)
     } catch (error) {

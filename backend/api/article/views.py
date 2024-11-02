@@ -3,8 +3,10 @@ from django.shortcuts import render
 from rest_framework import generics, status
 from rest_framework.response import Response
 from .models import Article
-from .serializer import ArticleCreateSerializer, ArticleSerializer, ArticleUpdateSerializer
+from .serializer import ArticleCreateSerializer, ArticleSerializer, ArticleUpdateSerializer,SearchQuerySerializer,SearchResultItemSerializer,IntentSerializer,SearchResultSerializer
 from ..common.permission import CustomDjangoModelPermissions
+from .semantic_search import SemanticSearchEngine
+from rest_framework.permissions import IsAuthenticated
 
 class ArticleCreateView(generics.CreateAPIView):
     permission_classes = [CustomDjangoModelPermissions]
@@ -52,3 +54,46 @@ class ArticleUpdateDestroyView(generics.UpdateAPIView, generics.DestroyAPIView):
         instance = self.get_object()
         instance.delete()
         return Response(status=status.HTTP_200_OK)
+    
+class SemanticSearchView(generics.ListAPIView):
+    permission_classes = [IsAuthenticated] 
+    serializer_class = SearchResultSerializer
+    queryset = Article.objects.all()
+    
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.search_engine = SemanticSearchEngine(relevancy_threshold=0.5)
+    
+    def post(self, request):
+        serializer = SearchQuerySerializer(data=request.data)
+        if serializer.is_valid():
+            query = serializer.validated_data['query']
+            top_k = serializer.validated_data.get('top_k', 5)
+            
+            # Initialize search engine if not already done
+            if self.search_engine.api_articles is None:
+                success = self.search_engine.fetch_articles_from_api()
+                if not success:
+                    return Response(
+                        {"error": "Failed to fetch articles"},
+                        status=status.HTTP_500_INTERNAL_SERVER_ERROR
+                    )
+            
+            # Perform search
+            results, intent_info = self.search_engine.semantic_search(
+                query, 
+                top_k=top_k
+            )
+            
+            # Prepare response
+            response_data = {
+                "intent": intent_info,
+                "results": results
+            }
+            
+            return Response(response_data, status=status.HTTP_200_OK)
+        
+        return Response(
+            serializer.errors,
+            status=status.HTTP_400_BAD_REQUEST
+        )
