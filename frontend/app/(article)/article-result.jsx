@@ -210,6 +210,7 @@ const ArticleResult = () => {
         id={article.id} 
         index = {index}
         category={article.topic}
+        onArticleClick={handleArticleClick}
         />
       ))
     ) : (
