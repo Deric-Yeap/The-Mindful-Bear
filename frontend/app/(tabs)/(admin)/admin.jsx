@@ -101,7 +101,7 @@ export default function Admin() {
           </View>
           <View className="flex-row justify-between mb-4">
             <Link href="/articleManagement" asChild>
-              <TouchableOpacity className="flex-1 bg-serenity-green-50 p-2 rounded-2xl mr-2">
+              <TouchableOpacity className="flex-1 bg-mindful-brown-30 p-2 rounded-2xl mr-2">
                 <View className="items-start">
                   <Text className="text-serenity-green-10 font-urbanist-bold text-lg">
                     Article
@@ -111,7 +111,7 @@ export default function Admin() {
                   <MaterialCommunityIcons
                     name="newspaper-variant-multiple-outline"
                     size={128}
-                    color={colors.serenityGreen20}
+                    color={colors.mindfulBrown10}
                   />
                 </View>
               </TouchableOpacity>
@@ -167,7 +167,9 @@ export default function Admin() {
             <Text className="text-mindful-brown-100 font-urbanist-bold text-xl mb-4">
               Mindfulness Tracker
             </Text>
+            <View className="-mx-4"> 
             <AnalyticsTabs />
+          </View>
           </View>
         </View>
       </ScrollView>
