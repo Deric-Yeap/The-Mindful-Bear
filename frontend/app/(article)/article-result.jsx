@@ -17,16 +17,15 @@ const ArticleResult = () => {
 
   const route = useRoute()
   const initialQuery = route.params.query
-  const [currentQuery, setCurrentQuery] = useState(initialQuery) 
-  const [searchInput, setSearchInput] = useState(initialQuery)  
-
-  // const handleArticlePress = (article) => {
-  //   console.log(`Navigating to article with ID: ${article.id}`); // Debugging log
-  //   router.push(`/(article)/article-detail?id=${article.id}`);
-    
-  // };
+  const [currentQuery, setCurrentQuery] = useState(initialQuery)
+  const [searchInput, setSearchInput] = useState(initialQuery)
 
   const performSearch = async (searchQuery) => {
+    // Don't perform search if query is empty
+    if (!searchQuery.trim()) {
+      return;
+    }
+
     setLoading(true);
     try {
       const response = await semanticSearch(searchQuery);
@@ -40,7 +39,7 @@ const ArticleResult = () => {
         topic: article.topic
       }));
       setArticles(formattedArticles);
-      setCurrentQuery(searchQuery);  
+      setCurrentQuery(searchQuery);
     } catch (error) {
       setError(
         error.response?.data || error.request
@@ -55,6 +54,13 @@ const ArticleResult = () => {
   useEffect(() => {
     performSearch(initialQuery);
   }, []);
+
+  // Function to handle search button press
+  const handleSearch = () => {
+    if (searchInput.trim()) {
+      performSearch(searchInput);
+    }
+  };
 
   if (loading) {
     return (
@@ -76,24 +82,25 @@ const ArticleResult = () => {
     <SafeAreaView style={{ flex: 1, backgroundColor: '#f8f5f1' }}>
       <ScrollView style={{ marginBottom: 48 }}>
         <StatusBarComponent barStyle="light-content" backgroundColor="#251404" />
-        <TopBrownSearchBar 
-          title="Article Finder" 
-          value={searchInput} 
+        <TopBrownSearchBar
+          title="Article Finder"
+          value={searchInput}
           onChangeText={setSearchInput}
-          onSearch={() => performSearch(searchInput)}
+          onSearch={handleSearch}
+          disabled={!searchInput.trim()} // Disable search if input is empty or only whitespace
         />
         <View style={{ backgroundColor: '#f8f5f1', padding: 16, borderRadius: 8, marginBottom: 16 }}>
           {articles.length > 0 ? (
             articles.map((article) => (
-              <TouchableOpacity 
-                key={article.id}              
-                >
+              <TouchableOpacity
+                key={article.id}
+              >
                 <ArticleCard
                   title={article.title}
                   imageSource={{ uri: article.imageUrl }}
                   pdfUrl={article.pdfUrl}
-                id = {article.id}
-                category={article.topic}
+                  id={article.id}
+                  category={article.topic}
                 />
               </TouchableOpacity>
             ))
