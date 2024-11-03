@@ -1,21 +1,28 @@
-import React, { useState }from 'react';
+import React, { useState } from 'react';
 import { View, Text, Image, StyleSheet, TouchableOpacity, Modal } from 'react-native';
-
-
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import { colors } from '../common/styles';
 import PdfViewer from '../app/(article)/article-pdf-viewer';
 
-const ArticleCard = ({ route, title, imageSource, description, category, pdfUrl, id}) => {
-
+const ArticleCard = ({ route, title, imageSource, description, category, pdfUrl, id, onArticleClick, index }) => {
   const [showPdfViewer, setShowPdfViewer] = useState(false);
 
-  
-  const handleArticlePress = () => {
+  const handleArticlePress = async () => {
     console.log(`Navigating to article with ID: ${id}`);
     console.log("uri", pdfUrl);
+
+    // Track the click if onArticleClick prop exists
+    if (onArticleClick) {
+      try {
+        await onArticleClick(id, index);
+        console.log('Click tracked successfully');
+      } catch (error) {
+        console.error('Error tracking click:', error);
+      }
+    }
+
+    // Continue with existing functionality
     if (pdfUrl) {
-      // Navigate to the PDF Viewer if PDF URL is present
       console.log("url", pdfUrl);
       setShowPdfViewer(true);
     } else {
@@ -24,47 +31,44 @@ const ArticleCard = ({ route, title, imageSource, description, category, pdfUrl,
       console.log("error", "No PDF URL found for the article");
     }
   };
+
   const handleClosePdfViewer = () => {
     setShowPdfViewer(false);
   };
+
   return (
     <View>
       <TouchableOpacity
         style={styles.cardContainer}
         onPress={handleArticlePress}
-      
       >
-      
-    
-      {/* Pill Badge */}
-      <View style={styles.pillBadge}>
-        <Text style={styles.pillText}>{category}</Text>
-      </View>
+        {/* Pill Badge */}
+        <View style={styles.pillBadge}>
+          <Text style={styles.pillText}>{category}</Text>
+        </View>
 
-      <Image source={imageSource} style={styles.image} resizeMode="cover" />
-      <View style={styles.cardBody}>
-        <View style={styles.row}>
-          <Text style={styles.cardTitle} className="text-mindfulbrown-80">{title}</Text>
-          <View style={styles.iconContainer}>
-            <MaterialCommunityIcons 
-              name="arrow-right-bold" 
-              size={24} 
-              color={colors.mindfulBrown80}
-            />
+        <Image source={imageSource} style={styles.image} resizeMode="cover" />
+        <View style={styles.cardBody}>
+          <View style={styles.row}>
+            <Text style={styles.cardTitle} className="text-mindfulbrown-80">{title}</Text>
+            <View style={styles.iconContainer}>
+              <MaterialCommunityIcons 
+                name="arrow-right-bold" 
+                size={24} 
+                color={colors.mindfulBrown80}
+              />
+            </View>
           </View>
         </View>
-        </View>
       </TouchableOpacity>
-        <Modal
+      <Modal
         visible={showPdfViewer}
         animationType="slide"
         onRequestClose={handleClosePdfViewer}
-        >
+      >
         <PdfViewer pdfUrl={pdfUrl} onClose={handleClosePdfViewer} />
-        </Modal>
+      </Modal>
     </View>
-    
-
   );
 };
 
