@@ -75,7 +75,8 @@ INSTALLED_APPS = [
     "api.avatar",
     "api.userAvatar",
     "api.article",
-    "api.userFragment"
+    "api.userFragment",
+    "api.searchHistory"
 ]
 
 REST_FRAMEWORK = {

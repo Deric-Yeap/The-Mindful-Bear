@@ -42,5 +42,6 @@ urlpatterns = [
     path("api/avatar/", include("api.avatar.urls")),
     path("api/userAvatar/", include("api.userAvatar.urls")),
     path("api/article/", include("api.article.urls")),
-    path("api/userFragment/", include("api.userFragment.urls"))
+    path("api/userFragment/", include("api.userFragment.urls")),
+    path("api/searchHistory/", include("api.searchHistory.urls"))
 ]
