@@ -1,27 +1,34 @@
-import { View, Text, ScrollView, Image, TextInput, TouchableOpacity } from 'react-native';
-import React, { useState } from 'react';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import StatusBarComponent from '../../components/darkThemStatusBar';
-import BackButton from '../../components/backButton';
-import { Dimensions } from 'react-native';
-import logo from '../../assets/mindfulBearLogo.png';
-import { useRouter } from 'expo-router'; 
-import MaterialIcons from '@expo/vector-icons/MaterialIcons';
+import {
+  View,
+  Text,
+  ScrollView,
+  Image,
+  TextInput,
+  TouchableOpacity,
+} from 'react-native'
+import React, { useState } from 'react'
+import { SafeAreaView } from 'react-native-safe-area-context'
+import StatusBarComponent from '../../components/darkThemStatusBar'
+import BackButton from '../../components/backButton'
+import { Dimensions } from 'react-native'
+import logo from '../../assets/mindfulBearLogo.png'
+import { useRouter } from 'expo-router'
+import MaterialIcons from '@expo/vector-icons/MaterialIcons'
 import { colors } from '../../common/styles'
 
 const ArticleDiscovery = () => {
-  const router = useRouter(); 
-  const [searchTerm, setSearchTerm] = useState('');
+  const router = useRouter()
+  const [searchTerm, setSearchTerm] = useState('')
 
   const handleSearch = () => {
     router.push({
       pathname: '/article-result',
       params: { query: searchTerm },
-    });
-  };
+    })
+  }
 
-  const screenHeight = Dimensions.get('window').height;
-  const screenWidth = Dimensions.get('window').width;
+  const screenHeight = Dimensions.get('window').height
+  const screenWidth = Dimensions.get('window').width
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: '#BEE2F8' }}>
@@ -55,13 +62,17 @@ const ArticleDiscovery = () => {
             resizeMode="contain"
           />
 
-          <Text
-            className="text-mindful-brown-80 font-urbanist-extra-bold text-xl mb-2 mt-2 ml-6"
-          >
+          <Text className="text-mindful-brown-80 font-urbanist-extra-bold text-xl mb-2 mt-2 ml-6">
             How may I help you?
           </Text>
 
-          <View style={{ paddingHorizontal: 20, marginTop: 10, width: screenWidth * 0.9 }}>
+          <View
+            style={{
+              paddingHorizontal: 20,
+              marginTop: 10,
+              width: screenWidth * 0.9,
+            }}
+          >
             <View style={{ flexDirection: 'row', alignItems: 'center' }}>
               <TextInput
                 placeholder="Search anything..."
@@ -91,8 +102,10 @@ const ArticleDiscovery = () => {
                   shadowOffset: { width: 0, height: 2 },
                   shadowOpacity: 0.2,
                   shadowRadius: 4,
+                  opacity: searchTerm.trim() ? 1 : 0.5, // Add opacity based on searchTerm
                 }}
-                onPress={handleSearch}
+                onPress={searchTerm.trim() ? handleSearch : null} // Disable onPress when empty
+                disabled={!searchTerm.trim()} // Add disabled prop
               >
                 <MaterialIcons name="search" size={24} color="#F7F4F2" />
               </TouchableOpacity>
@@ -103,7 +116,7 @@ const ArticleDiscovery = () => {
         <StatusBarComponent barStyle="dark-content" backgroundColor="#BEE2F8" />
       </ScrollView>
     </SafeAreaView>
-  );
-};
+  )
+}
 
-export default ArticleDiscovery;
+export default ArticleDiscovery
