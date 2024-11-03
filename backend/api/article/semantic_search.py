@@ -8,6 +8,8 @@ from nltk.tokenize import word_tokenize
 from nltk.stem import WordNetLemmatizer
 from nltk.corpus import stopwords
 from django.apps import apps
+from django.conf import settings
+from ..common.s3 import create_presigned_url
 
 # Download required NLTK resources
 nltk.download('punkt', quiet=True)
@@ -135,6 +137,18 @@ class SemanticSearchEngine:
                 importance += 0.5
         return importance
 
+    def get_cloudfront_url(self, pdf_url):
+        """Generate CloudFront URL for PDF"""
+        if pdf_url:
+            # Get the presigned url first
+            presigned_url = create_presigned_url(pdf_url)
+            if presigned_url:
+                return presigned_url
+            # If presigned URL generation fails, try CloudFront
+            elif hasattr(settings, 'CLOUDFRONT_DOMAIN'):
+                return f"https://{settings.CLOUDFRONT_DOMAIN}/{pdf_url}"
+        return None
+
     def semantic_search(self, query, top_k=5):
         """Perform semantic search with intent and context awareness"""
         if self.api_articles is None:
@@ -193,7 +207,7 @@ class SemanticSearchEngine:
                 'title': article['title'],
                 'topic': article['topic'],
                 'processed_contents': article['processed_contents'],
-                'article_pdf_url': article['article_pdf_url'],
+                'article_pdf_url': self.get_cloudfront_url(article['article_pdf_url']),
                 'article_image_url': article['article_image_url'],
                 'score': float(adjusted_scores[idx])
             })
