@@ -39,6 +39,7 @@ def train_and_save_model():
     multi_label_model.fit(X_tfidf, y)
 
     # Save model, vectorizer, and label names as separate files
+    #files have been saved to a folder called ml
     joblib.dump(tfidf_vectorizer, TFIDF_VECTORIZER_PATH)
     joblib.dump(multi_label_model, MODEL_PATH)
     joblib.dump(label_columns, LABELS_PATH)  # Save only labels list here

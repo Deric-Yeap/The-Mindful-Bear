@@ -12,6 +12,7 @@ import NeutralBear from '../../assets/neutralBear.png';
 import NegativeBear from '../../assets/negativeBear.png';
 import Toggle from '../../components/toggle';
 import Loading from '../../components/loading';
+import FilterButton from '../../components/filterButton';
 import { journalCounts, getJournalClassification } from '../../api/journal';
 
 const JournalAnalytics = () => {
@@ -208,101 +209,106 @@ const JournalAnalytics = () => {
             />
           </ScrollView>
         )}
+        
+        {/* Journal Classification */}
+        <View style={{ borderBottomWidth: 1, borderBottomColor: colors.mindfulBrown80, marginTop: 50 }} />
 
-                {/* Filter by Month and Year Section for Classification */}
-                <Text className="text-mindful-brown-100 font-urbanist-extra-bold text-xl mb-2 mt-2 ml-6">
-          Filter by Month and Year
-        </Text>
-        <View style={{ flexDirection: 'row', justifyContent: 'space-around', alignItems: 'center', marginBottom: 10 }}>
-          <View style={{ alignItems: 'center' }}>
-            <Text>Year</Text>
-            <TextInput
-              style={{ borderWidth: 1, borderColor: colors.zenYellow20, padding: 5, width: 80, textAlign: 'center' }}
-              placeholder="YYYY"
-              keyboardType="numeric"
-              value={year}
-              onChangeText={(text) => setYear(text)}
-            />
-          </View>
-          <View style={{ alignItems: 'center' }}>
-            <Text>Month</Text>
-            <TextInput
-              style={{ borderWidth: 1, borderColor: colors.zenYellow20, padding: 5, width: 80, textAlign: 'center' }}
-              placeholder="MM"
-              keyboardType="numeric"
-              value={month}
-              onChangeText={(text) => setMonth(text)}
-            />
-          </View>
-          <CustomButton onPress={fetchClassificationData} title="Apply Filter" />
-        </View>
-
-
-        {/* topic classification */}
-        <View style={{ paddingVertical: 20 }}>
-          <Text className="text-mindful-brown-100 font-urbanist-extra-bold text-xl mb-2 mt-2 ml-6">
+        <View style={{ paddingVertical: 10 }}>
+          <Text className="text-mindful-brown-100 font-urbanist-extra-bold text-2xl mt-2 ml-6">
             Journal Classification
           </Text>
+        </View>
 
-          {classificationData.map((topicData, index) => (
+        <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 10, paddingHorizontal: 30 }}>
+        <View style={{ alignItems: 'center', marginRight: 10 }}>
+          <Text>Year</Text>
+          <TextInput
+            style={{ borderWidth: 1, borderColor: colors.zenYellow20, padding: 5, width: 80, textAlign: 'center', borderRadius: 8 }}
+            placeholder="YYYY"
+            keyboardType="numeric"
+            value={year}
+            onChangeText={(text) => setYear(text)}
+          />
+        </View>
+        <View style={{ alignItems: 'center', marginRight: 10 }}>
+          <Text>Month</Text>
+          <TextInput
+            style={{ borderWidth: 1, borderColor: colors.zenYellow20, padding: 5, width: 80, textAlign: 'center', borderRadius: 8 }}
+            placeholder="MM"
+            keyboardType="numeric"
+            value={month}
+            onChangeText={(text) => setMonth(text)}
+          />
+        </View>
+
+        {/* Apply Button with Brown Background and Aligned with Filter Boxes */}
+        <FilterButton
+          title="Apply"
+          onPress={fetchClassificationData}
+          style={{
+            marginLeft: 100,
+            marginTop: 17// Add margin to adjust alignment
+          }}
+        />
+      </View>
+
+
+        {/* Topic classification entries display */}
+        {classificationData.map((topicData, index) => (
+          <View
+            key={index}
+            style={{
+              backgroundColor: colors['mindful-brown-20'],
+              margin: 10,
+              padding: 10,
+              borderRadius: 10,
+            }}
+          >
+            <Text
+              className="text-mindful-brown-100 font-urbanist-extra-bold text-lg mb-2"
+              style={{ marginBottom: 10 }}
+            >
+              Top 10 Reasons for {topicData.topic}:
+            </Text>
+            {/* Table Header */}
             <View
-              key={index}
               style={{
-                backgroundColor: colors['mindful-brown-20'],
-                margin: 10,
-                padding: 10,
-                borderRadius: 10,
+                flexDirection: 'row',
+                justifyContent: 'space-between',
+                paddingBottom: 10,
+                borderBottomWidth: 1,
+                borderColor: colors['mindful-brown-60'],
               }}
             >
-              <Text
-                className="text-mindful-brown-100 font-urbanist-extra-bold text-lg mb-2"
-                style={{ marginBottom: 10 }}
-              >
-                Top 10 Reasons for {topicData.topic}:
+              <Text className="text-mindful-brown-100 font-urbanist-bold text-base">
+                Keyword
               </Text>
-
-              {/* Table Header */}
+              <Text className="text-mindful-brown-100 font-urbanist-bold text-base">
+                Mentions
+              </Text>
+            </View>
+            {/* Table Rows */}
+            {topicData.top_reasons.slice(0, 10).map((reason, idx) => (
               <View
+                key={idx}
                 style={{
                   flexDirection: 'row',
                   justifyContent: 'space-between',
-                  paddingBottom: 10,
-                  borderBottomWidth: 1,
-                  borderColor: colors['mindful-brown-60'],
+                  paddingVertical: 6,
+                  borderBottomWidth: idx === topicData.top_reasons.length - 1 ? 0 : 1,
+                  borderColor: colors['mindful-brown-30'],
                 }}
               >
-                <Text className="text-mindful-brown-100 font-urbanist-bold text-base">
-                  Keyword
+                <Text className="text-mindful-brown-100 text-base">
+                  {reason.reason}
                 </Text>
-                <Text className="text-mindful-brown-100 font-urbanist-bold text-base">
-                  Mentions
+                <Text className="text-mindful-brown-100 text-base">
+                  {reason.mentions}
                 </Text>
               </View>
-
-              {/* Table Rows */}
-              {topicData.top_reasons.slice(0, 10).map((reason, idx) => (
-                <View
-                  key={idx}
-                  style={{
-                    flexDirection: 'row',
-                    justifyContent: 'space-between',
-                    paddingVertical: 6,
-                    borderBottomWidth: idx === topicData.top_reasons.length - 1 ? 0 : 1,
-                    borderColor: colors['mindful-brown-30'],
-                  }}
-                >
-                  <Text className="text-mindful-brown-100 text-base">
-                    {reason.reason}
-                  </Text>
-                  <Text className="text-mindful-brown-100 text-base">
-                    {reason.mentions}
-                  </Text>
-                </View>
-              ))}
-            </View>
-          ))}
-        </View>
-
+            ))}
+          </View>
+        ))}
       </ScrollView>
     </SafeAreaView>
   );
