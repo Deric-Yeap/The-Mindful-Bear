@@ -3,8 +3,8 @@ from api.user.models import CustomUser
 from api.article.models import Article
 
 class SearchHistory(models.Model):
-    searchID = models.AutoField(primary_key=True)  # Changed to match camelCase
-    userID = models.ForeignKey(  # Changed to match naming convention
+    searchID = models.AutoField(primary_key=True)  
+    userID = models.ForeignKey( 
         CustomUser,
         on_delete=models.CASCADE,
         related_name='search_history',
@@ -12,7 +12,7 @@ class SearchHistory(models.Model):
         blank=True, 
         null=True
     )
-    articleID = models.ForeignKey(  # Changed to match naming convention
+    articleID = models.ForeignKey( 
         Article,
         on_delete=models.CASCADE,
         related_name='search_clicks',
@@ -20,8 +20,8 @@ class SearchHistory(models.Model):
         blank=True,
         null=True
     )
-    query = models.CharField('Query', max_length=255)  # Added label and max_length like Question model
-    rankPosition = models.IntegerField('RankPosition', default=0)  # Added label and default
+    query = models.CharField('Query', max_length=255)  
+    rankPosition = models.IntegerField('RankPosition', default=0) 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -35,4 +35,4 @@ class SearchHistory(models.Model):
         ordering = ['-created_at']
 
     def __str__(self):
-        return str(self.searchID)  # Changed to match Question model's __str__
+        return str(self.searchID)  
