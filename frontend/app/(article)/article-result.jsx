@@ -199,32 +199,27 @@ const ArticleResult = () => {
   )
 
   const renderArticles = () => (
-    <View style={styles.articlesContainer}>
-        {state.articles.length > 0 ? (
-            state.articles.map((article, index) => (
-                <TouchableOpacity 
-                    key={article.id} 
-                    onPress={() => handleArticleClick(article.id, index)} 
-                    activeOpacity={0.7}
-                >
-                    <Text>Debug: Click Me</Text>
-                    <ArticleCard 
-                        title={article.title} 
-                        imageSource={{ uri: article.imageUrl }} 
-                        pdfUrl={article.pdfUrl} 
-                        id={article.id} 
-                        category={article.topic} 
-                    />
-                </TouchableOpacity>
-            ))
-        ) : (
-            <View style={styles.noResultsContainer}>
-                <Text style={styles.noResultsText}>
-                    No articles found for "{state.currentQuery}". Please try a different search term.
-                </Text>
-            </View>
-        )}
-    </View>
+  <View style={styles.articlesContainer}>
+    {state.articles.length > 0 ? (
+      state.articles.map((article, index) => (
+        <ArticleCard 
+        key={article.id}
+        title={article.title} 
+        imageSource={{ uri: article.imageUrl }} 
+        pdfUrl={article.pdfUrl} 
+        id={article.id} 
+        index = {index}
+        category={article.topic}
+        />
+      ))
+    ) : (
+      <View style={styles.noResultsContainer}>
+        <Text style={styles.noResultsText}>
+          No articles found for "{state.currentQuery}". Please try a different search term.
+        </Text>
+      </View>
+    )}
+  </View>
 );
 
   const renderContent = () => {

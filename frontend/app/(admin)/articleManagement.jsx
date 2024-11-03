@@ -207,16 +207,15 @@ const ArticleManagement = () => {
         friction={2}
         rightThreshold={40}
       >
-        <TouchableOpacity
-          onPress={() => handleArticlePress(article)}
-        >
-          <ArticleCard
-            title={article.title}
-            imageSource={{ uri: article.imageUrl }}
-            category={article.topic}
-            articleId={article.displayId}
+         <ArticleCard 
+          key={article.id}
+          title={article.title} 
+          imageSource={{ uri: article.imageUrl }} 
+          pdfUrl={article.pdfUrl} 
+          id={article.id} 
+          category={article.topic}
           />
-        </TouchableOpacity>
+      
       </Swipeable>
     )
   }
