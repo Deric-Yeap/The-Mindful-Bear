@@ -44,6 +44,7 @@ const ArticleManagement = () => {
   const [error, setError] = useState(null)
   const [articles, setArticles] = useState([])
   const [filteredArticles, setFilteredArticles] = useState([])
+  const [searchInput, setSearchInput] = useState(INITIAL_FILTER_STATE.searchQuery)
   const [searchQuery, setSearchQuery] = useState(INITIAL_FILTER_STATE.searchQuery)
   const [isSearching, setIsSearching] = useState(INITIAL_FILTER_STATE.isSearching)
   const [sortOption, setSortOption] = useState(INITIAL_FILTER_STATE.sortOption)
@@ -95,16 +96,15 @@ const ArticleManagement = () => {
     })
   }
 
-  const handleSearch = (searchTerm) => {
-    setIsSearching(Boolean(searchTerm.trim()))
-    setSearchQuery(searchTerm)
-    filterAndSortArticles(selectedTopic, sortOption, articles, searchTerm)
+  const handleSearch = () => {
+    const trimmedSearch = searchInput.trim()
+    setIsSearching(Boolean(trimmedSearch))
+    setSearchQuery(trimmedSearch)
+    filterAndSortArticles(selectedTopic, sortOption, articles, trimmedSearch)
   }
 
   const handleSearchChange = (text) => {
-    setSearchQuery(text)
-    setIsSearching(Boolean(text.trim()))
-    filterAndSortArticles(selectedTopic, sortOption, articles, text)
+    setSearchInput(text)
   }
 
   const handleSortChange = (value) => {
@@ -119,6 +119,7 @@ const ArticleManagement = () => {
 
   // Helper Functions
   const resetFilters = () => {
+    setSearchInput(INITIAL_FILTER_STATE.searchQuery)
     setSearchQuery(INITIAL_FILTER_STATE.searchQuery)
     setSortOption(INITIAL_FILTER_STATE.sortOption)
     setSelectedTopic(INITIAL_FILTER_STATE.selectedTopic)
@@ -331,7 +332,7 @@ const ArticleManagement = () => {
       <ScrollView className="flex-1 bg-optimistic-gray-10">
         <TopBrownSearchBar 
           title="Articles Management"
-          value={searchQuery}
+          value={searchInput}
           onChangeText={handleSearchChange}
           onSearch={handleSearch}
         />
