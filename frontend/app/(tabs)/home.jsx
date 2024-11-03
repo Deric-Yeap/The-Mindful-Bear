@@ -140,6 +140,18 @@ const Home = () => {
             </Text>
           </MetricCard>
           <MetricCard
+            route="/(points)/shop"
+            iconName="shopping-outline"
+            iconColor={colors.empathyOrange40}
+            circleStyle="bg-empathy-orange-10"
+            title="Shop"
+            rightImage={require('../../assets/mindfulJournalMetricCard.png')}
+          >
+            <Text className="font-urbanist-semi-bold text-mindful-brown-80 text-lg">
+              Spend your points to unlock avatars!
+            </Text>
+          </MetricCard>
+          <MetricCard
             route="/(avatar)"
             iconName="account"
             iconColor={colors.empathyOrange40}

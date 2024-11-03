@@ -5,6 +5,7 @@ const PointsLayout = () => {
     <>
       <Stack>
         <Stack.Screen name="points-history" options={{ headerShown: false }} />
+        <Stack.Screen name="shop" options={{ headerShown: false }} />
       </Stack>
     </>
   )

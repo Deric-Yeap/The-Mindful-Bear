@@ -81,13 +81,14 @@ class GachaFragmentView(APIView):
             total_points = 0
 
         if total_points < gachaCost:
-            return Response({"detail":"You do not have enough points."}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"detail":"You do not have sufficient points."}, status=status.HTTP_400_BAD_REQUEST)
         
         avatarList = Avatar.objects.all()
         avatar = gachaFragment(avatarList)
         if avatar is None:
             return Response({"detail":"There is no available avatars to unlock now"}, status=status.HTTP_400_BAD_REQUEST)
-        
+        avatar_data = AvatarSerializer(avatar).data
+        print(avatar_data)
         AchievementPoint.objects.create(userId=request.user, points=-gachaCost, description="Avatar Fragment Gacha")
         user_fragment, created = UserFragment.objects.get_or_create(user_id=user_id, avatar_id=avatar.avatar_id)
         if created:
@@ -96,11 +97,11 @@ class GachaFragmentView(APIView):
             base_points = 10
             points = base_points + (1-avatar.drop_rate)*10 * 5
             AchievementPoint.objects.create(userId=request.user, points=points, description="Fragment is converted into points")
-            return Response({"detail": {"detail": "You have already unlocked this avatar. Fragment is converted into points", "points":points}}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"detail": {"detail": f"You have already unlocked '{avatar_data['title']}'. Fragment is converted into points", "points":points, "avatar_url": avatar_data['avatar_url']}}, status=status.HTTP_400_BAD_REQUEST)
         else:
             user_fragment.quantity += 1
         user_fragment.save()
 
-        avatar_data = AvatarSerializer(avatar).data
+
             
         return Response(avatar_data, status=status.HTTP_200_OK)
