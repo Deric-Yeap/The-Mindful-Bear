@@ -41,7 +41,7 @@ const PdfViewer = ({ pdfUrl,onClose }) => {
 
   
   return (
-    <SafeAreaView className="flex-1 bg-f8f5f1">
+    <SafeAreaView className="flex-1  bg-[#cacac9]">
     <ScrollView className="flex-1" contentContainerStyle={{ flexGrow: 1 }}>
       <StatusBarComponent barStyle="light-content" backgroundColor="#251404" />
       
