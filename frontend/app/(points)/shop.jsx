@@ -1,7 +1,7 @@
 import { View, Text } from 'react-native'
 import LottieView from 'lottie-react-native'
 import { useRef, useState, useEffect } from 'react'
-
+import { useNavigation } from 'expo-router'
 import CustomButton from '../../components/customButton'
 import BackButton from '../../components/backButton'
 import { sumPoints } from '../../api/achievementPoint'
@@ -10,6 +10,7 @@ import Loading from '../../components/loading'
 import ConfirmModal from '../../components/confirmModal'
 
 const Shop = () => {
+  const navigation = useNavigation()
   const [points, setPoints] = useState(null)
   const [avatar, setAvatar] = useState(null)
   const [isModalVisible, setIsModalVisible] = useState(false)
@@ -26,6 +27,9 @@ const Shop = () => {
     } catch (error) {
       console.error(error)
     }
+  }
+  const handleGoToFragmentShop = () => {
+    navigation.navigate('(tabs)', { screen: '(fragmentShop)' })
   }
 
   const handleBoxOpen = async () => {
@@ -107,6 +111,12 @@ const Shop = () => {
           title="Open Box"
           handlePress={handleBoxOpen}
           buttonStyle="w-[50vw] mt-4 bg-empathy-orange-20"
+          textStyle="text-kind-purple-90 font-urbanist-extra-bold "
+        />
+        <CustomButton
+          title="Go to Fragment Shop"
+          handlePress={handleGoToFragmentShop}
+          buttonStyle="w-[60vw] mt-4 bg-empathy-orange-20"
           textStyle="text-kind-purple-90 font-urbanist-extra-bold "
         />
       </View>

@@ -8,7 +8,7 @@ const AvatarCard = ({
   isPurchaseButton,
   imageSource,
   title,
-  subTitle,
+  points,
   handleConfirm,
   isSelected,
 }) => {
@@ -25,11 +25,7 @@ const AvatarCard = ({
             {title}
           </Text>
         )}
-        {subTitle && (
-          <Text className="text-md xs:text-lg font-urbanist-medium">
-            {subTitle}
-          </Text>
-        )}
+        {points && points}
       </View>
 
       <View className="w-full flex flex-row justify-around px-4 pb-4">
@@ -37,7 +33,7 @@ const AvatarCard = ({
           title={
             isPurchaseButton ? 'Purchase' : isSelected ? 'Equipped' : 'Equip'
           }
-          handlePress={isPurchaseButton || isSelected ? null : handleConfirm}
+          handlePress={!isPurchaseButton || isSelected ? null : handleConfirm}
           buttonStyle={`w-full z-10 mr-0 rounded-full ${isSelected ? 'bg-optimistic-gray-30' : 'bg-[#FB8728]'}`}
           textStyle="text-white mr-0"
           disabled={isSelected}
