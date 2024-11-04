@@ -160,7 +160,7 @@ const Home = () => {
             rightImage={require('../../assets/mindfulJournalMetricCard.png')}
           >
             <Text className="font-urbanist-semi-bold text-mindful-brown-80 text-lg">
-              Manage your avatars
+              Manage and expand your avatar collection
             </Text>
           </MetricCard>
         </View>

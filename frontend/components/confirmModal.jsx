@@ -53,7 +53,9 @@ const ConfirmModal = ({
           )}
         </View>
 
-        <View className="w-full flex flex-row justify-around px-4 pb-4">
+        <View
+          className={`w-full flex flex-row justify-around px-4 pb-4 ${lottieSource ? 'mt-6' : ''}`}
+        >
           {isCancelButton && (
             <CustomButton
               title={cancelButtonTitle}
