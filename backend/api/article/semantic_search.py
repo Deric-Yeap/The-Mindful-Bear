@@ -10,6 +10,7 @@ from nltk.corpus import stopwords
 from django.apps import apps
 from django.conf import settings
 from ..common.s3 import create_presigned_url
+import string
 
 # Download required NLTK resources
 nltk.download('punkt', quiet=True)
@@ -53,6 +54,11 @@ class SemanticSearchEngine:
             self.article_embeddings = None
             
             SemanticSearchEngine._is_initialized = True
+
+            self.punctuation = set(string.punctuation)
+            
+            SemanticSearchEngine._is_initialized = True
+            
         
     def fetch_articles_from_api(self):
         """Fetch pre-processed articles from database"""
@@ -95,7 +101,8 @@ class SemanticSearchEngine:
     def extract_key_concepts(self, text):
         """Extract key concepts and entities from text"""
         # Tokenize and tag parts of speech
-        tokens = word_tokenize(text.lower())
+        text = self.preprocess_text(text)
+        tokens = word_tokenize(text)
         pos_tags = nltk.pos_tag(tokens)
         
         # Extract noun phrases and important terms
@@ -148,6 +155,22 @@ class SemanticSearchEngine:
             elif hasattr(settings, 'CLOUDFRONT_DOMAIN'):
                 return f"https://{settings.CLOUDFRONT_DOMAIN}/{pdf_url}"
         return None
+    
+    def preprocess_text(self, text):
+        """
+        Preprocess text by removing punctuation, special characters,
+        and normalizing whitespace
+        """
+        # Convert to lowercase
+        text = text.lower()
+        
+        # Remove punctuation
+        text = ''.join(char for char in text if char not in self.punctuation)
+        
+        # Replace multiple spaces with single space
+        text = ' '.join(text.split())
+        
+        return text
 
     def semantic_search(self, query, top_k=5):
         """Perform semantic search with intent and context awareness"""
@@ -155,12 +178,13 @@ class SemanticSearchEngine:
             if not self.fetch_articles_from_api():
                 return [], None
             
+        processed_query = self.preprocess_text(query)    
         # Detect intent
-        intent_info = self.detect_intent(query)
+        intent_info = self.detect_intent(processed_query)
         self.intent_history.append(intent_info)
         
         # Get query embedding
-        query_embedding = self.sentence_transformer.encode([query])[0]
+        query_embedding = self.sentence_transformer.encode([processed_query])[0]
         
         # Calculate semantic similarity scores
         similarity_scores = cosine_similarity(
@@ -169,7 +193,7 @@ class SemanticSearchEngine:
         )[0]
         
         # Extract key concepts from query
-        query_concepts = self.extract_key_concepts(query)
+        query_concepts = self.extract_key_concepts(processed_query)
         
         # Apply intent-based adjustments
         adjusted_scores = similarity_scores.copy()
