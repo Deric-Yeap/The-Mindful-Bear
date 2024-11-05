@@ -43,5 +43,7 @@ urlpatterns = [
     path("api/userAvatar/", include("api.userAvatar.urls")),
     path("api/article/", include("api.article.urls")),
     path("api/userFragment/", include("api.userFragment.urls")),
-    path("api/searchHistory/", include("api.searchHistory.urls"))
+    path("api/searchHistory/", include("api.searchHistory.urls")),
+    path("api/achievement/", include("api.achievement.urls")),
+    path("api/userAchievement/", include("api.userAchievement.urls")),
 ]
