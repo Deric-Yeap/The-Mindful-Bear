@@ -172,8 +172,9 @@ class SemanticSearchEngine:
         
         return text
 
-    def semantic_search(self, query, top_k=5):
+    def semantic_search(self,user_history_data, query, top_k=5):
         """Perform semantic search with intent and context awareness"""
+        print('snoopy',user_history_data)
         if self.api_articles is None:
             if not self.fetch_articles_from_api():
                 return [], None

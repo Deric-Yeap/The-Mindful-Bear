@@ -7,6 +7,7 @@ from .serializer import ArticleCreateSerializer, ArticleSerializer, ArticleUpdat
 from ..common.permission import CustomDjangoModelPermissions
 from .semantic_search import SemanticSearchEngine
 from rest_framework.permissions import IsAuthenticated
+from ..searchHistory.views import SearchHistoryViewSet
 
 class ArticleCreateView(generics.CreateAPIView):
     permission_classes = [CustomDjangoModelPermissions]
@@ -56,7 +57,7 @@ class ArticleUpdateDestroyView(generics.UpdateAPIView, generics.DestroyAPIView):
         return Response(status=status.HTTP_200_OK)
     
 class SemanticSearchView(generics.ListAPIView):
-    permission_classes = [IsAuthenticated] 
+    permission_classes = [IsAuthenticated]
     serializer_class = SearchResultSerializer
     queryset = Article.objects.all()
     
@@ -79,9 +80,30 @@ class SemanticSearchView(generics.ListAPIView):
                         status=status.HTTP_500_INTERNAL_SERVER_ERROR
                     )
             
+            # Instead of using viewset directly, create an instance and call the method
+            history_viewset = SearchHistoryViewSet()
+            history_viewset.request = request
+            history_viewset.format_kwarg = None
+            
+            try:
+                user_history_response = history_viewset.user_history(request)
+                if user_history_response.status_code == status.HTTP_200_OK:
+                    user_history_data = user_history_response.data
+                else:
+                    return Response(
+                        {"error": "Failed to retrieve user history"},
+                        status=user_history_response.status_code
+                    )
+            except Exception as e:
+                return Response(
+                    {"error": f"Failed to retrieve user history: {str(e)}"},
+                    status=status.HTTP_500_INTERNAL_SERVER_ERROR
+                )
+            
             # Perform search
             results, intent_info = self.search_engine.semantic_search(
-                query, 
+                user_history_data,
+                query,
                 top_k=top_k
             )
             
