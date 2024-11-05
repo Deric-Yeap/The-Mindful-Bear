@@ -61,10 +61,11 @@ const ArticleDiscovery = () => {
             }}
             resizeMode="contain"
           />
-
-          <Text className="text-mindful-brown-80 font-urbanist-extra-bold text-xl mb-2 mt-2 ml-6">
-            How may I help you?
-          </Text>
+  <View className="items-center space-y-2 mb-2">
+            <Text className="text-mindful-brown-80 font-urbanist-extra-bold text-4xl lg:text-5xl">
+              Article Search
+            </Text>
+          </View>
 
           <View
             style={{
@@ -75,7 +76,7 @@ const ArticleDiscovery = () => {
           >
             <View style={{ flexDirection: 'row', alignItems: 'center' }}>
               <TextInput
-                placeholder="Search anything..."
+                placeholder="How may i help you today..."
                 placeholderTextColor="#F7F4F2"
                 value={searchTerm}
                 onChangeText={setSearchTerm}
