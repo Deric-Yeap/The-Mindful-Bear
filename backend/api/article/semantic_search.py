@@ -11,8 +11,9 @@ from django.apps import apps
 from django.conf import settings
 from ..common.s3 import create_presigned_url
 import string
+from datetime import datetime
+from collections import defaultdict
 
-# Download required NLTK resources
 nltk.download('punkt', quiet=True)
 nltk.download('wordnet', quiet=True)
 nltk.download('stopwords', quiet=True)
@@ -28,46 +29,168 @@ class SemanticSearchEngine:
         return cls._instance
 
     def __init__(self, relevancy_threshold=0.5):
-        # Only initialize once
         if not SemanticSearchEngine._is_initialized:
-            # Initialize models
-            self.sentence_transformer = SentenceTransformer('all-MiniLM-L6-v2')
-            self.zero_shot_classifier = pipeline(
-                "zero-shot-classification",
-                model="facebook/bart-large-mnli",
-                device=-1
+            try:
+                self.sentence_transformer = SentenceTransformer('all-MiniLM-L6-v2')
+                self.zero_shot_classifier = pipeline(
+                    "zero-shot-classification",
+                    model="facebook/bart-large-mnli",
+                    device=-1
+                )
+                
+                self.lemmatizer = WordNetLemmatizer()
+                self.stopwords = set(stopwords.words('english'))
+                
+                self.session_history = []
+                self.intent_history = []
+                
+                self.relevancy_threshold = relevancy_threshold
+                
+                self.api_articles = None
+                self.article_embeddings = None
+                
+                self.punctuation = set(string.punctuation)
+                
+                SemanticSearchEngine._is_initialized = True
+            except Exception as e:
+                print(f"Initialization error: {e}")
+                raise
+
+    def preprocess_text(self, text):
+        try:
+            if not isinstance(text, str):
+                return ""
+            
+            text = text.lower()
+            
+            text = ''.join(char for char in text if char not in self.punctuation)
+            
+            text = ' '.join(text.split())
+            
+            return text
+        except Exception as e:
+            print(f"Text preprocessing error: {e}")
+            return ""
+
+    def extract_key_concepts(self, text):
+        try:
+            if not isinstance(text, str):
+                return set()
+
+            tokens = word_tokenize(self.preprocess_text(text))
+            pos_tags = nltk.pos_tag(tokens)
+            
+            key_terms = []
+            for word, tag in pos_tags:
+                if (tag.startswith('NN') or tag.startswith('JJ')) and word not in self.stopwords:
+                    key_terms.append(self.lemmatizer.lemmatize(word))
+            
+            return set(key_terms)
+        except Exception as e:
+            print(f"Key concept extraction error: {e}")
+            return set()
+
+    def detect_intent(self, query):
+        try:
+            candidate_intents = [
+                "find specific information",
+                "explore topic",
+                "compare articles",
+                "get latest updates",
+                "understand concept",
+                "find examples"
+            ]
+            
+            results = self.zero_shot_classifier(
+                query,
+                candidate_intents,
+                multi_label=True
             )
             
-            # Initialize NLP tools
-            self.lemmatizer = WordNetLemmatizer()
-            self.stopwords = set(stopwords.words('english'))
-            
-            # Initialize session context
-            self.session_history = []
-            self.intent_history = []
-            
-            # Set relevancy threshold
-            self.relevancy_threshold = relevancy_threshold
-            
-            # Store the API articles
-            self.api_articles = None
-            self.article_embeddings = None
-            
-            SemanticSearchEngine._is_initialized = True
+            return {
+                'primary_intent': results['labels'][0],
+                'confidence': results['scores'][0],
+                'all_intents': dict(zip(results['labels'], results['scores']))
+            }
+        except Exception as e:
+            print(f"Intent detection error: {e}")
+            return {
+                'primary_intent': "find specific information",
+                'confidence': 1.0,
+                'all_intents': {}
+            }
 
-            self.punctuation = set(string.punctuation)
-            
-            SemanticSearchEngine._is_initialized = True
-            
-        
-    def fetch_articles_from_api(self):
-        """Fetch pre-processed articles from database"""
-        # If articles are already loaded, use them
-        if self.api_articles is not None and self.article_embeddings is not None:
-            print("Using cached articles")
-            return True
-
+    def get_contextual_importance(self, term, session_history):
         try:
+            importance = 1.0
+            if not session_history:
+                return importance
+
+            for past_query in session_history[-3:]:
+                if not isinstance(past_query, str):
+                    continue
+                if term in past_query.lower():
+                    importance += 0.5
+            return importance
+        except Exception as e:
+            print(f"Contextual importance calculation error: {e}")
+            return 1.0
+
+    def get_cloudfront_url(self, pdf_url):
+        try:
+            if not pdf_url:
+                return None
+
+            # Get the presigned url first
+            presigned_url = create_presigned_url(pdf_url)
+            if presigned_url:
+                return presigned_url
+
+            # If presigned URL generation fails, try CloudFront
+            if hasattr(settings, 'CLOUDFRONT_DOMAIN'):
+                return f"https://{settings.CLOUDFRONT_DOMAIN}/{pdf_url}"
+            return None
+        except Exception as e:
+            print(f"CloudFront URL generation error: {e}")
+            return None
+
+    def calculate_article_weights(self, user_history_data):
+        article_weights = {}
+        total_clicks = 0
+
+        history_data = user_history_data.get('data', []) if isinstance(user_history_data, dict) else user_history_data
+
+        for search in history_data:
+            try:
+                search_time = datetime.fromisoformat(search.get('last_searched', '').replace('Z', '+00:00'))
+                time_weight = 1.0 
+
+                clicks = search.get('clicks', [])
+                for click in clicks:
+                    if isinstance(click, dict):  
+                        total_clicks += 1
+                        article_title = click.get('articleTitle', '')
+                        rank_position = click.get('rankPosition', 1)
+
+                        rank_weight = 1.0 / max(rank_position, 1)
+                        if article_title not in article_weights:
+                            article_weights[article_title] = 1.0
+                        article_weights[article_title] += rank_weight * time_weight
+            except Exception as e:
+                print(f"Error processing search entry: {e}")
+                continue
+
+        if total_clicks > 0:
+            for title in article_weights:
+                article_weights[title] = 1.0 + (article_weights[title] / total_clicks)
+
+        return defaultdict(lambda: 1.0, article_weights)
+
+    def fetch_articles_from_api(self):
+        try:
+            if self.api_articles is not None and self.article_embeddings is not None:
+                return True
+
             Article = apps.get_model('article', 'Article')
             articles = Article.objects.all()
             self.api_articles = []
@@ -82,168 +205,161 @@ class SemanticSearchEngine:
                     'article_image_url': article.article_image_url
                 })
             
-            # Create embeddings using title and processed_contents
-            texts = [
-                f"{article['title']} {article['processed_contents']}" 
-                for article in self.api_articles
-            ]
+            texts = [f"{article['title']} {article['processed_contents']}" 
+                    for article in self.api_articles]
             self.article_embeddings = self.sentence_transformer.encode(
                 texts, 
                 show_progress_bar=True
             )
-            print(f"Loaded {len(self.api_articles)} articles successfully")
             return True
-            
         except Exception as e:
             print(f"Error fetching articles: {e}")
+            import traceback
+            traceback.print_exc()
             return False
-    
-    def extract_key_concepts(self, text):
-        """Extract key concepts and entities from text"""
-        # Tokenize and tag parts of speech
-        text = self.preprocess_text(text)
-        tokens = word_tokenize(text)
-        pos_tags = nltk.pos_tag(tokens)
-        
-        # Extract noun phrases and important terms
-        key_terms = []
-        for word, tag in pos_tags:
-            if (tag.startswith('NN') or tag.startswith('JJ')) and word not in self.stopwords:
-                key_terms.append(self.lemmatizer.lemmatize(word))
-        
-        return set(key_terms)
-    
-    def detect_intent(self, query):
-        """Detect the user's search intent using zero-shot classification"""
-        candidate_intents = [
-            "find specific information",
-            "explore topic",
-            "compare articles",
-            "get latest updates",
-            "understand concept",
-            "find examples"
-        ]
-        
-        results = self.zero_shot_classifier(
-            query,
-            candidate_intents,
-            multi_label=True
-        )
-        
-        return {
-            'primary_intent': results['labels'][0],
-            'confidence': results['scores'][0],
-            'all_intents': dict(zip(results['labels'], results['scores']))
-        }
-    
-    def get_contextual_importance(self, term, session_history):
-        """Calculate term importance based on session history"""
-        importance = 1.0
-        for past_query in session_history[-3:]:
-            if term in past_query.lower():
-                importance += 0.5
-        return importance
 
-    def get_cloudfront_url(self, pdf_url):
-        """Generate CloudFront URL for PDF"""
-        if pdf_url:
-            # Get the presigned url first
-            presigned_url = create_presigned_url(pdf_url)
-            if presigned_url:
-                return presigned_url
-            # If presigned URL generation fails, try CloudFront
-            elif hasattr(settings, 'CLOUDFRONT_DOMAIN'):
-                return f"https://{settings.CLOUDFRONT_DOMAIN}/{pdf_url}"
-        return None
-    
-    def preprocess_text(self, text):
-        """
-        Preprocess text by removing punctuation, special characters,
-        and normalizing whitespace
-        """
-        # Convert to lowercase
-        text = text.lower()
-        
-        # Remove punctuation
-        text = ''.join(char for char in text if char not in self.punctuation)
-        
-        # Replace multiple spaces with single space
-        text = ' '.join(text.split())
-        
-        return text
+    def semantic_search(self, user_history_data, query, top_k=5):
+        try:
+            if self.api_articles is None:
+                if not self.fetch_articles_from_api():
+                    return [], None
 
-    def semantic_search(self,user_history_data, query, top_k=5):
-        """Perform semantic search with intent and context awareness"""
-        print('snoopy',user_history_data)
-        if self.api_articles is None:
-            if not self.fetch_articles_from_api():
+            if not query or not isinstance(query, str):
                 return [], None
-            
-        processed_query = self.preprocess_text(query)    
-        # Detect intent
-        intent_info = self.detect_intent(processed_query)
-        self.intent_history.append(intent_info)
-        
-        # Get query embedding
-        query_embedding = self.sentence_transformer.encode([processed_query])[0]
-        
-        # Calculate semantic similarity scores
-        similarity_scores = cosine_similarity(
-            [query_embedding], 
-            self.article_embeddings
-        )[0]
-        
-        # Extract key concepts from query
-        query_concepts = self.extract_key_concepts(processed_query)
-        
-        # Apply intent-based adjustments
-        adjusted_scores = similarity_scores.copy()
-        for idx, article in enumerate(self.api_articles):
-            article_text = f"{article['title']} {article['processed_contents']}"
-            article_concepts = self.extract_key_concepts(article_text)
-            
-            concept_overlap = len(query_concepts & article_concepts) / max(len(query_concepts), 1)
-            
-            if intent_info['primary_intent'] == 'find specific information':
-                adjusted_scores[idx] *= (1 + concept_overlap)
-            elif intent_info['primary_intent'] == 'explore topic':
-                adjusted_scores[idx] *= (1 + 0.5 * len(article_concepts))
-            
-            if self.session_history:
-                for term in query_concepts:
-                    importance = self.get_contextual_importance(term, self.session_history)
-                    if term in article_text.lower():
-                        adjusted_scores[idx] *= importance
-        
-        # Filter results based on relevancy threshold
-        relevant_indices = np.where(adjusted_scores >= self.relevancy_threshold)[0]
-        if len(relevant_indices) == 0:
-            return [], intent_info
-        
-        # Get top results
-        top_indices = relevant_indices[np.argsort(adjusted_scores[relevant_indices])[::-1][:top_k]]
-        
-        # Format results
-        results = []
-        for idx in top_indices:
-            article = self.api_articles[idx]
-            results.append({
-                'article_id': article['article_id'],
-                'title': article['title'],
-                'topic': article['topic'],
-                'processed_contents': article['processed_contents'],
-                'article_pdf_url': self.get_cloudfront_url(article['article_pdf_url']),
-                'article_image_url': article['article_image_url'],
-                'score': float(adjusted_scores[idx])
-            })
-        
-        # Update session history
-        self.session_history.append(query)
-        
-        return results, intent_info
 
+            processed_query = self.preprocess_text(query)
+            query_embedding = self.sentence_transformer.encode([processed_query])[0]
+            
+            print("User history type:", type(user_history_data))
+            print("User history content:", user_history_data)
+
+            similar_queries = []
+            history_data = []
+            if isinstance(user_history_data, dict):
+                history_data = user_history_data.get('data', [])
+            elif isinstance(user_history_data, list):
+                history_data = user_history_data
+
+            for search in history_data:
+                if isinstance(search, dict) and 'query' in search:
+                    past_query = search['query']
+                    past_embedding = self.sentence_transformer.encode([past_query])[0]
+                    similarity = cosine_similarity([query_embedding], [past_embedding])[0][0]
+
+                    if similarity > 0.7:  
+                        similar_queries.append(past_query)
+
+            similarity_scores = cosine_similarity(
+                [query_embedding], 
+                self.article_embeddings
+            )[0]
+
+            intent_info = self.detect_intent(processed_query)
+            self.intent_history.append(intent_info)
+
+            article_weights = {}
+            total_clicks = 0
+
+            for search in history_data:
+                try:
+                    search_time = datetime.fromisoformat(search.get('last_searched', '').replace('Z', '+00:00'))
+                    time_weight = 1.0
+
+                    clicks = search.get('clicks', [])
+                    for click in clicks:
+                        if isinstance(click, dict):
+                            total_clicks += 1
+                            article_title = click.get('articleTitle', '')
+                            rank_position = click.get('rankPosition', 1)
+
+                            rank_weight = 1.0 / max(rank_position, 1)
+                            if article_title not in article_weights:
+                                article_weights[article_title] = 1.0
+                            article_weights[article_title] += rank_weight * time_weight
+                except Exception as e:
+                    print(f"Error processing search entry: {e}")
+                    continue
+
+            if total_clicks > 0:
+                for title in article_weights:
+                    article_weights[title] = 1.0 + (article_weights[title] / total_clicks)
+
+            article_weights = defaultdict(lambda: 1.0, article_weights)
+
+            query_concepts = self.extract_key_concepts(processed_query)
+            for past_query in similar_queries:
+                query_concepts.update(self.extract_key_concepts(past_query))
+            
+            adjusted_scores = similarity_scores.copy()
+            for idx, article in enumerate(self.api_articles):
+                weight = article_weights[article['title']]
+                adjusted_scores[idx] *= weight
+                
+                article_text = f"{article['title']} {article['processed_contents']}"
+                article_concepts = self.extract_key_concepts(article_text)
+                
+                concept_overlap = len(query_concepts & article_concepts) / max(len(query_concepts), 1)
+                
+                if intent_info['primary_intent'] == 'find specific information':
+                    adjusted_scores[idx] *= (1 + concept_overlap)
+                elif intent_info['primary_intent'] == 'explore topic':
+                    adjusted_scores[idx] *= (1 + 0.5 * len(article_concepts))
+                elif intent_info['primary_intent'] == 'get latest updates':
+                    if 'date' in article:
+                        adjusted_scores[idx] *= 1.5
+
+
+                for search in history_data:
+                    if search.get('query') in similar_queries:
+                        for click in search.get('clicks', []):
+                            if click.get('articleTitle') == article['title']:
+                                adjusted_scores[idx] *= 1.2  
+            
+            relevant_indices = np.where(adjusted_scores >= self.relevancy_threshold)[0]
+            if len(relevant_indices) == 0:
+                return [], intent_info
+            
+            top_indices = relevant_indices[np.argsort(adjusted_scores[relevant_indices])[::-1][:top_k]]
+            
+            results = []
+            for idx in top_indices:
+                article = self.api_articles[idx]
+                preview_text = f"{article['title']} {article['processed_contents']}"[:200] + "..."
+                
+                result = {
+                    'article_id': article.get('article_id'),
+                    'title': article['title'],
+                    'topic': article['topic'],
+                    'score': float(adjusted_scores[idx]),
+                    'personalization_weight': float(article_weights[article['title']]),
+                    'text': preview_text
+                }
+                
+                if article.get('article_pdf_url'):
+                    result['article_pdf_url'] = self.get_cloudfront_url(article['article_pdf_url'])
+                if article.get('article_image_url'):
+                    result['article_image_url'] = article['article_image_url']
+                
+                results.append(result)
+
+            print("\nSimilar queries found:", similar_queries)
+            print("Query concepts:", query_concepts)
+            
+            self.session_history.append(query)
+            
+            return results, intent_info
+
+        except Exception as e:
+            print(f"Semantic search error: {e}")
+            print(f"Error details: {str(e)}")
+            import traceback
+            traceback.print_exc()
+            return [], None
     def force_refresh(self):
-        """Force refresh the article cache if needed"""
-        self.api_articles = None
-        self.article_embeddings = None
-        return self.fetch_articles_from_api()
+        try:
+            self.api_articles = None
+            self.article_embeddings = None
+            return self.fetch_articles_from_api()
+        except Exception as e:
+            print(f"Force refresh error: {e}")
+            return False

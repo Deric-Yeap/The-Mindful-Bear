@@ -80,7 +80,7 @@ class SemanticSearchView(generics.ListAPIView):
                         status=status.HTTP_500_INTERNAL_SERVER_ERROR
                     )
             
-            # Instead of using viewset directly, create an instance and call the method
+            
             history_viewset = SearchHistoryViewSet()
             history_viewset.request = request
             history_viewset.format_kwarg = None
