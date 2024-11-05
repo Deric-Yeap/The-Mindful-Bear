@@ -24,47 +24,48 @@ const ArticleCreator = () => {
   const [modalMessage, setModalMessage] = useState('')
 
   const handleSubmit = async () => {
-    if (!title || !content || !topic || !articleImageUrl) {
-      Alert.alert('Please fill in all required fields and provide an image URL.')
-      return
+    if (!title|| !content  || !topic || !articleImageUrl) {  
+        Alert.alert('Please fill in all required fields and provide an image URL.')
+        return
     }
 
     if (!pdfFile) {
-      Alert.alert('Please upload a PDF file.')
-      return
+        Alert.alert('Please upload a PDF file.')
+        return
     }
 
     const formData = new FormData()
     formData.append('title', title)
-    formData.append('content', content)
     formData.append('topic', topic)
+    formData.append('processed_contents',content)
     formData.append('article_image_url', articleImageUrl)
     
+    // Properly format the PDF file for upload
     if (pdfFile) {
-      formData.append('article_pdf_url', {
-        uri: pdfFile.uri,
-        name: pdfFile.name,
-        type: pdfFile.type
-      })
+        formData.append('article_pdf_url', {
+            uri: pdfFile.uri,
+            name: pdfFile.name || 'document.pdf',
+            type: 'application/pdf'
+        })
     }
 
     try {
-      await axiosInstance.post('article/create', formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
-      })
-      setModalMessage('created')
-      setShowSuccess(true)
-      resetForm()
+        await axiosInstance.post('article/create', formData, {
+            headers: {
+                'Content-Type': 'multipart/form-data',
+            },
+        })
+        setModalMessage('created')
+        setShowSuccess(true)
+        resetForm()
     } catch (error) {
-      console.error(error)
-      Alert.alert(
-        'Error creating article:',
-        error.response?.data?.message || JSON.stringify(error.response?.data)
-      )
+        console.error(error)
+        Alert.alert(
+            'Error creating article:',
+            error.response?.data?.message || JSON.stringify(error.response?.data)
+        )
     }
-  }
+}
 
   const resetForm = () => {
     setTitle('')
@@ -96,7 +97,7 @@ const ArticleCreator = () => {
 
   const handleConfirm = () => {
     setShowSuccess(false)
-    router.push('/articlemanagement')
+    router.push('/articleManagement')
   }
 
   return (
@@ -111,7 +112,7 @@ const ArticleCreator = () => {
           handleChange={setTitle}
           customStyles="m-4"
         />
-        <FormField
+         <FormField
           title="Content"
           iconName="text-box-outline"
           value={content}
