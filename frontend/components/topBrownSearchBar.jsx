@@ -5,7 +5,7 @@ import BackButton from '../components/backButton'
 import { useNavigation } from '@react-navigation/native'
 import { featureFlags } from '../common/featureFlags'
 
-const TopBrownSearchBar = ({ title, value, onChangeText, onSearch, showBackButton = true }) => {
+const TopBrownSearchBar = ({ title, value, onChangeText, onSearch, showBackButton = true, showSearchBar = true }) => {
   const navigation = useNavigation()
   const [searchTerm, setSearchTerm] = useState(value)
 
@@ -14,13 +14,13 @@ const TopBrownSearchBar = ({ title, value, onChangeText, onSearch, showBackButto
   }
 
   return (
-    <View className="bg-mindful-brown-100 p-4 pt-2 rounded-b-[32]">
+    <View className={`bg-mindful-brown-100 ${showSearchBar ? 'p-4 pt-2' : 'p-6 pt-4'} rounded-b-[32]`}>
        {showBackButton ? (
         <BackButton title={title} />
       ) : (
         <Text className="text-xl font-semibold text-white mb-2">{title}</Text>
       )}
-      {featureFlags.isSearchBar && (
+      {featureFlags.isSearchBar && showSearchBar && (
         <View className="flex-row items-center mt-4">
           <TextInput
             placeholder="Search anything..."
