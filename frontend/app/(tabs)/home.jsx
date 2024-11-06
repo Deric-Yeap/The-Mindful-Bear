@@ -68,8 +68,8 @@ const Home = () => {
     {
       route: "/(points)/points-history",
       iconName: "trophy-outline",
-      iconColor: colors.empathyOrange40,
-      circleStyle: "bg-empathy-orange-10",
+      iconColor: colors.serenityGreen80,
+      circleStyle: "bg-serenity-green-10",
       title: "Points Earned",
       bodyText: "View your points history.",
       category: "Achievement"
@@ -77,8 +77,8 @@ const Home = () => {
     {
       route: "/(points)/shop",
       iconName: "cart-outline",
-      iconColor: colors.empathyOrange40,
-      circleStyle: "bg-empathy-orange-10",
+      iconColor: colors.serenityGreen80,
+      circleStyle: "bg-serenity-green-10",
       title: "Shop",
       bodyText: "Spend your points to unlock avatars!",
       category: "Achievement"
@@ -86,8 +86,8 @@ const Home = () => {
     {
       route: "/(avatar)",
       iconName: "account-circle-outline",
-      iconColor: colors.empathyOrange40,
-      circleStyle: "bg-empathy-orange-10",
+      iconColor: colors.serenityGreen80,
+      circleStyle: "bg-serenity-green-10",
       title: "My Avatars",
       bodyText: "Manage and expand your avatar collection",
       category: "Achievement"
