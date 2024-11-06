@@ -94,7 +94,7 @@ const Home = () => {
               </Text>
               <MetricCard
                 route="/(article)/article-discovery"
-                iconName="book-plus-outline"
+                iconName="newspaper"
                 iconColor={colors.kindPurple50}
                 circleStyle="bg-kind-purple-10"
                 title="Article Discovery Made Easy"
@@ -112,11 +112,10 @@ const Home = () => {
               </Text>
               <MetricCard
                 route="/favourite"
-                iconName="book-plus-outline"
-                iconColor={colors.empathyOrange40}
+                iconName="heart-outline"
+                iconColor={colors.presentRed40}
                 circleStyle="bg-empathy-orange-10"
                 title="Favourite Landmarks"
-                rightImage={require('../../assets/mindfulJournalMetricCard.png')}
               >
                 <Text className="font-urbanist-semi-bold text-mindful-brown-80 text-lg">
                   View your favourite landmarks here.
@@ -130,10 +129,9 @@ const Home = () => {
           <MetricCard
             route="/(points)/points-history"
             iconName="diamond-stone"
-            iconColor={colors.empathyOrange40}
-            circleStyle="bg-empathy-orange-10"
+            iconColor={colors.serenityGreen70}
+            circleStyle="bg-serenity-green-10"
             title="Points Earned"
-            rightImage={require('../../assets/mindfulJournalMetricCard.png')}
           >
             <Text className="font-urbanist-semi-bold text-mindful-brown-80 text-lg">
               View your points history.
@@ -142,10 +140,9 @@ const Home = () => {
           <MetricCard
             route="/(points)/shop"
             iconName="shopping-outline"
-            iconColor={colors.empathyOrange40}
-            circleStyle="bg-empathy-orange-10"
+            iconColor={colors.serenityGreen70}
+            circleStyle="bg-serenity-green-10"
             title="Shop"
-            rightImage={require('../../assets/mindfulJournalMetricCard.png')}
           >
             <Text className="font-urbanist-semi-bold text-mindful-brown-80 text-lg">
               Spend your points to unlock avatars!
@@ -154,10 +151,9 @@ const Home = () => {
           <MetricCard
             route="/(avatar)"
             iconName="account"
-            iconColor={colors.empathyOrange40}
-            circleStyle="bg-empathy-orange-10"
+            iconColor={colors.serenityGreen70}
+            circleStyle="bg-serenity-green-10"
             title="My Avatars"
-            rightImage={require('../../assets/mindfulJournalMetricCard.png')}
           >
             <Text className="font-urbanist-semi-bold text-mindful-brown-80 text-lg">
               Manage and expand your avatar collection
