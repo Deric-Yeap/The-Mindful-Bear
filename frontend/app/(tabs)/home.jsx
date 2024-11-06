@@ -123,12 +123,6 @@ const Home = () => {
     <SafeAreaView className="flex-1 bg-optimistic-gray-10">
       <ScrollView className="mb-12">
         <StatusBarComponent barStyle="light-content" backgroundColor="#251404" />
-        {/* <TopBrownSearchBar
-          title={`Welcome, ${user.name}!`}
-          value={searchTerm}
-          onChangeText={handleSearch}
-          onSearch={handleSearch}
-        /> */}
         <TopBrownSearchBar title={`Welcome, ${user.name}!`} showBackButton={false} showSearchBar={false} />
         <View className="bg-optimistic-gray-10 p-4 rounded-lg mb-4">
           <Link href="/map" asChild>
