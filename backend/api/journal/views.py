@@ -396,6 +396,11 @@ class JournalClassificationView(APIView):
         # Prepare the final output format
         formatted_output = []
         for topic, keywords in aggregated_topic_keywords.items():
+            # Skip adding "Unrelated" topics to the output
+            if topic == "Unrelated":
+                continue
+
+            # Sort keywords by count and select the top 10
             sorted_keywords = sorted(keywords.items(), key=lambda x: x[1], reverse=True)[:10]
             formatted_output.append({
                 "topic": topic,
