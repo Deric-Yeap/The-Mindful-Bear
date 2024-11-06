@@ -22,6 +22,7 @@ const TabBar = ({ state, descriptors, navigation }) => {
     '(admin)',
     '(avatar)',
     '(fragmentShop)',
+    'favourite',
     '(article)' 
   ])
 

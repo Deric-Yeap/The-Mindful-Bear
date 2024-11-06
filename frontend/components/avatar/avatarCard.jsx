@@ -33,7 +33,7 @@ const AvatarCard = ({
           title={
             isPurchaseButton ? 'Purchase' : isSelected ? 'Equipped' : 'Equip'
           }
-          handlePress={!isPurchaseButton || isSelected ? null : handleConfirm}
+          handlePress={handleConfirm}
           buttonStyle={`w-full z-10 mr-0 rounded-full ${isSelected ? 'bg-optimistic-gray-30' : 'bg-[#FB8728]'}`}
           textStyle="text-white mr-0"
           disabled={isSelected}

@@ -6,11 +6,16 @@ import {
   ImageBackground,
   ScrollView,
 } from 'react-native'
-import { getFavouriteLandmarks } from '../api/landmark'
-import BackButton from '../components/backButton'
+import { getFavouriteLandmarks } from '../../api/landmark'
+import BackButton from '../../components/backButton'
+import { useLocalSearchParams, useRouter } from 'expo-router'
+import { getGeoJson } from '../../common/getGeoJson'
+
 
 const Favourite = () => {
+  const router = useRouter()
   const [landmarks, setLandmarks] = useState([])
+  const [landmarksData, setLandmarksData] = useState([])
 
   useEffect(() => {
     // Fetch favourite landmarks
@@ -18,9 +23,11 @@ const Favourite = () => {
       try {
         const response = await getFavouriteLandmarks()
         setLandmarks(response)
+        
+        setLandmarksData(getGeoJson(response, response))
       } catch (error) {
         console.error('Failed to fetch landmarks', error)
-      }
+      }            
     }
 
     fetchFavourites()
@@ -40,7 +47,7 @@ const Favourite = () => {
           No favourite landmarks available.
         </Text>
       ) : (
-        landmarks.map((landmark) => (
+        landmarks.map((landmark, index) => (
           <View
             key={landmark.landmark_id}
             className="mb-6 rounded-xl overflow-hidden border border-mindful-brown-30 shadow-lg"
@@ -66,7 +73,20 @@ const Favourite = () => {
                   </Text>
                 </View>
                 <TouchableOpacity className="bg-empathy-orange-50 p-2 rounded-lg mt-4">
-                  <Text className="text-white font-urbanist-bold text-center">
+                  <Text className="text-white font-urbanist-bold text-center" onPress={() =>
+                    router.push({
+                      pathname: '/map',
+                      params: {
+                        isRedirectedForms: false, 
+                        selectedLandmarkData: JSON.stringify(landmarksData.features[index]),
+                        sessionStarted: false,
+                        isClickTravel: false, 
+                        isForceStart: false, 
+                        isGeneric: true,
+                      },
+                    })
+                  }
+                  >
                     View Details
                   </Text>
                 </TouchableOpacity>
