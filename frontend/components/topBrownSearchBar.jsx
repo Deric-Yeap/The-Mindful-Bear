@@ -20,7 +20,7 @@ const TopBrownSearchBar = ({ title, value, onChangeText, onSearch, showBackButto
       ) : (
         <Text className="text-xl font-semibold text-white mb-2">{title}</Text>
       )}
-      {featureFlags.isSearchBar && showSearchBar && (
+      {showSearchBar && (
         <View className="flex-row items-center mt-4">
           <TextInput
             placeholder="Search anything..."
