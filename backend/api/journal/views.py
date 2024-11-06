@@ -326,6 +326,9 @@ class JournalEntryViewSet(viewsets.ViewSet):
 from ..common.topic_classifier import classify_text
 from ..common.text_processing import split_sentences 
 from collections import defaultdict
+from datetime import datetime
+import pytz
+
 
 class JournalClassificationView(APIView):
     #def post(self, request):
@@ -334,30 +337,48 @@ class JournalClassificationView(APIView):
         #journalTexts = [journal.journal_text for journal in journals] #just a random example, transform your own data to return
        # journal['predicted_labels'] = classify_text(journal_text)
         #return Response({"result": journalTexts}, status=status.HTTP_200_OK)
-   def get(self, request):
+    def get(self, request):
         year = request.query_params.get('year')
         month = request.query_params.get('month')
 
-        # Filter by year and month if provided
+        # Define timezone for Singapore (SGT) and UTC
+        sgt_timezone = pytz.timezone("Asia/Singapore")
+        utc_timezone = pytz.UTC
+
+        # Convert the SGT date range to UTC if year and month are provided
         if year and month:
             try:
                 year = int(year)
                 month = int(month)
-                journals = Journal.objects.filter(upload_date__year=year, upload_date__month=month)
+
+                # Define the start and end of the month in SGT
+                start_date_sgt = sgt_timezone.localize(datetime(year, month, 1, 0, 0, 0))
+                
+                # Calculate the end of the month in SGT
+                if month == 12:
+                    end_date_sgt = sgt_timezone.localize(datetime(year + 1, 1, 1, 0, 0, 0))
+                else:
+                    end_date_sgt = sgt_timezone.localize(datetime(year, month + 1, 1, 0, 0, 0))
+
+                # Convert start and end of the month to UTC for querying in Supabase
+                start_date_utc = start_date_sgt.astimezone(utc_timezone)
+                end_date_utc = end_date_sgt.astimezone(utc_timezone)
+
+                # Filter journals by the UTC datetime range in Supabase
+                journals = Journal.objects.filter(upload_date__gte=start_date_utc, upload_date__lt=end_date_utc)
             except ValueError:
                 return Response({"error": "Year and month must be integers."}, status=status.HTTP_400_BAD_REQUEST)
         else:
             journals = Journal.objects.all()
-            
+
+        # Process journals for topic classification and keyword aggregation
         aggregated_topic_keywords = defaultdict(lambda: defaultdict(int))
 
-        # Process each journal entry and accumulate keyword counts
         for journal in journals:
-            journal_text = journal.journal_text
-            print(f"Processing journal entry: '{journal_text}'")
-            topic_keyword_counts = classify_text(journal_text)
+            # Perform classification and extract keywords
+            topic_keyword_counts = classify_text(journal.journal_text)
 
-            # Aggregate counts across all journal entries
+            # Aggregate keyword counts across all journal entries
             for topic, keywords in topic_keyword_counts.items():
                 for keyword, count in keywords.items():
                     aggregated_topic_keywords[topic][keyword] += count
@@ -365,7 +386,6 @@ class JournalClassificationView(APIView):
         # Prepare the final output format
         formatted_output = []
         for topic, keywords in aggregated_topic_keywords.items():
-            # Sort keywords by count and select top 10
             sorted_keywords = sorted(keywords.items(), key=lambda x: x[1], reverse=True)[:10]
             formatted_output.append({
                 "topic": topic,
@@ -378,7 +398,6 @@ class JournalClassificationView(APIView):
                 ]
             })
 
-        # Return response
         return Response({
             'code': 200,
             'data': {
