@@ -32,14 +32,10 @@ const ArticleDiscovery = () => {
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: '#BEE2F8' }}>
-      <BackButton
-        buttonStyle=" left-4 top-12 z-10"
-        className="absolute"
-        tabName="(tabs)"
-        screenName="home"
-      />
+   <BackButton buttonStyle=" left-6 top-15 z-10" className="absolute" tabName="(tabs)" screenName="home" />
 
-      <ScrollView>
+    <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
+    
         <View
           className="bg-serenity-green-50 p-3 h-full items-center mt-[screenHeight/3] rounded-t-full w-[150vw] -left-[25vw]"
           style={{
