@@ -90,6 +90,15 @@ const Home = () => {
       category: 'Achievement',
     },
     {
+      route: '/(achievement)',
+      iconName: 'trophy-award',
+      iconColor: colors.serenityGreen80,
+      circleStyle: 'bg-serenity-green-10',
+      title: 'My Achievement Badges',
+      bodyText: 'View your achievements!',
+      category: 'Achievement',
+    },
+    {
       route: '/(points)/shop',
       iconName: 'cart-outline',
       iconColor: colors.serenityGreen80,
