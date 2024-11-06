@@ -24,4 +24,3 @@ pytz
 transformers
 scipy
 torch
-scikit-learn
