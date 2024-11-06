@@ -3,6 +3,8 @@ from rest_framework import generics, status
 from rest_framework.views import View
 from rest_framework.response import Response
 
+from ..achievement.serializer import AchievementSerializer
+
 from ..achievement.views import checkAchievementAttainedView
 from .models import UserAchievement
 from .serializer import UserAchievementSerializer, UserAchievementCreateSerializer, UserAchievementUpdateSerializer
@@ -82,6 +84,8 @@ class checkUserAchievementsView(generics.GenericAPIView):
         user = request.user
         attained_achievements = response.get('attained_achievements', [])
 
+        newly_created_achievements = []
+
         for achievement_data in attained_achievements:
             achievement_id = achievement_data['id']
             try:
@@ -92,6 +96,7 @@ class checkUserAchievementsView(generics.GenericAPIView):
                 )
                 if created:
                     print(f"Created new UserAchievement for user {user.user_id} and achievement {achievement_id}.")
+                    newly_created_achievements.append(achievement_id)
                 else:
                     print(f"UserAchievement already exists for user {user.user_id} and achievement {achievement_id}.")
             except Achievement.DoesNotExist:
@@ -99,10 +104,9 @@ class checkUserAchievementsView(generics.GenericAPIView):
 
         user_achievements = UserAchievement.objects.filter(user=user)
         serializer = UserAchievementSerializer(user_achievements, many=True)
+        
 
         return Response({
-            'current_journal_streak': response.get('current_journal_streak'),
-            'current_login_streak': response.get('current_login_streak'),
-            'attained_achievements': attained_achievements,
-            'user_achievements': serializer.data
+            'user_achievements': serializer.data,
+            'newly_created_achievements': newly_created_achievements
         }, status=status.HTTP_200_OK)
