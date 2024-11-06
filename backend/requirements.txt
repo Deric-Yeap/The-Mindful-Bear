@@ -26,3 +26,4 @@ scipy
 torch
 scikit-learn
 sentence_transformers
+nltk

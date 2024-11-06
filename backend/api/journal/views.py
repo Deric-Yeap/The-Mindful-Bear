@@ -380,6 +380,15 @@ class JournalClassificationView(APIView):
                 return Response({"error": "Year and month must be integers."}, status=status.HTTP_400_BAD_REQUEST)
         else:
             journals = Journal.objects.all()
+            
+            if not journals.exists():
+                return Response({
+                    'code': 404,
+                    'message': 'No journal entries found for the selected date range.',
+                    'data': [],
+                    'error_description': 'No journal entries available for the chosen year and month.'
+                }, status=status.HTTP_404_NOT_FOUND)
+        
 
         # Process journals for topic classification and keyword aggregation
         aggregated_topic_keywords = defaultdict(lambda: defaultdict(int))
@@ -393,25 +402,36 @@ class JournalClassificationView(APIView):
                 for keyword, count in keywords.items():
                     aggregated_topic_keywords[topic][keyword] += count
 
+        # Define the desired order for topics
+        desired_order = [
+            "Patient Care Excellence",
+            "Patient Care Challenges",
+            "Personal / Emotional Growth",
+            "Personal / Emotional Struggles",
+            "Professional Development / Career Wellness",
+            "Workplace Challenges"
+        ]
+
         # Prepare the final output format
         formatted_output = []
-        for topic, keywords in aggregated_topic_keywords.items():
-            # Skip adding "Unrelated" topics to the output
-            if topic == "Unrelated":
-                continue
-
-            # Sort keywords by count and select the top 10
-            sorted_keywords = sorted(keywords.items(), key=lambda x: x[1], reverse=True)[:10]
-            formatted_output.append({
-                "topic": topic,
-                "top_reasons": [
-                    {
-                        "reason": keyword,
-                        "mentions": count
-                    }
-                    for keyword, count in sorted_keywords
-                ]
-            })
+        for topic in desired_order:
+            if topic in aggregated_topic_keywords:
+                # Sort keywords by count and select the top 10
+                sorted_keywords = sorted(
+                    aggregated_topic_keywords[topic].items(), 
+                    key=lambda x: x[1], 
+                    reverse=True
+                )[:10]
+                formatted_output.append({
+                    "topic": topic,
+                    "top_reasons": [
+                        {
+                            "reason": keyword,
+                            "mentions": count
+                        }
+                        for keyword, count in sorted_keywords
+                    ]
+                })
 
         return Response({
             'code': 200,

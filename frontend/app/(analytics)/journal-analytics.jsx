@@ -22,6 +22,7 @@ const JournalAnalytics = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [classificationData, setClassificationData] = useState([]);
+  const [classificationError, setClassificationError] = useState(null);
   const [lastRefreshTime, setLastRefreshTime] = useState(null);
   
   const optionList = ['daily', 'monthly', 'yearly'];
@@ -62,28 +63,40 @@ const JournalAnalytics = () => {
     fetchJournalData();
   }, [selectedBear, selectedOption]);
 
-  //Topic classification: Fetch classification data with optional year and month filtering
+  // Topic classification: Fetch classification data with optional year and month filtering
   const fetchClassificationData = async () => {
     try {
       const params = {};
       if (year) params.year = year;
       if (month) params.month = month;
-
-      const response = await getJournalClassification(params); // Correct API call
-      console.log("Full response from getJournalClassification:", response);
-
-      const entries = response?.data?.classified_entries;
-      if (Array.isArray(entries)) {
-        setClassificationData(entries);
-      } else {
-        console.warn("Unexpected response structure:", response);
+  
+      const response = await getJournalClassification(params); // Make sure the response is awaited before logging
+  
+      if (!response) {
+        console.warn("No response received from API.");
+        setClassificationError("No response from the server.");
+        return;
+      }
+  
+      // Handle the structure of the response
+      if (response.code === 404 || response.status === 404) {
         setClassificationData([]);
+        setClassificationError(response?.error_description || 'No journal entries found for the selected date range.');
+      } else {
+        const entries = response?.data?.classified_entries;
+        if (Array.isArray(entries)) {
+          setClassificationData(entries);
+          setClassificationError(null);
+        } else {
+          console.warn("Unexpected response structure:", response);
+          setClassificationData([]);
+        }
       }
     } catch (error) {
       console.error("Failed to fetch classification data:", error);
+      setClassificationError('An error occurred while fetching classification data.');
     }
   };
-
   useEffect(() => {
     fetchClassificationData();
   }, [year, month]); // Trigger re-fetch when year or month changes
@@ -251,6 +264,23 @@ const JournalAnalytics = () => {
           }}
         />
       </View>
+
+        {/* Display classification error message if no data is found */}
+        {classificationError && (
+          <Text style={{ color: 'grey', margin: 20, textAlign: 'center', fontSize: 16 }}>
+            {classificationError === 'An error occurred while fetching classification data.'
+              ? "Oops! It seems there's an issue with the date input. Please check and try again with a valid date."
+              : classificationError}
+          </Text>
+        )}
+
+        {/* Display message if no relevant journal entries are found */}
+        {classificationData.length === 0 && !classificationError && (
+          <Text style={{ color: 'gray', margin: 20, textAlign: 'center', fontSize: 16 }}>
+            No relevant journal entries found for the selected date range.
+          </Text>
+        )}
+
 
 
         {/* Topic classification entries display */}

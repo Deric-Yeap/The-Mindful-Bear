@@ -5,9 +5,9 @@ import joblib
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.linear_model import LogisticRegression
 from sklearn.multioutput import MultiOutputClassifier
+import nltk
 from nltk.corpus import stopwords
 from nltk.stem import WordNetLemmatizer
-import nltk
 from .text_processing import preprocess_for_keywords
 
 nltk.download('stopwords')
