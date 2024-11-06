@@ -91,6 +91,9 @@ const Map = () => {
         console.error('Error parsing selected landmark data:', error)
       }
     }
+    if (sessionStarted !== 'true'){      
+      setIsBottomSheetOpen(true)          
+    }
     setIsRedirectedForms(isRedirected === 'true')
   }, [
     sessionStarted,
@@ -270,8 +273,6 @@ const Map = () => {
   const handleSessionStart = (isClickTravel) => {
     let sessionId = null
     const currentStartDateTime = getCurrentDateTime()
-    console.log('sessin')
-    console.log(isForceStart)
     setForm((prevForm) => {
       const updatedForm = {
         ...prevForm,
@@ -377,7 +378,7 @@ const Map = () => {
       handleSessionStart(true)
       return
     }
-    console.log(isForceStart)
+    
     if (isForceStart && isSessionStarted) {
       startExercise()
       return
@@ -391,8 +392,7 @@ const Map = () => {
             geometries: 'geojson',
             access_token: process.env.MAPBOX_PUBLIC_KEY,
           })
-      )
-      console.log('direction fetched')
+      )      
       let data = await response.json()
       let lineStringGeoJSON = {
         type: 'FeatureCollection',

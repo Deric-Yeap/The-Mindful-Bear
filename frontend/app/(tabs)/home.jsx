@@ -94,7 +94,7 @@ const Home = () => {
               </Text>
               <MetricCard
                 route="/(article)/article-discovery"
-                iconName="book-plus-outline"
+                iconName="magnify"
                 iconColor={colors.kindPurple50}
                 circleStyle="bg-kind-purple-10"
                 title="Article Discovery Made Easy"
@@ -112,9 +112,9 @@ const Home = () => {
               </Text>
               <MetricCard
                 route="/favourite"
-                iconName="book-plus-outline"
-                iconColor={colors.empathyOrange40}
-                circleStyle="bg-empathy-orange-10"
+                iconName="heart-outline"
+                iconColor={colors.presentRed60}
+                circleStyle="bg-present-red-10"
                 title="Favourite Landmarks"
                 rightImage={require('../../assets/mindfulJournalMetricCard.png')}
               >
