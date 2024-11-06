@@ -6,15 +6,17 @@ import { useSelector } from 'react-redux'
 import { setIsShownNav } from '../../redux/slices/isShownNavSlice'
 
 const Questionaire = () => {
-  const {    
+  const {
     isRedirectedForms,
     selectedLandmarkData,
     sessionID,
-    sessionStarted,      
+    sessionStarted,
     start,
     isClickTravel,
-    completedForms: initialCompletedForms,    
-  } = useLocalSearchParams()  
+    isForceStart,
+    completedForms: initialCompletedForms,
+    isGeneric,
+  } = useLocalSearchParams()
   const isShownNav = useSelector((state) => state.isShownNav).isShownNav
   const [forms, setForms] = useState([])
   const [completedForms, setCompletedForms] = useState(() => {
@@ -38,12 +40,19 @@ const Questionaire = () => {
     const fetchData = async () => {
       try {
         const response = await getForms()
-        if (start === 'true') {
+  
+        let filteredForms;
+        console.log(isGeneric)
+        if (isGeneric === 'true') {          
+          filteredForms = response.filter((form) =>
+            ['General Questions', 'Feedback', 'Landmark Ratings'].includes(form.form_name)
+          )
+        } else if (start === 'true') {
           filteredForms = response.filter((form) => form.is_presession)
         } else {
           filteredForms = response.filter((form) => form.is_postsession)
         }
-
+  
         setForms(filteredForms)
       } catch (error) {
         console.error('Error fetching form data:', error)
@@ -62,19 +71,44 @@ const Questionaire = () => {
 
   const navigateToForm = (formId) => {
     const updatedCompletedForms = [...completedForms, formId]
-
+    console.log('form')
+    console.log(isForceStart)
     router.push({
       pathname: `/questions/${formId}`,
-      params: {        
+      params: {
         isRedirectedForms: isRedirectedForms,
-        selectedLandmarkData: selectedLandmarkData, 
+        selectedLandmarkData: selectedLandmarkData,
         sessionID: sessionID,
-        sessionStarted: sessionStarted,        
+        sessionStarted: sessionStarted,
         isClickTravel: isClickTravel,
+        isForceStart: isForceStart,
         start: start,
-        completedForms: JSON.stringify(updatedCompletedForms),        
+        completedForms: JSON.stringify(updatedCompletedForms),
+        isGeneric: isGeneric
       },
     })
+  }
+  const handleSkip = () => {
+    if (start === 'true') {
+      if (!isShownNav) {
+        dispatch(setIsShownNav())
+      }
+      router.push({
+        pathname: '/map',
+        params: {
+          isRedirectedForms: isRedirectedForms,
+          selectedLandmarkData: selectedLandmarkData,
+          sessionID: sessionID,
+          sessionStarted: true,
+          isClickTravel: isClickTravel,
+          isForceStart: isForceStart,
+          isGeneric: true
+
+        },
+      })
+    } else {
+      router.push('/home')     
+    }
   }
 
   const handleStart = () => {
@@ -86,15 +120,16 @@ const Questionaire = () => {
       if (start === 'true') {
         if (!isShownNav) {
           dispatch(setIsShownNav())
-        }
+        }        
         router.push({
           pathname: '/map',
-          params: {            
+          params: {
             isRedirectedForms: isRedirectedForms,
-            selectedLandmarkData: selectedLandmarkData, 
+            selectedLandmarkData: selectedLandmarkData,
             sessionID: sessionID,
-            sessionStarted: true,     
-            isClickTravel: isClickTravel       
+            sessionStarted: true,
+            isClickTravel: isClickTravel,
+            isForceStart: isForceStart,
           },
         })
       } else {
@@ -109,9 +144,21 @@ const Questionaire = () => {
     <ScrollView className="flex-1 bg-optimistic-gray-10">
       <View className="flex-1 p-6 bg-optimistic-gray-10">
         {/* Title */}
-        <Text className="text-center text-2xl font-urbanist-bold text-mindful-brown-90">
-          {start === 'true' ? 'Before We Begin...' : 'Before We End...'}
-        </Text>
+        <View className="relative items-center">
+          <Text className="text-2xl font-urbanist-bold text-mindful-brown-90">
+            {start === 'true' ? 'Before We Begin...' : 'Before We End...'}
+          </Text>
+          {start === 'true' && (
+            <TouchableOpacity
+              onPress={handleSkip}
+              className="absolute right-0"
+            >
+              <Text className="text-lg font-urbanist-bold text-present-red-60">
+                Skip
+              </Text>
+            </TouchableOpacity>
+          )}
+        </View>
         {/* Subtitle */}
         <Text className="text-center text-lg font-urbanist-bold text-optimistic-gray-80 mt-4 mb-8">
           We will be assessing your mood based on the following questionnaires.
@@ -151,11 +198,23 @@ const Questionaire = () => {
                   resizeMode="contain"
                 />
 
-                {/* Text Content */}
-                <View className="flex-1">
+               {/* Text Content */}
+               <View className="flex-1">
                   <Text className="text-xl font-urbanist-bold text-mindful-brown-100 ml-4 mt-4">
                     {form.form_name} {isCompulsory ? '' : '(Optional)'}
                   </Text>
+                  {form.description && (
+                    
+                    <Text className="text-lg text-mindful-brown-90 font-urbanist-semi-bold mx-4 mt-1"  style={{
+                      textShadowColor: 'rgba(255, 255, 255, 0.3)', 
+                      textShadowOffset: { width: 1, height: 1 }, 
+                      textShadowRadius: 1, 
+                      lineHeight: 20
+                    }}>
+                      {form.description}
+                    </Text>
+                    
+                  )}
                 </View>
               </TouchableOpacity>
             )

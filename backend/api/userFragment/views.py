@@ -1,8 +1,14 @@
+from api.common.fragment import gachaFragment
 from django.shortcuts import render
 from rest_framework import generics, status
 from rest_framework.response import Response
 from .models import UserFragment
 from .serializer import UserFragmentCreateSerializer, UserFragmentSerializer, UserFragmentUpdateSerializer
+from ..avatar.models import Avatar
+from ..avatar.serializer import AvatarSerializer
+from ..achievementPoint.models import AchievementPoint
+from rest_framework.views import APIView
+from django.db import models
 
 
 class UserFragmentCreateView(generics.CreateAPIView):
@@ -64,3 +70,38 @@ class UserFragmentUpdateDestroyView(generics.UpdateAPIView, generics.DestroyAPIV
         instance = self.get_object()
         instance.delete()
         return Response(status=status.HTTP_200_OK)
+
+class GachaFragmentView(APIView):
+    def post(self, request):
+        gachaCost = 100
+        user_id = request.user.user_id
+
+        total_points = AchievementPoint.objects.filter(userId=user_id).aggregate(total=models.Sum('points'))['total']
+        if total_points is None:
+            total_points = 0
+
+        if total_points < gachaCost:
+            return Response({"detail":"You do not have sufficient points."}, status=status.HTTP_400_BAD_REQUEST)
+        
+        avatarList = Avatar.objects.all()
+        avatar = gachaFragment(avatarList)
+        if avatar is None:
+            return Response({"detail":"There is no available avatars to unlock now"}, status=status.HTTP_400_BAD_REQUEST)
+        avatar_data = AvatarSerializer(avatar).data
+        print(avatar_data)
+        AchievementPoint.objects.create(userId=request.user, points=-gachaCost, description="Avatar Fragment Gacha")
+        user_fragment, created = UserFragment.objects.get_or_create(user_id=user_id, avatar_id=avatar.avatar_id)
+        if created:
+            user_fragment.quantity = 1
+        elif user_fragment.quantity >= avatar.fragments_required:
+            base_points = 10
+            points = base_points + (1-avatar.drop_rate)*10 * 5
+            AchievementPoint.objects.create(userId=request.user, points=points, description="Fragment is converted into points")
+            return Response({"detail": {"detail": f"You have already unlocked '{avatar_data['title']}'. Fragment is converted into points", "points":points, "avatar_url": avatar_data['avatar_url']}}, status=status.HTTP_400_BAD_REQUEST)
+        else:
+            user_fragment.quantity += 1
+        user_fragment.save()
+
+
+            
+        return Response(avatar_data, status=status.HTTP_200_OK)

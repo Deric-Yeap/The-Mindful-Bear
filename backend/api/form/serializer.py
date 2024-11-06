@@ -57,52 +57,34 @@ class FormAndQuestionViewSerializer(serializers.ModelSerializer):
         existing_question_ids = [q['questionID'] for q in questions_data if 'questionID' in q]
 
         with transaction.atomic():
-            # Update the form's main fields
-            instance.form_name = validated_data.get('form_name', instance.form_name)
-            instance.store_responses = validated_data.get('store_responses', instance.store_responses)
-            instance.is_compulsory = validated_data.get('is_compulsory', instance.is_compulsory)
-            instance.is_presession = validated_data.get('is_presession', instance.is_presession)
-            instance.is_postsession = validated_data.get('is_postsession', instance.is_postsession)
+            # Dynamically update the form's main fields
+            for field, value in validated_data.items():
+                setattr(instance, field, value)
             instance.save()
 
-            # Get all the existing questions for the form
-            existing_questions = list(Question.objects.filter(formID=instance))
-
-            # Delete questions not in the input data (those not having a questionID in existing_question_ids)
-            for question in existing_questions:
-                if question.questionID not in existing_question_ids:
-                    question.delete()
+            # Delete questions not in the input data
+            Question.objects.filter(formID=instance).exclude(questionID__in=existing_question_ids).delete()
 
             # Update or create questions
             for question_data in questions_data:
-                option_set_data = question_data['optionSet']
-                if isinstance(option_set_data, int):
-                    option_set_id = option_set_data
-                elif isinstance(option_set_data, dict):
-                    option_set_id = option_set_data.get('id')
-                    if not option_set_id:
-                        raise serializers.ValidationError({'questions': 'OptionSet object must contain an id.'})
-                        
-                try:
-                    option_set = OptionSet.objects.get(id=option_set_id)
-                except OptionSet.DoesNotExist:
+                option_set_id = question_data.get('optionSet')
+                if isinstance(option_set_id, dict):
+                    option_set_id = option_set_id.get('id')
+                if not OptionSet.objects.filter(id=option_set_id).exists():
                     raise serializers.ValidationError({'questions': f'OptionSet with ID {option_set_id} does not exist.'})
 
-                if 'questionID' in question_data:
-                    # Update existing question using questionID
-                    question = Question.objects.get(questionID=question_data['questionID'])
-                    question.question = question_data['question']
-                    question.order = question_data['order']
-                    question.optionSet = option_set
-                    question.save()
-                else:
-                    # Create new question
-                    Question.objects.create(
-                        formID=instance,
-                        question=question_data['question'],
-                        order=question_data['order'],
-                        optionSet=option_set
-                    )
+                option_set = OptionSet.objects.get(id=option_set_id)
+
+                question, created = Question.objects.update_or_create(
+                    questionID=question_data.get('questionID'),
+                    defaults={
+                        'formID': instance,
+                        'question': question_data.get('question'),
+                        'order': question_data.get('order'),
+                        'optionSet': option_set,
+                        'reverse_score': question_data.get('reverse_score', False)
+                    }
+                )
 
         return instance
     

@@ -1,28 +1,36 @@
 import React, { useState } from 'react'
-import { View, Text, TextInput, TouchableOpacity } from 'react-native'
+import { View, TextInput, TouchableOpacity, Text } from 'react-native'
 import MaterialIcons from '@expo/vector-icons/MaterialIcons'
 import BackButton from '../components/backButton'
 import { useNavigation } from '@react-navigation/native'
 import { featureFlags } from '../common/featureFlags'
 
-const TopBrownSearchBar = ({ title }) => {
+const TopBrownSearchBar = ({ title, value, onChangeText, onSearch, showBackButton = true, showSearchBar = true }) => {
   const navigation = useNavigation()
-  const [searchTerm, setSearchTerm] = useState('')
+  const [searchTerm, setSearchTerm] = useState(value)
 
   const handleSearch = () => {
-    console.log(searchTerm)
+    onSearch(searchTerm)
   }
 
   return (
-    <View className="bg-mindful-brown-100 p-4 pt-2 rounded-b-[32]">
-      <BackButton title={title} />
-      {featureFlags.isSearchBar && (
+    <View className={`bg-mindful-brown-100 ${showSearchBar ? 'p-4 pt-2' : 'p-6 pt-4 py-7'} rounded-b-[32]`}>
+       {showBackButton ? (
+        <BackButton title={title} />
+      ) : (
+        <Text className="text-xl font-semibold text-white mb-2">{title}</Text>
+      )}
+      {featureFlags.isSearchBar && showSearchBar && (
         <View className="flex-row items-center mt-4">
           <TextInput
             placeholder="Search anything..."
             placeholderTextColor="#F7F4F2"
             value={searchTerm}
-            onChangeText={setSearchTerm}
+            onChangeText={(text) => {
+              setSearchTerm(text)
+              onChangeText(text)
+            }}
+            onSubmitEditing={handleSearch}
             className="flex-1 bg-mindful-brown-70 p-3 rounded-full text-white"
           />
           <TouchableOpacity

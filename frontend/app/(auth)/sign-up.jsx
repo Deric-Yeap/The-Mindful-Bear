@@ -46,6 +46,14 @@ const SignUp = () => {
     try {
       setIsLoading(true)
       setErrorMessage({})
+
+      // Add password validation here
+      if (form.password !== form.confirm_password) {
+        setIsLoading(false)
+        setErrorMessage({ confirm_password: "Passwords do not match" })
+        return
+      }
+
       const response = await create(form)
       setIsLoading(false)
       router.push('/sign-in')

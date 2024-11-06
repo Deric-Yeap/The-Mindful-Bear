@@ -43,8 +43,8 @@ class UserAvatarCreateSerializer(serializers.ModelSerializer):
 
 
 class UserAvatarUpdateSerializer(serializers.ModelSerializer):
-    user = serializers.PrimaryKeyRelatedField(queryset=CustomUser.objects.all())
-    avatar = serializers.PrimaryKeyRelatedField(queryset=Avatar.objects.all())
+    user = serializers.PrimaryKeyRelatedField(queryset=CustomUser.objects.all(), required=True)
+    avatar = serializers.PrimaryKeyRelatedField(queryset=Avatar.objects.all(),required=False)
     class Meta:
         model = UserAvatar
         fields = ['id','user', 'avatar','is_selected']
@@ -53,11 +53,11 @@ class UserAvatarUpdateSerializer(serializers.ModelSerializer):
         request = self.context.get('request')
         is_selected = validated_data.get('is_selected', instance.is_selected)
         if 'user' in validated_data:
-            user = validated_data['user'] 
+            user = validated_data['user']
         if isinstance(user, CustomUser):
-            instance.user = user 
+            instance.user = user
         else:
-            return serializers.ValidationError({"user": "Invalid user provided"})
+            raise ValidationError("Provided user is not a valid CustomUser instance.")
         if is_selected:
             UserAvatar.objects.filter(user=user).update(is_selected=False)
         for attr, value in validated_data.items():

@@ -50,10 +50,6 @@ console.log(cutoffDate)
          setSessionDurationLineData(formattedSessionDurationData)
          console.log("formattedSessionNumData ",formattedSessionNumData)
           console.log("formattedSessionDurationData",formattedSessionDurationData)
-
-        
-
-    
        
       } catch (error) {
         if (error.response) {

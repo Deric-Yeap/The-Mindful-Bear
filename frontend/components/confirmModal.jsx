@@ -1,6 +1,8 @@
 import React from 'react'
 import { View, Text } from 'react-native'
 import { Image } from 'expo-image'
+import LottieView from 'lottie-react-native'
+
 import CustomButton from './customButton'
 import confirmModal from '../assets/confirmModalImage.png'
 
@@ -10,6 +12,7 @@ const ConfirmModal = ({
   confirmButtonTitle,
   cancelButtonTitle,
   imageSource,
+  lottieSource,
   title,
   subTitle,
   handleConfirm,
@@ -19,11 +22,25 @@ const ConfirmModal = ({
     <View className="absolute top-0 left-0 right-0 bottom-0 flex justify-center items-center z-50 bg-black/70 ">
       <View className="w-11/12 h-1/2 md:h-3/5 bg-white bg-opacity-90 rounded-3xl shadow-lg flex flex-col">
         <View className="flex-1 justify-center items-center px-4">
-          <Image
+          {lottieSource ? (
+            <LottieView
+              source={lottieSource}
+              autoPlay={true}
+              loop={true}
+              className="w-[70vw] h-[70vw]"
+            />
+          ) : (
+            <Image
+              source={imageSource || confirmModal}
+              className="w-full h-1/2 xs:h-4/6 rounded-lg"
+              contentFit="contain"
+            />
+          )}
+          {/* <Image
             source={imageSource || confirmModal}
             className="w-full h-1/2 xs:h-4/6 rounded-lg"
             contentFit="contain"
-          />
+          /> */}
           {title && (
             <Text className="text-xl xs:text-2xl font-urbanist-extra-bold text-center mb-2">
               {title}
@@ -36,7 +53,9 @@ const ConfirmModal = ({
           )}
         </View>
 
-        <View className="w-full flex flex-row justify-around px-4 pb-4">
+        <View
+          className={`w-full flex flex-row justify-around px-4 pb-4 ${lottieSource ? 'mt-6' : ''}`}
+        >
           {isCancelButton && (
             <CustomButton
               title={cancelButtonTitle}

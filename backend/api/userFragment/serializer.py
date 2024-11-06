@@ -46,6 +46,9 @@ class UserFragmentUpdateSerializer(serializers.ModelSerializer):
 
     def update(self, instance, validated_data):
         request = self.context.get('request')
+        user = request.user if request and request.user else None
+        # if user:
+        #     validated_data['userId'] = user
         if 'user' in validated_data:
             user = validated_data['user'] 
         if isinstance(user, CustomUser):

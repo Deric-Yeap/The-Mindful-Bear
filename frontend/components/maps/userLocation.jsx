@@ -11,6 +11,8 @@ import * as Location from 'expo-location'
 import LottieView from 'lottie-react-native'
 import { View } from 'react-native'
 import { mindfulBear } from '../../assets/image'
+import { useSelector } from 'react-redux'
+import { getUserAvatars } from '../../api/userAvatar'
 
 const UserLocationCustom = ({
   visible = true,
@@ -24,12 +26,14 @@ const UserLocationCustom = ({
   const [heading, setHeading] = useState(0)
   const [interactionArea, setInteractionArea] = useState(null)
   const [fillOpacity, setFillOpacity] = useState(0.3)
+  const user = useSelector((state) => state.user)
+  const [userAvatar, setUserAvatar] = useState()
   const interactionAreaRadius = 15
 
   useEffect(() => {
     const interval = setInterval(() => {
       const now = Date.now()
-      const opacity = 0.2 + 0.3 * ((Math.sin(now / 500) + 1) / 2) // Range from 0.2 to 0.5
+      const opacity = 0.2 + 0.3 * ((Math.sin(now / 500) + 1) / 2)
       setFillOpacity(opacity)
     }, 100)
 
@@ -66,6 +70,24 @@ const UserLocationCustom = ({
       locationManager.removeListener(onLocationUpdate)
     }
   }, [minDisplacement, renderMode])
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const userAvatars = await getUserAvatars(user.userId)
+        const selectedAvatar = userAvatars.find((avatar) => avatar.is_selected)
+        if (selectedAvatar) {
+          setUserAvatar(selectedAvatar.avatar.avatar_url)
+        } else {
+          console.warn('No selected avatar found')
+        }
+      } catch (error) {
+        console.error(error)
+      }
+    }
+
+    fetchData()
+  }, [])
 
   const onLocationUpdate = (location) => {
     if (!location || !location.coords) return
@@ -110,11 +132,11 @@ const UserLocationCustom = ({
         <MarkerView coordinate={coordinates}>
           <View
             style={{
-              transform: [{ rotate: `${heading}deg` }], // Rotate based on heading
+              transform: [{ rotate: `${heading}deg` }],
             }}
           >
             <LottieView
-              source={mindfulBear}
+              source={{ uri: userAvatar }}
               className="w-14 h-14 z-20"
               autoPlay
             />

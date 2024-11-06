@@ -39,7 +39,7 @@ const SettingsPage = () => {
           barStyle="light-content"
           backgroundColor={colors.mindfulBrown100}
         />
-        <TopBrownSearchBar title="Settings" />
+        <TopBrownSearchBar title="Settings" showSearchBar={false}/>
         <View className="p-4">
           {/* General Settings Section */}
           {featureFlags.isSettings && (

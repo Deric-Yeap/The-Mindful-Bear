@@ -1,6 +1,6 @@
 import { Stack } from 'expo-router'
 
-const MapLayout = () => {
+const AvatarLayout = () => {
   return (
     <Stack>
       <Stack.Screen name="avatar" options={{ headerShown: false }} />
@@ -8,4 +8,4 @@ const MapLayout = () => {
   )
 }
 
-export default MapLayout
+export default AvatarLayout

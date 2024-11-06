@@ -74,7 +74,11 @@ INSTALLED_APPS = [
     "api.achievementPoint",
     "api.avatar",
     "api.userAvatar",
-    "api.userFragment"
+    "api.article",
+    "api.userFragment",
+    "api.searchHistory",
+    "api.achievement",
+    "api.userAchievement"
 ]
 
 REST_FRAMEWORK = {

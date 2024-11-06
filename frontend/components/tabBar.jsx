@@ -21,6 +21,9 @@ const TabBar = ({ state, descriptors, navigation }) => {
     '+not-found',
     '(admin)',
     '(avatar)',
+    '(fragmentShop)',
+    'favourite',
+    '(article)' 
   ])
 
   const isShownNav = useSelector((state) => state.isShownNav).isShownNav

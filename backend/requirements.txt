@@ -24,3 +24,5 @@ pytz
 transformers
 scipy
 torch
+scikit-learn
+sentence_transformers
