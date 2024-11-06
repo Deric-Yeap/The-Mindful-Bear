@@ -14,7 +14,7 @@ const TopBrownSearchBar = ({ title, value, onChangeText, onSearch, showBackButto
   }
 
   return (
-    <View className={`bg-mindful-brown-100 ${showSearchBar ? 'p-4 pt-2' : 'p-6 pt-4'} rounded-b-[32]`}>
+    <View className={`bg-mindful-brown-100 ${showSearchBar ? 'p-4 pt-2' : 'p-6 pt-4 py-7'} rounded-b-[32]`}>
        {showBackButton ? (
         <BackButton title={title} />
       ) : (

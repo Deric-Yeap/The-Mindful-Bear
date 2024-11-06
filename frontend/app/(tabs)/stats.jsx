@@ -16,7 +16,7 @@ const analytics = () => {
         barStyle="light-content"
         backgroundColor={colors.mindfulBrown100}
       />
-      <TopBrownSearchBar title="Analytics" />
+      <TopBrownSearchBar title="Analytics" showSearchBar={false}/>
       <AnalyticsTabs />
     </SafeAreaView>
   )

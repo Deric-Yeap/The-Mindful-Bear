@@ -63,8 +63,7 @@ const Home = () => {
       circleStyle: "bg-present-red-10",
       title: "Favourite Landmarks",
       bodyText: "View your favourite landmarks here.",
-      category: "Landmarks",
-      rightImage: require('../../assets/mindfulJournalMetricCard.png'),
+      category: "Landmarks"
     },
     {
       route: "/(points)/points-history",
@@ -73,8 +72,7 @@ const Home = () => {
       circleStyle: "bg-empathy-orange-10",
       title: "Points Earned",
       bodyText: "View your points history.",
-      category: "Achievement",
-      rightImage: require('../../assets/mindfulJournalMetricCard.png'),
+      category: "Achievement"
     },
     {
       route: "/(points)/shop",
@@ -83,8 +81,7 @@ const Home = () => {
       circleStyle: "bg-empathy-orange-10",
       title: "Shop",
       bodyText: "Spend your points to unlock avatars!",
-      category: "Achievement",
-      rightImage: require('../../assets/mindfulJournalMetricCard.png'),
+      category: "Achievement"
     },
     {
       route: "/(avatar)",
@@ -93,8 +90,7 @@ const Home = () => {
       circleStyle: "bg-empathy-orange-10",
       title: "My Avatars",
       bodyText: "Manage and expand your avatar collection",
-      category: "Achievement",
-      rightImage: require('../../assets/mindfulJournalMetricCard.png'),
+      category: "Achievement"
     },
   ]
 
@@ -127,12 +123,6 @@ const Home = () => {
     <SafeAreaView className="flex-1 bg-optimistic-gray-10">
       <ScrollView className="mb-12">
         <StatusBarComponent barStyle="light-content" backgroundColor="#251404" />
-        {/* <TopBrownSearchBar
-          title={`Welcome, ${user.name}!`}
-          value={searchTerm}
-          onChangeText={handleSearch}
-          onSearch={handleSearch}
-        /> */}
         <TopBrownSearchBar title={`Welcome, ${user.name}!`} showBackButton={false} showSearchBar={false} />
         <View className="bg-optimistic-gray-10 p-4 rounded-lg mb-4">
           <Link href="/map" asChild>
@@ -144,108 +134,18 @@ const Home = () => {
             </Pressable>
           </Link>
 
-          <Text className="text-mindful-brown-100 font-urbanist-extra-bold text-xl mb-4">
-            Mindfulness Tracker
-          </Text>
-          <MetricCard
-            route="/(journal)/journal-home"
-            iconName="book-plus-outline"
-            iconColor={colors.empathyOrange40}
-            circleStyle="bg-empathy-orange-10"
-            title="Mindful Journal"
-            rightImage={require('../../assets/mindfulJournalMetricCard.png')}
-          >
-            <Text className="font-urbanist-semi-bold text-mindful-brown-80 text-lg">
-              {streak} {streak <= 1 ? 'Day' : 'Days'} Streak
-            </Text>
-          </MetricCard>
-          {featureFlags.isDiscoverArticles && (
-            <>
-              <Text className="text-mindful-brown-100 font-urbanist-extra-bold text-xl mb-4">
-                Discover Articles
-              </Text>
-              <MetricCard
-                route="/(article)/article-discovery"
-                iconName="newspaper"
-                iconColor={colors.kindPurple50}
-                circleStyle="bg-kind-purple-10"
-                title="Article Discovery Made Easy"
-              >
-                <Text className="font-urbanist-semi-bold text-mindful-brown-80 text-lg">
-                  Effortlessly search and find articles that inspire and inform.
-                </Text>
-              </MetricCard>
-            </>
-          )}
-          {featureFlags.isFavouriteLandmarks && (
-            <>
-              <Text className="text-mindful-brown-100 font-urbanist-extra-bold text-xl mb-4">
-                Favourite Landmarks
-              </Text>
-              <MetricCard
-                route="/favourite"
-                iconName="heart-outline"
-                iconColor={colors.presentRed40}
-                circleStyle="bg-empathy-orange-10"
-                title="Favourite Landmarks"
-              >
-                <Text className="font-urbanist-semi-bold text-mindful-brown-80 text-lg">
-                  View your favourite landmarks here.
-                </Text>
-              </MetricCard>
-            </>
-          )}
-          <Text className="text-mindful-brown-100 font-urbanist-extra-bold text-xl mb-4">
-            Achievement
-          </Text>
-          <MetricCard
-            route="/(points)/points-history"
-            iconName="diamond-stone"
-            iconColor={colors.serenityGreen70}
-            circleStyle="bg-serenity-green-10"
-            title="Points Earned"
-          >
-            <Text className="font-urbanist-semi-bold text-mindful-brown-80 text-lg">
-              View your points history.
-            </Text>
-          </MetricCard>
-          <MetricCard
-            route="/(points)/shop"
-            iconName="shopping-outline"
-            iconColor={colors.serenityGreen70}
-            circleStyle="bg-serenity-green-10"
-            title="Shop"
-          >
-            <Text className="font-urbanist-semi-bold text-mindful-brown-80 text-lg">
-              Spend your points to unlock avatars!
-            </Text>
-          </MetricCard>
-          <MetricCard
-            route="/(avatar)"
-            iconName="account"
-            iconColor={colors.serenityGreen70}
-            circleStyle="bg-serenity-green-10"
-            title="My Avatars"
-          >
-            <Text className="font-urbanist-semi-bold text-mindful-brown-80 text-lg">
-              Manage and expand your avatar collection
-            </Text>
-          </MetricCard>
-          {/* Render MetricCards with conditional section titles */}
           {['Journal', 'Article', 'Landmarks', 'Achievement'].map((section) => {
             const sectionCards = filteredCards.filter((card) => card.category === section)
 
             if (sectionCards.length === 0) {
-              return null // Skip rendering this section if no cards are present
+              return null 
             }
 
             return (
               <View key={section}>
-                {/* Section Title */}
                 <Text className="text-mindful-brown-100 font-urbanist-extra-bold text-xl mb-4">
                   {section}
                 </Text>
-                {/* Render Cards for the Current Section */}
                 {sectionCards.map((card, index) => (
                   <MetricCard
                     key={index}
