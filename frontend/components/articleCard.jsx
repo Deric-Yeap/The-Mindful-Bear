@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { View, Text, Image, StyleSheet, TouchableOpacity, Modal } from 'react-native';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import { colors } from '../common/styles';
-import PdfViewer from '../app/(article)/article-pdf-viewer';
+import PdfViewer from '../app/(articlepdf)/article-pdf-viewer';
 
 const ArticleCard = ({ route, title, imageSource, description, category, pdfUrl, id, onArticleClick, index }) => {
   const [showPdfViewer, setShowPdfViewer] = useState(false);
