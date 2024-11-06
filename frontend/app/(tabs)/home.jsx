@@ -55,7 +55,7 @@ const Home = () => {
           barStyle="light-content"
           backgroundColor="#251404"
         />
-        <TopBrownSearchBar title={`Welcome, ${user.name}!`} />
+        <TopBrownSearchBar title={`Welcome, ${user.name}!`} showBackButton={false} />
         <View className="bg-optimistic-gray-10 p-4 rounded-lg mb-4">
           <Link href="/map" asChild>
             <Pressable

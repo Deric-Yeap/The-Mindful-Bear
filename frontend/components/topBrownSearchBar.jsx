@@ -1,11 +1,11 @@
 import React, { useState } from 'react'
-import { View, TextInput, TouchableOpacity } from 'react-native'
+import { View, TextInput, TouchableOpacity, Text } from 'react-native'
 import MaterialIcons from '@expo/vector-icons/MaterialIcons'
 import BackButton from '../components/backButton'
 import { useNavigation } from '@react-navigation/native'
 import { featureFlags } from '../common/featureFlags'
 
-const TopBrownSearchBar = ({ title, value, onChangeText, onSearch }) => {
+const TopBrownSearchBar = ({ title, value, onChangeText, onSearch, showBackButton = true }) => {
   const navigation = useNavigation()
   const [searchTerm, setSearchTerm] = useState(value)
 
@@ -15,7 +15,11 @@ const TopBrownSearchBar = ({ title, value, onChangeText, onSearch }) => {
 
   return (
     <View className="bg-mindful-brown-100 p-4 pt-2 rounded-b-[32]">
-      <BackButton title={title} />
+       {showBackButton ? (
+        <BackButton title={title} />
+      ) : (
+        <Text className="text-xl font-semibold text-white mb-2">{title}</Text>
+      )}
       {featureFlags.isSearchBar && (
         <View className="flex-row items-center mt-4">
           <TextInput
