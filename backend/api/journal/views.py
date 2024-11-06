@@ -328,6 +328,10 @@ from ..common.text_processing import split_sentences
 from collections import defaultdict
 from datetime import datetime
 import pytz
+import logging
+
+# Configure logging if it's not already configured
+logging.basicConfig(level=logging.INFO)
 
 
 class JournalClassificationView(APIView):
@@ -363,6 +367,12 @@ class JournalClassificationView(APIView):
                 # Convert start and end of the month to UTC for querying in Supabase
                 start_date_utc = start_date_sgt.astimezone(utc_timezone)
                 end_date_utc = end_date_sgt.astimezone(utc_timezone)
+                
+                 # Log the dates to verify conversion
+                logging.info(f"Filter year/month: {year}-{month}")
+                logging.info(f"SGT Start Date: {start_date_sgt}, SGT End Date: {end_date_sgt}")
+                logging.info(f"UTC Start Date: {start_date_utc}, UTC End Date: {end_date_utc}")
+
 
                 # Filter journals by the UTC datetime range in Supabase
                 journals = Journal.objects.filter(upload_date__gte=start_date_utc, upload_date__lt=end_date_utc)
