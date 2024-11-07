@@ -1,6 +1,9 @@
+#C:\The-Mindful-Bear\backend\api\journal\urls.py
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
-from .views import (JournalListView, UploadFileView, JournalCalendarView, CountYearJournalView,SpeechToTextView, JournalEntriesByDateView, JournalEntriesByPeriodView, JournalEntryViewSet, JournalStreakView, Count, JournalClassificationView)
+from .views import (JournalListView, UploadFileView, JournalCalendarView, CountYearJournalView,
+                    SpeechToTextView, JournalEntriesByDateView, JournalEntriesByPeriodView, 
+                    JournalEntryViewSet, JournalStreakView, Count, JournalClassificationView)
 
 router = DefaultRouter()
 router.register(r'journal_entry', JournalEntryViewSet, basename='journal-entry')
@@ -16,6 +19,6 @@ urlpatterns = [
     path("journal_entries_by_date/", JournalEntriesByDateView.as_view()),
     path('journal_entries_by_period/', JournalEntriesByPeriodView.as_view(), name='journal-entries-by-period'),
     path("journal_streak/", JournalStreakView.as_view()),
-    path("journal_classification/", JournalClassificationView.as_view()),
+    path("journal_classification/", JournalClassificationView.as_view(), name="journal-classification"),
     path('', include(router.urls)),
 ]

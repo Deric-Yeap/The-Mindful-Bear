@@ -1,3 +1,4 @@
+#C:\The-Mindful-Bear\backend\api\journal\views.py
 import json
 import pandas as pd
 from textblob import TextBlob
@@ -23,6 +24,9 @@ from datetime import timedelta
 from transformers import AutoTokenizer, AutoModelForSequenceClassification
 from scipy.special import softmax
 import torch
+
+#for filter of topic classification model
+from datetime import datetime
 
 # Load the model and tokenizer once, to avoid reloading every time
 MODEL = "cardiffnlp/twitter-roberta-base-sentiment"
@@ -319,9 +323,120 @@ class JournalEntryViewSet(viewsets.ViewSet):
         journal.delete()
         return Response({'message': 'Journal entry deleted successfully.'}, status=status.HTTP_200_OK)
 
+from ..common.topic_classifier import classify_text
+from ..common.text_processing import split_sentences 
+from collections import defaultdict
+from datetime import datetime
+import pytz
+import logging
+
+# Configure logging if it's not already configured
+logging.basicConfig(level=logging.INFO)
+
+
 class JournalClassificationView(APIView):
-    def post(self, request):
-        text = request.data.get('text')
-        journals = Journal.objects.all()
-        journalTexts = [journal.journal_text for journal in journals] #just a random example, transform your own data to return
-        return Response({"result": journalTexts}, status=status.HTTP_200_OK)
+    #def post(self, request):
+        #text = request.data.get('text')
+        #journals = Journal.objects.all()
+        #journalTexts = [journal.journal_text for journal in journals] #just a random example, transform your own data to return
+       # journal['predicted_labels'] = classify_text(journal_text)
+        #return Response({"result": journalTexts}, status=status.HTTP_200_OK)
+    def get(self, request):
+        year = request.query_params.get('year')
+        month = request.query_params.get('month')
+
+        # Define timezone for Singapore (SGT) and UTC
+        sgt_timezone = pytz.timezone("Asia/Singapore")
+        utc_timezone = pytz.UTC
+
+        # Convert the SGT date range to UTC if year and month are provided
+        if year and month:
+            try:
+                year = int(year)
+                month = int(month)
+
+                # Define the start and end of the month in SGT
+                start_date_sgt = sgt_timezone.localize(datetime(year, month, 1, 0, 0, 0))
+                
+                # Calculate the end of the month in SGT
+                if month == 12:
+                    end_date_sgt = sgt_timezone.localize(datetime(year + 1, 1, 1, 0, 0, 0))
+                else:
+                    end_date_sgt = sgt_timezone.localize(datetime(year, month + 1, 1, 0, 0, 0))
+
+                # Convert start and end of the month to UTC for querying in Supabase
+                start_date_utc = start_date_sgt.astimezone(utc_timezone)
+                end_date_utc = end_date_sgt.astimezone(utc_timezone)
+                
+                 # Log the dates to verify conversion
+                logging.info(f"Filter year/month: {year}-{month}")
+                logging.info(f"SGT Start Date: {start_date_sgt}, SGT End Date: {end_date_sgt}")
+                logging.info(f"UTC Start Date: {start_date_utc}, UTC End Date: {end_date_utc}")
+
+
+                # Filter journals by the UTC datetime range in Supabase
+                journals = Journal.objects.filter(upload_date__gte=start_date_utc, upload_date__lt=end_date_utc)
+            except ValueError:
+                return Response({"error": "Year and month must be integers."}, status=status.HTTP_400_BAD_REQUEST)
+        else:
+            journals = Journal.objects.all()
+            
+            if not journals.exists():
+                return Response({
+                    'code': 404,
+                    'message': 'No journal entries found for the selected date range.',
+                    'data': [],
+                    'error_description': 'No journal entries available for the chosen year and month.'
+                }, status=status.HTTP_404_NOT_FOUND)
+        
+
+        # Process journals for topic classification and keyword aggregation
+        aggregated_topic_keywords = defaultdict(lambda: defaultdict(int))
+
+        for journal in journals:
+            # Perform classification and extract keywords
+            topic_keyword_counts = classify_text(journal.journal_text)
+
+            # Aggregate keyword counts across all journal entries
+            for topic, keywords in topic_keyword_counts.items():
+                for keyword, count in keywords.items():
+                    aggregated_topic_keywords[topic][keyword] += count
+
+        # Define the desired order for topics
+        desired_order = [
+            "Patient Care Excellence",
+            "Patient Care Challenges",
+            "Personal / Emotional Growth",
+            "Personal / Emotional Struggles",
+            "Professional Development / Career Wellness",
+            "Workplace Challenges"
+        ]
+
+        # Prepare the final output format
+        formatted_output = []
+        for topic in desired_order:
+            if topic in aggregated_topic_keywords:
+                # Sort keywords by count and select the top 10
+                sorted_keywords = sorted(
+                    aggregated_topic_keywords[topic].items(), 
+                    key=lambda x: x[1], 
+                    reverse=True
+                )[:10]
+                formatted_output.append({
+                    "topic": topic,
+                    "top_reasons": [
+                        {
+                            "reason": keyword,
+                            "mentions": count
+                        }
+                        for keyword, count in sorted_keywords
+                    ]
+                })
+
+        return Response({
+            'code': 200,
+            'data': {
+                'classified_entries': formatted_output
+            },
+            'error_description': None
+        }, status=status.HTTP_200_OK)

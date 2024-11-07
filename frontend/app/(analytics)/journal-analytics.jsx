@@ -1,139 +1,132 @@
+
 import React, { useState, useEffect } from 'react';
-import { View, Text, ScrollView, Image, TouchableOpacity, ActivityIndicator, Dimensions } from 'react-native';
+import { View, Text, ScrollView, Image, TouchableOpacity, ActivityIndicator, Dimensions, TextInput } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import BrownPageTitlePortion from '../../components/brownPageTitlePortion';
 import StatusBarComponent from '../../components/darkThemStatusBar';
+import CustomButton from '../../components/customButton'; // Importing CustomButton
 import { colors } from '../../common/styles';
 import { LineChart } from 'react-native-gifted-charts';
 import PositiveBear from '../../assets/positiveBear.png';
 import NeutralBear from '../../assets/neutralBear.png';
 import NegativeBear from '../../assets/negativeBear.png';
 import Toggle from '../../components/toggle';
-import axiosInstance from '../../common/axiosInstance';
-import { journalCounts } from '../../api/journal'
-import Loading from '../../components/loading'
-import { Svg } from 'react-native-svg';
-
+import Loading from '../../components/loading';
+import FilterButton from '../../components/filterButton';
+import { journalCounts, getJournalClassification } from '../../api/journal';
 
 const JournalAnalytics = () => {
-  const [selectedBear, setSelectedBear] = useState('Positive')
-  const [selectedOption, setSelectedOption] = useState(1)
-  const [lineData, setLineData] = useState([])
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState(null)
-  const optionList = ['daily', 'monthly', 'yearly']
-  const periodSelected = optionList[selectedOption - 1]
+  const [selectedBear, setSelectedBear] = useState('Positive');
+  const [selectedOption, setSelectedOption] = useState(1);
+  const [lineData, setLineData] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [classificationData, setClassificationData] = useState([]);
+  const [classificationError, setClassificationError] = useState(null);
+  const [lastRefreshTime, setLastRefreshTime] = useState(null);
+  
+  const optionList = ['daily', 'monthly', 'yearly'];
+  const periodSelected = optionList[selectedOption - 1];
+  const screenWidth = Dimensions.get('window').width;
+  const chartWidth = Math.max(screenWidth, lineData.length * 100);
+
+  //filter for topic classification
+  const [year, setYear] = useState('');
+  const [month, setMonth] = useState('');
+  const [entries, setEntries] = useState([]);
 
   useEffect(() => {
     const fetchJournalData = async () => {
-      setLoading(true)
-      setError(null)
+      setLoading(true);
+      setError(null);
       try {
         const response = await journalCounts({
           sentiment: selectedBear,
           period: periodSelected,
-        })
-
+        });
         if (response && Array.isArray(response.counts)) {
           const transformedData = response.counts.map((item) => ({
             value: item.count,
             label: item.date,
-          }))
-          setLineData(transformedData)
+          }));
+          setLineData(transformedData);
         } else {
-          setError('No data found')
+          setError('No data found');
         }
       } catch (error) {
-        if (error.response) {
-          setError(
-            `Error: ${error.response.data.message || 'An error occurred.'}`
-          )
-        } else {
-          setError('An unexpected error occurred. Please try again.')
-        }
+        setError('An error occurred. Please try again.');
       } finally {
-        setLoading(false)
+        setLoading(false);
       }
+    };
+
+    fetchJournalData();
+  }, [selectedBear, selectedOption]);
+
+  // Topic classification: Fetch classification data with optional year and month filtering
+  const fetchClassificationData = async () => {
+    try {
+      const params = {};
+      if (year) params.year = year;
+      if (month) params.month = month;
+  
+      const response = await getJournalClassification(params); // Make sure the response is awaited before logging
+  
+      if (!response) {
+        console.warn("No response received from API.");
+        setClassificationError("No response from the server.");
+        return;
+      }
+  
+      // Handle the structure of the response
+      if (response.code === 404 || response.status === 404) {
+        setClassificationData([]);
+        setClassificationError(response?.error_description || 'No journal entries found for the selected date range.');
+      } else {
+        const entries = response?.data?.classified_entries;
+        if (Array.isArray(entries)) {
+          setClassificationData(entries);
+          setClassificationError(null);
+        } else {
+          console.warn("Unexpected response structure:", response);
+          setClassificationData([]);
+        }
+      }
+    } catch (error) {
+      console.error("Failed to fetch classification data:", error);
+      setClassificationError('An error occurred while fetching classification data.');
     }
+  };
+  useEffect(() => {
+    fetchClassificationData();
+  }, [year, month]); // Trigger re-fetch when year or month changes
 
-    fetchJournalData()
-  }, [selectedBear, selectedOption])
-  if (loading) {
-    return (
-      <View
-        style={{
-          flex: 1,
-          justifyContent: 'center',
-          alignItems: 'center',
-          backgroundColor: colors.optimisticGray10,
-        }}
-      >
-        <Loading />
-      </View>
-    );
-  }
+
   const onSelectSwitch = (option) => {
-    setSelectedOption(option)
-  }
+    setSelectedOption(option);
+  };
 
-  const handlePress = bearType => {
+  const handlePress = (bearType) => {
     setSelectedBear(bearType);
   };
-   // Inside your MindfulnessExercisesAnalytics component
-   const screenWidth = Dimensions.get('window').width;
 
-   // Use the number of data points to determine the chart width
-   const chartWidth = Math.max(screenWidth, lineData.length * 100); // Ensure at least the screen width
-   console.log("chartWidth",chartWidth)
- 
-  // Function to calculate linear regression (trendline)
-  const calculateTrendline = (data) => {
-   const n = data.length;
-   if (n === 0) return []; // Avoid calculation if no data
-   const sumX = data.reduce((sum, _, index) => sum + index, 0);
-   const sumY = data.reduce((sum, point) => sum + point.value, 0);
-   const sumXY = data.reduce((sum, point, index) => sum + index * point.value, 0);
-   const sumX2 = data.reduce((sum, _, index) => sum + index * index, 0);
-    print("sumX",sumX)
-   const slope = (n * sumXY - sumX * sumY) / (n * sumX2 - sumX * sumX);
-   const intercept = (sumY - slope * sumX) / n;
- 
-   return data.map((_, index) => ({
-     value: slope * index + intercept,
-     label: data[index].label,
-   }));
- };
- 
- // Function to calculate average line
- const calculateAverageLine = (data) => {
-   const averageValue = data.reduce((sum, point) => sum + point.value, 0) / data.length;
-   return data.map(point => ({
-     value: averageValue,
-     label: point.label,
-   }));
- };
- 
+  const calculateAverageLine = (data) => {
+    const averageValue = data.reduce((sum, point) => sum + point.value, 0) / data.length;
+    return data.map(point => ({ value: averageValue, label: point.label }));
+  };
+
   const averageLineData = selectedOption === 1 ? calculateAverageLine(lineData) : [];
-   const trendlineData = selectedOption !== 1 ? calculateTrendline(lineData) : [];
 
   return (
-    <SafeAreaView
-      style={{ flex: 1, backgroundColor: colors['optimistic-gray-10'] }}
-    >
-      <StatusBarComponent
-        barStyle="light-content"
-        backgroundColor={colors.mindfulBrown100}
-      />
-      <BrownPageTitlePortion
-        title="Mindful Journal Analytics"
-        tabName="(tabs)"
-        screenName="stats"
-      />
-      <ScrollView style={{ flex: 1 }}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: colors['optimistic-gray-10'] }}>
+      <StatusBarComponent barStyle="light-content" backgroundColor={colors.mindfulBrown100} />
+      <BrownPageTitlePortion title="Mindful Journal Analytics" tabName="(tabs)" screenName="stats" />
+      <ScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: 20 }}>
+        
+        {/* Filter by Period Section */}
         <Text className="text-mindful-brown-100 font-urbanist-extra-bold text-xl mb-2 mt-2 ml-6">
           Filter by Period
         </Text>
-
         <View style={{ alignItems: 'center', marginLeft: 10, marginRight: 10 }}>
           <Toggle
             selectionMode={selectedOption}
@@ -145,17 +138,12 @@ const JournalAnalytics = () => {
             selectionColor={colors.mindfulBrown80}
           />
         </View>
+
+        {/* Filter by Sentiment Section */}
         <Text className="text-mindful-brown-100 font-urbanist-extra-bold text-xl mb-2 mt-2 ml-6">
           Filter by Sentiment
         </Text>
-
-        <View
-          style={{
-            flexDirection: 'row',
-            justifyContent: 'space-around',
-            alignItems: 'center',
-          }}
-        >
+        <View style={{ flexDirection: 'row', justifyContent: 'space-around', alignItems: 'center' }}>
           {['Positive', 'Neutral', 'Negative'].map((bearType) => (
             <TouchableOpacity
               key={bearType}
@@ -163,10 +151,7 @@ const JournalAnalytics = () => {
               style={{
                 alignItems: 'center',
                 justifyContent: 'center',
-                backgroundColor:
-                  selectedBear === bearType
-                    ? colors.empathyOrange10
-                    : 'transparent',
+                backgroundColor: selectedBear === bearType ? colors.empathyOrange10 : 'transparent',
                 borderColor: colors.zenYellow20,
                 borderWidth: 2,
                 borderRadius: 8,
@@ -178,86 +163,185 @@ const JournalAnalytics = () => {
                   bearType === 'Positive'
                     ? PositiveBear
                     : bearType === 'Neutral'
-                      ? NeutralBear
-                      : NegativeBear
+                    ? NeutralBear
+                    : NegativeBear
                 }
                 style={{ width: 80, height: 80 }}
                 resizeMode="contain"
               />
-              <Text style={{ marginTop: 8, fontSize: 16, color: 'black' }}>
-                {bearType}
-              </Text>
+              <Text style={{ marginTop: 8, fontSize: 16, color: 'black' }}>{bearType}</Text>
             </TouchableOpacity>
           ))}
         </View>
 
+        {/* Line Chart Section */}
         <Text className="text-mindful-brown-100 font-urbanist-extra-bold text-xl mb-2 mt-2 ml-6">
-        No. of journal entries based on sentiment
+          No. of journal entries based on sentiment
         </Text>
-
         {loading ? (
-          <ActivityIndicator
-            size="large"
-            color={colors.mindfulBrown80}
-            style={{ marginVertical: 20 }}
-          />
+          <ActivityIndicator size="large" color={colors.mindfulBrown80} style={{ marginVertical: 20 }} />
         ) : error ? (
           <Text style={{ color: 'red', marginVertical: 20 }}>{error}</Text>
         ) : (
-          <View style={{ paddingVertical: 8 }}>
-            <ScrollView
-              horizontal={true}
-              showsHorizontalScrollIndicator={false}
-            >
-              <LineChart
-                areaChart
-                curved
-                data={lineData.length > 1 ? lineData : null}
-                data2={averageLineData.length > 1 ? averageLineData : null}
-                data3={trendlineData.length > 1 ? trendlineData : null}
-                 // Ensure this is your data
-                width={chartWidth} // Make chart width dynamic based on data
-                height={250}
-                showVerticalLines
-                spacing={70}
-                initialSpacing={0}
-                color1={colors.mindfulBrown100}
-                hideDataPoints
-                dataPointsColor1={colors.mindfulBrown100}
-                startFillColor1={colors.mindfulBrown50}
-                startOpacity1={0.8}
-                endOpacity1={0.3}
-                // To avoid any shadow or transparency effects on the second dataset
-                startOpacity2={0} 
-                endOpacity2={0}   
-                startOpacity3={0} 
-                endOpacity3={0}  
-                // Make the average & trendline line dashed
-                strokeDashArray2={[4, 4]}
-                strokeDashArray3={[4, 4]}
-                xAxisTickCount={5} // Adjust based on your data
-                xAxisLabelTextStyle={{
-                    transform: [{ rotate: '-15deg' }], // Consistent rotation angle for all labels
-                    textAlign: 'center',
-                    overflow: 'visible',
-                    fontSize: lineData.length > 10 ? 8 : 11,
-                    color: colors.mindfulBrown100,
-                    fontWeight: 'bold',
-                }}
-                xAxisLabelContainerStyle={{
-                    paddingBottom: 60, // Fixed padding for bottom space
-                    paddingHorizontal: lineData.length > 10 ? 15 : 7,
-                    paddingTop: -20,
-                    paddingLeft: 20,
-                }}
-                hideXAxis={false}
-              />
-            </ScrollView>
-          </View>
+          <ScrollView horizontal={true} showsHorizontalScrollIndicator={false}>
+            <LineChart
+              areaChart
+              curved
+              data={lineData.length > 1 ? lineData : null}
+              data2={averageLineData.length > 1 ? averageLineData : null}
+              width={chartWidth}
+              height={250}
+              showVerticalLines
+              spacing={70}
+              initialSpacing={0}
+              color1={colors.mindfulBrown100}
+              hideDataPoints
+              dataPointsColor1={colors.mindfulBrown100}
+              startFillColor1={colors.mindfulBrown50}
+              startOpacity1={0.8}
+              endOpacity1={0.3}
+              startOpacity2={0}
+              endOpacity2={0}
+              strokeDashArray2={[4, 4]}
+              xAxisTickCount={5}
+              xAxisLabelTextStyle={{
+                transform: [{ rotate: '-15deg' }],
+                textAlign: 'center',
+                overflow: 'visible',
+                fontSize: lineData.length > 10 ? 8 : 11,
+                color: colors.mindfulBrown100,
+                fontWeight: 'bold',
+              }}
+              xAxisLabelContainerStyle={{
+                paddingBottom: 60,
+                paddingHorizontal: lineData.length > 10 ? 15 : 7,
+                paddingTop: -20,
+                paddingLeft: 20,
+              }}
+              hideXAxis={false}
+            />
+          </ScrollView>
         )}
+        
+        {/* Journal Classification */}
+        <View style={{ borderBottomWidth: 1, borderBottomColor: colors.mindfulBrown80, marginTop: 50 }} />
+
+        <View style={{ paddingVertical: 10 }}>
+          <Text className="text-mindful-brown-100 font-urbanist-extra-bold text-2xl mt-2 ml-6">
+            Journal Classification
+          </Text>
+        </View>
+
+        <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 10, paddingHorizontal: 30 }}>
+        <View style={{ alignItems: 'center', marginRight: 10 }}>
+          <Text>Year</Text>
+          <TextInput
+            style={{ borderWidth: 1, borderColor: colors.zenYellow20, padding: 5, width: 80, textAlign: 'center', borderRadius: 8 }}
+            placeholder="YYYY"
+            keyboardType="numeric"
+            value={year}
+            onChangeText={(text) => setYear(text)}
+          />
+        </View>
+        <View style={{ alignItems: 'center', marginRight: 10 }}>
+          <Text>Month</Text>
+          <TextInput
+            style={{ borderWidth: 1, borderColor: colors.zenYellow20, padding: 5, width: 80, textAlign: 'center', borderRadius: 8 }}
+            placeholder="MM"
+            keyboardType="numeric"
+            value={month}
+            onChangeText={(text) => setMonth(text)}
+          />
+        </View>
+
+        {/* Apply Button with Brown Background and Aligned with Filter Boxes */}
+        <FilterButton
+          title="Apply"
+          onPress={fetchClassificationData}
+          style={{
+            marginLeft: 100,
+            marginTop: 17// Add margin to adjust alignment
+          }}
+        />
+      </View>
+
+        {/* Display classification error message if no data is found */}
+        {classificationError && (
+          <Text style={{ color: 'grey', margin: 20, textAlign: 'center', fontSize: 16 }}>
+            {classificationError === 'An error occurred while fetching classification data.'
+              ? "Oops! It seems there's an issue with the date input. Please check and try again with a valid date."
+              : classificationError}
+          </Text>
+        )}
+
+        {/* Display message if no relevant journal entries are found */}
+        {classificationData.length === 0 && !classificationError && (
+          <Text style={{ color: 'gray', margin: 20, textAlign: 'center', fontSize: 16 }}>
+            No relevant journal entries found for the selected date range.
+          </Text>
+        )}
+
+
+
+        {/* Topic classification entries display */}
+        {classificationData.map((topicData, index) => (
+          <View
+            key={index}
+            style={{
+              backgroundColor: colors['mindful-brown-20'],
+              margin: 10,
+              padding: 10,
+              borderRadius: 10,
+            }}
+          >
+            <Text
+              className="text-mindful-brown-100 font-urbanist-extra-bold text-lg mb-2"
+              style={{ marginBottom: 10 }}
+            >
+              Top 10 Reasons for {topicData.topic}:
+            </Text>
+            {/* Table Header */}
+            <View
+              style={{
+                flexDirection: 'row',
+                justifyContent: 'space-between',
+                paddingBottom: 10,
+                borderBottomWidth: 1,
+                borderColor: colors['mindful-brown-60'],
+              }}
+            >
+              <Text className="text-mindful-brown-100 font-urbanist-bold text-base">
+                Keyword
+              </Text>
+              <Text className="text-mindful-brown-100 font-urbanist-bold text-base">
+                Mentions
+              </Text>
+            </View>
+            {/* Table Rows */}
+            {topicData.top_reasons.slice(0, 10).map((reason, idx) => (
+              <View
+                key={idx}
+                style={{
+                  flexDirection: 'row',
+                  justifyContent: 'space-between',
+                  paddingVertical: 6,
+                  borderBottomWidth: idx === topicData.top_reasons.length - 1 ? 0 : 1,
+                  borderColor: colors['mindful-brown-30'],
+                }}
+              >
+                <Text className="text-mindful-brown-100 text-base">
+                  {reason.reason}
+                </Text>
+                <Text className="text-mindful-brown-100 text-base">
+                  {reason.mentions}
+                </Text>
+              </View>
+            ))}
+          </View>
+        ))}
       </ScrollView>
     </SafeAreaView>
-  )
-}
+  );
+};
 
-export default JournalAnalytics
+export default JournalAnalytics;
