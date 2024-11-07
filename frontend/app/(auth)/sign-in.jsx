@@ -20,8 +20,8 @@ import {
 const SignIn = () => {
   const [isLoading, setIsLoading] = useState(false)
   const [form, setForm] = useState({
-    email: 'poh.hui.min77@gmail.com',
-    password: 'Themindfulbear123!',
+    email: '',
+    password: '',
   })
   const [errorMessage, setErrorMessage] = useState({})
 
