@@ -9,6 +9,9 @@ import { LineChart } from 'react-native-gifted-charts'
 import Loading from '../../components/loading';
 import Toggle from '../../components/toggle';
 import { Svg } from 'react-native-svg';
+import { ActivityIndicator } from 'react-native';
+// Import additional components if needed
+import { BarChart } from 'react-native-gifted-charts';
 
 const MindfulnessExercisesAnalytics = () => {
   const [loading, setLoading] = useState(false); 
@@ -16,13 +19,19 @@ const MindfulnessExercisesAnalytics = () => {
   const [sessionNumLineData, setSessionNumLineData] = useState([]) // state for dynamic line data
   const [sessionDurationLineData, setSessionDurationLineData] = useState([]) // state for dynamic line data
   const optionList = ['daily', 'monthly', 'yearly'];
-  const periodSelected =  optionList[selectedOption - 1]
   const [selectedOption, setSelectedOption] = useState(1);
+
   const today = new Date();
   const thirtyDaysAgo = new Date();
   thirtyDaysAgo.setDate(today.getDate() - 30);
   // Format the cutoff date to a comparable format (YYYY-MM-DD)
   const cutoffDate = thirtyDaysAgo.toISOString().split('T')[0]; 
+
+ // New states for the mindfulness level chart
+ const [mindfulnessLevelData, setMindfulnessLevelData] = useState([]);
+ const [loadingMindfulness, setLoadingMindfulness] = useState(false);
+
+
 console.log(cutoffDate)
   useEffect(() => {
     const fetchData = async () => {
@@ -75,6 +84,38 @@ console.log(cutoffDate)
       </View>
     );
   }
+
+  // Fetch mindfulness data specifically for the new chart
+  useEffect(() => {
+    const fetchMindfulnessData = async () => {
+      setError(null); // Reset error state
+      try {
+        setLoadingMindfulness(true);
+        const period = optionList[selectedOption - 1];
+        const response = await splitSession({ period });
+        
+        const formattedMindfulnessData = Object.keys(response?.dates || {}).map((date) => ({
+          label: date,
+          activeLow: response?.dates[date]?.active?.low || 0,
+          activeModerate: response?.dates[date]?.active?.moderate || 0,
+          activeHigh: response?.dates[date]?.active?.high || 0,
+          inactiveLow: response?.dates[date]?.inactive?.low || 0,
+          inactiveModerate: response?.dates[date]?.inactive?.moderate || 0,
+          inactiveHigh: response?.dates[date]?.inactive?.high || 0,
+        }));
+  
+        setMindfulnessLevelData(formattedMindfulnessData);
+      } catch (error) {
+        setError('Error fetching mindfulness level data');
+      } finally {
+        setLoadingMindfulness(false);
+      }
+    };
+  
+    fetchMindfulnessData();
+  }, [selectedOption]);
+
+
   // Inside your MindfulnessExercisesAnalytics component
   const screenWidth = Dimensions.get('window').width;
 
@@ -152,7 +193,7 @@ const calculateAverageLine = (data) => {
       
         
 
-        <View className="p-4">
+      <View className="p-4">
         <Text className="text-mindful-brown-100 font-urbanist-bold text-xl mb-4">
           Filter by Period
         </Text>
@@ -316,10 +357,61 @@ const calculateAverageLine = (data) => {
               
             </View>
           </View>
+
+        {/* New chart code below */}
+        <View className="p-4">
+          <Text className="text-mindful-brown-100 font-urbanist-bold text-xl mb-4">
+            Mindfulness Levels by Active/Inactive Status
+          </Text>
+          
+          {loadingMindfulness ? (
+            <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+              <Loading />
+            </View>
+          ) : error ? (
+            <Text style={{ color: 'red', marginVertical: 20 }}>{error}</Text>
+          ) : (
+            <ScrollView horizontal={true}>
+              <View className="flex-row justify-between mb-4" style={{ width: chartWidth }}>
+                <BarChart
+                  data={mindfulnessLevelData.map((item) => ({
+                    key: index, // Add unique key for each item
+                    label: item.label,
+                    bars: [
+                      { value: item.activeLow, color: colors.mindfulBrown50, label: 'Active Low' },
+                      { value: item.activeModerate, color: colors.mindfulBrown80, label: 'Active Moderate' },
+                      { value: item.activeHigh, color: colors.mindfulBrown100, label: 'Active High' },
+                      { value: item.inactiveLow, color: colors.optimisticGray30, label: 'Inactive Low' },
+                      { value: item.inactiveModerate, color: colors.optimisticGray50, label: 'Inactive Moderate' },
+                      { value: item.inactiveHigh, color: colors.optimisticGray70, label: 'Inactive High' },
+                    ],
+                  }))}
+                  width={chartWidth} 
+                  height={250}
+                  showVerticalLines
+                  spacing={30}
+                  initialSpacing={15}
+                  labelWidth={80}
+                  hideRules
+                  yAxisTextStyle={{ color: colors.mindfulBrown100, fontSize: 11 }}
+                  xAxisLabelTextStyle={{
+                    transform: [{ rotate: '-15deg' }],
+                    textAlign: 'center',
+                    color: colors.mindfulBrown100,
+                    fontWeight: 'bold',
+                  }}
+                  xAxisLabelContainerStyle={{
+                    paddingBottom: 20,
+                  }}
+                />
+              </View>
+            </ScrollView>
+          )}
         </View>
+      </View>
       </ScrollView>
     </SafeAreaView>
-  )
-}
+  );
+};
 
 export default MindfulnessExercisesAnalytics

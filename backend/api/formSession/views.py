@@ -3,6 +3,7 @@ from rest_framework.response import Response
 from .models import FormSession
 from .serializer import ScoreAggregationSerializer, FormSessionSerializer
 
+
 class FormSessionList(generics.ListCreateAPIView):
     # Create a new session
     queryset = FormSession.objects.all()
@@ -25,3 +26,4 @@ class FormSessionScoreView(generics.ListAPIView):
             return Response({'detail': 'FormSession not found'}, status=status.HTTP_404_NOT_FOUND)
         except Exception as e:
             return Response({'detail': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+

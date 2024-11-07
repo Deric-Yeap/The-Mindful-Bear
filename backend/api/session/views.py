@@ -2,6 +2,11 @@ from rest_framework import generics, status
 from rest_framework.response import Response
 from .models import Session
 from .serializer import SessionSerializer, SessionUpdateSerializer, SessionSplitSerializer
+from rest_framework.views import APIView
+from api.formSession.models import FormSession
+from django.db.models import Avg, Count, Q
+from django.utils.timezone import make_aware
+from datetime import datetime, timedelta
 
 class SessionCreate(generics.CreateAPIView):
     # Create a new session
@@ -68,8 +73,45 @@ class SessionSplitView(generics.ListAPIView):
         except Exception as e:
             return Response({'detail': str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
-    
+class SessionSplitEnhancedView(generics.ListAPIView):
+    queryset = Session.objects.all()
+    serializer_class = SessionSplitSerializer
 
+    def get(self, request, *args, **kwargs):
+        period = request.query_params.get('period', 'daily')
+        
+        # Define active sessions as those within the last 30 days
+        thirty_days_ago = make_aware(datetime.now() - timedelta(days=30))
+
+        # Get active sessions based on end_datetime within the last 30 days
+        active_sessions = Session.objects.filter(end_datetime__gte=thirty_days_ago)
+        
+        # Get inactive sessions as those outside of the last 30 days
+        inactive_sessions = Session.objects.filter(end_datetime__lt=thirty_days_ago)
+
+        # Define mindfulness levels based on SMS scores or other criteria
+        active_levels = {
+            "low": active_sessions.filter(Q(sms_before__lt=3)).count(),
+            "moderate": active_sessions.filter(Q(sms_before__gte=3) & Q(sms_before__lt=6)).count(),
+            "high": active_sessions.filter(Q(sms_before__gte=6)).count()
+        }
+
+        inactive_levels = {
+            "low": inactive_sessions.filter(Q(sms_before__lt=3)).count(),
+            "moderate": inactive_sessions.filter(Q(sms_before__gte=3) & Q(sms_before__lt=6)).count(),
+            "high": inactive_sessions.filter(Q(sms_before__gte=6)).count()
+        }
+
+        # Construct the response data
+        data = {
+            "period": period,
+            "data": {
+                "active": active_levels,
+                "inactive": inactive_levels
+            }
+        }
+
+        return Response(data, status=status.HTTP_200_OK)
 class UpdateSessionDetail(generics.RetrieveUpdateAPIView):
    
     # Retrieve and update a session without modifying start_datetime
