@@ -11,7 +11,7 @@ import {
   getUserFragments,
   updateUserFragment,
 } from '../../../api/userFragment'
-import { useNavigation } from 'expo-router'
+import { useNavigation, useFocusEffect } from 'expo-router'
 import { getAvatars } from '../../../api/avatar'
 import { useSelector } from 'react-redux'
 import BackButton from '../../../components/backButton'
@@ -52,6 +52,12 @@ const FragmentShop = () => {
   useEffect(() => {
     fetchData()
   }, [])
+  useFocusEffect(
+    React.useCallback(() => {
+      fetchData()
+    }, [])
+  )
+
   const handleConfirm = async () => {
     if (!selectedAvatar) return
     const {

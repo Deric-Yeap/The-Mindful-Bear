@@ -25,8 +25,8 @@ class AchievementCreateSerializer(serializers.ModelSerializer):
         fields = ['achievement_id', 'description', 'streak_count', 'achievement_badge_url']
 
     def validate_achievement_badge_url(self, value):
-        if not value.name.endswith(('.jpg', '.jpeg', '.png')):
-            raise serializers.ValidationError("File must be in jpg, jpeg, or png format.")
+        if not value.name.endswith(('.jpg', '.jpeg', '.png', 'json')):
+            raise serializers.ValidationError("File must be in jpg, jpeg, png or json format.")
         return value
 
     def create(self, validated_data):
@@ -62,8 +62,8 @@ class AchievementUpdateSerializer(serializers.ModelSerializer):
         fields = ['achievement_id', 'description', 'streak_count', 'achievement_badge_url']
 
     def validate_achievement_badge_url(self, value):
-        if not value.name.endswith(('.jpg', '.jpeg', '.png')):
-            raise serializers.ValidationError("File must be in jpg, jpeg, or png format.")
+        if not value.name.endswith(('.jpg', '.jpeg', '.png', 'json')):
+            raise serializers.ValidationError("File must be in jpg, jpeg, png or json format.")
         return value
 
 

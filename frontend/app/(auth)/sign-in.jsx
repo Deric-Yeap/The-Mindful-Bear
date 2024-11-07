@@ -5,18 +5,23 @@ import { setUserDetails } from '../../redux/slices/userSlice'
 import { useDispatch, useSelector } from 'react-redux'
 import { router } from 'expo-router'
 import logo from '../../assets/mindfulBearLogo.png'
-
+import { transformAchievementData } from '../../common/transformUserAchievements'
 import CustomButton from '../../components/customButton'
 import FormField from '../../components/formField'
 import { login, getMe } from '../../api/user'
 import Loading from '../../components/loading'
 import { collectedLogin, postPoints } from '../../api/achievementPoint'
+import { getNewAchievements } from '../../api/achievement'
+import {
+  setUserAchievements,
+  setNewlyAttainedAchievements,
+} from '../../redux/slices/userAchievementSlice'
 
 const SignIn = () => {
   const [isLoading, setIsLoading] = useState(false)
   const [form, setForm] = useState({
-    email: '',
-    password: '',
+    email: 'poh.hui.min77@gmail.com',
+    password: 'Themindfulbear123!',
   })
   const [errorMessage, setErrorMessage] = useState({})
 
@@ -30,6 +35,7 @@ const SignIn = () => {
         email: form.email,
         password: form.password,
       })
+
       setIsLoading(false)
       dispatch(
         setTokens({
@@ -46,6 +52,16 @@ const SignIn = () => {
           description: 'Login',
         })
       }
+      const userAchievements = await getNewAchievements()
+      if (!userAchievements) {
+        throw new Error('Failed to fetch achievements')
+      }
+      const transformedData = transformAchievementData(userAchievements)
+      dispatch(setUserAchievements(transformedData.userAchievements))
+      dispatch(
+        setNewlyAttainedAchievements(transformedData.newlyAttainedAchievements)
+      )
+
       if (user.is_staff) {
         router.push('/admin')
       } else {
