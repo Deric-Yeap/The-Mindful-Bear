@@ -83,6 +83,12 @@ const Map = () => {
     setIsSessionStarted(sessionStarted === 'true')
     setIsClickTravel(isClickTraveled === 'true')
     setIsForceStart(isForceStarted === 'true')
+    setIsRedirectedForms(isRedirected === 'true')
+    if (!isRedirectedForms){
+      if (sessionStarted){      
+        handleBottomSheetModalOpen()  
+      }
+    }
     if (selectedLandmarkData) {
       try {
         const landmarkData = JSON.parse(selectedLandmarkData)
@@ -91,10 +97,8 @@ const Map = () => {
         console.error('Error parsing selected landmark data:', error)
       }
     }
-    if (sessionStarted !== 'true'){      
-      setIsBottomSheetOpen(true)          
-    }
-    setIsRedirectedForms(isRedirected === 'true')
+
+    
   }, [
     sessionStarted,
     selectedLandmarkData,
