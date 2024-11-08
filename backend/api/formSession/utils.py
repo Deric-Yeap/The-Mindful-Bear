@@ -1,5 +1,6 @@
 from rest_framework import serializers
 from .models import FormSession
+from api.session.models import Session
 from django.conf import settings
 from datetime import datetime, timedelta
 from django.db.models import FloatField, Avg, F, Count, Q, Min, Max
@@ -13,20 +14,34 @@ from django.utils.module_loading import import_string
 # from api.session.serializer import SessionSerializer
 
 
-def get_serialized_sessions(queryset):
+#def get_serialized_sessions(queryset):
     # Dynamically import SessionSerializer to avoid circular import
-    SessionSerializer = import_string('api.session.serializer.SessionSerializer')
-    return SessionSerializer(queryset, many=True).data
+    #SessionSerializer = import_string('api.session.serializer.SessionSerializer')
+    #serialized_data = SessionSerializer(queryset, many=True).data
+    #print(f"Serialized Sessions: {serialized_data}")
+    #return serialized_data
+    
+SGT = pytz.timezone('Asia/Singapore')
+
+def convert_to_sgt(dt):
+    """Converts a datetime object to Singapore timezone."""
+    if dt:
+        return dt.astimezone(SGT).strftime('%Y-%m-%d %H:%M:%S')
+    return None
 
 def categorize_score(score, low_threshold, high_threshold):
     """Helper function to categorize a score into low, moderate, or high."""
     if score is None:
+        print("Score is None")
         return None
     elif score <= low_threshold:
+        print(f"Score {score} categorized as low")
         return "low"
     elif score > high_threshold:
+        print(f"Score {score} categorized as high")
         return "high"
     else:
+        print(f"Score {score} categorized as moderate")
         return "moderate"
 
 def categorize_scores_by_level(session_ids, view_type="before"):
@@ -37,17 +52,20 @@ def categorize_scores_by_level(session_ids, view_type="before"):
         "pss": (LOW_PSS, HIGH_PSS),
         "sms": (LOW_SMS, HIGH_SMS)
     }
+    print(f"Categorizing scores for view_type {view_type} with thresholds: {thresholds}")
 
     sessions = Session.objects.filter(id__in=session_ids)
-    
+    print(f"Sessions Retrieved for Categorization: {sessions.count()}")
+
     categorized_data = {
         "pss": {"low": 0, "moderate": 0, "high": 0},
         "sms": {"low": 0, "moderate": 0, "high": 0}
     }
 
     for session in sessions:
-        pss_score = getattr(session, f"pss_{view_type}")
-        sms_score = getattr(session, f"sms_{view_type}")
+        pss_score = getattr(session, f"pss_{view_type}", None)
+        sms_score = getattr(session, f"sms_{view_type}", None)
+        print(f"Session ID: {session.id}, PSS Score: {pss_score}, SMS Score: {sms_score}")
 
         if pss_score is not None:
             if pss_score <= thresholds["pss"][0]:
@@ -65,12 +83,14 @@ def categorize_scores_by_level(session_ids, view_type="before"):
             else:
                 categorized_data["sms"]["moderate"] += 1
 
+    print(f"Categorized Data: {categorized_data}")
     return categorized_data
 
 def get_sessions_by_period(start_date, end_date, period):
     SGT = pytz.timezone('Asia/Singapore')
     start_date_utc = start_date.astimezone(UTC)
     end_date_utc = end_date.astimezone(UTC)
+    print(f"Fetching sessions between {start_date_utc} and {end_date_utc} for period {period}")
 
     sessions = Session.objects.filter(
         start_datetime__gte=start_date_utc,
@@ -78,9 +98,11 @@ def get_sessions_by_period(start_date, end_date, period):
     ).exclude(
         start_datetime=F('end_datetime')
     )
+    print(f"Sessions Retrieved: {sessions.count()}")
 
     form_sessions = FormSession.objects.filter(SessionID__in=sessions)
-    
+    print(f"Form Sessions Retrieved: {form_sessions.count()}")
+
     valid_sessions = (
         form_sessions
         .filter(FormID__in=[3, 5])
@@ -90,11 +112,12 @@ def get_sessions_by_period(start_date, end_date, period):
         .values_list('SessionID', flat=True)
         .distinct()
     )
+    print(f"Valid Sessions IDs: {list(valid_sessions)}")
 
     filtered_sessions = sessions.filter(id__in=valid_sessions)
-    
     session_dict = {}
     current_date = start_date.astimezone(SGT).replace(hour=0, minute=0, second=0, microsecond=0)
+    print(f"Start Date (SGT): {current_date}")
 
     if period == 'daily':
         delta = timedelta(days=1)
@@ -108,6 +131,8 @@ def get_sessions_by_period(start_date, end_date, period):
         raise serializers.ValidationError("Invalid period specified.")
 
     while current_date < end_date.astimezone(SGT):
+        print(f"Processing date range starting at {current_date}")
+
         if period == 'monthly':
             key = current_date.strftime("%b-%y")
             next_date = (datetime(current_date.year, current_date.month % 12 + 1, 1, tzinfo=SGT)
@@ -123,17 +148,19 @@ def get_sessions_by_period(start_date, end_date, period):
             start_datetime__gte=current_date.astimezone(UTC),
             start_datetime__lt=next_date.astimezone(UTC)
         )
+        print(f"Sessions for period {key}: {period_sessions.count()}")
 
-        # Use SessionSplitSerializer to calculate average_duration and average_daily_sessions
         session_serializer = SessionSplitSerializer()
         session_metrics = session_serializer.get_average_duration({'sessions': get_serialized_sessions(period_sessions), 'session_count': period_sessions.count()})
+        print(f"Session Metrics: {session_metrics}")
 
         session_ids = period_sessions.values_list('id', flat=True)
         categorized_scores = categorize_scores_by_level(session_ids)
+        print(f"Categorized Scores: {categorized_scores}")
 
         session_dict[key] = {
-            'session_count': session_ids.count(),
-            'session_ids': session_ids,
+            'session_count': period_sessions.count(),
+            'session_ids': list(session_ids),
             'categorized_scores': categorized_scores,
             'average_duration': session_metrics.get('average_duration', 0),
             'daily_sessions': session_metrics.get('average_daily_sessions', 0)
@@ -141,4 +168,5 @@ def get_sessions_by_period(start_date, end_date, period):
 
         current_date = next_date.astimezone(SGT)
 
+    print(f"Final Session Dictionary: {session_dict}")
     return session_dict
