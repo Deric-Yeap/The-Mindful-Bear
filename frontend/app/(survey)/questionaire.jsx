@@ -4,6 +4,8 @@ import { getForms } from '../../api/form'
 import { useLocalSearchParams, useRouter } from 'expo-router'
 import { useSelector } from 'react-redux'
 import { setIsShownNav } from '../../redux/slices/isShownNavSlice'
+import ConfirmModal from '../../components/confirmModal'
+import { confirmModal } from '../../assets/image'
 
 const Questionaire = () => {
   const {
@@ -28,6 +30,7 @@ const Questionaire = () => {
     }
   })
   const [showError, setShowError] = useState(false)
+  const [isShowConfirmModal, setIsShowConfirmModal] = useState(false)
   const [startPressed, setStartPressed] = useState(false)
   const router = useRouter()
   const images = [
@@ -40,19 +43,21 @@ const Questionaire = () => {
     const fetchData = async () => {
       try {
         const response = await getForms()
-  
-        let filteredForms;
-        console.log(isGeneric)
-        if (isGeneric === 'true') {          
+
+        let filteredForms
+
+        if (isGeneric === 'true') {
           filteredForms = response.filter((form) =>
-            ['General Questions', 'Feedback', 'Landmark Ratings'].includes(form.form_name)
+            ['General Questions', 'Feedback', 'Landmark Ratings'].includes(
+              form.form_name
+            )
           )
         } else if (start === 'true') {
           filteredForms = response.filter((form) => form.is_presession)
         } else {
           filteredForms = response.filter((form) => form.is_postsession)
         }
-  
+
         setForms(filteredForms)
       } catch (error) {
         console.error('Error fetching form data:', error)
@@ -84,7 +89,7 @@ const Questionaire = () => {
         isForceStart: isForceStart,
         start: start,
         completedForms: JSON.stringify(updatedCompletedForms),
-        isGeneric: isGeneric
+        isGeneric: isGeneric,
       },
     })
   }
@@ -102,12 +107,11 @@ const Questionaire = () => {
           sessionStarted: true,
           isClickTravel: isClickTravel,
           isForceStart: isForceStart,
-          isGeneric: true
-
+          isGeneric: true,
         },
       })
     } else {
-      router.push('/home')     
+      router.push('/home')
     }
   }
 
@@ -120,7 +124,7 @@ const Questionaire = () => {
       if (start === 'true') {
         if (!isShownNav) {
           dispatch(setIsShownNav())
-        }        
+        }
         router.push({
           pathname: '/map',
           params: {
@@ -141,104 +145,125 @@ const Questionaire = () => {
   }
 
   return (
-    <ScrollView className="flex-1 bg-optimistic-gray-10">
-      <View className="flex-1 p-6 bg-optimistic-gray-10">
-        {/* Title */}
-        <View className="relative items-center">
-          <Text className="text-2xl font-urbanist-bold text-mindful-brown-90">
-            {start === 'true' ? 'Before We Begin...' : 'Before We End...'}
-          </Text>
-          {start === 'true' && (
-            <TouchableOpacity
-              onPress={handleSkip}
-              className="absolute right-0"
-            >
-              <Text className="text-lg font-urbanist-bold text-present-red-60">
-                Skip
-              </Text>
-            </TouchableOpacity>
-          )}
-        </View>
-        {/* Subtitle */}
-        <Text className="text-center text-lg font-urbanist-bold text-optimistic-gray-80 mt-4 mb-8">
-          We will be assessing your mood based on the following questionnaires.
-        </Text>
-
-        <View className="space-y-4">
-          {forms.map((form, index) => {
-            const isCompleted = completedForms.includes(form.id)
-            const isCompulsory = form.is_compulsory
-            const isUncompletedCompulsory =
-              isCompulsory && !isCompleted && startPressed
-
-            return (
+    <>
+      {isShowConfirmModal && (
+        <ConfirmModal
+          isConfirmButton={true}
+          isCancelButton={true}
+          imageSource={confirmModal}
+          confirmButtonTitle={'Confirm'}
+          cancelButtonTitle={'Cancel'}
+          title={`Are you sure you want to skip?`}
+          subTitle={'You will earn less points if you skip the surveys!'}
+          handleConfirm={handleSkip}
+          handleCancel={() => {
+            setIsShowConfirmModal(false)
+          }}
+        />
+      )}
+      <ScrollView className="flex-1 bg-optimistic-gray-10">
+        <View className="flex-1 p-6 bg-optimistic-gray-10">
+          {/* Title */}
+          <View className="relative items-center">
+            <Text className="text-2xl font-urbanist-bold text-mindful-brown-90">
+              {start === 'true' ? 'Before We Begin...' : 'Before We End...'}
+            </Text>
+            {start === 'true' && (
               <TouchableOpacity
-                key={form.id}
-                className={`relative p-2 rounded-3xl flex-row items-start justify-between h-48 ${
-                  isCompleted
-                    ? 'border-2 border-green-500 bg-green-100'
-                    : isUncompletedCompulsory
-                      ? 'border-2 border-red-500'
-                      : 'bg-white'
-                }`}
                 onPress={() => {
-                  handleFormComplete(form.id)
-                  navigateToForm(form.id)
+                  setIsShowConfirmModal(true)
                 }}
-                disabled={isCompleted}
-                style={{ overflow: 'hidden' }}
+                className="absolute right-0"
               >
-                {/* Background Image */}
-                <Image
-                  source={images[index % 2]}
-                  className="absolute right-0 w-48 h-48"
-                  style={{
-                    opacity: 0.8,
-                  }}
-                  resizeMode="contain"
-                />
-
-               {/* Text Content */}
-               <View className="flex-1">
-                  <Text className="text-xl font-urbanist-bold text-mindful-brown-100 ml-4 mt-4">
-                    {form.form_name} {isCompulsory ? '' : '(Optional)'}
-                  </Text>
-                  {form.description && (
-                    
-                    <Text className="text-lg text-mindful-brown-90 font-urbanist-semi-bold mx-4 mt-1"  style={{
-                      textShadowColor: 'rgba(255, 255, 255, 0.3)', 
-                      textShadowOffset: { width: 1, height: 1 }, 
-                      textShadowRadius: 1, 
-                      lineHeight: 20
-                    }}>
-                      {form.description}
-                    </Text>
-                    
-                  )}
-                </View>
+                <Text className="text-lg font-urbanist-bold text-present-red-60">
+                  Skip
+                </Text>
               </TouchableOpacity>
-            )
-          })}
+            )}
+          </View>
+          {/* Subtitle */}
+          <Text className="text-center text-lg font-urbanist-bold text-optimistic-gray-80 mt-4 mb-8">
+            We will be assessing your mood based on the following
+            questionnaires.
+          </Text>
+
+          <View className="space-y-4">
+            {forms.map((form, index) => {
+              const isCompleted = completedForms.includes(form.id)
+              const isCompulsory = form.is_compulsory
+              const isUncompletedCompulsory =
+                isCompulsory && !isCompleted && startPressed
+
+              return (
+                <TouchableOpacity
+                  key={form.id}
+                  className={`relative p-2 rounded-3xl flex-row items-start justify-between h-48 ${
+                    isCompleted
+                      ? 'border-2 border-green-500 bg-green-100'
+                      : isUncompletedCompulsory
+                        ? 'border-2 border-red-500'
+                        : 'bg-white'
+                  }`}
+                  onPress={() => {
+                    handleFormComplete(form.id)
+                    navigateToForm(form.id)
+                  }}
+                  disabled={isCompleted}
+                  style={{ overflow: 'hidden' }}
+                >
+                  {/* Background Image */}
+                  <Image
+                    source={images[index % 2]}
+                    className="absolute right-0 w-48 h-48"
+                    style={{
+                      opacity: 0.8,
+                    }}
+                    resizeMode="contain"
+                  />
+
+                  {/* Text Content */}
+                  <View className="flex-1">
+                    <Text className="text-xl font-urbanist-bold text-mindful-brown-100 ml-4 mt-4">
+                      {form.form_name} {isCompulsory ? '' : '(Optional)'}
+                    </Text>
+                    {form.description && (
+                      <Text
+                        className="text-lg text-mindful-brown-90 font-urbanist-semi-bold mx-4 mt-1"
+                        style={{
+                          textShadowColor: 'rgba(255, 255, 255, 0.3)',
+                          textShadowOffset: { width: 1, height: 1 },
+                          textShadowRadius: 1,
+                          lineHeight: 20,
+                        }}
+                      >
+                        {form.description}
+                      </Text>
+                    )}
+                  </View>
+                </TouchableOpacity>
+              )
+            })}
+          </View>
+
+          {/* Notification for uncompleted compulsory forms */}
+          {showError && (
+            <Text className="text-red-500 text-center mt-4">
+              Please complete all required forms
+            </Text>
+          )}
+
+          {/* Start Button */}
+          <TouchableOpacity
+            className="mt-8 bg-mindful-brown-80 py-4 rounded-full items-center"
+            onPress={handleStart}
+          >
+            <Text className="text-white text-lg font-urbanist-bold">
+              {start === 'true' ? 'Start →' : 'End →'}
+            </Text>
+          </TouchableOpacity>
         </View>
-
-        {/* Notification for uncompleted compulsory forms */}
-        {showError && (
-          <Text className="text-red-500 text-center mt-4">
-            Please complete all required forms
-          </Text>
-        )}
-
-        {/* Start Button */}
-        <TouchableOpacity
-          className="mt-8 bg-mindful-brown-80 py-4 rounded-full items-center"
-          onPress={handleStart}
-        >
-          <Text className="text-white text-lg font-urbanist-bold">
-            {start === 'true' ? 'Start →' : 'End →'}
-          </Text>
-        </TouchableOpacity>
-      </View>
-    </ScrollView>
+      </ScrollView>
+    </>
   )
 }
 

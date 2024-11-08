@@ -84,9 +84,9 @@ const Map = () => {
     setIsClickTravel(isClickTraveled === 'true')
     setIsForceStart(isForceStarted === 'true')
     setIsRedirectedForms(isRedirected === 'true')
-    if (!isRedirectedForms){
-      if (sessionStarted){      
-        handleBottomSheetModalOpen()  
+    if (!isRedirectedForms) {
+      if (sessionStarted) {
+        handleBottomSheetModalOpen()
       }
     }
     if (selectedLandmarkData) {
@@ -97,8 +97,6 @@ const Map = () => {
         console.error('Error parsing selected landmark data:', error)
       }
     }
-
-    
   }, [
     sessionStarted,
     selectedLandmarkData,
@@ -298,7 +296,7 @@ const Map = () => {
               start: 'true',
               isClickTravel: isClickTravel,
               isForceStart: isForceStart,
-              isGeneric: isGeneric
+              isGeneric: isGeneric,
             },
           })
         })
@@ -382,7 +380,7 @@ const Map = () => {
       handleSessionStart(true)
       return
     }
-    
+
     if (isForceStart && isSessionStarted) {
       startExercise()
       return
@@ -396,7 +394,7 @@ const Map = () => {
             geometries: 'geojson',
             access_token: process.env.MAPBOX_PUBLIC_KEY,
           })
-      )      
+      )
       let data = await response.json()
       let lineStringGeoJSON = {
         type: 'FeatureCollection',
@@ -508,7 +506,7 @@ const Map = () => {
                 handlePress={
                   isSessionStarted ? handleSessionEnd : handleSessionStart
                 }
-                buttonStyle={`w-11/12 z-10 absolute mb-1  self-center ${isSessionStarted ? 'bg-red-500 ' : ''} bottom-24 xs:bottom-20 sm:bottom-18 md:bottom-16 lg:bottom-14`}
+                buttonStyle={`w-11/12 z-10 absolute mb-1  self-center ${isSessionStarted ? 'bg-red-500 ' : ''} bottom-24 xs:bottom-24 sm:bottom-18 md:bottom-16 lg:bottom-14`}
                 textStyle="text-white"
               />
             )}
@@ -534,12 +532,13 @@ const Map = () => {
             isCancelButton={false}
             imageSource={confirmModal}
             confirmButtonTitle={'Confirm'}
-            title={'+100'}
+            title={`+${isGeneric ? 100 : 200}`}
             subTitle={'Great Job!'}
             handleConfirm={async () => {
               setIsCompletedModalOpen(false)
+              const points = isGeneric ? 100 : 200
               const postPointsResponse = await postPoints({
-                points: 100,
+                points: points,
                 description: 'Exercise Completed',
               })
             }}
