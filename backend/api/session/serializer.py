@@ -89,35 +89,44 @@ class SessionSplitSerializer(serializers.Serializer):
             'dates': session_dict
         }
         return data
+    
+    def categorize_scores_by_level(self, sessions):
 
-    def to_representation_2(self, instance):
-        request = self.context.get('request')
-        period = request.query_params.get('period', 'daily')
-        SGT = pytz.timezone('Asia/Singapore')
+        #Categorize 'before' and 'after' scores for PSS and SMS into 'low,' 'moderate,' and 'high' groups.
 
-        if period == 'daily':
-            end_date = datetime.now(tz=SGT)
-            start_date = end_date - timedelta(days=30)
-        else:
-            start_date = datetime(2024, 1, 1, tzinfo=SGT)
-            end_date = datetime(2024, 12, 31, tzinfo=SGT)
+        # Define thresholds for PSS and SMS scores
+        pss_thresholds = {"low": 13, "moderate": 26, "high": 40}
+        sms_thresholds = {"low": 28, "moderate": 56, "high": 84}
 
-        sessions = Session.objects.filter(start_datetime__gte=start_date, start_datetime__lt=end_date)
-        form_sessions = FormSession.objects.filter(FormID__in=[3, 5])
+        # Helper function to categorize scores
+        def categorize_score(scores, thresholds):
+            low = sum(1 for score in scores if score <= thresholds["low"])
+            high = sum(1 for score in scores if score > thresholds["moderate"])
+            moderate = len(scores) - low - high
+            return {"low": low, "moderate": moderate, "high": high}
 
-        categorized_data = calculate_session_metrics(
-            sessions,
-            form_sessions,
-            daily_threshold=0.33,
-            duration_threshold=3.93
-        )
+        # Extract "before" and "after" PSS and SMS scores from sessions
+        pss_before_scores = sessions.values_list('pss_before', flat=True)
+        pss_after_scores = sessions.values_list('pss_after', flat=True)
+        sms_before_scores = sessions.values_list('sms_before', flat=True)
+        sms_after_scores = sessions.values_list('sms_after', flat=True)
 
-        response_data = {
-            "period": period,
-            "data": categorized_data
+        # Categorize PSS and SMS scores into low, moderate, and high groups
+        pss_before_categories = categorize_score([score for score in pss_before_scores if score is not None], pss_thresholds)
+        pss_after_categories = categorize_score([score for score in pss_after_scores if score is not None], pss_thresholds)
+        sms_before_categories = categorize_score([score for score in sms_before_scores if score is not None], sms_thresholds)
+        sms_after_categories = categorize_score([score for score in sms_after_scores if score is not None], sms_thresholds)
+
+        return {
+            "stress_levels": {
+                "before": pss_before_categories,
+                "after": pss_after_categories
+            },
+            "mindfulness_levels": {
+                "before": sms_before_categories,
+                "after": sms_after_categories
+            }
         }
-
-        return response_data
 
 class SessionUpdateSerializer(serializers.ModelSerializer):
     class Meta:
