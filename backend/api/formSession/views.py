@@ -4,6 +4,7 @@ from rest_framework.response import Response
 from rest_framework import status
 from .models import FormSession
 from .serializer import ScoreAggregationSerializer, FormSessionSerializer
+from api.session.serializer import SessionSplitSerializer
 from .utils import get_sessions_by_period
 from api.session.models import Session
 from datetime import datetime, timedelta
@@ -22,6 +23,7 @@ class FormSessionScoreView(generics.ListAPIView):
     serializer_class = ScoreAggregationSerializer
 
 class FormSessionAggregatedView(APIView):
+
     """
     A view to provide aggregated PSS and SMS scores categorized by active and inactive users
     with filtering options for daily, monthly, and yearly intervals.
@@ -36,19 +38,30 @@ class FormSessionAggregatedView(APIView):
             # Set date range based on period
             end_date = datetime.now(tz=SGT)
             start_date = {
-                'daily': end_date - timedelta(days=1),
-                'monthly': end_date - timedelta(days=30),
-                'yearly': end_date - timedelta(days=365)
-            }.get(period, end_date - timedelta(days=30))  # default to 30 days if period is invalid
+                'daily': end_date - timedelta(days=30),
+                'monthly': end_date.replace(day=1) - timedelta(days=365),
+                'yearly': end_date.replace(month=1, day=1) - timedelta(days=365 * 5)
+            }.get(period, end_date - timedelta(days=30))  # Default to 30 days if period is invalid
 
-            # Get session data for the specified period
+            # Use get_sessions_by_period to get raw session data based on the period
             session_data = get_sessions_by_period(start_date, end_date, period)
 
-            # Define thresholds and classify users
-            active_thresholds = {"daily_sessions": 0.33, "average_duration": 3.93}
-            active_users, inactive_users = self.classify_active_inactive_users(session_data, active_thresholds)
+            # Initialize SessionSplitSerializer with session data
+            session_serializer = SessionSplitSerializer(data={'sessions': session_data})
+            session_serializer.is_valid(raise_exception=True)
 
-            # Get categorized scores for active and inactive users
+            # Get average_duration and average_daily_sessions from SessionSplitSerializer
+            session_metrics = session_serializer.data  # This contains processed metrics
+
+            # Extract calculated values
+            average_duration = session_metrics.get('average_duration')
+            average_daily_sessions = session_metrics.get('average_daily_sessions')
+
+            # Now proceed with user classification based on calculated values
+            active_thresholds = {"daily_sessions": 0.33, "average_duration": 3.93}
+            active_users, inactive_users = self.classify_active_inactive_users(session_metrics, active_thresholds)
+
+            # Prepare categorized scores
             result = {
                 "stress_levels": {
                     view_type: self.get_score_categories(active_users, inactive_users, f"pss_{view_type}")
@@ -63,7 +76,7 @@ class FormSessionAggregatedView(APIView):
         except Exception as e:
             logger.error(f"Error in FormSessionAggregatedView: {str(e)}")
             return Response({"detail": str(e)}, status=status.HTTP_400_BAD_REQUEST)
-
+        
     def classify_active_inactive_users(self, session_data, thresholds):
         """Classify sessions as active or inactive based on session metrics."""
         active_users = []
@@ -87,23 +100,24 @@ class FormSessionAggregatedView(APIView):
         """
         # Define thresholds based on PSS or SMS
         thresholds = {"low": 13, "high": 27} if "pss" in score_field else {"low": 28, "high": 56}
-        
+    
         def categorize(queryset, form_id):
             low = queryset.filter(FormID=form_id, aggregatedScore__lte=thresholds["low"]).count()
             high = queryset.filter(FormID=form_id, aggregatedScore__gte=thresholds["high"]).count()
             moderate = queryset.filter(FormID=form_id).count() - low - high
             return {"low": low, "moderate": moderate, "high": high}
         
-        # Determine FormID based on score type
-        form_id = 3 if "pss" in score_field else 5
+        # Ensure session_ids are extracted as lists, not query objects
+        active_session_ids = [session_id for data in active_users for session_id in data["session_ids"]]
+        inactive_session_ids = [session_id for data in inactive_users for session_id in data["session_ids"]]
         
         # Get categorized scores for active users
-        active_scores = FormSession.objects.filter(SessionID__in=[u["session_ids"] for u in active_users])
-        active_categories = categorize(active_scores, form_id)
+        active_scores = FormSession.objects.filter(SessionID__in=active_session_ids)
+        active_categories = categorize(active_scores, 3 if "pss" in score_field else 5)
         
         # Get categorized scores for inactive users
-        inactive_scores = FormSession.objects.filter(SessionID__in=[u["session_ids"] for u in inactive_users])
-        inactive_categories = categorize(inactive_scores, form_id)
+        inactive_scores = FormSession.objects.filter(SessionID__in=inactive_session_ids)
+        inactive_categories = categorize(inactive_scores, 3 if "pss" in score_field else 5)
 
         return {
             "active": active_categories,

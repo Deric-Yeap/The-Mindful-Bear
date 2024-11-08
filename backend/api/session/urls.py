@@ -1,6 +1,5 @@
 from django.urls import path
 from . import views
-from .views import SessionAggregatedMetricsView
 
 urlpatterns = [
     path('create/', views.SessionCreate.as_view(), name='session-create'),
@@ -8,9 +7,5 @@ urlpatterns = [
     path('get/<int:pk>/', views.SessionDetail.as_view(), name='session-detail'),
     path('update/<int:pk>/', views.UpdateSessionDetail.as_view(), name='update-session-detail'),   
     # path('get_by_date/', views.SessionByDate.as_view(), name='session-by-date'),
-    path('split/', views.SessionSplitView.as_view(), name='session-period-split'),
-    path('aggregated-metrics/', SessionAggregatedMetricsView.as_view(), name='session-aggregated-metrics')
-
+    path('split/', views.SessionSplitView.as_view(), name='session-period-split')
 ]
-
- 

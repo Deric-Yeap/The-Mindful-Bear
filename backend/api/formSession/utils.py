@@ -1,6 +1,5 @@
 from rest_framework import serializers
 from .models import FormSession
-from ..session.models import Session
 from django.conf import settings
 from datetime import datetime, timedelta
 from django.db.models import FloatField, Avg, F, Count, Q, Min, Max
@@ -8,6 +7,7 @@ from django.db.models.functions import Cast
 import pytz
 from pytz import UTC  # Make sure pytz is installed
 from rest_framework import serializers
+from api.session.serializer import SessionSplitSerializer
 
 from django.utils.module_loading import import_string
 # from api.session.serializer import SessionSerializer
@@ -124,6 +124,10 @@ def get_sessions_by_period(start_date, end_date, period):
             start_datetime__lt=next_date.astimezone(UTC)
         )
 
+        # Use SessionSplitSerializer to calculate average_duration and average_daily_sessions
+        session_serializer = SessionSplitSerializer()
+        session_metrics = session_serializer.get_average_duration({'sessions': get_serialized_sessions(period_sessions), 'session_count': period_sessions.count()})
+
         session_ids = period_sessions.values_list('id', flat=True)
         categorized_scores = categorize_scores_by_level(session_ids)
 
@@ -131,11 +135,10 @@ def get_sessions_by_period(start_date, end_date, period):
             'session_count': session_ids.count(),
             'session_ids': session_ids,
             'categorized_scores': categorized_scores,
-            'average_duration': 0,  # Placeholder for average duration
-            'daily_sessions': 0     # Placeholder for daily sessions count
+            'average_duration': session_metrics.get('average_duration', 0),
+            'daily_sessions': session_metrics.get('average_daily_sessions', 0)
         }
 
         current_date = next_date.astimezone(SGT)
 
     return session_dict
-
