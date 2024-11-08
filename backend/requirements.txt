@@ -26,3 +26,4 @@ scikit-learn
 sentence_transformers
 nltk
 numpy==1.26.4
+torch
