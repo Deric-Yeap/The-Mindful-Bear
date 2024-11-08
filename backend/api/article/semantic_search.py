@@ -14,10 +14,10 @@ import string
 from datetime import datetime
 from collections import defaultdict
 
-nltk.download('punkt', quiet=True)
-nltk.download('wordnet', quiet=True)
-nltk.download('stopwords', quiet=True)
-nltk.download('averaged_perceptron_tagger', quiet=True)
+# nltk.download('punkt', quiet=True)
+# nltk.download('wordnet', quiet=True)
+# nltk.download('stopwords', quiet=True)
+# nltk.download('averaged_perceptron_tagger', quiet=True)
 
 class SemanticSearchEngine:
     _instance = None

@@ -26,5 +26,5 @@ transformers
 scipy
 scikit-learn
 sentence_transformers
-nltk
+nltk==3.8.1
 numpy==1.26.4

@@ -10,7 +10,7 @@ const baseURL = 'https://themindfulbear.xyz/api/'
 
 const axiosInstance = axios.create({
   baseURL: baseURL,
-  timeout: 10000,
+  timeout: 120000,
   headers: {
     'Content-Type': 'application/json',
   },
