@@ -13,7 +13,6 @@ django-rest-passwordreset
 Pillow
 pydub
 vosk
-pandas
 textblob
 transformers
 gunicorn
@@ -23,7 +22,6 @@ openpyxl==3.1.5
 pytz
 transformers
 scipy
-torch
 scikit-learn
 sentence_transformers
 nltk

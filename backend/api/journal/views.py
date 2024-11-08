@@ -1,6 +1,4 @@
-#C:\The-Mindful-Bear\backend\api\journal\views.py
 import json
-import pandas as pd
 from textblob import TextBlob
 from datetime import datetime
 from rest_framework.views import APIView
@@ -19,14 +17,16 @@ from rest_framework.exceptions import APIException
 from django.http import JsonResponse
 # import nltk
 # from nltk.sentiment import SentimentIntensityAnalyzer
-from datetime import timedelta
-
+from django.db.models import Count as JournalCount
 from transformers import AutoTokenizer, AutoModelForSequenceClassification
 from scipy.special import softmax
-import torch
 
-#for filter of topic classification model
-from datetime import datetime
+from ..common.topic_classifier import classify_text
+from ..common.text_processing import split_sentences 
+from collections import defaultdict
+import pytz
+import logging
+
 
 # Load the model and tokenizer once, to avoid reloading every time
 MODEL = "cardiffnlp/twitter-roberta-base-sentiment"
@@ -145,17 +145,7 @@ class CountYearJournalView(APIView):
         journals = Journal.objects.filter(user_id=request.user.user_id, upload_date__year=year)
         return Response({'count': journals.count()}, status=status.HTTP_200_OK)
 
-from datetime import datetime
-from django.db.models import Count as JournalCount
-from rest_framework.response import Response
-from rest_framework import status
-from rest_framework.views import APIView
 
-from datetime import datetime
-from django.db.models import Count as JournalCount
-from rest_framework.response import Response
-from rest_framework import status
-from rest_framework.views import APIView
 
 class Count(APIView):
     def get(self, request):
@@ -323,12 +313,6 @@ class JournalEntryViewSet(viewsets.ViewSet):
         journal.delete()
         return Response({'message': 'Journal entry deleted successfully.'}, status=status.HTTP_200_OK)
 
-from ..common.topic_classifier import classify_text
-from ..common.text_processing import split_sentences 
-from collections import defaultdict
-from datetime import datetime
-import pytz
-import logging
 
 # Configure logging if it's not already configured
 logging.basicConfig(level=logging.INFO)
