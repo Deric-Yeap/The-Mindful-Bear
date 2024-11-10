@@ -376,7 +376,7 @@ const calculateAverageLine = (data) => {
           
           {/* Additional Bar Charts Section */}
           <View className="p-1">
-            <Text className="text-mindful-brown-100 font-urbanist-bold text-xl mb-4">Likelihood of Future Use</Text>
+            <Text className="text-mindful-brown-80 font-urbanist-bold text-xl mb-4">Likelihood of Future Use</Text>
             {likelihoodData.length > 0 ? (
               <BarChart
                 data={likelihoodData.map((item, index) => ({
@@ -393,15 +393,15 @@ const calculateAverageLine = (data) => {
                 yAxisThickness={1}
                 xAxisThickness={1}
                 showYAxisIndices
-                yAxisLabelTextStyle={{ color: colors.mindfulBrown100, fontSize: 10 }}
-                xAxisLabelTextStyle={{ color: colors.mindfulBrown100, fontSize: 10 }}
+                yAxisLabelTextStyle={{ color: colors.mindfulBrown70, fontSize: 10 }}
+                xAxisLabelTextStyle={{ color: colors.mindfulBrown90, fontSize: 10 }}
                 maxValue={maxLikelihoodValue} // Dynamically set the max y-axis value based on data
               />
             ) : (
               <Text>No data available</Text>
             )}
 
-            <Text className="text-mindful-brown-100 font-urbanist-bold text-xl mb-4 mt-8">Overall Experience Rating</Text>
+            <Text className="text-mindful-brown-80 font-urbanist-bold text-xl mb-4 mt-8">Overall Experience Rating</Text>
             {experienceData.length > 0 ? (
               <BarChart
                 data={experienceData.map((item, index) => ({
@@ -418,8 +418,8 @@ const calculateAverageLine = (data) => {
                 yAxisThickness={1}
                 xAxisThickness={1}
                 showYAxisIndices
-                yAxisLabelTextStyle={{ color: colors.optimisticGray50, fontSize: 10 }}
-                xAxisLabelTextStyle={{ color: colors.optimisticGray50, fontSize: 10 }}
+                yAxisLabelTextStyle={{ color: colors.mindfulBrown70, fontSize: 10 }}
+                xAxisLabelTextStyle={{ color: colors.mindfulBrown90, fontSize: 10 }}
                 maxValue={maxExperienceValue} // Dynamically set the max y-axis value based on data
               />
             ) : (
