@@ -139,6 +139,8 @@ class SessionSplitSerializer(serializers.Serializer):
 #                         "end_datetime_sgt": "2024-10-09 11:52:54"
 #                     },
 
+
+
 class SessionUpdateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Session
