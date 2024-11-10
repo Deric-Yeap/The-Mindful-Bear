@@ -73,7 +73,7 @@ export const createLandmarkRatings = async (sessionID) => {
       }
 
       const exerciseExists = form.questions.some((question) =>
-        question.question.includes(exerciseName)
+        question.question.includes(exerciseName) && question.question.includes(landmarkName)
       );
 
       if (!exerciseExists) {
