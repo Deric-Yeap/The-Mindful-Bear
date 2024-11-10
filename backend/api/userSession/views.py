@@ -1,7 +1,7 @@
 from rest_framework import generics, status
 from rest_framework.response import Response
 from .models import UserSession  
-from .serializer import UserSessionSerializer, UserSessionSplitSerializer, UserSessionUpdateSerializer
+from .serializer import UserSessionSerializer, UserSessionLandmarkSplitSerializer, UserSessionExerciseSplitSerializer, UserSessionUpdateSerializer
 
 class UserSessionCreate(generics.CreateAPIView):
     queryset = UserSession.objects.all()
@@ -34,9 +34,9 @@ class UserSessionDetail(generics.RetrieveAPIView):
             return Response({'detail': str(e)}, status=status.HTTP_400_BAD_REQUEST)
         
 
-class UserSessionSplitView(generics.ListAPIView):
+class UserSessionLandmarkSplitView(generics.ListAPIView):
     queryset = UserSession.objects.all()
-    serializer_class = UserSessionSplitSerializer
+    serializer_class = UserSessionLandmarkSplitSerializer
 
     def get(self, request, *args, **kwargs):
         try:
@@ -52,8 +52,25 @@ class UserSessionSplitView(generics.ListAPIView):
         except Exception as e:
             return Response({'detail': str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
-    
 
+class UserSessionExerciseSplitView(generics.ListAPIView):
+    queryset = UserSession.objects.all()
+    serializer_class = UserSessionExerciseSplitSerializer
+
+    def get(self, request, *args, **kwargs):
+        try:
+            # Initialize the serializer with context including the request
+            serializer = self.get_serializer(context={'request': request})
+
+            # Get the serialized data
+            data = serializer.to_representation(None)
+            
+            return Response(data, status=status.HTTP_200_OK)
+        except UserSession.DoesNotExist:
+            return Response({'detail': 'Session not found'}, status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            return Response({'detail': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        
 class UpdateUserSessionDetail(generics.RetrieveUpdateAPIView):
    
     # Retrieve and update a session without modifying start_datetime
