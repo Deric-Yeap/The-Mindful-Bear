@@ -1,6 +1,7 @@
 from rest_framework import serializers
 from .models import Session
 from ..formSession.utils import get_sessions_by_period
+from .utils import get_average_duration
 from datetime import datetime, timedelta
 from pytz import UTC  # Make sure pytz is installed
 import pytz
@@ -39,107 +40,6 @@ class SessionSerializer(serializers.ModelSerializer):
 
 class SessionSplitSerializer(serializers.Serializer):
     
-    # def get_sessions_by_period(self, start_date, end_date, period):
-    #     """
-    #     This function takes start and end dates and the period (daily, weekly, monthly) 
-    #     and returns a dictionary of sessions grouped by the period.
-    #     """
-    #     # Ensure start_date and end_date are in UTC
-    #     SGT = pytz.timezone('Asia/Singapore')
-    #     start_date_utc = start_date.astimezone(UTC)
-        
-    #     end_date_utc = end_date.astimezone(UTC)
-
-    #     start_date_sgt = start_date.astimezone(SGT)
-    #     end_date_sgt = end_date.astimezone(SGT)
-
-    #     sessions = Session.objects.filter(
-    #         start_datetime__gte=start_date_utc,
-    #         start_datetime__lt=end_date_utc
-    #     )
-
-    #     print("sessions",sessions)
-        
-    #     session_dict = {}
-    #     current_date = start_date_sgt.replace(hour=0, minute=0, second=0, microsecond=0)  # Start from midnight
-
-
-    #     if period == 'daily':
-    #         delta = timedelta(days=1)
-    #         # remove weekly, add yearly
-    #     # elif period == 'weekly':
-    #     #     current_date -= timedelta(days=current_date.weekday())  # Adjust to previous Monday
-    #     #     delta = timedelta(weeks=1)
-    #     elif period == 'monthly':
-    #         current_date = current_date.replace(day=1)  # Set to the first day of the month
-    #     # No delta needed here since we'll calculate the next month on the fly
-    #     elif period == 'yearly':
-    #         current_date = current_date.replace(month=1, day=1)
-    #     else:
-    #         raise serializers.ValidationError("Invalid period specified.")
-
-    #     # Loop through the date range by the specified period (daily, weekly, etc.)
-    #     while current_date < end_date_sgt:
-    #         # if period == 'weekly':
-    #         #     next_date = current_date + timedelta(weeks=1)
-    #         #     # dd/mm/YY
-    #         #     key = f"{current_date.date()}"
-    #         if period == 'monthly':
-    #             key = f"{current_date.year}-{current_date.month:02d}"  # Format as MMM-YY
-    #             key = current_date.strftime("%b-%y").title()
-    #             if current_date.month == 12:
-    #                 next_date = datetime(current_date.year + 1, 1, 1, tzinfo=SGT)  # January next year
-    #             else:
-    #                 next_date = datetime(current_date.year, current_date.month + 1, 1, tzinfo=SGT)  # First day of next month
-    #         elif period == 'yearly':
-    #             key = f"{current_date.year}"
-    #             next_date = datetime(current_date.year + 1, 1, 1, tzinfo=SGT)  # January next year
-    #         else:
-    #             next_date = current_date + delta
-    #             key = f"{current_date.date()}"
-
-    #         # Filter sessions for the current period
-    #         print("current_date",current_date)
-    #         period_sessions = sessions.filter(start_datetime__gte=current_date.astimezone(UTC), 
-    #                                           start_datetime__lt=next_date.astimezone(UTC))
-    def get_average_duration(self, period_sessions):
-        session_dict = {}
-        # Calculate the session count
-        # Calculate the average duration of sessions
-        sgt_format = '%Y-%m-%d %H:%M:%S'
-
-
-        for key, data in period_sessions.items():
-            # Assuming each session in 'sessions' has 'start_datetime' and 'end_datetime' fields
-            session_details = data['sessions']
-            total_duration_seconds = sum(
-            (datetime.strptime(session['end_datetime_sgt'], sgt_format) - datetime.strptime(session['start_datetime_sgt'], sgt_format)).total_seconds()  for session in data['sessions']
-                        )
-            total_duration_minutes = total_duration_seconds / 60  # Convert to minutes
-            
-            # Add the total duration to the period data if needed
-            session_count = data['session_count'] 
-
-            # Print out results for each period
-            print(f"Period: {key}")
-            print(f"Total Duration (minutes): {total_duration_minutes}")
-
-        
-        # # Calculate the total duration of sessions in minutes
-        # total_duration_seconds = sum([(session.end_datetime - session.start_datetime).total_seconds() for session in session_details])
-        # total_duration_minutes = total_duration_seconds / 60  # Convert to minutes
-
-            avg_duration = total_duration_minutes / session_count if session_count > 0 else 0
-
-            # Prepare the data for this period
-            session_dict[key] = {
-                'session_count': session_count,
-                'average_duration': avg_duration,  # Convert to minutes
-                'sessions': session_details # Serialize the sessions
-            }
-        print("session_dict",session_dict)
-        return session_dict
-
     def to_representation(self, instance):
         request = self.context.get('request')
         year = request.query_params.get('year')
@@ -177,7 +77,7 @@ class SessionSplitSerializer(serializers.Serializer):
         # Get the session data for the specified period
         session_data = get_sessions_by_period(start_date, end_date, period)
         print("session data",session_data)
-        session_dict =  self.get_average_duration(session_data)
+        session_dict =  get_average_duration(session_data)
             
         
         data = {
