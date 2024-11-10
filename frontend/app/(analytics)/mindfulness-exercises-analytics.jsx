@@ -1,17 +1,15 @@
-import React, { useState, useEffect } from 'react'
-import { View, Text, ScrollView, Dimensions } from 'react-native'
-import { SafeAreaView } from 'react-native-safe-area-context'
-import BrownPageTitlePortion from '../../components/brownPageTitlePortion'
-import StatusBarComponent from '../../components/darkThemStatusBar'
-import { colors } from '../../common/styles'
-import { splitSession } from '../../api/session'
-import { LineChart } from 'react-native-gifted-charts'
+import React, { useState, useEffect } from 'react';
+import { View, Text, ScrollView, Dimensions, ActivityIndicator } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import BrownPageTitlePortion from '../../components/brownPageTitlePortion';
+import StatusBarComponent from '../../components/darkThemStatusBar';
+import { colors } from '../../common/styles';
+import { splitSession } from '../../api/session';
+import { LineChart, BarChart } from 'react-native-gifted-charts';
 import Loading from '../../components/loading';
 import Toggle from '../../components/toggle';
 import { Svg } from 'react-native-svg';
-import { ActivityIndicator } from 'react-native';
-// Import additional components if needed
-import { BarChart } from 'react-native-gifted-charts';
+import { fetchLikelihoodOfFutureUse, fetchOverallExperienceRating } from '../../api/formQuestion';
 
 const MindfulnessExercisesAnalytics = () => {
   const [loading, setLoading] = useState(false); 
@@ -19,20 +17,48 @@ const MindfulnessExercisesAnalytics = () => {
   const [sessionNumLineData, setSessionNumLineData] = useState([]) // state for dynamic line data
   const [sessionDurationLineData, setSessionDurationLineData] = useState([]) // state for dynamic line data
   const optionList = ['daily', 'monthly', 'yearly'];
+  const periodSelected =  optionList[selectedOption - 1]
   const [selectedOption, setSelectedOption] = useState(1);
+
+  // newly added: State for likelihood and experience data
+  const [likelihoodData, setLikelihoodData] = useState([]);
+  const [experienceData, setExperienceData] = useState([]);
+  const likelihoodLabels = {
+    "0": "Very Unlikely",
+    "1": "Unlikely",
+    "2": "Neutral",
+    "3": "Likely",
+    "4": "Very Likely",
+  };
+  const experienceLabels = {
+    "0": "Very Bad",
+    "1": "Bad",
+    "2": "Neutral",
+    "3": "Good",
+    "4": "Very Good",
+  };
+
+  const likelihoodBarColors = [
+    colors.presentRed40, colors.mindfulBrown40, colors.kindPurple40, 
+    colors.empathyOrange40, colors.serenityGreen40
+  ];
+  
+  const experienceBarColors = [
+    colors.presentRed40, colors.mindfulBrown40, colors.kindPurple40, 
+    colors.empathyOrange40, colors.serenityGreen40
+  ];
+
+  const maxLikelihoodValue = Math.max(...likelihoodData.map(item => item.value), 20); // Default to 20 if no data available
+  const maxExperienceValue = Math.max(...experienceData.map(item => item.value), 20); // Default to 20 if no data available
+  // newly added: State for likelihood and experience data
 
   const today = new Date();
   const thirtyDaysAgo = new Date();
   thirtyDaysAgo.setDate(today.getDate() - 30);
   // Format the cutoff date to a comparable format (YYYY-MM-DD)
   const cutoffDate = thirtyDaysAgo.toISOString().split('T')[0]; 
+  console.log(cutoffDate)
 
- // New states for the mindfulness level chart
- const [mindfulnessLevelData, setMindfulnessLevelData] = useState([]);
- const [loadingMindfulness, setLoadingMindfulness] = useState(false);
-
-
-console.log(cutoffDate)
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true); 
@@ -73,6 +99,28 @@ console.log(cutoffDate)
     fetchData()
   }, [selectedOption])
 
+  // newly added
+  useEffect(() => {
+    const getData = async () => {
+      try {
+        const likelihood = await fetchLikelihoodOfFutureUse();
+        const experience = await fetchOverallExperienceRating();
+        setLikelihoodData(Object.keys(likelihood).map(rating => ({
+          value: likelihood[rating],
+          label: likelihoodLabels[rating] || rating,
+        })));
+        setExperienceData(Object.keys(experience).map(rating => ({
+          value: experience[rating],
+          label: experienceLabels[rating] || rating,
+        })));
+      } catch (error) {
+        console.error("Error fetching data for charts:", error);
+      }
+    };
+    getData();
+  }, []);
+  // newly added
+
   const onSelectSwitch = option => {
     setSelectedOption(option);
   };
@@ -84,38 +132,6 @@ console.log(cutoffDate)
       </View>
     );
   }
-
-  // Fetch mindfulness data specifically for the new chart
-  useEffect(() => {
-    const fetchMindfulnessData = async () => {
-      setError(null); // Reset error state
-      try {
-        setLoadingMindfulness(true);
-        const period = optionList[selectedOption - 1];
-        const response = await splitSession({ period });
-        
-        const formattedMindfulnessData = Object.keys(response?.dates || {}).map((date) => ({
-          label: date,
-          activeLow: response?.dates[date]?.active?.low || 0,
-          activeModerate: response?.dates[date]?.active?.moderate || 0,
-          activeHigh: response?.dates[date]?.active?.high || 0,
-          inactiveLow: response?.dates[date]?.inactive?.low || 0,
-          inactiveModerate: response?.dates[date]?.inactive?.moderate || 0,
-          inactiveHigh: response?.dates[date]?.inactive?.high || 0,
-        }));
-  
-        setMindfulnessLevelData(formattedMindfulnessData);
-      } catch (error) {
-        setError('Error fetching mindfulness level data');
-      } finally {
-        setLoadingMindfulness(false);
-      }
-    };
-  
-    fetchMindfulnessData();
-  }, [selectedOption]);
-
-
   // Inside your MindfulnessExercisesAnalytics component
   const screenWidth = Dimensions.get('window').width;
 
@@ -193,7 +209,7 @@ const calculateAverageLine = (data) => {
       
         
 
-      <View className="p-4">
+        <View className="p-4">
         <Text className="text-mindful-brown-100 font-urbanist-bold text-xl mb-4">
           Filter by Period
         </Text>
@@ -347,71 +363,73 @@ const calculateAverageLine = (data) => {
                 
             </View>
           </ScrollView>
+          
           <View className="bg-optimistic-gray-10 p-4 rounded-lg mb-4">
             <Text className="text-mindful-brown-100 font-urbanist-bold text-xl mb-4">
               Popular Landmarks
             </Text>
             <View>
               
-              
-              
             </View>
           </View>
 
-        {/* New chart code below */}
-        <View className="p-4">
-          <Text className="text-mindful-brown-100 font-urbanist-bold text-xl mb-4">
-            Mindfulness Levels by Active/Inactive Status
-          </Text>
           
-          {loadingMindfulness ? (
-            <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-              <Loading />
-            </View>
-          ) : error ? (
-            <Text style={{ color: 'red', marginVertical: 20 }}>{error}</Text>
-          ) : (
-            <ScrollView horizontal={true}>
-              <View className="flex-row justify-between mb-4" style={{ width: chartWidth }}>
-                <BarChart
-                  data={mindfulnessLevelData.map((item) => ({
-                    key: index, // Add unique key for each item
-                    label: item.label,
-                    bars: [
-                      { value: item.activeLow, color: colors.mindfulBrown50, label: 'Active Low' },
-                      { value: item.activeModerate, color: colors.mindfulBrown80, label: 'Active Moderate' },
-                      { value: item.activeHigh, color: colors.mindfulBrown100, label: 'Active High' },
-                      { value: item.inactiveLow, color: colors.optimisticGray30, label: 'Inactive Low' },
-                      { value: item.inactiveModerate, color: colors.optimisticGray50, label: 'Inactive Moderate' },
-                      { value: item.inactiveHigh, color: colors.optimisticGray70, label: 'Inactive High' },
-                    ],
-                  }))}
-                  width={chartWidth} 
-                  height={250}
-                  showVerticalLines
-                  spacing={30}
-                  initialSpacing={15}
-                  labelWidth={80}
-                  hideRules
-                  yAxisTextStyle={{ color: colors.mindfulBrown100, fontSize: 11 }}
-                  xAxisLabelTextStyle={{
-                    transform: [{ rotate: '-15deg' }],
-                    textAlign: 'center',
-                    color: colors.mindfulBrown100,
-                    fontWeight: 'bold',
-                  }}
-                  xAxisLabelContainerStyle={{
-                    paddingBottom: 20,
-                  }}
-                />
-              </View>
-            </ScrollView>
-          )}
+          {/* Additional Bar Charts Section */}
+          <View className="p-1">
+            <Text className="text-mindful-brown-100 font-urbanist-bold text-xl mb-4">Likelihood of Future Use</Text>
+            {likelihoodData.length > 0 ? (
+              <BarChart
+                data={likelihoodData.map((item, index) => ({
+                  ...item,
+                  frontColor: likelihoodBarColors[index % likelihoodBarColors.length], // Cycle through colors for each bar
+                  topLabelComponent: () => (
+                    <Text style={{ color: colors.optimisticGray50, fontSize: 12, marginBottom: 6 }}>
+                      {item.value}
+                    </Text>
+                  ),
+                }))}
+                barWidth={30}
+                barBorderRadius={4}
+                yAxisThickness={1}
+                xAxisThickness={1}
+                showYAxisIndices
+                yAxisLabelTextStyle={{ color: colors.mindfulBrown100, fontSize: 10 }}
+                xAxisLabelTextStyle={{ color: colors.mindfulBrown100, fontSize: 10 }}
+                maxValue={maxLikelihoodValue} // Dynamically set the max y-axis value based on data
+              />
+            ) : (
+              <Text>No data available</Text>
+            )}
+
+            <Text className="text-mindful-brown-100 font-urbanist-bold text-xl mb-4 mt-8">Overall Experience Rating</Text>
+            {experienceData.length > 0 ? (
+              <BarChart
+                data={experienceData.map((item, index) => ({
+                  ...item,
+                  frontColor: experienceBarColors[index % experienceBarColors.length], // Cycle through colors for each bar
+                  topLabelComponent: () => (
+                    <Text style={{ color: colors.optimisticGray50, fontSize: 12, marginBottom: 6 }}>
+                      {item.value}
+                    </Text>
+                  ),
+                }))}
+                barWidth={30}
+                barBorderRadius={4}
+                yAxisThickness={1}
+                xAxisThickness={1}
+                showYAxisIndices
+                yAxisLabelTextStyle={{ color: colors.optimisticGray50, fontSize: 10 }}
+                xAxisLabelTextStyle={{ color: colors.optimisticGray50, fontSize: 10 }}
+                maxValue={maxExperienceValue} // Dynamically set the max y-axis value based on data
+              />
+            ) : (
+              <Text>No data available</Text>
+            )}
+          </View>
         </View>
-      </View>
       </ScrollView>
     </SafeAreaView>
-  );
-};
+  )
+}
 
 export default MindfulnessExercisesAnalytics
