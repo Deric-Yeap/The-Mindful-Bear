@@ -209,7 +209,7 @@ class ScoreAggregationProfPercentageSerializer(serializers.Serializer):
     pss_percentage_change = serializers.SerializerMethodField()
     sms_percentage_change = serializers.SerializerMethodField()
 
-    def get_pss_percentage_change(self, session_ids,pss_threshold=None):
+    def get_pss_percentage_change(self, session_ids,count,pss_threshold=None):
         filtered_sessions = FormSession.objects.filter(SessionID__in=session_ids)
 
         
@@ -220,7 +220,8 @@ class ScoreAggregationProfPercentageSerializer(serializers.Serializer):
         # If there are no valid sessions, return 0 
         if session_count == 0:
            return {
-            'session_count': 0,
+            'session_count_pss': 0,
+            'session_count_percent_pss': 0,
             'percentage_changes_pss': {}  # No sessions, so no percentage change
             }
         else: 
@@ -237,6 +238,7 @@ class ScoreAggregationProfPercentageSerializer(serializers.Serializer):
 
             # Step 2: Calculate percentage change for each session
             percentage_changes_pss = {}
+            pss_filter_count = 0
 
             for session in pss_scores:
                 before_score = float(filtered_sessions.get(id=session['before_score_id']).aggregatedScore)
@@ -259,16 +261,20 @@ class ScoreAggregationProfPercentageSerializer(serializers.Serializer):
                 # Apply threshold filter only if threshold is provided
                 if pss_threshold is None or percentage_score >= float(pss_threshold):
                     percentage_changes_pss[session_id] = percentage_score
+                    pss_filter_count += 1
+
+            session_count_percent_pss = pss_filter_count / count * 100
                 
                 
 
             return {
-                'session_count': session_count,
+                'session_count_pss':pss_filter_count,
+                'session_count_percent_pss': session_count_percent_pss,
                 'percentage_changes_pss': percentage_changes_pss
             }
                  
 
-    def get_sms_percentage_change(self, session_ids,sms_threshold=None):
+    def get_sms_percentage_change(self, session_ids,count,sms_threshold=None):
         filtered_sessions = FormSession.objects.filter(SessionID__in=session_ids)
 
         
@@ -279,7 +285,8 @@ class ScoreAggregationProfPercentageSerializer(serializers.Serializer):
         # If there are no valid sessions, return 0 
         if session_count == 0:
            return {
-            'session_count': 0,
+            'session_count_sms': 0,
+            'session_count_percent_sms': 0,
             'percentage_changes_sms': {}  # No sessions, so no percentage change
             }
         else: 
@@ -296,6 +303,7 @@ class ScoreAggregationProfPercentageSerializer(serializers.Serializer):
 
             # Step 2: Calculate percentage change for each session
             percentage_changes_sms= {}
+            sms_filter_count = 0
 
             for session in sms_scores:
                 before_score = float(filtered_sessions.get(id=session['before_score_id']).aggregatedScore)
@@ -315,11 +323,14 @@ class ScoreAggregationProfPercentageSerializer(serializers.Serializer):
                 # Apply threshold filter only if threshold is provided
                 if sms_threshold is None or percentage_score <= float(sms_threshold):
                     percentage_changes_sms[session_id] = percentage_score
-                
+                    sms_filter_count += 1
+            
+            session_count_percent_sms = sms_filter_count / count * 100
 
 
             return {
-                'session_count': session_count,
+                'session_count_sms': sms_filter_count,
+                'session_count_percent_sms': session_count_percent_sms,
                 'percentage_changes_sms': percentage_changes_sms
             }
                  
@@ -370,12 +381,15 @@ class ScoreAggregationProfPercentageSerializer(serializers.Serializer):
         print("session data",session_data)
         result = {}
         for period_key, data in session_data.items():
-            pss_percentage_scores = self.get_pss_percentage_change(data['session_prof_ids'],pss)
-            sms_percentage_scores = self.get_sms_percentage_change(data['session_prof_ids'],sms)
+            pss_percentage_scores = self.get_pss_percentage_change(data['session_prof_ids'],data['session_prof_count'],pss)
+            sms_percentage_scores = self.get_sms_percentage_change(data['session_prof_ids'],data['session_prof_count'],sms)
+            
             result[period_key] = {
                 **pss_percentage_scores,
                 **sms_percentage_scores,
                 'session_prof_ids': data['session_prof_ids'],
+                'session_prof_count': data['session_prof_count']
+                
             }
 
         return result
