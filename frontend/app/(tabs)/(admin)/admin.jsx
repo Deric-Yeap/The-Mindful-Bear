@@ -30,7 +30,7 @@ export default function Admin() {
             Management
           </Text>
           <View className="flex-row justify-between mb-4">
-            <Link href="/admin/user" asChild>
+            <Link href="/user-upgrade" asChild>
               <TouchableOpacity className="flex-1 bg-mindful-brown-30 p-2 rounded-2xl mr-2">
                 <View className="items-start">
                   <Text className="text-white font-urbanist-bold text-lg">
