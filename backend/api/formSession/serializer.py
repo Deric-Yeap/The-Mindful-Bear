@@ -147,8 +147,6 @@ class ScoreAggregationProfSerializer(serializers.Serializer):
                 'average_sms_before': sms_before_avg,
                 'average_sms_after': sms_after_avg
             }
-        
-
     
 
     def to_representation(self, instance):

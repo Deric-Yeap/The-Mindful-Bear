@@ -163,33 +163,33 @@ class UserSessionExerciseSplitSerializer(serializers.Serializer):
         landmarks = Landmark.objects.all()
         print("landmarks",landmarks)
         for exercise in exercises:
-            exercise_data[exercise.exercise_id] = {'durations': [], 'count': 0, 'usersessions': []}
+            exercise_data[exercise.exercise_id] = {'durations': [], 'count': 0, 'percent_count':0,'usersessions': []}
 
         print("exercise_data",exercise_data)
 
         # Iterate through sessions to update exercise data
         for session in usersessions:
-            # print(session)
+            print(session)
             landmark_id = session['landmark']
-            print(landmarks)
             exercise_id = landmarks.filter(landmark_id=landmark_id).first().exercise.exercise_id
-            print("exercise_id",exercise_id)
             total_duration_seconds = (datetime.strptime(session['end_datetime_sgt'], sgt_format) - datetime.strptime(session['start_datetime_sgt'], sgt_format)).total_seconds()
             total_duration_minutes = total_duration_seconds / 60  # Convert to minutes
 
             exercise_data[exercise_id]['durations'].append(total_duration_minutes)
             exercise_data[exercise_id]['count'] += 1
             exercise_data[exercise_id]['usersessions'].append(session)
+            
        
 
       # Calculate average durations
         exercise_session_details = {}
         for exercise_id, data in exercise_data.items():
             durations = data['durations']
+            count = len(durations)
             if len(durations) > 0:
                 exercise_session_details[exercise_id] = {
                     'average_duration': sum(durations) / len(durations),
-                    'count': data['count'],
+                    'count': count,
                     'usersessions': data['usersessions']
                 }
             else:
@@ -198,7 +198,8 @@ class UserSessionExerciseSplitSerializer(serializers.Serializer):
                     'count': 0,
                     'usersessions': []
                 }
-        return exercise_session_details
+        return {
+            **exercise_session_details}
     
 
 
@@ -242,11 +243,10 @@ class UserSessionExerciseSplitSerializer(serializers.Serializer):
         # session_dict =  get_average_duration(session_data)
         for period_key, data in session_data.items():
             print("period_key",period_key)
-            # print("data",data)
-            # session_count = data['session_count']
-            # average_duration = data['average_duration']
+            print("data",data)
+            
             usersession_details = self.get_user_session_details(data)
-            # form_averages = self.get_form_averages(data['session_ids'])
+            
             exercise_details = self.get_average_duration_exercise(usersession_details)
 
 

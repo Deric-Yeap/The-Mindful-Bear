@@ -26,7 +26,7 @@ class FormSessionScoreView(generics.ListAPIView):
         except Exception as e:
             return Response({'detail': str(e)}, status=status.HTTP_400_BAD_REQUEST)
         
-class FormSessionScoreView(generics.ListAPIView):
+class FormSessionScorePercentageView(generics.ListAPIView):
     queryset = FormSession.objects.all()
     serializer_class = ScoreAggregationProfPercentageSerializer
 
