@@ -10,8 +10,13 @@ from api.session.models import Session
 
 #added
 from rest_framework.views import APIView
-from django.db.models import Count
+from .utils import process_and_count_responses # Import the function from utils.py
+from collections import Counter
+from django.db.models import Count  # Add this import for Count
 #added
+
+
+
 
 class FormQuestionList(generics.ListAPIView):
     serializer_class = FormQuestionSerializer
@@ -147,3 +152,35 @@ class OverallExperienceRatingDistribution(APIView):
             data[item['Response']] = item['count']
 
         return Response(data, status=status.HTTP_200_OK)
+
+
+class SuggestionOnLandmarkAPIView(APIView):
+    def get(self, request):
+        # Fetch responses for question ID 127
+        responses = FormQuestion.objects.filter(QuestionID=127).values_list('Response', flat=True)
+        
+        if not responses:
+            return Response({"error_description": "No responses found for question ID 127 (suggestions on landmark)."}, status=status.HTTP_404_NOT_FOUND)
+
+        # Process, clean, and get the top 5 responses using the utility function
+        data = process_and_count_responses(responses, top_n=5)
+
+        # Directly return the cleaned data
+        return Response(data, status=status.HTTP_200_OK)
+
+class ImprovementsToAppAPIView(APIView):
+    def get(self, request):
+        # Fetch responses for question ID 132
+        responses = FormQuestion.objects.filter(QuestionID=132).values_list('Response', flat=True)
+        
+        if not responses:
+            return Response(
+                {"error_description": "No responses found for question ID 132 (improvements to app)."},
+                status=status.HTTP_404_NOT_FOUND
+            )
+
+        # Process, clean, and count top responses
+        data = process_and_count_responses(responses, top_n=5)
+
+        # Return the response in the required format without extra nesting
+        return Response(data,  status=status.HTTP_200_OK)

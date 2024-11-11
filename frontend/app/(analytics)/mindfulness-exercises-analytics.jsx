@@ -9,7 +9,10 @@ import { LineChart, BarChart } from 'react-native-gifted-charts';
 import Loading from '../../components/loading';
 import Toggle from '../../components/toggle';
 import { Svg } from 'react-native-svg';
-import { fetchLikelihoodOfFutureUse, fetchOverallExperienceRating } from '../../api/formQuestion';
+import { fetchLikelihoodOfFutureUse, fetchOverallExperienceRating, fetchRatingDistribution } from '../../api/formQuestion';
+import { Picker } from '@react-native-picker/picker';
+
+
 
 const MindfulnessExercisesAnalytics = () => {
   const [loading, setLoading] = useState(false); 
@@ -19,6 +22,11 @@ const MindfulnessExercisesAnalytics = () => {
   const optionList = ['daily', 'monthly', 'yearly'];
   const periodSelected =  optionList[selectedOption - 1]
   const [selectedOption, setSelectedOption] = useState(1);
+
+
+  // Add WordCloud component rendering logic here
+
+
 
   // newly added: State for likelihood and experience data
   const [likelihoodData, setLikelihoodData] = useState([]);
@@ -38,19 +46,21 @@ const MindfulnessExercisesAnalytics = () => {
     "4": "Very Good",
   };
 
-  const likelihoodBarColors = [
-    colors.presentRed40, colors.mindfulBrown40, colors.kindPurple40, 
-    colors.empathyOrange40, colors.serenityGreen40
-  ];
-  
-  const experienceBarColors = [
-    colors.presentRed40, colors.mindfulBrown40, colors.kindPurple40, 
-    colors.empathyOrange40, colors.serenityGreen40
-  ];
+  const getColorForValue = (value, maxCount) => {
+    const intensity = value / maxCount; // Calculate intensity from 0 to 1
+    return `rgba(108, 83, 61, ${0.4 + 0.5 * intensity})`; // From mindfulnessbrown30 to mindfulnessbrown80
+  };
 
   const maxLikelihoodValue = Math.max(...likelihoodData.map(item => item.value), 20); // Default to 20 if no data available
   const maxExperienceValue = Math.max(...experienceData.map(item => item.value), 20); // Default to 20 if no data available
   // newly added: State for likelihood and experience data
+
+  //newly added: landmark_exercise_ratingscore
+  const [exerciseRatings, setExerciseRatings] = useState({});
+  const [landmarkRatings, setLandmarkRatings] = useState({});
+  const [selectedExercise, setSelectedExercise] = useState(null);
+  const [selectedLandmark, setSelectedLandmark] = useState(null);
+ //newly added: landmark_exercise_ratingscore
 
   const today = new Date();
   const thirtyDaysAgo = new Date();
@@ -58,6 +68,8 @@ const MindfulnessExercisesAnalytics = () => {
   // Format the cutoff date to a comparable format (YYYY-MM-DD)
   const cutoffDate = thirtyDaysAgo.toISOString().split('T')[0]; 
   console.log(cutoffDate)
+
+
 
   useEffect(() => {
     const fetchData = async () => {
@@ -99,7 +111,7 @@ const MindfulnessExercisesAnalytics = () => {
     fetchData()
   }, [selectedOption])
 
-  // newly added
+  // newly added: likelihood and experience data
   useEffect(() => {
     const getData = async () => {
       try {
@@ -119,7 +131,100 @@ const MindfulnessExercisesAnalytics = () => {
     };
     getData();
   }, []);
-  // newly added
+  // newly added: likelihood and experience data
+
+  //newly added: landmark_exercise_ratingscore
+  useEffect(() => {
+    const loadRatingsData = async () => {
+      try {
+        setLoading(true);
+        const response = await fetchRatingDistribution();
+
+        // Separate data into exercises and landmarks
+        const exerciseData = {};
+        const landmarkData = {};
+
+        Object.keys(response).forEach((questionID) => {
+          if (isExerciseQuestion(questionID)) {
+            exerciseData[questionID] = response[questionID];
+          } else if (isLandmarkQuestion(questionID)) {
+            landmarkData[questionID] = response[questionID];
+          }
+        });
+
+        setExerciseRatings(exerciseData);
+        setLandmarkRatings(landmarkData);
+
+        // Set default selections to the first exercise and landmark if available
+        setSelectedExercise(Object.keys(exerciseData)[0] || null);
+        setSelectedLandmark(Object.keys(landmarkData)[0] || null);
+
+      } catch (error) {
+        setError("Error fetching rating distribution. Please try again later.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadRatingsData();
+  }, []);
+
+  // Mapping for question IDs to human-readable names
+  const exerciseLabelsMap = {
+    "165": "Breathe Awareness and Mindfulness",
+    "167": "Mindfulness Walking Exercise",
+    "180": "Engaging Taste and Touch",
+    "193": "Expanding Awareness through Senses",
+  };
+
+  const landmarkLabelsMap = {
+    "164": "Connector",
+    "166": "SGH Outdoor Area",
+    "179": "SGH Bicentennial Garden",
+    "192": "SGH Museum",
+  };
+
+  // Helper functions to check question IDs
+  const isExerciseQuestion = (questionID) => ["165", "167", "180", "193"].includes(String(questionID));
+  const isLandmarkQuestion = (questionID) => ["164", "166", "179", "192"].includes(String(questionID));
+
+  // Format data for each chart
+  const formatChartData = (data) => {
+    if (!data) return [];
+
+    const maxCount = Math.max(...Object.values(data));
+    return Object.keys(data).map((rating) => ({
+      label: ratingLabels[rating] || rating,
+      value: data[rating],
+      frontColor: getColorForValue(data[rating], maxCount),
+      topLabelComponent: () => (
+        <Text style={{ color: colors.mindfulBrown100, fontSize: 12, marginBottom: 6 }}>
+          {data[rating]}
+        </Text>
+      ),
+    }));
+  };
+
+  const ratingLabels = {
+    "0": "Very Bad",
+    "1": "Bad",
+    "2": "Neutral",
+    "3": "Good",
+    "4": "Very Good",
+  };
+
+  const formattedExerciseData = formatChartData(exerciseRatings[selectedExercise]);
+  const formattedLandmarkData = formatChartData(landmarkRatings[selectedLandmark]);
+
+  const maxExerciseValue = formattedExerciseData.length > 0 
+  ? Math.max(...formattedExerciseData.map(item => item.value), 5) 
+  : 5;
+
+  const maxLandmarkValue = formattedLandmarkData.length > 0 
+  ? Math.max(...formattedLandmarkData.map(item => item.value), 5) 
+  : 5;
+
+  //newly added: landmark_exercise_ratingscore
 
   const onSelectSwitch = option => {
     setSelectedOption(option);
@@ -374,58 +479,141 @@ const calculateAverageLine = (data) => {
           </View>
 
           
-          {/* Additional Bar Charts Section */}
-          <View className="p-1">
-            <Text className="text-mindful-brown-80 font-urbanist-bold text-xl mb-4">Likelihood of Future Use</Text>
-            {likelihoodData.length > 0 ? (
-              <BarChart
-                data={likelihoodData.map((item, index) => ({
-                  ...item,
-                  frontColor: likelihoodBarColors[index % likelihoodBarColors.length], // Cycle through colors for each bar
-                  topLabelComponent: () => (
-                    <Text style={{ color: colors.optimisticGray50, fontSize: 12, marginBottom: 6 }}>
-                      {item.value}
-                    </Text>
-                  ),
-                }))}
-                barWidth={30}
-                barBorderRadius={4}
-                yAxisThickness={1}
-                xAxisThickness={1}
-                showYAxisIndices
-                yAxisLabelTextStyle={{ color: colors.mindfulBrown70, fontSize: 10 }}
-                xAxisLabelTextStyle={{ color: colors.mindfulBrown90, fontSize: 10 }}
-                maxValue={maxLikelihoodValue} // Dynamically set the max y-axis value based on data
-              />
+          {/* Likelihood of Future Use Chart */}
+          <Text className="text-mindful-brown-80 font-urbanist-bold text-xl mb-4">Likelihood of Future Use</Text>
+          {likelihoodData.length > 0 ? (
+            <BarChart
+              data={likelihoodData.map((item) => ({
+                ...item,
+                frontColor: getColorForValue(item.value, maxLikelihoodValue), // Use dynamic color
+                topLabelComponent: () => (
+                  <Text style={{ color: colors.optimisticGray50, fontSize: 12, marginBottom: 6 }}>
+                    {item.value}
+                  </Text>
+                ),
+              }))}
+              barWidth={30}
+              barBorderRadius={4}
+              yAxisThickness={1}
+              xAxisThickness={1}
+              showYAxisIndices
+              yAxisLabelTextStyle={{ color: colors.mindfulBrown70, fontSize: 10 }}
+              xAxisLabelTextStyle={{ color: colors.mindfulBrown90, fontSize: 10 }}
+              maxValue={maxLikelihoodValue} // Dynamically set the max y-axis value based on data
+            />
+          ) : (
+            <Text>No data available</Text>
+          )}
+
+          {/* Overall Experience Rating Chart */}
+          <Text className="text-mindful-brown-80 font-urbanist-bold text-xl mb-4 mt-8">Overall Experience Rating</Text>
+          {experienceData.length > 0 ? (
+            <BarChart
+              data={experienceData.map((item) => ({
+                ...item,
+                frontColor: getColorForValue(item.value, maxExperienceValue), // Use dynamic color
+                topLabelComponent: () => (
+                  <Text style={{ color: colors.optimisticGray50, fontSize: 12, marginBottom: 6 }}>
+                    {item.value}
+                  </Text>
+                ),
+              }))}
+              barWidth={30}
+              barBorderRadius={4}
+              yAxisThickness={1}
+              xAxisThickness={1}
+              showYAxisIndices
+              yAxisLabelTextStyle={{ color: colors.mindfulBrown70, fontSize: 10 }}
+              xAxisLabelTextStyle={{ color: colors.mindfulBrown90, fontSize: 10 }}
+              maxValue={maxExperienceValue} // Dynamically set the max y-axis value based on data
+            />
+          ) : (
+            <Text>No data available</Text>
+          )}
+
+          {/* Exercise Picker */}   
+          <View className="p-4"> 
+            <Text className="text-mindful-brown-80 font-urbanist-bold text-xl mb-2">Exercises Rating:</Text>
+            <View style={{ borderWidth: 1, borderColor: colors.mindfulBrown40, borderRadius: 4, marginBottom: 8 }}>
+            <Picker
+            selectedValue={selectedExercise}
+            onValueChange={(itemValue) => setSelectedExercise(itemValue)}
+            style={{ height: 50, width: '100%', color: colors.mindfulBrown100 }}
+          >
+                {Object.keys(exerciseRatings).map((exerciseId) => (
+                  <Picker.Item key={exerciseId} label={exerciseLabelsMap[exerciseId]} value={exerciseId} />
+                ))}
+              </Picker>
+            </View>
+
+            {/* Exercise Rating Chart */}
+            {formattedExerciseData.length > 0 ? (
+              <View className="mt-4">
+                <Text className="text-mindful-brown-80 font-urbanist-bold text-lg mb-2">
+                  {exerciseLabelsMap[selectedExercise] || "Exercise Rating"}
+                </Text>
+                <BarChart
+                  data={formattedExerciseData}
+                  barWidth={30}
+                  barBorderRadius={4}
+                  yAxisThickness={1}
+                  xAxisThickness={1}
+                  showYAxisIndices
+                  yAxisLabelTextStyle={{ color: colors.mindfulBrown70, fontSize: 10 }}
+                  xAxisLabelTextStyle={{ color: colors.mindfulBrown90, fontSize: 10 }}
+                  maxValue={maxExerciseValue}
+                />
+              </View>
             ) : (
-              <Text>No data available</Text>
+              selectedExercise && (
+                <Text className="text-mindful-brown-80 text-center mt-4">
+                  No data available for the selected exercise
+                </Text>
+              )
             )}
 
-            <Text className="text-mindful-brown-80 font-urbanist-bold text-xl mb-4 mt-8">Overall Experience Rating</Text>
-            {experienceData.length > 0 ? (
-              <BarChart
-                data={experienceData.map((item, index) => ({
-                  ...item,
-                  frontColor: experienceBarColors[index % experienceBarColors.length], // Cycle through colors for each bar
-                  topLabelComponent: () => (
-                    <Text style={{ color: colors.optimisticGray50, fontSize: 12, marginBottom: 6 }}>
-                      {item.value}
-                    </Text>
-                  ),
-                }))}
-                barWidth={30}
-                barBorderRadius={4}
-                yAxisThickness={1}
-                xAxisThickness={1}
-                showYAxisIndices
-                yAxisLabelTextStyle={{ color: colors.mindfulBrown70, fontSize: 10 }}
-                xAxisLabelTextStyle={{ color: colors.mindfulBrown90, fontSize: 10 }}
-                maxValue={maxExperienceValue} // Dynamically set the max y-axis value based on data
-              />
+            {/* Landmark Picker */}
+            <Text className="text-mindful-brown-80 font-urbanist-bold text-xl mt-4 mb-2">Landmarks Rating:</Text>
+            <View style={{ borderWidth: 1, borderColor: colors.mindfulBrown40, borderRadius: 4, marginBottom: 8 }}>
+              <Picker
+                selectedValue={selectedLandmark}
+                onValueChange={(itemValue) => setSelectedLandmark(itemValue)}
+                style={{ height: 50, width: '100%', color: colors.mindfulBrown100 }}
+              >
+                {Object.keys(landmarkRatings).map((landmarkId) => (
+                  <Picker.Item key={landmarkId} label={landmarkLabelsMap[landmarkId]} value={landmarkId} />
+                ))}
+              </Picker>
+            </View>
+
+            {/* Landmark Rating Chart */}
+            {formattedLandmarkData.length > 0 ? (
+              <View className="mt-4">
+                <Text className="text-mindful-brown-80 font-urbanist-bold text-lg mb-2">
+                  {landmarkLabelsMap[selectedLandmark] || "Landmark Rating"}
+                </Text>
+                <BarChart
+                  data={formattedLandmarkData}
+                  barWidth={30}
+                  barBorderRadius={4}
+                  yAxisThickness={1}
+                  xAxisThickness={1}
+                  showYAxisIndices
+                  yAxisLabelTextStyle={{ color: colors.mindfulBrown70, fontSize: 10 }}
+                  xAxisLabelTextStyle={{ color: colors.mindfulBrown90, fontSize: 10 }}
+                  maxValue={maxLandmarkValue}
+                />
+              </View>
             ) : (
-              <Text>No data available</Text>
+              selectedLandmark && (
+                <Text className="text-mindful-brown-80 text-center mt-4">
+                  No data available for the selected landmark
+                </Text>
+              )
             )}
           </View>
+
+
         </View>
       </ScrollView>
     </SafeAreaView>
