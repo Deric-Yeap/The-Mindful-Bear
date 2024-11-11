@@ -9,8 +9,15 @@ import { LineChart, BarChart } from 'react-native-gifted-charts';
 import Loading from '../../components/loading';
 import Toggle from '../../components/toggle';
 import { Svg } from 'react-native-svg';
-import { fetchLikelihoodOfFutureUse, fetchOverallExperienceRating, fetchRatingDistribution } from '../../api/formQuestion';
+import { fetchLikelihoodOfFutureUse, fetchOverallExperienceRating, fetchRatingDistribution, fetchSuggestionOnLandmark, fetchImprovementsToApp } from '../../api/formQuestion';
 import { Picker } from '@react-native-picker/picker';
+
+// Helper function to calculate bar width
+const calculateBarWidth = (data, chartWidth) => {
+  return data && data.length > 0
+    ? chartWidth / (data.length * 1.5)  // Adjust multiplier for spacing as needed
+    : 40;  // Default bar width if data is empty or unavailable
+};
 
 
 
@@ -22,9 +29,31 @@ const MindfulnessExercisesAnalytics = () => {
   const optionList = ['daily', 'monthly', 'yearly'];
   const periodSelected =  optionList[selectedOption - 1]
   const [selectedOption, setSelectedOption] = useState(1);
+  // Inside your MindfulnessExercisesAnalytics component
+  const screenWidth = Dimensions.get('window').width;
+
+// Calculate chart width and height for each bar chart
+const likelihoodChartWidth = Math.max(screenWidth, (likelihoodData?.length || 0) * 80);  // Customize width multiplier
+const experienceChartWidth = Math.max(screenWidth, (experienceData?.length || 0) * 80);
+const exerciseChartWidth = Math.max(screenWidth, (formattedExerciseData?.length || 0) * 80);
+const landmarkChartWidth = Math.max(screenWidth, (formattedLandmarkData?.length || 0) * 80);
+
+const defaultchartHeight = 250; // Set a standard height for all charts, or customize if needed
+
+// Calculate bar width for each chart individually
+const likelihoodBarWidth = calculateBarWidth(likelihoodData || [], likelihoodChartWidth);
+const experienceBarWidth = calculateBarWidth(experienceData || [], experienceChartWidth);
+const exerciseBarWidth = calculateBarWidth(formattedExerciseData || [], exerciseChartWidth);
+const landmarkBarWidth = calculateBarWidth(formattedLandmarkData || [], landmarkChartWidth);
 
 
-  // Add WordCloud component rendering logic here
+
+  // newly added: Add suggestions for landmarks and app
+  const [landmarkSuggestions, setLandmarkSuggestions] = useState([]);
+  const [appImprovements, setAppImprovements] = useState([]);
+  const [suggestionsLoading, setSuggestionsLoading] = useState(false);
+  const [suggestionsError, setSuggestionsError] = useState(null);
+  // newly added: Add suggestions for landmarks and app
 
 
 
@@ -226,6 +255,35 @@ const MindfulnessExercisesAnalytics = () => {
 
   //newly added: landmark_exercise_ratingscore
 
+  // Fetch Suggestions on Landmark and App Improvements
+  useEffect(() => {
+    const fetchSuggestionsData = async () => {
+      setSuggestionsLoading(true);
+      try {
+        // Fetch landmark suggestions
+        const landmarkResponse = await fetchSuggestionOnLandmark();
+        console.log("Landmark Suggestions API Response:", landmarkResponse);
+        setLandmarkSuggestions(landmarkResponse || []);
+  
+        // Fetch app improvements
+        const appResponse = await fetchImprovementsToApp();
+        console.log("App Improvements API Response:", appResponse);
+        setAppImprovements(appResponse || []);
+        
+        setSuggestionsError(null);
+      } catch (error) {
+        setSuggestionsError('Failed to load suggestions data.');
+        console.error("Error fetching suggestions data:", error);
+      } finally {
+        setSuggestionsLoading(false);
+      }
+    };
+  
+    fetchSuggestionsData();
+  }, []);
+
+// Fetch Suggestions on Landmark and App Improvements
+
   const onSelectSwitch = option => {
     setSelectedOption(option);
   };
@@ -237,8 +295,6 @@ const MindfulnessExercisesAnalytics = () => {
       </View>
     );
   }
-  // Inside your MindfulnessExercisesAnalytics component
-  const screenWidth = Dimensions.get('window').width;
 
   // Use the number of data points to determine the chart width
   const chartWidth = Math.max(screenWidth, sessionNumLineData.length * 100); // Ensure at least the screen width
@@ -301,6 +357,9 @@ const calculateAverageLine = (data) => {
   // Step 3: Calculate the y-coordinate for the average line
   const yCoordinateNumBasedOnAverage = chartHeight * (1 - (averageDataSessionsValue - yMin) / (yMax - yMin));
   console.log("yCoordinateNumBasedOnAverage",yCoordinateNumBasedOnAverage)
+
+  console.log("Data before rendering - Landmark Suggestions:", landmarkSuggestions);
+  console.log("Data before rendering - App Improvements:", appImprovements);
 
   return (
     <SafeAreaView
@@ -478,100 +537,117 @@ const calculateAverageLine = (data) => {
             </View>
           </View>
 
-          
-          {/* Likelihood of Future Use Chart */}
+
           <Text className="text-mindful-brown-80 font-urbanist-bold text-xl mb-4">Likelihood of Future Use</Text>
           {likelihoodData.length > 0 ? (
-            <BarChart
-              data={likelihoodData.map((item) => ({
-                ...item,
-                frontColor: getColorForValue(item.value, maxLikelihoodValue), // Use dynamic color
-                topLabelComponent: () => (
-                  <Text style={{ color: colors.optimisticGray50, fontSize: 12, marginBottom: 6 }}>
-                    {item.value}
-                  </Text>
-                ),
-              }))}
-              barWidth={30}
-              barBorderRadius={4}
-              yAxisThickness={1}
-              xAxisThickness={1}
-              showYAxisIndices
-              yAxisLabelTextStyle={{ color: colors.mindfulBrown70, fontSize: 10 }}
-              xAxisLabelTextStyle={{ color: colors.mindfulBrown90, fontSize: 10 }}
-              maxValue={maxLikelihoodValue} // Dynamically set the max y-axis value based on data
-            />
+              <ScrollView horizontal={true}>
+                  <View style={{ width: likelihoodChartWidth }}>
+                      <BarChart
+                          data={likelihoodData.map((item) => ({
+                              ...item,
+                              frontColor: getColorForValue(item.value, maxLikelihoodValue),
+                              topLabelComponent: () => (
+                                  <Text style={{ color: colors.optimisticGray50, fontSize: 12, marginBottom: 6 }}>
+                                      {item.value}
+                                  </Text>
+                              ),
+                          }))}
+                          barWidth={likelihoodBarWidth}  // Specific bar width for this chart
+                          barBorderRadius={4}
+                          width={likelihoodChartWidth}  // Specific chart width
+                          height={defaultchartHeight}  // Default chart height
+                          yAxisThickness={1}
+                          xAxisThickness={1}
+                          showYAxisIndices
+                          yAxisLabelTextStyle={{ color: colors.mindfulBrown70, fontSize: 10 }}
+                          xAxisLabelTextStyle={{ color: colors.mindfulBrown90, fontSize: 10 }}
+                          maxValue={maxLikelihoodValue}
+                      />
+                  </View>
+              </ScrollView>
           ) : (
-            <Text>No data available</Text>
+              <Text>No data available</Text>
           )}
 
-          {/* Overall Experience Rating Chart */}
+
           <Text className="text-mindful-brown-80 font-urbanist-bold text-xl mb-4 mt-8">Overall Experience Rating</Text>
           {experienceData.length > 0 ? (
-            <BarChart
-              data={experienceData.map((item) => ({
-                ...item,
-                frontColor: getColorForValue(item.value, maxExperienceValue), // Use dynamic color
-                topLabelComponent: () => (
-                  <Text style={{ color: colors.optimisticGray50, fontSize: 12, marginBottom: 6 }}>
-                    {item.value}
-                  </Text>
-                ),
-              }))}
-              barWidth={30}
-              barBorderRadius={4}
-              yAxisThickness={1}
-              xAxisThickness={1}
-              showYAxisIndices
-              yAxisLabelTextStyle={{ color: colors.mindfulBrown70, fontSize: 10 }}
-              xAxisLabelTextStyle={{ color: colors.mindfulBrown90, fontSize: 10 }}
-              maxValue={maxExperienceValue} // Dynamically set the max y-axis value based on data
-            />
+              <ScrollView horizontal={true}>
+                  <View style={{ width: experienceChartWidth }}>
+                      <BarChart
+                          data={experienceData.map((item) => ({
+                              ...item,
+                              frontColor: getColorForValue(item.value, maxExperienceValue),
+                              topLabelComponent: () => (
+                                  <Text style={{ color: colors.optimisticGray50, fontSize: 12, marginBottom: 6 }}>
+                                      {item.value}
+                                  </Text>
+                              ),
+                          }))}
+                          barWidth={experienceBarWidth}  // Specific bar width for this chart
+                          barBorderRadius={4}
+                          width={experienceChartWidth}  // Specific chart width
+                          height={defaultchartHeight}  // Default chart height
+                          yAxisThickness={1}
+                          xAxisThickness={1}
+                          showYAxisIndices
+                          yAxisLabelTextStyle={{ color: colors.mindfulBrown70, fontSize: 10 }}
+                          xAxisLabelTextStyle={{ color: colors.mindfulBrown90, fontSize: 10 }}
+                          maxValue={maxExperienceValue}
+                      />
+                  </View>
+              </ScrollView>
           ) : (
-            <Text>No data available</Text>
+              <Text>No data available</Text>
           )}
 
+
           {/* Exercise Picker */}   
-          <View className="p-4"> 
-            <Text className="text-mindful-brown-80 font-urbanist-bold text-xl mb-2">Exercises Rating:</Text>
+          
+            <Text className="text-mindful-brown-80 font-urbanist-bold text-xl mt-4 mb-2">Exercises Rating:</Text>
             <View style={{ borderWidth: 1, borderColor: colors.mindfulBrown40, borderRadius: 4, marginBottom: 8 }}>
             <Picker
             selectedValue={selectedExercise}
             onValueChange={(itemValue) => setSelectedExercise(itemValue)}
             style={{ height: 50, width: '100%', color: colors.mindfulBrown100 }}
-          >
+            >
                 {Object.keys(exerciseRatings).map((exerciseId) => (
                   <Picker.Item key={exerciseId} label={exerciseLabelsMap[exerciseId]} value={exerciseId} />
                 ))}
               </Picker>
             </View>
 
-            {/* Exercise Rating Chart */}
+
             {formattedExerciseData.length > 0 ? (
               <View className="mt-4">
-                <Text className="text-mindful-brown-80 font-urbanist-bold text-lg mb-2">
-                  {exerciseLabelsMap[selectedExercise] || "Exercise Rating"}
-                </Text>
-                <BarChart
-                  data={formattedExerciseData}
-                  barWidth={30}
-                  barBorderRadius={4}
-                  yAxisThickness={1}
-                  xAxisThickness={1}
-                  showYAxisIndices
-                  yAxisLabelTextStyle={{ color: colors.mindfulBrown70, fontSize: 10 }}
-                  xAxisLabelTextStyle={{ color: colors.mindfulBrown90, fontSize: 10 }}
-                  maxValue={maxExerciseValue}
-                />
+                  <Text className="text-mindful-brown-80 font-urbanist-bold text-lg mb-2">
+                      {exerciseLabelsMap[selectedExercise] || "Exercise Rating"}
+                  </Text>
+                  <ScrollView horizontal={true}>
+                      <View style={{ width: exerciseChartWidth }}>
+                          <BarChart
+                              data={formattedExerciseData}
+                              barWidth={exerciseBarWidth}  // Specific bar width for this chart
+                              barBorderRadius={4}
+                              width={exerciseChartWidth}  // Specific chart width
+                              height={defaultchartHeight}  // Default chart height
+                              yAxisThickness={1}
+                              xAxisThickness={1}
+                              showYAxisIndices
+                              yAxisLabelTextStyle={{ color: colors.mindfulBrown70, fontSize: 10 }}
+                              xAxisLabelTextStyle={{ color: colors.mindfulBrown90, fontSize: 10 }}
+                              maxValue={maxExerciseValue}
+                          />
+                      </View>
+                  </ScrollView>
               </View>
-            ) : (
+          ) : (
               selectedExercise && (
-                <Text className="text-mindful-brown-80 text-center mt-4">
-                  No data available for the selected exercise
-                </Text>
+                  <Text className="text-mindful-brown-80 text-center mt-4">
+                      No data available for the selected exercise
+                  </Text>
               )
-            )}
-
+          )}
             {/* Landmark Picker */}
             <Text className="text-mindful-brown-80 font-urbanist-bold text-xl mt-4 mb-2">Landmarks Rating:</Text>
             <View style={{ borderWidth: 1, borderColor: colors.mindfulBrown40, borderRadius: 4, marginBottom: 8 }}>
@@ -588,31 +664,158 @@ const calculateAverageLine = (data) => {
 
             {/* Landmark Rating Chart */}
             {formattedLandmarkData.length > 0 ? (
-              <View className="mt-4">
-                <Text className="text-mindful-brown-80 font-urbanist-bold text-lg mb-2">
+            <View className="mt-4">
+              <Text className="text-mindful-brown-80 font-urbanist-bold text-lg mb-2">
                   {landmarkLabelsMap[selectedLandmark] || "Landmark Rating"}
-                </Text>
-                <BarChart
-                  data={formattedLandmarkData}
-                  barWidth={30}
-                  barBorderRadius={4}
-                  yAxisThickness={1}
-                  xAxisThickness={1}
-                  showYAxisIndices
-                  yAxisLabelTextStyle={{ color: colors.mindfulBrown70, fontSize: 10 }}
-                  xAxisLabelTextStyle={{ color: colors.mindfulBrown90, fontSize: 10 }}
-                  maxValue={maxLandmarkValue}
-                />
-              </View>
-            ) : (
-              selectedLandmark && (
-                <Text className="text-mindful-brown-80 text-center mt-4">
+              </Text>
+              <ScrollView horizontal={true}>
+                  <View style={{ width: landmarkChartWidth }}>
+                      <BarChart
+                          data={formattedLandmarkData}
+                          barWidth={landmarkBarWidth}  // Specific bar width for this chart
+                          barBorderRadius={4}
+                          width={landmarkChartWidth}  // Specific chart width
+                          height={defaultchartHeight}  // Default chart height
+                          yAxisThickness={1}
+                          xAxisThickness={1}
+                          showYAxisIndices
+                          yAxisLabelTextStyle={{ color: colors.mindfulBrown70, fontSize: 10 }}
+                          xAxisLabelTextStyle={{ color: colors.mindfulBrown90, fontSize: 10 }}
+                          maxValue={maxLandmarkValue}
+                      />
+                  </View>
+              </ScrollView>
+          </View>
+        ) : (
+          selectedLandmark && (
+              <Text className="text-mindful-brown-80 text-center mt-4">
                   No data available for the selected landmark
-                </Text>
+              </Text>
+          )
+        )}
+                  
+
+
+          {/* Suggestions Section */}
+            <View style={{ borderBottomWidth: 1, borderBottomColor: colors.mindfulBrown80, marginTop: 50 }} />
+
+            {/* Suggestions to Improve Landmark */}
+            <Text className="text-mindful-brown-100 font-urbanist-extra-bold text-2xl mt-6 ml-6">
+              Suggestions to Improve Landmark
+            </Text>
+            {suggestionsLoading ? (
+              <ActivityIndicator size="large" color={colors.mindfulBrown80} style={{ marginVertical: 20 }} />
+            ) : suggestionsError ? (
+              <Text style={{ color: 'red', marginVertical: 20, textAlign: 'center' }}>{suggestionsError}</Text>
+            ) : (
+              landmarkSuggestions.length > 0 ? (
+                <View style={{ margin: 10, padding: 10, backgroundColor: colors['mindful-brown-20'], borderRadius: 10 }}>
+                  {/* Table Header */}
+                  <View style={{ flexDirection: 'row', justifyContent: 'space-between', paddingBottom: 10, borderBottomWidth: 1, borderColor: colors['mindful-brown-60'] }}>
+                    <Text className="text-mindful-brown-100 font-urbanist-bold text-base">Suggestion</Text>
+                    <Text className="text-mindful-brown-100 font-urbanist-bold text-base">Mentions</Text>
+                  </View>
+                  {/* Table Rows */}
+                  {landmarkSuggestions.map((suggestion, idx) => (
+                    <View
+                      key={idx}
+                      style={{
+                        flexDirection: 'row',
+                        alignItems: 'center',  // Aligns items vertically
+                        paddingVertical: 6,
+                        borderBottomWidth: idx === landmarkSuggestions.length - 1 ? 0 : 1,
+                        borderColor: colors['mindful-brown-30'],
+                      }}
+                    >
+                      {/* Suggestion Text */}
+                      <Text
+                        style={{
+                          flex: 1,
+                          marginRight: 30,  // Space between suggestion and mentions
+                          color: colors.mindfulBrown100,
+                          fontSize: 16,
+                        }}
+                      >
+                        {suggestion.response}
+                      </Text>
+                      
+                      {/* Mentions Count */}
+                      <Text
+                        style={{
+                          color: colors.mindfulBrown100,
+                          fontSize: 16,
+                          width: 30,  // Fixed width for alignment
+                          textAlign: 'right',  // Align text to the right
+                        }}
+                      >
+                        {suggestion.count}
+                      </Text>
+                    </View>
+                  ))}
+                </View>
+              ) : (
+                <Text style={{ color: 'gray', margin: 20, textAlign: 'center', fontSize: 16 }}>No suggestions available for landmarks.</Text>
               )
             )}
-          </View>
 
+            {/* Suggestions to Improve App */}
+            <Text className="text-mindful-brown-100 font-urbanist-extra-bold text-2xl mt-6 ml-6">
+              Suggestions to Improve App
+            </Text>
+            {suggestionsLoading ? (
+              <ActivityIndicator size="large" color={colors.mindfulBrown80} style={{ marginVertical: 20 }} />
+            ) : suggestionsError ? (
+              <Text style={{ color: 'red', marginVertical: 20, textAlign: 'center' }}>{suggestionsError}</Text>
+            ) : (
+              appImprovements.length > 0 ? (
+                <View style={{ margin: 10, padding: 10, backgroundColor: colors['mindful-brown-20'], borderRadius: 10 }}>
+                  {/* Table Header */}
+                  <View style={{ flexDirection: 'row', justifyContent: 'space-between', paddingBottom: 10, borderBottomWidth: 1, borderColor: colors['mindful-brown-60'] }}>
+                    <Text className="text-mindful-brown-100 font-urbanist-bold text-base">Suggestion</Text>
+                    <Text className="text-mindful-brown-100 font-urbanist-bold text-base">Mentions</Text>
+                  </View>
+                  {/* Table Rows */}
+                  {appImprovements.map((improvement, idx) => (
+                    <View
+                      key={idx}
+                      style={{
+                        flexDirection: 'row',
+                        alignItems: 'center',  // Aligns items vertically
+                        paddingVertical: 6,
+                        borderBottomWidth: idx === appImprovements.length - 1 ? 0 : 1,
+                        borderColor: colors['mindful-brown-30'],
+                      }}
+                    >
+                      {/* Suggestion Text */}
+                      <Text
+                        style={{
+                          flex: 1,
+                          marginRight: 20,  // Space between suggestion and mentions
+                          color: colors.mindfulBrown100,
+                          fontSize: 16,
+                        }}
+                      >
+                        {improvement.response}
+                      </Text>
+                      
+                      {/* Mentions Count */}
+                      <Text
+                        style={{
+                          color: colors.mindfulBrown100,
+                          fontSize: 16,
+                          width: 30,  // Fixed width for alignment
+                          textAlign: 'right',  // Align text to the right
+                        }}
+                      >
+                        {improvement.count}
+                      </Text>
+                    </View>
+                  ))}
+                </View>
+              ) : (
+                <Text style={{ color: 'gray', margin: 20, textAlign: 'center', fontSize: 16 }}>No suggestions available for app improvements.</Text>
+              )
+            )}
 
         </View>
       </ScrollView>
