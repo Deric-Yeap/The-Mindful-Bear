@@ -17,6 +17,7 @@ from ..exercise.models import Exercise
 from django.db.models import F
 from ..landmark.serializer import LandmarkSerializer
 from ..landmark.models import Landmark
+from django.contrib.auth.models import Group
 
 # Create your views here.
 class UserCreateView(generics.CreateAPIView):
@@ -109,7 +110,53 @@ class CustomRefreshToken(RefreshToken):
         refresh['department'] = department_serializer.data
         return refresh
     
+class UpgradeUserView(generics.GenericAPIView):
+    def post(self, request):
+        if request.user.groups.filter(name="admin").exists():
+            return Response({'error': 'Permission denied. Only admin users can perform this action.'}, status=status.HTTP_403_FORBIDDEN)
 
+        user_id = request.data.get('id')
+        
+        if not user_id:
+            return Response({'detail': 'User ID is required'}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            user = CustomUser.objects.get(pk=user_id)
+        except CustomUser.DoesNotExist:
+            return Response({'error': 'User not found'}, status=status.HTTP_404_NOT_FOUND)
+
+        try:
+            staff_group = Group.objects.get(name='staff')
+            if staff_group in user.groups.all():
+                user.groups.remove(staff_group)
+        except Group.DoesNotExist:
+            return Response({'error': "The 'staff' group does not exist"}, status=status.HTTP_404_NOT_FOUND)
+        
+        try:
+            admin_group = Group.objects.get(name='admin')
+            user.groups.add(admin_group)
+            user.is_staff = True
+        except Group.DoesNotExist:
+            return Response({'error': "The 'admin' group does not exist"}, status=status.HTTP_404_NOT_FOUND)
+
+        user.save()
+        return Response({'success': f'User {user.email} has been upgraded to admin.'}, status=status.HTTP_200_OK)
+
+class ListUserView(generics.GenericAPIView):
+    permission_classes = [CustomDjangoModelPermissions]
+    queryset = CustomUser.objects.all()
+
+    def get(self, request):
+        users = self.get_queryset().values('user_id', 'email', 'is_staff')
+        user_list = []
+
+        for user in users:
+            if user['is_staff']:
+                user_list.append({'key': user['user_id'], 'value': f"{user['email']} (Admin)"})
+            else:
+                user_list.append({'key': user['user_id'], 'value': user['email']})
+        return Response(user_list, status=status.HTTP_200_OK)
+    
 class UserExercisesView(generics.ListAPIView):
     serializer_class = ExerciseSerializer
 
