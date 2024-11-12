@@ -12,6 +12,9 @@ import os
 
 class ArticleSerializer(serializers.ModelSerializer):
     article_pdf_url = serializers.SerializerMethodField()
+    article_image_url = serializers.SerializerMethodField()
+
+   
     class Meta:
         model = Article
         fields = ['article_id','title', 'topic', 'processed_contents', 'article_pdf_url', 'article_image_url']
@@ -20,11 +23,15 @@ class ArticleSerializer(serializers.ModelSerializer):
         if obj.article_pdf_url:
             return create_presigned_url(obj.article_pdf_url)
         return None
+    def get_image_file_url(self, obj):
+        if obj.article_image_url:
+            return create_presigned_url(obj.article_image_url)
+        return None
 
     
 class ArticleCreateSerializer(serializers.ModelSerializer):
     article_pdf_url = serializers.FileField(write_only=True, required=True)
-  
+    article_image_url = serializers.FileField(write_only=True, required=True)
     class Meta: 
         model = Article
         fields = ['article_id', 'title', 'topic', 'processed_contents', 'article_pdf_url', 'article_image_url']
@@ -32,6 +39,11 @@ class ArticleCreateSerializer(serializers.ModelSerializer):
     def validate_article_pdf_url(self, value):
         if not value.name.endswith(('.pdf')):
             raise serializers.ValidationError("File must be in pdf.")
+        return value
+    
+    def validate_article_image_url(self, value):
+        if not value.name.endswith(('.jpg', '.jpeg', '.png')):
+            raise serializers.ValidationError("File must be in .jpg, .jpeg, png.")
         return value
     
 
@@ -48,6 +60,17 @@ class ArticleCreateSerializer(serializers.ModelSerializer):
         if not file_url:        
             raise serializers.ValidationError("File upload to S3 failed")
         
+        #image
+        article_image_url = validated_data.pop('article_image_url')
+        imgName, imgExt = os.path.splitext(article_image_url.name)
+        imgeClean= re.sub(r'[^a-zA-Z0-9]', '', imgName)
+        cleanedName = imgeClean + imgExt
+        imgFileName, imgObjPath = make_file_upload_path("articles", user, quote(cleanedName)) 
+        bucket = settings.AWS_STORAGE_BUCKET_NAME
+        imgFile_url = upload_fileobj(article_image_url, bucket, imgObjPath)
+        if not imgFile_url:        
+            raise serializers.ValidationError("File upload to S3 failed")
+        
         # Combine title and processed_contents
         combined_text = validated_data['title'] + ' ' + validated_data['processed_contents']
         
@@ -59,7 +82,7 @@ class ArticleCreateSerializer(serializers.ModelSerializer):
         
         article = Article.objects.create(
             article_pdf_url=object_path,
-            article_image_url=validated_data['article_image_url'],
+            article_image_url=imgObjPath,
             topic=validated_data['topic'],
             processed_contents=validated_data['processed_contents'],
             title=validated_data['title']
@@ -69,11 +92,12 @@ class ArticleCreateSerializer(serializers.ModelSerializer):
     def to_representation(self, instance):
         representation = super().to_representation(instance)
         representation['article_pdf_url'] = instance.article_pdf_url  
+        representation['article_image_url'] = instance.article_pdf_url  
         return representation
     
 class ArticleUpdateSerializer(serializers.ModelSerializer):
     article_pdf_url = serializers.FileField(write_only=True, required=False)
-    article_image_url = serializers.CharField(max_length=255, required=False)
+    article_image_url = serializers.FileField(write_only=True, required=False)
     topic = serializers.CharField(max_length=100, required=False)
     processed_contents = serializers.CharField(required=False)
     title = serializers.CharField(required=False)
@@ -86,19 +110,37 @@ class ArticleUpdateSerializer(serializers.ModelSerializer):
         if not value.name.endswith(('.pdf')):
             return serializers.ValidationError("File must be in pdf.")
         return value
+    def validate_article_image_url(self, value):
+        if not value.name.endswith(('.jpg', '.jpeg', '.png')):
+            raise serializers.ValidationError("File must be in .jpg, .jpeg, png.")
+        return value
     
 
     def update(self, instance, validated_data):
         user = self.context['request'].user    
         if 'article_pdf_url' in validated_data:
             article_pdf_url = validated_data.pop('article_pdf_url')
-            file_name, object_path = make_file_upload_path("articles", user, quote(article_pdf_url.name))
+            name, ext = os.path.splitext(article_pdf_url.name)
+            clean_name = re.sub(r'[^a-zA-Z0-9]', '', name)
+            clean_file_name = clean_name + ext
+            file_name, object_path = make_file_upload_path("articles", user, quote(clean_file_name)) 
             bucket = settings.AWS_STORAGE_BUCKET_NAME
             file_url = upload_fileobj(article_pdf_url, bucket, object_path)
-            if not file_url:
+            if not file_url:        
                 raise serializers.ValidationError("File upload to S3 failed")
             instance.article_pdf_url = object_path
-
+        if 'article_image_url' in validated_data:
+            #image
+            article_image_url = validated_data.pop('article_image_url')
+            imgName, imgExt = os.path.splitext(article_image_url.name)
+            imgeClean= re.sub(r'[^a-zA-Z0-9]', '', imgName)
+            cleanedName = imgeClean + imgExt
+            imgFileName, imgObjPath = make_file_upload_path("articles", user, quote(cleanedName)) 
+            bucket = settings.AWS_STORAGE_BUCKET_NAME
+            imgFile_url = upload_fileobj(article_image_url, bucket, imgObjPath)
+            if not imgFile_url:        
+                raise serializers.ValidationError("File upload to S3 failed")
+            instance.article_image_url = imgObjPath
         
         if 'processed_contents' in validated_data:
             processed_content = validated_data.get('processed_contents', '')
