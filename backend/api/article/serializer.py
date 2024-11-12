@@ -23,7 +23,7 @@ class ArticleSerializer(serializers.ModelSerializer):
         if obj.article_pdf_url:
             return create_presigned_url(obj.article_pdf_url)
         return None
-    def get_image_file_url(self, obj):
+    def get_article_image_url(self, obj):
         if obj.article_image_url:
             return create_presigned_url(obj.article_image_url)
         return None
