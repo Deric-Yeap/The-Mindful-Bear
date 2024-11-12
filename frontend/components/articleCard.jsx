@@ -1,41 +1,52 @@
-import React, { useState } from 'react';
-import { View, Text, Image, StyleSheet, TouchableOpacity, Modal } from 'react-native';
-import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
-import { colors } from '../common/styles';
-import PdfViewer from '../app/(articlepdf)/article-pdf-viewer';
+import React, { useState } from 'react'
+import { View, Text, StyleSheet, TouchableOpacity, Modal } from 'react-native'
+import { Image } from 'expo-image'
+import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons'
+import { colors } from '../common/styles'
+import PdfViewer from '../app/(articlepdf)/article-pdf-viewer'
 
-const ArticleCard = ({ route, title, imageSource, description, category, pdfUrl, id, onArticleClick, index }) => {
-  const [showPdfViewer, setShowPdfViewer] = useState(false);
+const ArticleCard = ({
+  route,
+  title,
+  imageSource,
+  description,
+  category,
+  pdfUrl,
+  id,
+  onArticleClick,
+  index,
+}) => {
+  const [showPdfViewer, setShowPdfViewer] = useState(false)
 
   const handleArticlePress = async () => {
-    console.log(`Navigating to article with ID: ${id}`);
-    console.log("uri", pdfUrl);
+    console.log(`Navigating to article with ID: ${id}`)
+    console.log('uri', pdfUrl)
 
     // Track the click if onArticleClick prop exists
     if (onArticleClick) {
       try {
-        await onArticleClick(id, index);
-        console.log('Click tracked successfully');
+        await onArticleClick(id, index)
+        console.log('Click tracked successfully')
       } catch (error) {
-        console.error('Error tracking click:', error);
+        console.error('Error tracking click:', error)
       }
     }
 
     // Continue with existing functionality
     if (pdfUrl) {
-      console.log("url", pdfUrl);
-      setShowPdfViewer(true);
+      console.log('url', pdfUrl)
+      setShowPdfViewer(true)
     } else {
       // Navigate to article detail if no PDF URL
       // router.push(`/(article)/article-detail?id=${article.id}`);
-      console.log("error", "No PDF URL found for the article");
+      console.log('error', 'No PDF URL found for the article')
     }
-  };
+  }
 
   const handleClosePdfViewer = () => {
-    setShowPdfViewer(false);
-  };
-
+    setShowPdfViewer(false)
+  }
+  console.log(title, imageSource)
   return (
     <View>
       <TouchableOpacity
@@ -47,14 +58,20 @@ const ArticleCard = ({ route, title, imageSource, description, category, pdfUrl,
           <Text style={styles.pillText}>{category}</Text>
         </View>
 
-        <Image source={imageSource} style={styles.image} resizeMode="cover" />
+        <Image
+          source={{ uri: imageSource }}
+          style={styles.image}
+          contentFit="cover"
+        />
         <View style={styles.cardBody}>
           <View style={styles.row}>
-            <Text style={styles.cardTitle} className="text-mindfulbrown-80">{title}</Text>
+            <Text style={styles.cardTitle} className="text-mindfulbrown-80">
+              {title}
+            </Text>
             <View style={styles.iconContainer}>
-              <MaterialCommunityIcons 
-                name="arrow-right-bold" 
-                size={24} 
+              <MaterialCommunityIcons
+                name="arrow-right-bold"
+                size={24}
                 color={colors.mindfulBrown80}
               />
             </View>
@@ -69,8 +86,8 @@ const ArticleCard = ({ route, title, imageSource, description, category, pdfUrl,
         <PdfViewer pdfUrl={pdfUrl} onClose={handleClosePdfViewer} />
       </Modal>
     </View>
-  );
-};
+  )
+}
 
 const styles = StyleSheet.create({
   cardContainer: {
@@ -145,6 +162,6 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     color: '#666',
   },
-});
+})
 
-export default ArticleCard;
+export default ArticleCard
