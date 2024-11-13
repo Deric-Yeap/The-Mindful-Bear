@@ -32,7 +32,7 @@ const MindfulnessExercisesAnalytics = () => {
   // Inside your MindfulnessExercisesAnalytics component
   const screenWidth = Dimensions.get('window').width;
 
-// Calculate chart width and height for each bar chart
+// newly added: Calculate chart width and height for each bar chart
 const likelihoodChartWidth = Math.max(screenWidth, (likelihoodData?.length || 0) * 80);  // Customize width multiplier
 const experienceChartWidth = Math.max(screenWidth, (experienceData?.length || 0) * 80);
 const exerciseChartWidth = Math.max(screenWidth, (formattedExerciseData?.length || 0) * 80);
@@ -40,7 +40,7 @@ const landmarkChartWidth = Math.max(screenWidth, (formattedLandmarkData?.length 
 
 const defaultchartHeight = 250; // Set a standard height for all charts, or customize if needed
 
-// Calculate bar width for each chart individually
+// newly added: Calculate bar width for each chart individually
 const likelihoodBarWidth = calculateBarWidth(likelihoodData || [], likelihoodChartWidth);
 const experienceBarWidth = calculateBarWidth(experienceData || [], experienceChartWidth);
 const exerciseBarWidth = calculateBarWidth(formattedExerciseData || [], exerciseChartWidth);
