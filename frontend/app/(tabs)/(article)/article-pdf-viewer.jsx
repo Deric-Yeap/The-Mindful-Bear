@@ -2,12 +2,12 @@ import React, { useEffect, useState} from 'react';
 import { View, SafeAreaView, ActivityIndicator, ScrollView, TouchableOpacity, Text,} from 'react-native';
 // import PDFView from 'react-native-pdf';
 import { WebView } from 'react-native-webview';
-import StatusBarComponent from '../../components/darkThemStatusBar';
-import TopBrownSearchBar from '../../components/topBrownSearchBar';
-import Loading from '../../components/loading';
-import { colors } from '../../common/styles';
-import { BackButton } from '../../components/backButton';
-import { LandmarkBackButton } from '../../components/landmarkBackButton';
+import StatusBarComponent from '../../../components/darkThemStatusBar';
+import TopBrownSearchBar from '../../../components/topBrownSearchBar';
+import Loading from '../../../components/loading';
+import { colors } from '../../../common/styles';
+import { BackButton } from '../../../components/backButton';
+import { LandmarkBackButton } from '../../../components/landmarkBackButton';
 
 
 const PdfViewer = ({ pdfUrl,onClose }) => {
