@@ -210,7 +210,7 @@ const ArticleManagement = () => {
          <ArticleCard 
           key={article.id}
           title={article.title} 
-          imageSource={{ uri: article.imageUrl }} 
+          imageSource={article.imageUrl } 
           pdfUrl={article.pdfUrl} 
           id={article.id} 
           category={article.topic}
