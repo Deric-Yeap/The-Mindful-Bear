@@ -81,8 +81,7 @@ const Favourite = () => {
                         selectedLandmarkData: JSON.stringify(landmarksData.features[index]),
                         sessionStarted: false,
                         isClickTravel: false, 
-                        isForceStart: false, 
-                        isGeneric: true,
+                        isForceStart: false,                         
                       },
                     })
                   }

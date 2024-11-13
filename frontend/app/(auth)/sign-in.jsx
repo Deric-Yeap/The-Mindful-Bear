@@ -20,8 +20,8 @@ import {
 const SignIn = () => {
   const [isLoading, setIsLoading] = useState(false)
   const [form, setForm] = useState({
-    email: 'poh.hui.min77@gmail.com',
-    password: 'Themindfulbear123!',
+    email: '',
+    password: '',
   })
   const [errorMessage, setErrorMessage] = useState({})
 
@@ -81,7 +81,7 @@ const SignIn = () => {
         <View className="bg-mindful-brown-80 h-[150vw] w-[150vw] rounded-full"></View>
       </View>
       {isLoading && (
-        <View className="absolute top-0 left-0 right-0 bottom-0 flex justify-center items-center z-10 bg-optimistic-gray-80/90">
+        <View className="absolute h-full top-0 left-0 right-0 bottom-0 flex justify-center items-center z-10 bg-optimistic-gray-80/90">
           <Loading />
         </View>
       )}

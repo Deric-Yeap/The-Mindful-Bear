@@ -73,6 +73,7 @@ const ArticleResult = () => {
               console.warn('Article missing required fields:', article)
               return null
             }
+            console.log(article.article_image_url)
             return {
               id: article.article_id,
               title: article.title,
@@ -199,29 +200,30 @@ const ArticleResult = () => {
   )
 
   const renderArticles = () => (
-  <View style={styles.articlesContainer}>
-    {state.articles.length > 0 ? (
-      state.articles.map((article, index) => (
-        <ArticleCard 
-        key={article.id}
-        title={article.title} 
-        imageSource={{ uri: article.imageUrl }} 
-        pdfUrl={article.pdfUrl} 
-        id={article.id} 
-        index = {index}
-        category={article.topic}
-        onArticleClick={handleArticleClick}
-        />
-      ))
-    ) : (
-      <View style={styles.noResultsContainer}>
-        <Text style={styles.noResultsText}>
-          No articles found for "{state.currentQuery}". Please try a different search term.
-        </Text>
-      </View>
-    )}
-  </View>
-);
+    <View style={styles.articlesContainer}>
+      {state.articles.length > 0 ? (
+        state.articles.map((article, index) => (
+          <ArticleCard
+            key={article.id}
+            title={article.title}
+            imageSource={article.imageUrl}
+            pdfUrl={article.pdfUrl}
+            id={article.id}
+            index={index}
+            category={article.topic}
+            onArticleClick={handleArticleClick}
+          />
+        ))
+      ) : (
+        <View style={styles.noResultsContainer}>
+          <Text style={styles.noResultsText}>
+            No articles found for "{state.currentQuery}". Please try a different
+            search term.
+          </Text>
+        </View>
+      )}
+    </View>
+  )
 
   const renderContent = () => {
     if (state.loading && !state.refreshing) return renderLoading()

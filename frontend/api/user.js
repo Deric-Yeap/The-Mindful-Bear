@@ -8,8 +8,16 @@ export const getMe = () => {
   return axiosInstance.get('users/getMe')
 }
 
+export const listUsers = () => {
+  return axiosInstance.get('users/list-users')
+}
+
 export const create = (data) => {
   return axiosInstance.post('users/create', data)
+}
+
+export const upgradeUser = (data) => {
+  return axiosInstance.post('users/upgrade-user/', data)
 }
 
 export const getExercises = async () => {

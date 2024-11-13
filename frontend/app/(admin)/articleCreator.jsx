@@ -18,14 +18,14 @@ const ArticleCreator = () => {
   const [title, setTitle] = useState('')
   const [content, setContent] = useState('')
   const [topic, setTopic] = useState('')
-  const [articleImageUrl, setArticleImageUrl] = useState('')
+  const [articleImage, setArticleImage] = useState(null) // Changed from articleImageUrl
   const [pdfFile, setPdfFile] = useState(null)
   const [showSuccess, setShowSuccess] = useState(false)
   const [modalMessage, setModalMessage] = useState('')
 
   const handleSubmit = async () => {
-    if (!title|| !content  || !topic || !articleImageUrl) {  
-        Alert.alert('Please fill in all required fields and provide an image URL.')
+    if (!title|| !content  || !topic || !articleImage) {  
+        Alert.alert('Please fill in all required fields and upload an image.')
         return
     }
 
@@ -38,9 +38,16 @@ const ArticleCreator = () => {
     formData.append('title', title)
     formData.append('topic', topic)
     formData.append('processed_contents',content)
-    formData.append('article_image_url', articleImageUrl)
     
-    // Properly format the PDF file for upload
+    // Changed image handling
+    if (articleImage) {
+        formData.append('article_image_url', {
+            uri: articleImage.uri,
+            name: articleImage.name || 'image.jpg',
+            type: articleImage.type || 'image/jpeg'
+        })
+    }
+    
     if (pdfFile) {
         formData.append('article_pdf_url', {
             uri: pdfFile.uri,
@@ -71,8 +78,30 @@ const ArticleCreator = () => {
     setTitle('')
     setContent('')
     setTopic('')
-    setArticleImageUrl('')
+    setArticleImage(null) 
     setPdfFile(null)
+  }
+
+  // Added new function for image upload
+  const handleImageUpload = async () => {
+    try {
+      const result = await DocumentPicker.getDocumentAsync({
+        type: ['image/*'],
+        copyToCacheDirectory: true,
+      })
+
+      if (!result.canceled && result.assets && result.assets.length > 0) {
+        const selectedFile = result.assets[0]
+        setArticleImage({
+          uri: selectedFile.uri,
+          name: selectedFile.name,
+          type: selectedFile.mimeType
+        })
+      }
+    } catch (error) {
+      console.error('Error picking image file:', error)
+      Alert.alert('Error', 'Failed to upload image')
+    }
   }
 
   const handlePDFUpload = async () => {
@@ -126,14 +155,25 @@ const ArticleCreator = () => {
           handleChange={setTopic}
           customStyles="m-4"
         />
-        <FormField
-          title="Image Address"
-          iconName="text-box-outline"
-          value={articleImageUrl}
-          handleChange={setArticleImageUrl}
-          customStyles="m-4"
-          placeholder="Enter image URL"
-        />
+        
+        <View className="px-4 w-full mb-4">
+          <Text className="text-mindful-brown-100 text-xl font-bold mb-4">
+            Article Image
+          </Text>
+          <TouchableOpacity
+            className="bg-serenity-green-50 rounded-full py-2 flex-row justify-center items-center shadow-lg"
+            onPress={handleImageUpload}
+          >
+            <Text className="text-white text-lg">
+              {articleImage ? 'Change Image' : 'Upload Image'}
+            </Text>
+          </TouchableOpacity>
+          {articleImage && (
+            <Text className="text-mindful-brown-100 text-sm mt-2 text-center">
+              Selected: {articleImage.name}
+            </Text>
+          )}
+        </View>
 
         <View className="px-4 w-full mb-4">
           <Text className="text-mindful-brown-100 text-xl font-bold mb-4">

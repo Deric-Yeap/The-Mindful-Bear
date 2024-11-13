@@ -1,3 +1,5 @@
+--find-links https://download.pytorch.org/whl/torch_stable.html
+torch==2.2.2+cpu
 django
 djangorestframework>=3.12.0
 djangorestframework-simplejwt>= 5.2.2
@@ -13,7 +15,6 @@ django-rest-passwordreset
 Pillow
 pydub
 vosk
-pandas
 textblob
 transformers
 gunicorn
@@ -23,7 +24,7 @@ openpyxl==3.1.5
 pytz
 transformers
 scipy
-torch
 scikit-learn
 sentence_transformers
-nltk
+nltk==3.8.1
+numpy==1.26.4

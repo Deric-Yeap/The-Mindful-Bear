@@ -18,7 +18,7 @@ export const semanticSearch = async (searchQuery) => {
         top_k: 5  
     }, {
         // Additional config specific to semantic search
-        timeout: 30000, // 30 seconds for semantic search
+        
         headers: {
             'Accept': 'application/json',
             'Content-Type': 'application/json'
