@@ -1,7 +1,7 @@
 from rest_framework import generics, status
 from rest_framework.response import Response
 from .models import FormSession
-from .serializer import ScoreAggregationSerializer, FormSessionSerializer
+from .serializer import ScoreAggregationProfSerializer, ScoreAggregationProfPercentageSerializer,FormSessionSerializer
 
 class FormSessionList(generics.ListCreateAPIView):
     # Create a new session
@@ -10,7 +10,7 @@ class FormSessionList(generics.ListCreateAPIView):
 
 class FormSessionScoreView(generics.ListAPIView):
     queryset = FormSession.objects.all()
-    serializer_class = ScoreAggregationSerializer
+    serializer_class = ScoreAggregationProfSerializer
 
     def get(self, request, *args, **kwargs):
         try:
@@ -25,3 +25,22 @@ class FormSessionScoreView(generics.ListAPIView):
             return Response({'detail': 'FormSession not found'}, status=status.HTTP_404_NOT_FOUND)
         except Exception as e:
             return Response({'detail': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        
+class FormSessionScorePercentageView(generics.ListAPIView):
+    queryset = FormSession.objects.all()
+    serializer_class = ScoreAggregationProfPercentageSerializer
+
+    def get(self, request, *args, **kwargs):
+        try:
+            # Initialize the serializer with context including the request
+            serializer = self.get_serializer(context={'request': request})
+
+            # Get the serialized data
+            data = serializer.to_representation(None)
+            
+            return Response(data, status=status.HTTP_200_OK)
+        except FormSession.DoesNotExist:
+            return Response({'detail': 'FormSession not found'}, status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            return Response({'detail': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        
