@@ -44,7 +44,66 @@ export const deleteQuestion = (id) => {
 export const deleteForm = (formId) => {
   return axiosInstance.delete(`form/delete/${formId}`);
 };
+export const isLandmarkRatingsEmpty = async (sessionID) => {
+  try {
+    const landmarks = await axiosInstance.get(`users/session-landmarks/${sessionID}/`);
+    const form = await getFormQuestions('88');
+    const oldQuestions = form.questions;
+    const newQuestions = [];
+    const landmarkImageMap = {};
 
+    landmarks.forEach((landmark) => {
+      landmarkImageMap[landmark.landmark_name] = landmark.image_file_url;
+    });
+
+    landmarks.forEach((landmark) => {
+      const landmarkName = landmark.landmark_name;
+      const exerciseName = landmark.exercise.exercise_name;
+      const landmarkExists = form.questions.some((question) =>
+        question.question.includes(landmarkName)
+      );
+
+      if (!landmarkExists) {
+        newQuestions.push({
+          question: `How would you rate the landmark ${landmarkName}?`,
+          order: landmark.landmark_id,
+          optionSet: 5,
+        });
+      }
+
+      const exerciseExists = form.questions.some((question) =>
+        question.question.includes(exerciseName) && question.question.includes(landmarkName)
+      );
+
+      if (!exerciseExists) {
+        newQuestions.push({
+          question: `How would you rate the exercise ${exerciseName} at ${landmarkName}?`,
+          order: landmark.exercise.exercise_id,
+          optionSet: 5,
+        });
+      }
+    });
+
+    var combinedList = [...newQuestions, ...oldQuestions];
+    combinedList = combinedList
+      .filter((question) =>
+        landmarks.some((landmark) => question.question.includes(landmark.landmark_name))
+      )
+      .map((question) => {
+        const landmarkName = landmarks.find((landmark) =>
+          question.question.includes(landmark.landmark_name)
+        ).landmark_name;
+        return {
+          ...question,
+          image_file_url: landmarkImageMap[landmarkName],
+        };
+      });
+
+    return combinedList.length == 0
+  } catch (error) {
+    console.error(error);
+  }
+}
 export const createLandmarkRatings = async (sessionID) => {
   try {
     const landmarks = await axiosInstance.get(`users/session-landmarks/${sessionID}/`);
