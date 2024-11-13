@@ -3,7 +3,7 @@ from .models import FormQuestion, Question, Session, Form
 from rest_framework.exceptions import ValidationError
 from api.formSession.models import FormSession
 from api.formSession.utils import get_sessions_by_period
-from django.db.models import FloatField,  Count, Min, Max, Case, When, IntegerField
+from django.db.models import Count, Case, When, IntegerField, F
 from datetime import datetime, timedelta
 import pytz
 
@@ -89,50 +89,91 @@ class ScoreAggregationGenSerializer(serializers.Serializer):
     
     def get_stress_improve_change(self, session_ids):
         print('hi')
-        print(FormQuestion.objects.all())
-        # filtered_sessions = FormQuestion.objects.filter(SessionID__in=session_ids)
-        # print('filtered_sessions',filtered_sessions)
-        return "filtered_sessions"
+        filtered_sessions = (FormQuestion.objects.filter(QuestionID__in=[177], SessionID__in=session_ids)
+            .values('QuestionID', 'Response')
+            .annotate( yes_count=Count(Case(When(Response='Yes', then=1), output_field=IntegerField())),
+                        no_count=Count(Case(When(Response='No', then=1), output_field=IntegerField())))
+            .order_by('QuestionID'))
+        
+
+        print('filtered_sessions',filtered_sessions)
+        # return rating_counts
         
         # Get the new session count
-        # session_count = filtered_sessions.values('SessionID').distinct().count()
-        # print("filtered_sessions",filtered_sessions)
-
+        session_count = filtered_sessions.values('SessionID').distinct().count()
+        print('session_count',session_count)
         # If there are no valid sessions, return 0 
-        # if session_count == 0:
-        #    return {
-        #     'total_responses': 0,
-        #     'percentage_yes': 0,
-        #     'percentage_no': 0
-        #     }
-        # else: 
-        #     return "succes"
-             
-            # stress_answers = (
-            #     filtered_sessions
-            #     .filter(Question__QuestionID=177) # Only general stress
-            #     .aggregate(
-            #         yes_count=Count(Case(When(response='yes', then=1), output_field=IntegerField())),
-            #         no_count=Count(Case(When(response='no', then=1), output_field=IntegerField()))
-            #     )
-            # )
+        if session_count == 0:
+           return {
+            'percentage_yes_stress': 0,
+            'percentage_no_stress': 0
+            }
+        else: 
 
-            # #Calculate percentage yes vs no for reducing stress
-            # total_responses = stress_answers['yes_count'] + stress_answers['no_count']
-            # if total_responses > 0:
-            #     percentage_yes = (stress_answers['yes_count'] / total_responses) * 100
-            #     percentage_no = (stress_answers['no_count'] / total_responses) * 100
-            # else:
-            #     percentage_yes = 0
-            #     percentage_no = 0
+            total_yes_count = 0
+            total_no_count = 0
 
+            # Iterate over each item in filtered_sessions
+            for entry in filtered_sessions:
+                total_yes_count += entry.get('yes_count', 0)
+                total_no_count += entry.get('no_count', 0)
+            print('total_yes_count',total_yes_count)
+            print('total_no_count',total_no_count)
+
+            
+            percentage_yes = (total_yes_count /session_count) * 100
+            percentage_no = (total_no_count / session_count) * 100
+            
     
 
-            # return {
-            #     'total_responses': total_responses,
-            #     'percentage_yes': percentage_yes,
-            #     'percentage_no': percentage_no
-            # }
+            return {
+                'percentage_yes_stress': percentage_yes,
+                'percentage_no_stress': percentage_no
+            }
+        
+    def get_mindfulness_improve_change(self, session_ids):
+        print('hi')
+        filtered_sessions = (FormQuestion.objects.filter(QuestionID__in=[178], SessionID__in=session_ids)
+            .values('QuestionID', 'Response')
+            .annotate( yes_count=Count(Case(When(Response='Yes', then=1), output_field=IntegerField())),
+                        no_count=Count(Case(When(Response='No', then=1), output_field=IntegerField())))
+            .order_by('QuestionID'))
+        
+
+        print('filtered_sessions',filtered_sessions)
+        # return rating_counts
+        
+        # Get the new session count
+        session_count = filtered_sessions.values('SessionID').distinct().count()
+        print('session_count',session_count)
+        # If there are no valid sessions, return 0 
+        if session_count == 0:
+           return {
+            'percentage_yes': 0,
+            'percentage_no': 0
+            }
+        else: 
+
+            total_yes_count = 0
+            total_no_count = 0
+
+            # Iterate over each item in filtered_sessions
+            for entry in filtered_sessions:
+                total_yes_count += entry.get('yes_count', 0)
+                total_no_count += entry.get('no_count', 0)
+            print('total_yes_count',total_yes_count)
+            print('total_no_count',total_no_count)
+
+            
+            percentage_yes = (total_yes_count /session_count) * 100
+            percentage_no = (total_no_count / session_count) * 100
+            
+    
+
+            return {
+                'percentage_yes_mindfulness': percentage_yes,
+                'percentage_no_mindfulness': percentage_no
+            }
                  
 
     
@@ -179,19 +220,17 @@ class ScoreAggregationGenSerializer(serializers.Serializer):
         # Get sessions aggregated by period
          # Iterate over each period and calculate form averages
          # Get sessions aggregated by period
-        session_data = get_sessions_by_period(start_date, end_date, period)
+        session_data = get_sessions_by_period(start_date,end_date, period)
         
         result = {}
         for period_key, data in session_data.items():
             print('data',data['session_gen_ids'])
             stress_gen= self.get_stress_improve_change(data['session_gen_ids'])
-            print('stress_gen',stress_gen)
-            
-            # sms_percentage_scores = self.get_sms_percentage_change(data['session_gen_ids'],data['session_gen_count'],sms)
+            mindfulness_gen = self.get_mindfulness_improve_change(data['session_gen_ids'])
             
             result[period_key] = {
                 **stress_gen,
-                # **sms_percentage_scores,
+                **mindfulness_gen,
                 'session_gen_ids': data['session_gen_ids'],
                 'session_gen_count': data['session_gen_count']
                 

@@ -76,8 +76,33 @@ class BulkFormQuestionCreate(generics.CreateAPIView):
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return Response(status=status.HTTP_201_CREATED)
+    
+# class ExerciseLandmarkRatingDistribution(APIView):
+    
 
 class FormQuestionScoreGenView(generics.ListAPIView):
+    # def get(self, request):
+    #     # Define question IDs related to exercises and landmarks
+    #     question_ids = [177,178]  # Adjust as necessary
+
+    #     # Fetch and aggregate rating counts for each question ID
+    #     rating_counts = (
+    #         FormQuestion.objects
+    #         .filter(QuestionID__in=question_ids, Response__in=['yes','no'])
+    #         .values('QuestionID', 'Response')
+    #         .annotate(count=Count('Response'))
+    #         .order_by('QuestionID', 'Response')
+    #     )
+
+    #     # Structure the response to show counts for each rating (1–5) by question ID
+    #     data = {}
+    #     for item in rating_counts:
+    #         question_id = item['QuestionID']
+    #         if question_id not in data:
+    #             data[question_id] = {str(i): 0 for i in range(0, 5)}  # Initialize counts for ratings 0 - 4
+    #         data[question_id][item['Response']] = item['count']
+
+    #     return Response(data, status=status.HTTP_200_OK)
     queryset = FormQuestion.objects.all()
     serializer_class = ScoreAggregationGenSerializer
 
