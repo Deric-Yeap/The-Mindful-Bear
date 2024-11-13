@@ -21,8 +21,6 @@ def classify_text(journal_text):
     sentences = split_sentences(journal_text)
     topic_keyword_counts = defaultdict(lambda: defaultdict(int))
 
-    print("Starting classification of journal text...")
-
     for sentence in sentences:
         if sentence:
             print(f"\nProcessing original sentence: '{sentence}'")

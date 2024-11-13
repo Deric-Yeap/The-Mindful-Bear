@@ -11,6 +11,7 @@ import Toggle from '../../components/toggle';
 import { Svg } from 'react-native-svg';
 import { fetchLikelihoodOfFutureUse, fetchOverallExperienceRating, fetchRatingDistribution, fetchSuggestionOnLandmark, fetchImprovementsToApp } from '../../api/formQuestion';
 import { Picker } from '@react-native-picker/picker';
+import Dropdown from '../../components/dropdown'; 
 
 // Helper function to calculate bar width
 const calculateBarWidth = (data, chartWidth) => {
@@ -185,8 +186,8 @@ const landmarkBarWidth = calculateBarWidth(formattedLandmarkData || [], landmark
         setLandmarkRatings(landmarkData);
 
         // Set default selections to the first exercise and landmark if available
-        setSelectedExercise(Object.keys(exerciseData)[0] || null);
-        setSelectedLandmark(Object.keys(landmarkData)[0] || null);
+        //setSelectedExercise(Object.keys(exerciseData)[0] || null);
+        //setSelectedLandmark(Object.keys(landmarkData)[0] || null);
 
       } catch (error) {
         setError("Error fetching rating distribution. Please try again later.");
@@ -216,6 +217,17 @@ const landmarkBarWidth = calculateBarWidth(formattedLandmarkData || [], landmark
   // Helper functions to check question IDs
   const isExerciseQuestion = (questionID) => ["165", "167", "180", "193"].includes(String(questionID));
   const isLandmarkQuestion = (questionID) => ["164", "166", "179", "192"].includes(String(questionID));
+
+  // Fallbacks to handle undefined or empty data
+  const exerciseOptions = Object.keys(exerciseRatings || {}).map((exerciseId) => ({
+    key: exerciseId,
+    value: exerciseLabelsMap[exerciseId] || "Unnamed Exercise",
+  }));
+
+  const landmarkOptions = Object.keys(landmarkRatings || {}).map((landmarkId) => ({
+    key: landmarkId,
+    value: landmarkLabelsMap[landmarkId] || "Unnamed Landmark",
+  }));
 
   // Format data for each chart
   const formatChartData = (data) => {
@@ -537,6 +549,90 @@ const calculateAverageLine = (data) => {
             </View>
           </View>
 
+          <View style={{ borderBottomWidth: 1, borderBottomColor: colors.mindfulBrown80, marginTop: 50 }} />
+          {/* Exercise Picker with Dropdown Component */}
+          <Text className="text-mindful-brown-80 font-urbanist-bold text-xl mt-10">Exercises Rating:</Text>
+          <Dropdown
+            data={exerciseOptions}
+            handleSelect={(itemValue) => setSelectedExercise(itemValue)}
+            selectedValue={selectedExercise}
+            iconName="chevron-down"
+          />
+
+          {/* Exercise Rating Chart */}
+          {formattedExerciseData.length > 0 ? (
+            <View className="mt-4">
+              <Text className="text-mindful-brown-80 font-urbanist-bold text-lg mb-2">
+                {exerciseLabelsMap[selectedExercise] || "Exercise Rating"}
+              </Text>
+              <ScrollView horizontal={true}>
+                <View style={{ width: exerciseChartWidth }}>
+                  <BarChart
+                    data={formattedExerciseData}
+                    barWidth={exerciseBarWidth}
+                    barBorderRadius={4}
+                    width={exerciseChartWidth}
+                    height={defaultchartHeight}
+                    yAxisThickness={1}
+                    xAxisThickness={1}
+                    showYAxisIndices
+                    yAxisLabelTextStyle={{ color: colors.mindfulBrown70, fontSize: 10 }}
+                    xAxisLabelTextStyle={{ color: colors.mindfulBrown90, fontSize: 10 }}
+                    maxValue={maxExerciseValue}
+                  />
+                </View>
+              </ScrollView>
+            </View>
+          ) : (
+            selectedExercise && (
+              <Text className="text-mindful-brown-80 text-center mt-4">
+                No data available for the selected exercise
+              </Text>
+            )
+          )}
+
+          {/* Landmark Picker with Dropdown Component */}
+          <Text className="text-mindful-brown-80 font-urbanist-bold text-xl mt-10">Landmarks Rating:</Text>
+          <Dropdown
+            data={landmarkOptions}
+            handleSelect={(itemValue) => setSelectedLandmark(itemValue)}
+            selectedValue={selectedLandmark}
+            iconName="chevron-down"
+          />
+
+          {/* Landmark Rating Chart */}
+          {formattedLandmarkData.length > 0 ? (
+            <View className="mt-4">
+              <Text className="text-mindful-brown-80 font-urbanist-bold text-lg mb-2">
+                {landmarkLabelsMap[selectedLandmark] || "Landmark Rating"}
+              </Text>
+              <ScrollView horizontal={true}>
+                <View style={{ width: landmarkChartWidth }}>
+                  <BarChart
+                    data={formattedLandmarkData}
+                    barWidth={landmarkBarWidth}
+                    barBorderRadius={4}
+                    width={landmarkChartWidth}
+                    height={defaultchartHeight}
+                    yAxisThickness={1}
+                    xAxisThickness={1}
+                    showYAxisIndices
+                    yAxisLabelTextStyle={{ color: colors.mindfulBrown70, fontSize: 10 }}
+                    xAxisLabelTextStyle={{ color: colors.mindfulBrown90, fontSize: 10 }}
+                    maxValue={maxLandmarkValue}
+                  />
+                </View>
+              </ScrollView>
+            </View>
+          ) : (
+            selectedLandmark && (
+              <Text className="text-mindful-brown-80 text-center mt-4">
+                No data available for the selected landmark
+              </Text>
+            )
+          )}
+
+          <View style={{ borderBottomWidth: 1, borderBottomColor: colors.mindfulBrown80, marginTop: 50 }} />
 
           <Text className="text-mindful-brown-80 font-urbanist-bold text-xl mb-4">Likelihood of Future Use</Text>
           {likelihoodData.length > 0 ? (
@@ -602,98 +698,8 @@ const calculateAverageLine = (data) => {
           )}
 
 
-          {/* Exercise Picker */}   
           
-            <Text className="text-mindful-brown-80 font-urbanist-bold text-xl mt-4 mb-2">Exercises Rating:</Text>
-            <View style={{ borderWidth: 1, borderColor: colors.mindfulBrown40, borderRadius: 4, marginBottom: 8 }}>
-            <Picker
-            selectedValue={selectedExercise}
-            onValueChange={(itemValue) => setSelectedExercise(itemValue)}
-            style={{ height: 50, width: '100%', color: colors.mindfulBrown100 }}
-            >
-                {Object.keys(exerciseRatings).map((exerciseId) => (
-                  <Picker.Item key={exerciseId} label={exerciseLabelsMap[exerciseId]} value={exerciseId} />
-                ))}
-              </Picker>
-            </View>
-
-
-            {formattedExerciseData.length > 0 ? (
-              <View className="mt-4">
-                  <Text className="text-mindful-brown-80 font-urbanist-bold text-lg mb-2">
-                      {exerciseLabelsMap[selectedExercise] || "Exercise Rating"}
-                  </Text>
-                  <ScrollView horizontal={true}>
-                      <View style={{ width: exerciseChartWidth }}>
-                          <BarChart
-                              data={formattedExerciseData}
-                              barWidth={exerciseBarWidth}  // Specific bar width for this chart
-                              barBorderRadius={4}
-                              width={exerciseChartWidth}  // Specific chart width
-                              height={defaultchartHeight}  // Default chart height
-                              yAxisThickness={1}
-                              xAxisThickness={1}
-                              showYAxisIndices
-                              yAxisLabelTextStyle={{ color: colors.mindfulBrown70, fontSize: 10 }}
-                              xAxisLabelTextStyle={{ color: colors.mindfulBrown90, fontSize: 10 }}
-                              maxValue={maxExerciseValue}
-                          />
-                      </View>
-                  </ScrollView>
-              </View>
-          ) : (
-              selectedExercise && (
-                  <Text className="text-mindful-brown-80 text-center mt-4">
-                      No data available for the selected exercise
-                  </Text>
-              )
-          )}
-            {/* Landmark Picker */}
-            <Text className="text-mindful-brown-80 font-urbanist-bold text-xl mt-4 mb-2">Landmarks Rating:</Text>
-            <View style={{ borderWidth: 1, borderColor: colors.mindfulBrown40, borderRadius: 4, marginBottom: 8 }}>
-              <Picker
-                selectedValue={selectedLandmark}
-                onValueChange={(itemValue) => setSelectedLandmark(itemValue)}
-                style={{ height: 50, width: '100%', color: colors.mindfulBrown100 }}
-              >
-                {Object.keys(landmarkRatings).map((landmarkId) => (
-                  <Picker.Item key={landmarkId} label={landmarkLabelsMap[landmarkId]} value={landmarkId} />
-                ))}
-              </Picker>
-            </View>
-
-            {/* Landmark Rating Chart */}
-            {formattedLandmarkData.length > 0 ? (
-            <View className="mt-4">
-              <Text className="text-mindful-brown-80 font-urbanist-bold text-lg mb-2">
-                  {landmarkLabelsMap[selectedLandmark] || "Landmark Rating"}
-              </Text>
-              <ScrollView horizontal={true}>
-                  <View style={{ width: landmarkChartWidth }}>
-                      <BarChart
-                          data={formattedLandmarkData}
-                          barWidth={landmarkBarWidth}  // Specific bar width for this chart
-                          barBorderRadius={4}
-                          width={landmarkChartWidth}  // Specific chart width
-                          height={defaultchartHeight}  // Default chart height
-                          yAxisThickness={1}
-                          xAxisThickness={1}
-                          showYAxisIndices
-                          yAxisLabelTextStyle={{ color: colors.mindfulBrown70, fontSize: 10 }}
-                          xAxisLabelTextStyle={{ color: colors.mindfulBrown90, fontSize: 10 }}
-                          maxValue={maxLandmarkValue}
-                      />
-                  </View>
-              </ScrollView>
-          </View>
-        ) : (
-          selectedLandmark && (
-              <Text className="text-mindful-brown-80 text-center mt-4">
-                  No data available for the selected landmark
-              </Text>
-          )
-        )}
-                  
+                    
 
 
           {/* Suggestions Section */}
