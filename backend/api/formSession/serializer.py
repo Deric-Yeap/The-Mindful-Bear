@@ -1,11 +1,9 @@
 from rest_framework import serializers
 from .models import FormSession
 from ..session.models import Session
-from ..userSession.models import UserSession
-from ..user.models import CustomUser
 from django.conf import settings
 from datetime import datetime, timedelta
-from django.db.models import FloatField, Avg, F, Count, Q, Min, Max
+from django.db.models import FloatField,  Count, Min, Max, Case, When, IntegerField
 from django.db.models.functions import Cast
 from .utils import get_sessions_by_period
 
@@ -213,7 +211,6 @@ class ScoreAggregationProfPercentageSerializer(serializers.Serializer):
         
         # Get the new session count
         session_count = filtered_sessions.values('SessionID').distinct().count()
-        print("filtered_sessions",filtered_sessions)
 
         # If there are no valid sessions, return 0 
         if session_count == 0:
@@ -246,7 +243,6 @@ class ScoreAggregationProfPercentageSerializer(serializers.Serializer):
                 #extract session id as an int from the queryset
                 session_obj = Session.objects.filter(id=session_id)
                 session_id = session_obj.values_list('id', flat=True).first()
-                print("session_id",session_id)
                 # Calculate percentage change
 
                 #Calculate the percentage change
@@ -278,7 +274,6 @@ class ScoreAggregationProfPercentageSerializer(serializers.Serializer):
         
         # Get the new session count
         session_count = filtered_sessions.values('SessionID').distinct().count()
-        print("filtered_sessions",filtered_sessions)
 
         # If there are no valid sessions, return 0 
         if session_count == 0:
@@ -311,7 +306,6 @@ class ScoreAggregationProfPercentageSerializer(serializers.Serializer):
                 #extract session id as an int from the queryset
                 session_obj = Session.objects.filter(id=session_id)
                 session_id = session_obj.values_list('id', flat=True).first()
-                print("session_id",session_id)
                 #Calculate the percentage change
                 if before_score:  # Avoid division by zero
                     percentage_score = ((after_score - before_score) / before_score) * 100
@@ -376,7 +370,7 @@ class ScoreAggregationProfPercentageSerializer(serializers.Serializer):
          # Iterate over each period and calculate form averages
          # Get sessions aggregated by period
         session_data = get_sessions_by_period(start_date, end_date, period)
-        print("session data",session_data)
+
         result = {}
         for period_key, data in session_data.items():
             pss_percentage_scores = self.get_pss_percentage_change(data['session_prof_ids'],data['session_prof_count'],pss)
@@ -391,4 +385,5 @@ class ScoreAggregationProfPercentageSerializer(serializers.Serializer):
             }
 
         return result
+    
 

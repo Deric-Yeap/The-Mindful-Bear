@@ -1,7 +1,7 @@
 from rest_framework import generics, status
 from rest_framework.response import Response
 from .models import FormSession
-from .serializer import ScoreAggregationProfSerializer, ScoreAggregationProfPercentageSerializer, FormSessionSerializer
+from .serializer import ScoreAggregationProfSerializer, ScoreAggregationProfPercentageSerializer,FormSessionSerializer
 
 class FormSessionList(generics.ListCreateAPIView):
     # Create a new session

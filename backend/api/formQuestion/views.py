@@ -3,7 +3,7 @@ from rest_framework import generics, status
 from rest_framework.response import Response
 from .models import FormQuestion
 from api.question.models import Question
-from .serializer import FormQuestionSerializer
+from .serializer import FormQuestionSerializer, ScoreAggregationGenSerializer
 from rest_framework.exceptions import ValidationError
 from .serializer import BulkFormQuestionSerializer
 from api.session.models import Session
@@ -76,3 +76,22 @@ class BulkFormQuestionCreate(generics.CreateAPIView):
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return Response(status=status.HTTP_201_CREATED)
+
+class FormQuestionScoreGenView(generics.ListAPIView):
+    queryset = FormQuestion.objects.all()
+    serializer_class = ScoreAggregationGenSerializer
+
+    def get(self, request, *args, **kwargs):
+        try:
+            # Initialize the serializer with context including the request
+            serializer = self.get_serializer(context={'request': request})
+
+            # Get the serialized data
+            data = serializer.to_representation(None)
+            
+            return Response(data, status=status.HTTP_200_OK)
+        except FormQuestion.DoesNotExist:
+            return Response({'detail': 'FormSession not found'}, status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            return Response({'detail': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        
