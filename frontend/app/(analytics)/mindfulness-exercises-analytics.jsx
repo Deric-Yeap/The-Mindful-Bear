@@ -122,6 +122,7 @@ const getColorForValue = (value, maxCount) => {
     
 // Separate useEffect for calculating max values after data is set
 useEffect(() => {
+  // retrieveData();
   if (exercisesSessionCountData.length > 0) {
       const maxSessionCount = Math.max(...exercisesSessionCountData.map(item => item.value), 20);
       setMaxSessionCountValue(maxSessionCount);
@@ -129,9 +130,13 @@ useEffect(() => {
 
   if (exerciseSessionDurationData.length > 0) {
       const maxSessionDuration = Math.max(...exerciseSessionDurationData.map(item => item.value), 20);
+      console.log("maxSessionDuration",maxSessionDuration)
+      console.log("type",typeof(maxSessionDuration))
       setMaxSessionDurationValue(maxSessionDuration);
       
+      
   }
+
 
   console.log("try again","maxSessionCountValue",maxSessionCountValue)
 }, [exercisesSessionCountData, exerciseSessionDurationData]);
@@ -470,7 +475,7 @@ const calculateAverageLine = (data) => {
             </Text>
             <ScrollView horizontal={true}>
               <View className="flex-row justify-between mb-4 " >
-              {exercisesSessionCountData.length > 0 ? (
+              {exercisesSessionCountData.length > 0   ? (
               <ScrollView horizontal={true}>
                   <View style={{ width: exerciseSessionCountChartWidth }}>
                       <BarChart
@@ -493,7 +498,7 @@ const calculateAverageLine = (data) => {
                     showYAxisIndices
                     yAxisLabelTextStyle={{ color: colors.mindfulBrown70, fontSize: 10 }}
                     xAxisLabelTextStyle={{ color: colors.mindfulBrown90, fontSize: 10 }}
-                    maxValue={maxSessionCountValue}
+                    maxValue={30}
                   />
                  </View> 
               </ScrollView>
@@ -505,50 +510,19 @@ const calculateAverageLine = (data) => {
               </View>
             </ScrollView>
 
-             {/* <View style={{ borderBottomWidth: 1, borderBottomColor: colors.mindfulBrown80, marginTop: 50 }}/>
-            <Text className="text-mindful-brown-80 font-urbanist-bold text-xl mb-4">Popular Exercises by Count</Text> */}
-          {/* {exercisesSessionCountData.length > 0 ? (
-              <ScrollView horizontal={true}>
-                  <View style={{ width: exerciseSessionCountChartWidth }}>
-                      <BarChart
-                          data={exercisesSessionCountData.map((item) => ({
-                              ...item,
-                              frontColor: getColorForValue(item.value,maxSessionCountValue),
-                              topLabelComponent: () => (
-                                  <Text style={{ color: colors.optimisticGray50, fontSize: 12, marginBottom: 6 }}>
-                                      {item.value}
-                                  </Text>
-                              ),
-                          }))}
-                    
-                    barWidth={exerciseSessionCountBarWidth}
-                    barBorderRadius={4}
-                    width={exerciseSessionCountChartWidth}
-                    height={defaultchartHeight}
-                    yAxisThickness={1}
-                    xAxisThickness={1}
-                    showYAxisIndices
-                    yAxisLabelTextStyle={{ color: colors.mindfulBrown70, fontSize: 10 }}
-                    xAxisLabelTextStyle={{ color: colors.mindfulBrown90, fontSize: 10 }}
-                    maxValue={maxSessionCountValue}
-                  />
-                 </View> 
-              </ScrollView>
-             
+            <View className="flex-row justify-between mb-4">
             
-          ) : (
-            <Text>No data available for selected period</Text>
-        )}
-        */}
-         {/* <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 10, paddingHorizontal: 30 }}>
-         <Text className="text-mindful-brown-80 font-urbanist-bold text-xl mb-4">Popular Exercises by Duration</Text>
-          {exerciseSessionDurationData.length > 0 ? (
+            </View>
+            <Text className="text-mindful-brown-100 font-urbanist-bold text-xl mb-4">
+              Popular Exercises by Duration
+            </Text>
+          {exerciseSessionDurationData.length > 0  ? (
               <ScrollView horizontal={true}>
                   <View style={{ width: exerciseSessionDurationChartWidth }}>
                       <BarChart
                           data={exerciseSessionDurationData.map((item) => ({
                               ...item,
-                              frontColor: getColorForValue(item.value,maxSessionDurationValue),
+                              frontColor: getColorForValue(item.value,30),
                               topLabelComponent: () => (
                                   <Text style={{ color: colors.optimisticGray50, fontSize: 12, marginBottom: 6 }}>
                                       {item.value}
@@ -565,7 +539,7 @@ const calculateAverageLine = (data) => {
                     showYAxisIndices
                     yAxisLabelTextStyle={{ color: colors.mindfulBrown70, fontSize: 10 }}
                     xAxisLabelTextStyle={{ color: colors.mindfulBrown90, fontSize: 10 }}
-                    maxValue={maxSessionDurationValue}
+                    maxValue={30}
                   />
                 </View>
               </ScrollView>
@@ -574,9 +548,8 @@ const calculateAverageLine = (data) => {
             <Text>No data available for selected period</Text>
         )}
             
-          </View> */}
+          </View> 
              
-          </View>
 )}
           </View>
       
