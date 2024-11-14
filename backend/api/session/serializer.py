@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from .models import Session
-from ..formSession.utils import get_sessions_by_period
+from .utils import get_sessions_by_period
 from datetime import datetime, timedelta
 from pytz import UTC  # Make sure pytz is installed
 import pytz

@@ -7,8 +7,7 @@ import { setIsShownNav } from '../../redux/slices/isShownNavSlice'
 import ConfirmModal from '../../components/confirmModal'
 import { confirmModal } from '../../assets/image'
 import { colors } from '../../common/styles'
-
-
+import { isLandmarkRatingsEmpty } from '../../api/form'
 
 const Questionaire = () => {
   const {
@@ -58,6 +57,10 @@ const Questionaire = () => {
               form.form_name
             )
           )
+          const hasLandmarkRatings = filteredForms.some((form) => form.form_name === 'Landmark Ratings');
+          if (hasLandmarkRatings && await isLandmarkRatingsEmpty(sessionID)) {
+            filteredForms = filteredForms.filter((form) => form.form_name !== 'Landmark Ratings');
+          }
         } else if (start === 'true') {
           filteredForms = response.filter((form) => form.is_presession)
         } else {

@@ -2,7 +2,9 @@ import React from 'react'
 import { View, Text, TouchableOpacity } from 'react-native'
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons'
 import { colors } from '../common/styles'
-import { useRouter } from 'expo-router' // Import useRouter for navigation
+import { useRouter } from 'expo-router'
+import { useDispatch } from 'react-redux'
+import { toggleUserView } from '../redux/slices/userSlice'
 
 const SettingsItem = ({
   title,
@@ -11,12 +13,19 @@ const SettingsItem = ({
   href,
   setIsShowLogoutModal,
 }) => {
-  const router = useRouter() // Initialize the router for navigation
+  const router = useRouter()
+  const dispatch = useDispatch()
 
   const handlePress = () => {
     if (href) {
       if (href == 'logout') {
         setIsShowLogoutModal(true)
+      } else if (href == 'user-home') {
+        dispatch(toggleUserView())
+        router.push('home')
+      } else if (href == 'user-admin') {
+        dispatch(toggleUserView())
+        router.push('(admin)')
       } else {
         router.push(href) // Navigate to the specified route
       }

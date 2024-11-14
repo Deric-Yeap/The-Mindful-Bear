@@ -1,7 +1,6 @@
 from rest_framework import serializers
-from .models import FormSession
-from ..session.models import Session
-from ..formQuestion.models import FormQuestion
+from api.formSession.models import FormSession
+from .models import Session
 from django.conf import settings
 from datetime import datetime, timedelta
 from django.db.models import FloatField, Avg, F, Count, Q, Min, Max
@@ -41,11 +40,10 @@ def get_sessions_by_period(start_date, end_date, period):
         )
 
         form_sessions = FormSession.objects.filter(SessionID__in=sessions)
-        form_questions = FormQuestion.objects.filter(SessionID__in=sessions)
         
         # Group by SessionID and FormID, and count each group
         # Only keep SessionIDs where there are exactly 2 PSS and 2 SMS entries
-        valid_sessions_professional = (
+        valid_sessions = (
             form_sessions
             .filter(FormID__in=[3, 5])  # Filter only PSS and SMS forms
             .values('SessionID', 'FormID') 
@@ -55,26 +53,12 @@ def get_sessions_by_period(start_date, end_date, period):
             .distinct()
         )
 
-        valid_sessions_general = (
-             form_questions
-                .filter(QuestionID__in=[177, 178])  # Only questions 177 & 178
-                .values('SessionID','QuestionID')
-                .annotate(question_count=Count('id'))
-                .filter(question_count=1)  # Ensure both questions 177 and 178 are completed
-                .values_list('SessionID', flat=True)
-                .distinct()
-        )
-
-        
-
          # Filter only valid sessions for averaging
-        
-        filtered_prof_sessions = sessions.filter(id__in=valid_sessions_professional)
-        filtered_gen_sessions = sessions.filter(id__in=valid_sessions_general)
+        filtered_sessions = sessions.filter(id__in=valid_sessions)
         
 
 
-       
+        print("sessions",sessions)
         
         session_dict = {}
         current_date = start_date_sgt.replace(hour=0, minute=0, second=0, microsecond=0)
@@ -108,39 +92,25 @@ def get_sessions_by_period(start_date, end_date, period):
 
             # Filter sessions for the current period
             print("current_date",current_date)
-            
-            period_prof_sessions = filtered_prof_sessions.filter(start_datetime__gte=current_date.astimezone(UTC), 
-                                              start_datetime__lt=next_date.astimezone(UTC))
-            period_gen_sessions = filtered_gen_sessions.filter(start_datetime__gte=current_date.astimezone(UTC), 
+            period_sessions = filtered_sessions.filter(start_datetime__gte=current_date.astimezone(UTC), 
                                               start_datetime__lt=next_date.astimezone(UTC))
              
     
     #         # Filter sessions for the current period
-            
-            serialized_prof_sessions = get_serialized_sessions(period_prof_sessions)
-            serialized_gen_sessions = get_serialized_sessions(period_gen_sessions)
-            serialized_sessions = serialized_prof_sessions + serialized_gen_sessions
+            print("period_sessions",period_sessions)
+            serialized_sessions = get_serialized_sessions(period_sessions)
     # 
                         # Extract session IDs from the filtered period_sessions
-            
-            session_prof_ids = period_prof_sessions.values_list('id', flat=True)  # Extracting the session IDs
-            session_gen_ids = period_gen_sessions.values_list('id', flat=True)
-            session_ids =list(session_prof_ids) + list(session_gen_ids)
-            session_count = len(session_ids)  # Counting the number of session IDs
-            session_prof_count = session_prof_ids.count()
-            session_gen_count = session_gen_ids.count()
+            session_ids = period_sessions.values_list('id', flat=True)  # Extracting the session IDs
+            session_count = session_ids.count()  # Counting the number of session IDs
+            # session_dict[str(current_date.date())] = SessionSerializer(period_sessions, many=True).data
             # Now filter FormSession based on these session IDs
             
             # Prepare the data for this period
             session_dict[key] = {
                 'session_count': session_count,
                 'session_ids': session_ids,  # return the session ids
-                'session_prof_ids': session_prof_ids,  # return the session ids
-                'session_prof_count': session_prof_count,
-                'session_gen_ids': session_gen_ids,  # return the session ids
-                'session_gen_count': session_gen_count,
-                'sessions': serialized_sessions # Serialize the sessions
-
+                'sessions': serialized_sessions  # Serialize the sessions
             }
             
             # Move to the next period

@@ -38,3 +38,20 @@ export const splitSession = async ({ period = 'daily', year, month } = {}) => {
 export const updateSession = async (data, sessionId) => {
   return axiosInstance.put(`session/update/${sessionId}/`, data)
 }
+
+// New function for enhanced split session
+export const splitSessionEnhanced = async ({ period = 'daily' } = {}) => {
+  try {
+    // Construct the URL with the period parameter
+    const url = `session/split-enhanced/?period=${period}`;
+
+    // Make the API request to the enhanced endpoint
+    const response = await axiosInstance.get(url);
+
+    // Return the response data
+    return response;
+  } catch (error) {
+    console.error('Error fetching enhanced session split data:', error);
+    throw error;
+  }
+};
