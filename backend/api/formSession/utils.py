@@ -148,3 +148,90 @@ def get_sessions_by_period(start_date, end_date, period):
 
         return session_dict
 
+
+def get_sessions(start_date, end_date):
+        
+
+        SGT = pytz.timezone('Asia/Singapore')
+        start_date_utc = start_date.astimezone(UTC)
+        
+        end_date_utc = end_date.astimezone(UTC)
+
+        # start_date_sgt = start_date.astimezone(SGT)
+        # end_date_sgt = end_date.astimezone(SGT)
+
+       
+
+        sessions = Session.objects.filter(
+            start_datetime__gte=start_date_utc,
+            start_datetime__lt=end_date_utc
+        ).exclude(
+            start_datetime=F('end_datetime')  # Exclude sessions where start and end times are the same
+        )
+
+        form_sessions = FormSession.objects.filter(SessionID__in=sessions)
+        form_questions = FormQuestion.objects.filter(SessionID__in=sessions)
+        
+        # Group by SessionID and FormID, and count each group
+        # Only keep SessionIDs where there are exactly 2 PSS and 2 SMS entries
+        valid_sessions_professional = (
+            form_sessions
+            .filter(FormID__in=[3, 5])  # Filter only PSS and SMS forms
+            .values('SessionID', 'FormID') 
+            .annotate(count=Count('id'))
+            .filter(count=2) # Ensure there are exactly 2 entries for each (SessionID, FormID) pair
+            .values_list('SessionID', flat=True)
+            .distinct()
+        )
+
+        valid_sessions_general = (
+             form_questions
+                .filter(QuestionID__in=[177, 178])  # Only questions 177 & 178
+                .values('SessionID','QuestionID')
+                .annotate(question_count=Count('id'))
+                .filter(question_count=1)  # Ensure both questions 177 and 178 are completed
+                .values_list('SessionID', flat=True)
+                .distinct()
+        )
+
+        
+
+         # Filter only valid sessions for averaging
+        
+        filtered_prof_sessions = sessions.filter(id__in=valid_sessions_professional)
+        filtered_gen_sessions = sessions.filter(id__in=valid_sessions_general)
+        
+        session_dict = {}
+    
+#         # Filter sessions for the current period
+        
+        serialized_prof_sessions = get_serialized_sessions(filtered_prof_sessions)
+        serialized_gen_sessions = get_serialized_sessions(filtered_gen_sessions)
+        serialized_sessions = serialized_prof_sessions + serialized_gen_sessions
+# 
+                    # Extract session IDs from the filtered period_sessions
+        
+        session_prof_ids = filtered_prof_sessions.values_list('id', flat=True)  # Extracting the session IDs
+        session_gen_ids = filtered_gen_sessions.values_list('id', flat=True)
+        session_ids =list(session_prof_ids) + list(session_gen_ids)
+        session_count = len(session_ids)  # Counting the number of session IDs
+        session_prof_count = session_prof_ids.count()
+        session_gen_count = session_gen_ids.count()
+        # Now filter FormSession based on these session IDs
+        
+        # Prepare the data for this period
+        session_dict= {
+            'session_count': session_count,
+            'session_ids': session_ids,  # return the session ids
+            'session_prof_ids': session_prof_ids,  # return the session ids
+            'session_prof_count': session_prof_count,
+            'session_gen_ids': session_gen_ids,  # return the session ids
+            'session_gen_count': session_gen_count,
+            'sessions': serialized_sessions # Serialize the sessions
+
+        }
+        
+        
+       
+
+        return session_dict

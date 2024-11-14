@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from .models import UserSession
-from ..formSession.utils import get_sessions_by_period
+from ..formSession.utils import get_sessions_by_period, get_sessions
 from datetime import datetime, timedelta
 from pytz import UTC  # Make sure pytz is installed
 import pytz
@@ -163,7 +163,7 @@ class UserSessionExerciseSplitSerializer(serializers.Serializer):
         landmarks = Landmark.objects.all()
         print("landmarks",landmarks)
         for exercise in exercises:
-            exercise_data[exercise.exercise_id] = {'durations': [], 'count': 0, 'percent_count':0,'usersessions': []}
+            exercise_data[exercise.exercise_name] = {'durations': [], 'count': 0, 'percent_count':0,'usersessions': []}
 
         print("exercise_data",exercise_data)
 
@@ -171,29 +171,29 @@ class UserSessionExerciseSplitSerializer(serializers.Serializer):
         for session in usersessions:
             print(session)
             landmark_id = session['landmark']
-            exercise_id = landmarks.filter(landmark_id=landmark_id).first().exercise.exercise_id
+            exercise_name = landmarks.filter(landmark_id=landmark_id).first().exercise.exercise_name
             total_duration_seconds = (datetime.strptime(session['end_datetime_sgt'], sgt_format) - datetime.strptime(session['start_datetime_sgt'], sgt_format)).total_seconds()
             total_duration_minutes = total_duration_seconds / 60  # Convert to minutes
 
-            exercise_data[exercise_id]['durations'].append(total_duration_minutes)
-            exercise_data[exercise_id]['count'] += 1
-            exercise_data[exercise_id]['usersessions'].append(session)
+            exercise_data[exercise_name]['durations'].append(total_duration_minutes)
+            exercise_data[exercise_name]['count'] += 1
+            exercise_data[exercise_name]['usersessions'].append(session)
             
        
 
       # Calculate average durations
         exercise_session_details = {}
-        for exercise_id, data in exercise_data.items():
+        for exercise_name, data in exercise_data.items():
             durations = data['durations']
             count = len(durations)
             if len(durations) > 0:
-                exercise_session_details[exercise_id] = {
-                    'average_duration': sum(durations) / len(durations),
+                exercise_session_details[exercise_name] = {
+                    'average_duration': round(sum(durations) / len(durations),2),
                     'count': count,
                     'usersessions': data['usersessions']
                 }
             else:
-                exercise_session_details[exercise_id] = {
+                exercise_session_details[exercise_name] = {
                     'average_duration': 0,
                     'count': 0,
                     'usersessions': []
@@ -207,56 +207,60 @@ class UserSessionExerciseSplitSerializer(serializers.Serializer):
         request = self.context.get('request')
         year = request.query_params.get('year')
         month = request.query_params.get('month')
-        period = request.query_params.get('period', 'daily')  # Default to daily if no period is specified
         SGT = pytz.timezone('Asia/Singapore')
          # Get all sessions if year and month are not provided
         sessions = UserSession.objects.all()
-        if period == 'daily':
-             # Calculate start and end dates for the last 30 days
-            end_date = datetime.now(tz=SGT)
-            start_date = end_date - timedelta(days=30)
-        else:
-            if year and month:
-                # If year and month are provided, filter by the month
-                year = int(year)
-                month = int(month)
-                start_date = datetime(year, month, 1, tzinfo=SGT)
-
-                if month == 12:
-                    end_date = datetime(year + 1, 1, 1, tzinfo=SGT) - timedelta(microseconds=1)
-                else:
-                    end_date = datetime(year, month + 1, 1, tzinfo=SGT) - timedelta(microseconds=1)
-
-                sessions = sessions.filter(start_datetime__gte=start_date, start_datetime__lt=end_date)
+        # Use the current year if no year is provided
+        if not year and not month:
+        # No year and no month provided, use the full date range of all sessions
+            if sessions.exists():
+                start_date = sessions.order_by('start_datetime').first().start_datetime
+                end_date = sessions.order_by('-start_datetime').first().start_datetime
             else:
-                # If no year and month, use the full date range of all sessions
-                if sessions.exists():
-                    start_date = sessions.order_by('start_datetime').first().start_datetime
-                    end_date = sessions.order_by('-start_datetime').first().start_datetime
-                else:
-                    start_date = datetime.now(tz=SGT)
-                    end_date = datetime.now(tz=SGT)
+                # If no sessions are available, use the current date
+                start_date = datetime.now(tz=SGT)
+                end_date = datetime.now(tz=SGT)
+                
+        elif year and not month:
+            # Only year provided, take all months in that year
+            year = int(year)
+            start_date = datetime(year, 1, 1, tzinfo=SGT)
+            end_date = datetime(year + 1, 1, 1, tzinfo=SGT) - timedelta(microseconds=1)
+            
+        elif month and not year:
+            # Only month provided, take the specified month across all years
+            month = int(month)
+            start_date = sessions.filter(start_datetime__month=month).order_by('start_datetime').first().start_datetime
+            end_date = sessions.filter(start_datetime__month=month).order_by('-start_datetime').first().start_datetime
+
+        else:
+            # Both year and month are provided
+            year = int(year)
+            month = int(month)
+            start_date = datetime(year, month, 1, tzinfo=SGT)
+            if month == 12:
+                end_date = datetime(year + 1, 1, 1, tzinfo=SGT) - timedelta(microseconds=1)
+            else:
+                end_date = datetime(year, month + 1, 1, tzinfo=SGT) - timedelta(microseconds=1)
 
         # Get the session data for the specified period
-        session_data = get_sessions_by_period(start_date, end_date, period)
+        session_data = get_sessions(start_date, end_date)
         result = {}
         # session_dict =  get_average_duration(session_data)
-        for period_key, data in session_data.items():
-            print("period_key",period_key)
-            print("data",data)
-            
-            usersession_details = self.get_user_session_details(data)
-            
-            exercise_details = self.get_average_duration_exercise(usersession_details)
+    
+        
+        usersession_details = self.get_user_session_details(session_data)
+        
+        exercise_details = self.get_average_duration_exercise(usersession_details)
 
 
-            result[period_key] = {
-                'exercise_details': exercise_details,
-            }
+        result= {
+            **exercise_details,
+        }
             
         
         data = {
-            'period': period,
+            
             'dates': result
         }
         # print("data",data)
