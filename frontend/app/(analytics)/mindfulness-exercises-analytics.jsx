@@ -113,11 +113,12 @@ const getColorForValue = (value, maxCount) => {
           setError('An unexpected error occurred. Please try again.');
         }
       }
-    }
+    
+  }
    
     
 /// Calculate max values whenever exercise session data changes
-const retrieveMaxValues = () => {
+const retrieveMaxValues = useEffect(()=>{
   if (exercisesSessionCountData.length > 0) {
     const maxCountValue = Math.max(...exercisesSessionCountData.map(item => item.value)+2, 20);
     setMaxSessionCountValue(maxCountValue);
@@ -127,8 +128,10 @@ const retrieveMaxValues = () => {
     const maxDurationValue = Math.max(...exerciseSessionDurationData.map(item => item.value)+2, 20);
     setMaxSessionDurationValue(maxDurationValue);
   }
-};
+}, [exercisesSessionCountData, exerciseSessionDurationData]);
 //retrieve exercise sessiondata
+
+  
   
     const retrieveData = async () => {
       setLoading(true); 
@@ -177,6 +180,7 @@ const retrieveMaxValues = () => {
       } 
     }
 
+
     //Run both fetchData and retrieveData in parallel
     const fetchAllData = async () => {
       setLoading(true);
@@ -198,6 +202,17 @@ const retrieveMaxValues = () => {
       fetchAllData();
     }, [selectedOption, year, month]);
 
+    // Centralized error handling function
+const handleFetchError = (error) => {
+  if (error.response) {
+    setError(`Error: ${error.response.data.message || 'An error occurred.'}`);
+  } else {
+    setError('An unexpected error occurred. Please try again.');
+  }
+  setLoading(false);  // Ensure loading is turned off when an error occurs
+};
+
+  
 
   const onSelectSwitch = option => {
     setSelectedOption(option);
