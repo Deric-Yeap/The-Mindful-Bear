@@ -35,7 +35,6 @@ const initialFormState = {
 }
 
 const POLLING_INTERVAL = 2000
-// const DISTANCE_THRESHOLD = 100 // Distance in meters to trigger directions fetch
 const DEVIATION_THRESHOLD = 52
 
 const Map = () => {
