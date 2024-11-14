@@ -236,11 +236,11 @@ const landmarkBarWidth = calculateBarWidth(formattedLandmarkData || [], landmark
     const maxCount = Math.max(...Object.values(data));
     return Object.keys(data).map((rating) => ({
       label: ratingLabels[rating] || rating,
-      value: data[rating],
+      value: Math.round(data[rating]),
       frontColor: getColorForValue(data[rating], maxCount),
       topLabelComponent: () => (
         <Text style={{ color: colors.mindfulBrown100, fontSize: 12, marginBottom: 6 }}>
-          {data[rating]}
+          {Math.round(data[rating])}
         </Text>
       ),
     }));
@@ -575,10 +575,10 @@ const calculateAverageLine = (data) => {
                     height={defaultchartHeight}
                     yAxisThickness={1}
                     xAxisThickness={1}
-                    showYAxisIndices
+                    stepValue={1} 
                     yAxisLabelTextStyle={{ color: colors.mindfulBrown70, fontSize: 10 }}
                     xAxisLabelTextStyle={{ color: colors.mindfulBrown90, fontSize: 10 }}
-                    maxValue={maxExerciseValue}
+                    maxValue={Math.floor(maxExerciseValue)}
                   />
                 </View>
               </ScrollView>
@@ -616,7 +616,7 @@ const calculateAverageLine = (data) => {
                     height={defaultchartHeight}
                     yAxisThickness={1}
                     xAxisThickness={1}
-                    showYAxisIndices
+                    stepValue={1} 
                     yAxisLabelTextStyle={{ color: colors.mindfulBrown70, fontSize: 10 }}
                     xAxisLabelTextStyle={{ color: colors.mindfulBrown90, fontSize: 10 }}
                     maxValue={maxLandmarkValue}
@@ -654,7 +654,6 @@ const calculateAverageLine = (data) => {
                           height={defaultchartHeight}  // Default chart height
                           yAxisThickness={1}
                           xAxisThickness={1}
-                          showYAxisIndices
                           yAxisLabelTextStyle={{ color: colors.mindfulBrown70, fontSize: 10 }}
                           xAxisLabelTextStyle={{ color: colors.mindfulBrown90, fontSize: 10 }}
                           maxValue={maxLikelihoodValue}
@@ -686,7 +685,6 @@ const calculateAverageLine = (data) => {
                           height={defaultchartHeight}  // Default chart height
                           yAxisThickness={1}
                           xAxisThickness={1}
-                          showYAxisIndices
                           yAxisLabelTextStyle={{ color: colors.mindfulBrown70, fontSize: 10 }}
                           xAxisLabelTextStyle={{ color: colors.mindfulBrown90, fontSize: 10 }}
                           maxValue={maxExperienceValue}
