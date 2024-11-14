@@ -52,27 +52,28 @@ const exerciseSessionCountChartWidth = Math.max(screenWidth, (exercisesSessionCo
         console.log("profScorePercentData",profScorePercentData)
         // const experience = await fetchOverallExperienceRating();
 
-        const { session_count_percent_sms, session_count_percent_sms_no, session_count_percent_pss, session_count_percent_pss_no } = likelihoodData;
 
         // Prepare the data for the pie chart
-        const pieChartData = [
+        const pieChartProfData = [
             {
-                value: session_count_percent_sms,
+                value: profScorePercentData["session_count_percent_sms"],
                 label: "SMS Improvent",
             },
             {
-                value: session_count_percent_sms_no,
+                value: profScorePercentData["session_count_percent_sms_no"],
                 label: "SMS No  Improvement",
             },
             {
-                value: session_count_percent_pss,
+                value: profScorePercentData["session_count_percent_pss"],
                 label: "PSS Improve",
             },
             {
-                value: session_count_percent_pss_no,
+                value: profScorePercentData["session_count_percent_pss_no"],
                 label: "PSS No Improvement",
             }
         ];
+        setProfScorePercentData(pieChartProfData )
+
 
 
       } catch (error) {
@@ -98,42 +99,6 @@ const exerciseSessionCountChartWidth = Math.max(screenWidth, (exercisesSessionCo
   useEffect(() => {
     fetchAllData();
   }, []);
-
-  
-  //newly added: landmark_exercise_ratingscore
-
-  // Fetch Suggestions on Landmark and App Improvements
-  useEffect(() => {
-    const fetchSuggestionsData = async () => {
-      setSuggestionsLoading(true);
-      try {
-        // Fetch landmark suggestions
-        const landmarkResponse = await fetchSuggestionOnLandmark();
-        console.log("Landmark Suggestions API Response:", landmarkResponse);
-        setLandmarkSuggestions(landmarkResponse || []);
-  
-        // Fetch app improvements
-        const appResponse = await fetchImprovementsToApp();
-        console.log("App Improvements API Response:", appResponse);
-        setAppImprovements(appResponse || []);
-        
-        setSuggestionsError(null);
-      } catch (error) {
-        setSuggestionsError('Failed to load suggestions data.');
-        console.error("Error fetching suggestions data:", error);
-      } finally {
-        setSuggestionsLoading(false);
-      }
-    };
-  
-    fetchSuggestionsData();
-  }, []);
-
-// Fetch Suggestions on Landmark and App Improvements
-
-  const onSelectSwitch = option => {
-    setSelectedOption(option);
-  };
 
   if (loading) {
     return (
@@ -364,14 +329,6 @@ const calculateAverageLine = (data) => {
             </View>
           </ScrollView>
           
-          <View className="bg-optimistic-gray-10 p-4 rounded-lg mb-4">
-            <Text className="text-mindful-brown-100 font-urbanist-bold text-xl mb-4">
-              Popular Landmarks
-            </Text>
-            <View>
-              
-            </View>
-          </View>
 
           <View style={{ borderBottomWidth: 1, borderBottomColor: colors.mindfulBrown80, marginTop: 50 }} />
           {/* Exercise Picker with Dropdown Component */}

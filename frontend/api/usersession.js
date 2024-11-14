@@ -30,6 +30,7 @@ export const splitUserSession = async ({ year, month } ={}) => {
 
     // Make the API request
     const response = await axiosInstance.get(url)
+    console.log("response",response)
 
     // Return the response data
     return response.dates

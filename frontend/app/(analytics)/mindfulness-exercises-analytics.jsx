@@ -39,6 +39,8 @@ const MindfulnessExercisesAnalytics = () => {
   const [exercisesSessionCountData, setExercisesSessionCountData] = useState([]) // state for dynamic line data
   const [exerciseSessionDurationData, setExerciseSessionDurationData] = useState([]) // state for dynamic line data
   
+  const [maxSessionCountValue, setMaxSessionCountValue] = useState(20);
+  const [maxSessionDurationValue, setMaxSessionDurationValue] = useState(20);
   // newly added: Calculate chart width and height for each bar chart
   const screenWidth = Dimensions.get('window').width;
 
@@ -56,14 +58,9 @@ const getColorForValue = (value, maxCount) => {
 };
 
 // Default to 20 if no data available
-const maxSessionCountValue = exercisesSessionCountData.length > 0 
-? Math.max(...exercisesSessionCountData.map(item => item.value)+2, 20) 
-: 20;
-const maxSessionDurationValue = exerciseSessionDurationData.length > 0 
-? Math.max(...exerciseSessionDurationData.map(item => item.value)+2, 20) 
-: 20;
 
-  
+
+  useEffect(() => {
     const fetchData = async () => {
       setLoading(true); 
       setError(null); 
@@ -84,9 +81,30 @@ const maxSessionDurationValue = exerciseSessionDurationData.length > 0
          // Update the state with the formatted data
          setSessionNumLineData(formattedSessionNumData)
          setSessionDurationLineData(formattedSessionDurationData)
-         console.log("formattedSessionNumData ",formattedSessionNumData)
-          console.log("formattedSessionDurationData",formattedSessionDurationData)
+         
 
+          
+            userSession = await splitUserSession();
+            console.log("userSession",userSession)
+            // Initialize an array to hold the formatted data
+            const exerciseSessionCountData = Object.keys(userSession).map((exercise_name) => ({
+              
+             value: userSession[exercise_name].count || 0, // Use session_count or default to 0
+             label: exercise_name
+           }));
+          
+         // Update the state with the formatted data
+         setExercisesSessionCountData(exerciseSessionCountData);
+  
+         const exerciseSessionDurationData = Object.keys(userSession).map((exercise_name) => ({
+              
+          value: userSession[exercise_name].average_duration || 0, // Use session_count or default to 0
+          label: exercise_name
+        }));
+  
+        setExerciseSessionDurationData(exerciseSessionDurationData);
+        console.log("exerciseSessionDurationData",exerciseSessionDurationData)
+       
        
        
       } catch (error) {
@@ -95,10 +113,28 @@ const maxSessionDurationValue = exerciseSessionDurationData.length > 0
         } else {
           setError('An unexpected error occurred. Please try again.');
         }
-      }
+      }finally {
+        setLoading(false)
     }
+    }
+    fetchData();
+  }, [selectedOption]);
     
+// Separate useEffect for calculating max values after data is set
+useEffect(() => {
+  if (exercisesSessionCountData.length > 0) {
+      const maxSessionCount = Math.max(...exercisesSessionCountData.map(item => item.value), 20);
+      setMaxSessionCountValue(maxSessionCount);
+  }
 
+  if (exerciseSessionDurationData.length > 0) {
+      const maxSessionDuration = Math.max(...exerciseSessionDurationData.map(item => item.value), 20);
+      setMaxSessionDurationValue(maxSessionDuration);
+      
+  }
+
+  console.log("try again","maxSessionCountValue",maxSessionCountValue)
+}, [exercisesSessionCountData, exerciseSessionDurationData]);
   
     const retrieveData = async () => {
       setLoading(true); 
@@ -127,6 +163,15 @@ const maxSessionDurationValue = exerciseSessionDurationData.length > 0
       }));
 
       setExerciseSessionDurationData(exerciseSessionDurationData);
+
+      const maxSessionCountValue = exercisesSessionCountData.length > 0 
+      ? Math.max(...exercisesSessionCountData.map(item => item.value)+2, 20) 
+      : 20;
+      setMaxSessionCountValue(maxSessionCountValue)
+      const maxSessionDurationValue = exerciseSessionDurationData.length > 0 
+      ? Math.max(...exerciseSessionDurationData.map(item => item.value)+2, 20) 
+      : 20;
+      setMaxSessionDurationValue(maxSessionDurationValue)
        
       } catch (error) {
         if (error.response) {
@@ -134,27 +179,28 @@ const maxSessionDurationValue = exerciseSessionDurationData.length > 0
         } else {
           setError('An unexpected error occurred. Please try again.');
         }
+      
+      } finally {
+        setLoading(false);
       }
     }
 
     // Run both fetchData and retrieveData in parallel
-    const fetchAllData = async () => {
-      setLoading(true);
-      try {
-        await Promise.all([fetchData(), retrieveData()]); // Wait for both to complete
-      } catch (error) {
-        // If either call fails, set the error immediately
-        setError('An error occurred during data fetching.');
-      }finally {
-        // Set loading to false only after both fetchData and retrieveData have completed (or failed)
-        setLoading(false);
-      }
-    };
+    // const fetchAllData = async () => {
+    //   setLoading(true);
+    //   try {
+    //     await Promise.all([fetchData(), retrieveData()]); // Wait for both to complete
+    //     console.log("both data retrieval done")
+    //   } catch (error) {
+    //     // If either call fails, set the error immediately
+    //     setError('An error occurred during data fetching.');
+    //   }finally {
+    //     // Set loading to false only after both fetchData and retrieveData have completed (or failed)
+    //     setLoading(false);
+    //   }
+    // };
   
     // Trigger fetchAllData when the selected option, year, or month changes
-    useEffect(() => {
-      fetchAllData();
-    }, [selectedOption, year, month]);
 
 
   const onSelectSwitch = option => {
@@ -267,7 +313,7 @@ const calculateAverageLine = (data) => {
             ) : error ? (
               <Text style={{ color: 'red', marginVertical: 20 }}>{error}</Text>
             ) : (
-          <View>
+          <View >
             <Text className="text-mindful-brown-100 font-urbanist-bold text-xl mb-4">
             No. of Sessions Overtime
           </Text>
@@ -380,42 +426,87 @@ const calculateAverageLine = (data) => {
             
               </View>
             </ScrollView>
-            <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 10, paddingHorizontal: 30 }}>
+            <View className="flex-row justify-between mb-4">
+            <View style={{ flexDirection: 'row', alignItems: 'center',paddingHorizontal: 30 }}>
 
-            <View style={{ alignItems: 'center', marginRight: 10 }}>
-                <Text>Year</Text>
-                <TextInput
-                  style={{ borderWidth: 1, borderColor: colors.zenYellow20, padding: 5, width: 80, textAlign: 'center', borderRadius: 8 }}
-                  placeholder="YYYY"
-                  keyboardType="numeric"
-                  value={year}
-                  onChangeText={(text) => setYear(text)}
-                />
-              </View>
-              <View style={{ alignItems: 'center', marginRight: 10 }}>
-                <Text>Month</Text>
-                <TextInput
-                  style={{ borderWidth: 1, borderColor: colors.zenYellow20, padding: 5, width: 80, textAlign: 'center', borderRadius: 8 }}
-                  placeholder="MM"
-                  keyboardType="numeric"
-                  value={month}
-                  onChangeText={(text) => setMonth(text)}
-                />
-              </View>
-               {/* Apply Button with Brown Background and Aligned with Filter Boxes */}
-              <FilterButton
-                title="Apply"
-                onPress={retrieveData}
-                style={{
-                  marginLeft: 100,
-                  marginTop: 17// Add margin to adjust alignment
-                }}
-              />
-            </View>
+        <View style={{ alignItems: 'center', marginRight: 10 }}>
+            <Text>Year</Text>
+            <TextInput
+              style={{ borderWidth: 1, borderColor: colors.zenYellow20, padding: 5, width: 80, textAlign: 'center', borderRadius: 8 }}
+              placeholder="YYYY"
+              keyboardType="numeric"
+              value={year}
+              onChangeText={(text) => setYear(text)}
+            />
+          </View>
+          <View style={{ alignItems: 'center', marginRight: 10 }}>
+            <Text>Month</Text>
+            <TextInput
+              style={{ borderWidth: 1, borderColor: colors.zenYellow20, padding: 5, width: 80, textAlign: 'center', borderRadius: 8 }}
+              placeholder="MM"
+              keyboardType="numeric"
+              value={month}
+              onChangeText={(text) => setMonth(text)}
+            />
+          </View>
+          {/* Apply Button with Brown Background and Aligned with Filter Boxes */}
+          <FilterButton
+            title="Apply"
+            onPress={retrieveData}
+            style={{
+              marginLeft: 100,
+              marginTop: 17// Add margin to adjust alignment
+            }}
+          />
+                    
+                    </View>
+                
+                    </View>
+            <View className="flex-row justify-between mb-4">
             
+            </View>
+            <Text className="text-mindful-brown-100 font-urbanist-bold text-xl mb-4">
+              Popular Exercises by Count
+            </Text>
+            <ScrollView horizontal={true}>
+              <View className="flex-row justify-between mb-4 " >
+              {exercisesSessionCountData.length > 0 ? (
+              <ScrollView horizontal={true}>
+                  <View style={{ width: exerciseSessionCountChartWidth }}>
+                      <BarChart
+                          data={exercisesSessionCountData.map((item) => ({
+                              ...item,
+                              frontColor: getColorForValue(item.value,maxSessionCountValue),
+                              topLabelComponent: () => (
+                                  <Text style={{ color: colors.optimisticGray50, fontSize: 12, marginBottom: 6 }}>
+                                      {item.value}
+                                  </Text>
+                              ),
+                          }))}
+                    
+                    barWidth={exerciseSessionCountBarWidth}
+                    barBorderRadius={4}
+                    width={exerciseSessionCountChartWidth}
+                    height={defaultchartHeight}
+                    yAxisThickness={1}
+                    xAxisThickness={1}
+                    showYAxisIndices
+                    yAxisLabelTextStyle={{ color: colors.mindfulBrown70, fontSize: 10 }}
+                    xAxisLabelTextStyle={{ color: colors.mindfulBrown90, fontSize: 10 }}
+                    maxValue={maxSessionCountValue}
+                  />
+                 </View> 
+              </ScrollView>
+             
+            
+          ) : (
+            <Text>No data available for selected period</Text>
+        )}
+              </View>
+            </ScrollView>
 
-                      
-            <Text className="text-mindful-brown-80 font-urbanist-bold text-xl mb-4">Popular Exercises by Count</Text>
+             {/* <View style={{ borderBottomWidth: 1, borderBottomColor: colors.mindfulBrown80, marginTop: 50 }}/>
+            <Text className="text-mindful-brown-80 font-urbanist-bold text-xl mb-4">Popular Exercises by Count</Text> */}
           {/* {exercisesSessionCountData.length > 0 ? (
               <ScrollView horizontal={true}>
                   <View style={{ width: exerciseSessionCountChartWidth }}>
@@ -438,17 +529,20 @@ const calculateAverageLine = (data) => {
                     xAxisThickness={1}
                     showYAxisIndices
                     yAxisLabelTextStyle={{ color: colors.mindfulBrown70, fontSize: 10 }}
-                    xAxisLabelTextStyle={{ color: colors.mindfulBrown90, fontSize: 10, rotate: '-15deg' }}
+                    xAxisLabelTextStyle={{ color: colors.mindfulBrown90, fontSize: 10 }}
                     maxValue={maxSessionCountValue}
                   />
-                </View>
+                 </View> 
               </ScrollView>
+             
             
           ) : (
             <Text>No data available for selected period</Text>
-        )} */}
-                      <Text className="text-mindful-brown-80 font-urbanist-bold text-xl mb-4">Popular Exercises by Duration</Text>
-          {/* {exerciseSessionDurationData.length > 0 ? (
+        )}
+        */}
+         {/* <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 10, paddingHorizontal: 30 }}>
+         <Text className="text-mindful-brown-80 font-urbanist-bold text-xl mb-4">Popular Exercises by Duration</Text>
+          {exerciseSessionDurationData.length > 0 ? (
               <ScrollView horizontal={true}>
                   <View style={{ width: exerciseSessionDurationChartWidth }}>
                       <BarChart
@@ -470,7 +564,7 @@ const calculateAverageLine = (data) => {
                     xAxisThickness={1}
                     showYAxisIndices
                     yAxisLabelTextStyle={{ color: colors.mindfulBrown70, fontSize: 10 }}
-                    xAxisLabelTextStyle={{ color: colors.mindfulBrown90, fontSize: 10 , rotate: '-15deg'}}
+                    xAxisLabelTextStyle={{ color: colors.mindfulBrown90, fontSize: 10 }}
                     maxValue={maxSessionDurationValue}
                   />
                 </View>
@@ -479,8 +573,8 @@ const calculateAverageLine = (data) => {
           ) : (
             <Text>No data available for selected period</Text>
         )}
-             */}
-               
+            
+          </View> */}
              
           </View>
 )}
