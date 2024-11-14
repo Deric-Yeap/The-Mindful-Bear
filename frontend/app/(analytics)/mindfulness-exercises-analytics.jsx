@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { View, Text, ScrollView, Dimensions, TextInput } from 'react-native'
+import { View, Text, ScrollView, Dimensions, TextInput,ActivityIndicator } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import BrownPageTitlePortion from '../../components/brownPageTitlePortion'
 import StatusBarComponent from '../../components/darkThemStatusBar'
@@ -241,22 +241,7 @@ useEffect(() => {
       }
     }
 
-    // Run both fetchData and retrieveData in parallel
-    // const fetchAllData = async () => {
-    //   setLoading(true);
-    //   try {
-    //     await Promise.all([fetchData(), retrieveData()]); // Wait for both to complete
-    //     console.log("both data retrieval done")
-    //   } catch (error) {
-    //     // If either call fails, set the error immediately
-    //     setError('An error occurred during data fetching.');
-    //   }finally {
-    //     // Set loading to false only after both fetchData and retrieveData have completed (or failed)
-    //     setLoading(false);
-    //   }
-    // };
-  
-    // Trigger fetchAllData when the selected option, year, or month changes
+   
  // newly added: likelihood and experience data
   useEffect(() => {
     const getData = async () => {
@@ -635,7 +620,7 @@ const calculateAverageLine = (data) => {
             
               </View>
             </ScrollView>
-            <View className="flex-row justify-between mb-4">
+            <View className="flex-row justify-between mb-4" style={{ borderBottomWidth: 1, borderBottomColor: colors.mindfulBrown80, marginTop: 50 }}>
             <View style={{ flexDirection: 'row', alignItems: 'center',paddingHorizontal: 30 }}>
 
         <View style={{ alignItems: 'center', marginRight: 10 }}>
