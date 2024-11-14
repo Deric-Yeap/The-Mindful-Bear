@@ -2,7 +2,7 @@ from rest_framework import serializers
 from .models import FormQuestion, Question, Session, Form
 from rest_framework.exceptions import ValidationError
 from api.formSession.models import FormSession
-from api.formSession.utils import get_sessions_by_period
+from api.formSession.utils import get_sessions_by_period, get_sessions
 from django.db.models import Count, Case, When, IntegerField, F
 from datetime import datetime, timedelta
 import pytz
@@ -182,59 +182,72 @@ class ScoreAggregationGenSerializer(serializers.Serializer):
         request = self.context.get('request')
         year = request.query_params.get('year')
         month = request.query_params.get('month')
+       
+
+        SGT = pytz.timezone('Asia/Singapore')
+         # Get all sessions if year and month are not provided
+        sessions = Session.objects.all()
+        
+        request = self.context.get('request')
+        year = request.query_params.get('year')
+        month = request.query_params.get('month')
         period = request.query_params.get('period', 'daily')
-        pss = request.query_params.get('pss')
-        sms = request.query_params.get('sms')
         print("period",period)
 
         SGT = pytz.timezone('Asia/Singapore')
          # Get all sessions if year and month are not provided
         sessions = Session.objects.all()
-        if period == 'daily':
-             # Calculate start and end dates for the last 30 days
-            end_date = datetime.now(tz=SGT)
-            start_date = end_date - timedelta(days=30)
-        else:
-            if year and month:
-                # If year and month are provided, filter by the month
-                year = int(year)
-                month = int(month)
-                start_date = datetime(year, month, 1, tzinfo=SGT)
-
-                if month == 12:
-                    end_date = datetime(year + 1, 1, 1, tzinfo=SGT) - timedelta(microseconds=1)
-                else:
-                    end_date = datetime(year, month + 1, 1, tzinfo=SGT) - timedelta(microseconds=1)
-
-                sessions = sessions.filter(start_datetime__gte=start_date, start_datetime__lt=end_date)
+        # Use the current year if no year is provided
+        if not year and not month:
+        # No year and no month provided, use the full date range of all sessions
+            if sessions.exists():
+                start_date = sessions.order_by('start_datetime').first().start_datetime
+                end_date = sessions.order_by('-start_datetime').first().start_datetime
             else:
-                # If no year and month, use the full date range of all sessions
-                if sessions.exists():
-                    start_date = sessions.order_by('start_datetime').first().start_datetime
-                    end_date = sessions.order_by('-start_datetime').first().start_datetime
-                else:
-                    start_date = datetime.now(tz=SGT)
-                    end_date = datetime.now(tz=SGT)
+                # If no sessions are available, use the current date
+                start_date = datetime.now(tz=SGT)
+                end_date = datetime.now(tz=SGT)
+                
+        elif year and not month:
+            # Only year provided, take all months in that year
+            year = int(year)
+            start_date = datetime(year, 1, 1, tzinfo=SGT)
+            end_date = datetime(year + 1, 1, 1, tzinfo=SGT) - timedelta(microseconds=1)
+            
+        elif month and not year:
+            # Only month provided, take the specified month across all years
+            month = int(month)
+            start_date = sessions.filter(start_datetime__month=month).order_by('start_datetime').first().start_datetime
+            end_date = sessions.filter(start_datetime__month=month).order_by('-start_datetime').first().start_datetime
+
+        else:
+            # Both year and month are provided
+            year = int(year)
+            month = int(month)
+            start_date = datetime(year, month, 1, tzinfo=SGT)
+            if month == 12:
+                end_date = datetime(year + 1, 1, 1, tzinfo=SGT) - timedelta(microseconds=1)
+            else:
+                end_date = datetime(year, month + 1, 1, tzinfo=SGT) - timedelta
 
         # Get the session data for the specified period
         # Get sessions aggregated by period
          # Iterate over each period and calculate form averages
          # Get sessions aggregated by period
-        session_data = get_sessions_by_period(start_date,end_date, period)
+        session_data = get_sessions(start_date,end_date)
         
         result = {}
-        for period_key, data in session_data.items():
-            print('data',data['session_gen_ids'])
-            stress_gen= self.get_stress_improve_change(data['session_gen_ids'])
-            mindfulness_gen = self.get_mindfulness_improve_change(data['session_gen_ids'])
+        
+        stress_gen= self.get_stress_improve_change(session_data['session_gen_ids'])
+        mindfulness_gen = self.get_mindfulness_improve_change(session_data['session_gen_ids'])
             
-            result[period_key] = {
-                **stress_gen,
-                **mindfulness_gen,
-                'session_gen_ids': data['session_gen_ids'],
-                'session_gen_count': data['session_gen_count']
-                
-            }
+        result = {
+            **stress_gen,
+            **mindfulness_gen,
+            'session_gen_ids': session_data['session_gen_ids'],
+            'session_gen_count': session_data['session_gen_count']
+            
+        }
 
         return result
 

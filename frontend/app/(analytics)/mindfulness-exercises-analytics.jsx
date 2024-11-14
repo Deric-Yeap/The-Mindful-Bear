@@ -1,17 +1,21 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, ScrollView, Dimensions, ActivityIndicator } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import BrownPageTitlePortion from '../../components/brownPageTitlePortion';
-import StatusBarComponent from '../../components/darkThemStatusBar';
-import { colors } from '../../common/styles';
-import { splitSession } from '../../api/session';
-import { LineChart, BarChart } from 'react-native-gifted-charts';
+import React, { useState, useEffect } from 'react'
+import { View, Text, ScrollView, Dimensions, TextInput,ActivityIndicator } from 'react-native'
+import { SafeAreaView } from 'react-native-safe-area-context'
+import BrownPageTitlePortion from '../../components/brownPageTitlePortion'
+import StatusBarComponent from '../../components/darkThemStatusBar'
+import { colors } from '../../common/styles'
+import { splitSession } from '../../api/session'
+import { BarChart, LineChart } from 'react-native-gifted-charts'
 import Loading from '../../components/loading';
 import Toggle from '../../components/toggle';
 import { Svg } from 'react-native-svg';
+import { splitUserSession } from '../../api/usersession';
+import FilterButton from '../../components/filterButton';
 import { fetchLikelihoodOfFutureUse, fetchOverallExperienceRating, fetchRatingDistribution, fetchSuggestionOnLandmark, fetchImprovementsToApp } from '../../api/formQuestion';
 import { Picker } from '@react-native-picker/picker';
 import Dropdown from '../../components/dropdown'; 
+
+
 
 // Helper function to calculate bar width
 const calculateBarWidth = (data, chartWidth) => {
@@ -21,18 +25,31 @@ const calculateBarWidth = (data, chartWidth) => {
 };
 
 
-
 const MindfulnessExercisesAnalytics = () => {
   const [loading, setLoading] = useState(false); 
   const [error, setError] = useState(null); 
   const [sessionNumLineData, setSessionNumLineData] = useState([]) // state for dynamic line data
   const [sessionDurationLineData, setSessionDurationLineData] = useState([]) // state for dynamic line data
   const optionList = ['daily', 'monthly', 'yearly'];
+  const [year, setYear] = useState('');
+  const [month, setMonth] = useState('');
   const periodSelected =  optionList[selectedOption - 1]
   const [selectedOption, setSelectedOption] = useState(1);
-  // Inside your MindfulnessExercisesAnalytics component
+  const today = new Date();
+  const thirtyDaysAgo = new Date();
+  thirtyDaysAgo.setDate(today.getDate() - 30);
+  // Format the cutoff date to a comparable format (YYYY-MM-DD)
+  const cutoffDate = thirtyDaysAgo.toISOString().split('T')[0]; 
+  const [exercisesSessionCountData, setExercisesSessionCountData] = useState([]) // state for dynamic line data
+  const [exerciseSessionDurationData, setExerciseSessionDurationData] = useState([]) // state for dynamic line data
+  
+  const [maxSessionCountValue, setMaxSessionCountValue] = useState(20);
+  const [maxSessionDurationValue, setMaxSessionDurationValue] = useState(20);
+  // newly added: Calculate chart width and height for each bar chart
   const screenWidth = Dimensions.get('window').width;
 
+const exerciseSessionCountChartWidth = Math.max(screenWidth, (exercisesSessionCountData?.length || 0) * 80);  // Customize width multiplier
+const exerciseSessionDurationChartWidth = Math.max(screenWidth, (exerciseSessionDurationData?.length || 0) * 80);  // Customize width multiplier
 // newly added: Calculate chart width and height for each bar chart
 const likelihoodChartWidth = Math.max(screenWidth, (likelihoodData?.length || 0) * 80);  // Customize width multiplier
 const experienceChartWidth = Math.max(screenWidth, (experienceData?.length || 0) * 80);
@@ -42,46 +59,45 @@ const landmarkChartWidth = Math.max(screenWidth, (formattedLandmarkData?.length 
 const defaultchartHeight = 250; // Set a standard height for all charts, or customize if needed
 
 // newly added: Calculate bar width for each chart individually
+const exerciseSessionCountBarWidth = calculateBarWidth(exercisesSessionCountData || [], exerciseSessionCountChartWidth);
+const exerciseSessionDurationBarWidth = calculateBarWidth(exerciseSessionDurationData || [], exerciseSessionDurationChartWidth);
 const likelihoodBarWidth = calculateBarWidth(likelihoodData || [], likelihoodChartWidth);
 const experienceBarWidth = calculateBarWidth(experienceData || [], experienceChartWidth);
 const exerciseBarWidth = calculateBarWidth(formattedExerciseData || [], exerciseChartWidth);
 const landmarkBarWidth = calculateBarWidth(formattedLandmarkData || [], landmarkChartWidth);
 
-
-
-  // newly added: Add suggestions for landmarks and app
-  const [landmarkSuggestions, setLandmarkSuggestions] = useState([]);
-  const [appImprovements, setAppImprovements] = useState([]);
-  const [suggestionsLoading, setSuggestionsLoading] = useState(false);
-  const [suggestionsError, setSuggestionsError] = useState(null);
-  // newly added: Add suggestions for landmarks and app
+ // newly added: Add suggestions for landmarks and app
+ const [landmarkSuggestions, setLandmarkSuggestions] = useState([]);
+ const [appImprovements, setAppImprovements] = useState([]);
+ const [suggestionsLoading, setSuggestionsLoading] = useState(false);
+ const [suggestionsError, setSuggestionsError] = useState(null);
+ // newly added: Add suggestions for landmarks and app
 
 
 
-  // newly added: State for likelihood and experience data
-  const [likelihoodData, setLikelihoodData] = useState([]);
-  const [experienceData, setExperienceData] = useState([]);
-  const likelihoodLabels = {
-    "0": "Very Unlikely",
-    "1": "Unlikely",
-    "2": "Neutral",
-    "3": "Likely",
-    "4": "Very Likely",
-  };
-  const experienceLabels = {
-    "0": "Very Bad",
-    "1": "Bad",
-    "2": "Neutral",
-    "3": "Good",
-    "4": "Very Good",
-  };
+ // newly added: State for likelihood and experience data
+ const [likelihoodData, setLikelihoodData] = useState([]);
+ const [experienceData, setExperienceData] = useState([]);
+ const likelihoodLabels = {
+   "0": "Very Unlikely",
+   "1": "Unlikely",
+   "2": "Neutral",
+   "3": "Likely",
+   "4": "Very Likely",
+ };
+ const experienceLabels = {
+   "0": "Very Bad",
+   "1": "Bad",
+   "2": "Neutral",
+   "3": "Good",
+   "4": "Very Good",
+ };
+const getColorForValue = (value, maxCount) => {
+  const intensity = value / maxCount; // Calculate intensity from 0 to 1
+  return `rgba(108, 83, 61, ${0.4 + 0.5 * intensity})`; // From mindfulnessbrown30 to mindfulnessbrown80
+};
 
-  const getColorForValue = (value, maxCount) => {
-    const intensity = value / maxCount; // Calculate intensity from 0 to 1
-    return `rgba(108, 83, 61, ${0.4 + 0.5 * intensity})`; // From mindfulnessbrown30 to mindfulnessbrown80
-  };
-
-  const maxLikelihoodValue = Math.max(...likelihoodData.map(item => item.value), 20); // Default to 20 if no data available
+const maxLikelihoodValue = Math.max(...likelihoodData.map(item => item.value), 20); // Default to 20 if no data available
   const maxExperienceValue = Math.max(...experienceData.map(item => item.value), 20); // Default to 20 if no data available
   // newly added: State for likelihood and experience data
 
@@ -90,15 +106,8 @@ const landmarkBarWidth = calculateBarWidth(formattedLandmarkData || [], landmark
   const [landmarkRatings, setLandmarkRatings] = useState({});
   const [selectedExercise, setSelectedExercise] = useState(null);
   const [selectedLandmark, setSelectedLandmark] = useState(null);
- //newly added: landmark_exercise_ratingscore
 
-  const today = new Date();
-  const thirtyDaysAgo = new Date();
-  thirtyDaysAgo.setDate(today.getDate() - 30);
-  // Format the cutoff date to a comparable format (YYYY-MM-DD)
-  const cutoffDate = thirtyDaysAgo.toISOString().split('T')[0]; 
-  console.log(cutoffDate)
-
+// Default to 20 if no data available
 
 
   useEffect(() => {
@@ -108,11 +117,8 @@ const landmarkBarWidth = calculateBarWidth(formattedLandmarkData || [], landmark
       const period = optionList[selectedOption - 1]; // Get the period based on selected option
       try {
         response = await splitSession({ period })
-        // console.log("response",response)
-        
 
         // Format the data for the line chart
-       
            const formattedSessionNumData = Object.keys(response.dates).map((date) => ({
           value: response.dates[date].session_count || 0, // Use session_count or default to 0
           label: date
@@ -125,8 +131,31 @@ const landmarkBarWidth = calculateBarWidth(formattedLandmarkData || [], landmark
          // Update the state with the formatted data
          setSessionNumLineData(formattedSessionNumData)
          setSessionDurationLineData(formattedSessionDurationData)
-         console.log("formattedSessionNumData ",formattedSessionNumData)
-          console.log("formattedSessionDurationData",formattedSessionDurationData)
+         
+
+          
+            userSession = await splitUserSession();
+            console.log("userSession",userSession)
+            // Initialize an array to hold the formatted data
+            const exerciseSessionCountData = Object.keys(userSession).map((exercise_name) => ({
+              
+             value: userSession[exercise_name].count || 0, // Use session_count or default to 0
+             label: exercise_name
+           }));
+          
+         // Update the state with the formatted data
+         setExercisesSessionCountData(exerciseSessionCountData);
+  
+         const exerciseSessionDurationData = Object.keys(userSession).map((exercise_name) => ({
+              
+          value: userSession[exercise_name].average_duration || 0, // Use session_count or default to 0
+          label: exercise_name
+        }));
+  
+        setExerciseSessionDurationData(exerciseSessionDurationData);
+        console.log("exerciseSessionDurationData",exerciseSessionDurationData)
+       
+       
        
       } catch (error) {
         if (error.response) {
@@ -135,13 +164,85 @@ const landmarkBarWidth = calculateBarWidth(formattedLandmarkData || [], landmark
           setError('An unexpected error occurred. Please try again.');
         }
       }finally {
-        setLoading(false); 
+        setLoading(false)
+    }
+    }
+    fetchData();
+  }, [selectedOption]);
+
+    
+// Separate useEffect for calculating max values after data is set
+useEffect(() => {
+  // retrieveData();
+  if (exercisesSessionCountData.length > 0) {
+      const maxSessionCount = Math.max(...exercisesSessionCountData.map(item => item.value), 20);
+      setMaxSessionCountValue(maxSessionCount);
+  }
+
+  if (exerciseSessionDurationData.length > 0) {
+      const maxSessionDuration = Math.max(...exerciseSessionDurationData.map(item => item.value), 20);
+      console.log("maxSessionDuration",maxSessionDuration)
+      console.log("type",typeof(maxSessionDuration))
+      setMaxSessionDurationValue(maxSessionDuration);
+      
+      
+  }
+
+
+  console.log("try again","maxSessionCountValue",maxSessionCountValue)
+}, [exercisesSessionCountData, exerciseSessionDurationData]);
+  
+    const retrieveData = async () => {
+      setLoading(true); 
+      setError(null); 
+     
+      try {
+        const params = {};
+        if (year) params.year = year;
+        if (month) params.month = month;
+    
+          userSession = await splitUserSession(params);
+          // Initialize an array to hold the formatted data
+          const exerciseSessionCountData = Object.keys(userSession).map((exercise_name) => ({
+            
+           value: userSession[exercise_name].count || 0, // Use session_count or default to 0
+           label: exercise_name
+         }));
+        
+       // Update the state with the formatted data
+       setExercisesSessionCountData(exerciseSessionCountData);
+
+       const exerciseSessionDurationData = Object.keys(userSession).map((exercise_name) => ({
+            
+        value: userSession[exercise_name].average_duration || 0, // Use session_count or default to 0
+        label: exercise_name
+      }));
+
+      setExerciseSessionDurationData(exerciseSessionDurationData);
+
+      const maxSessionCountValue = exercisesSessionCountData.length > 0 
+      ? Math.max(...exercisesSessionCountData.map(item => item.value)+2, 20) 
+      : 20;
+      setMaxSessionCountValue(maxSessionCountValue)
+      const maxSessionDurationValue = exerciseSessionDurationData.length > 0 
+      ? Math.max(...exerciseSessionDurationData.map(item => item.value)+2, 20) 
+      : 20;
+      setMaxSessionDurationValue(maxSessionDurationValue)
+       
+      } catch (error) {
+        if (error.response) {
+          setError(`Error: ${error.response.data.message || 'An error occurred.'}`);
+        } else {
+          setError('An unexpected error occurred. Please try again.');
+        }
+      
+      } finally {
+        setLoading(false);
       }
     }
-    fetchData()
-  }, [selectedOption])
 
-  // newly added: likelihood and experience data
+   
+ // newly added: likelihood and experience data
   useEffect(() => {
     const getData = async () => {
       try {
@@ -307,6 +408,7 @@ const landmarkBarWidth = calculateBarWidth(formattedLandmarkData || [], landmark
       </View>
     );
   }
+  // Inside your MindfulnessExercisesAnalytics component
 
   // Use the number of data points to determine the chart width
   const chartWidth = Math.max(screenWidth, sessionNumLineData.length * 100); // Ensure at least the screen width
@@ -355,8 +457,7 @@ const calculateAverageLine = (data) => {
 
   const averageLineDataSessions = selectedOption === 1 ? calculateAverageLine(sessionNumLineData) : [];
   const trendlineDataSessions = selectedOption !== 1 ? calculateTrendline(sessionNumLineData) : [];
-  console.log("averageLineDataSessions",averageLineDataSessions)
-  console.log("trendlineDataSessions",trendlineDataSessions)
+  
 
   // Step 1: Extract the average value
   const averageDataSessionsValue = averageLineDataSessions.length > 0 ? averageLineDataSessions[0].value : 0;
@@ -367,11 +468,7 @@ const calculateAverageLine = (data) => {
   const chartHeight = 250; // Assume chart height is 250 pixels
 
   // Step 3: Calculate the y-coordinate for the average line
-  const yCoordinateNumBasedOnAverage = chartHeight * (1 - (averageDataSessionsValue - yMin) / (yMax - yMin));
-  console.log("yCoordinateNumBasedOnAverage",yCoordinateNumBasedOnAverage)
-
-  console.log("Data before rendering - Landmark Suggestions:", landmarkSuggestions);
-  console.log("Data before rendering - App Improvements:", appImprovements);
+  const yCoordinateNumBasedOnAverage = defaultchartHeight * (1 - (averageDataSessionsValue - yMin) / (yMax - yMin));
 
   return (
     <SafeAreaView
@@ -402,9 +499,7 @@ const calculateAverageLine = (data) => {
           />
         </View>
           
-          <Text className="text-mindful-brown-100 font-urbanist-bold text-xl mb-4">
-            No. of Sessions Overtime
-          </Text>
+          
 
           
           {loading ? (
@@ -412,96 +507,25 @@ const calculateAverageLine = (data) => {
             ) : error ? (
               <Text style={{ color: 'red', marginVertical: 20 }}>{error}</Text>
             ) : (
-          <ScrollView horizontal={true}>
-            <View className="flex-row justify-between mb-4 style={{ width: chartWidth }} ">
-             
-            <LineChart
-                areaChart
-                curved
-                data={sessionNumLineData.length > 1 ? sessionNumLineData : null}
-                data2={averageLineDataSessions.length > 1 ? averageLineDataSessions : null}
-                data3={trendlineDataSessions.length > 1 ? trendlineDataSessions : null}
-                // Ensure this is your data
-                width={chartWidth} // Make chart width dynamic based on data
-                height={250}
-                showVerticalLines
-                spacing={44}
-                initialSpacing={11}
-                color1={colors.mindfulBrown100}
-                color2={colors.optimisticGray50}
-                color3={colors.optimisticGray50}
-                textColor1="green"
-                hideDataPoints
-                dataPointsColor1={colors.mindfulBrown100}
-                startFillColor1={colors.mindfulBrown50}
-                endFillColor1={colors.mindfulBrown30}   
-               
-                startOpacity1={0.8}
-                endOpacity1={0.3}
-                // To avoid any shadow or transparency effects on the second dataset
-                startOpacity2={0} 
-                endOpacity2={0}   
-                startOpacity3={0} 
-                endOpacity3={0}  
-                // Make the average & trendline line dashed
-              strokeDashArray2={[4, 4]}
-              strokeDashArray3={[4, 4]}
-               
-               
-                xAxisLabelTextStyle={{
-                  transform: [{ rotate: '-15deg' }], // Consistent rotation angle for all labels
-                  textAlign: 'center',
-                  overflow: 'visible',
-                  fontSize: sessionNumLineData.length > 10 ? 8 : 11,
-                  color: colors.mindfulBrown100,
-                  fontWeight: 'bold',
-                }}
-                xAxisLabelContainerStyle={{
-                  paddingBottom: 60,
-                  paddingHorizontal: sessionNumLineData.length > 10 ? 15 : 7,
-                  paddingTop: -20,
-                  paddingLeft: 20, // Add padding to the left to prevent coverage
-                }}
-                
-              />
-              
-            {/* <Svg height="250" width={chartWidth}>
-              <Text
-                x={chartWidth - 50} // X-position of the label
-                y={yCoordinateNumBasedOnAverage} // Y-position based on the average value
-                fill={colors.presentRed100} // Color of the text
-                fontSize="12"
-                fontWeight="bold"
-              >
-                {`Average: ${averageDataSessionsValue}`} 
-              </Text>
-            </Svg>
-            */}
-            
-            </View>
-          </ScrollView>
-          )}
-          <View className="flex-row justify-between mb-4">
-            
-            
-          </View>
-
-          <Text className="text-mindful-brown-100 font-urbanist-bold text-xl mb-4">
-            Average Duration of Sessions Overtime
+          <View >
+            <Text className="text-mindful-brown-100 font-urbanist-bold text-xl mb-4">
+            No. of Sessions Overtime
           </Text>
-          <ScrollView horizontal={true}>
-            <View className="flex-row justify-between mb-4 style={{ width: chartWidth }}">
-            <LineChart
+            <ScrollView horizontal={true}>
+              <View className="flex-row justify-between mb-4 style={{ width: chartWidth }} ">
+            
+              <LineChart
                   areaChart
                   curved
-                  data={sessionDurationLineData.length > 1 ? sessionDurationLineData : null} // Ensure this is your data
-                  data2={averageLineDataDuration.length > 1 ? averageLineDataDuration : null}
-                  data3={trendlineDataDuration.length > 1 ? trendlineDataDuration : null}
+                  data={sessionNumLineData.length > 1 ? sessionNumLineData : null}
+                  data2={averageLineDataSessions.length > 1 ? averageLineDataSessions : null}
+                  data3={trendlineDataSessions.length > 1 ? trendlineDataSessions : null}
+                  // Ensure this is your data
                   width={chartWidth} // Make chart width dynamic based on data
                   height={250}
                   showVerticalLines
                   spacing={44}
-                  initialSpacing={0}
+                  initialSpacing={11}
                   color1={colors.mindfulBrown100}
                   color2={colors.optimisticGray50}
                   color3={colors.optimisticGray50}
@@ -509,7 +533,8 @@ const calculateAverageLine = (data) => {
                   hideDataPoints
                   dataPointsColor1={colors.mindfulBrown100}
                   startFillColor1={colors.mindfulBrown50}
-                  endFillColor1={colors.mindfulBrown30}   
+                  endFillColor1={colors.mindfulBrown30}
+            
                   startOpacity1={0.8}
                   endOpacity1={0.3}
                   // To avoid any shadow or transparency effects on the second dataset
@@ -517,10 +542,11 @@ const calculateAverageLine = (data) => {
                   endOpacity2={0}
                   startOpacity3={0}
                   endOpacity3={0}
-
-                  strokeDashArray2={[4, 4]}
-                  strokeDashArray3={[4, 4]}
-
+                  // Make the average & trendline line dashed
+                strokeDashArray2={[4, 4]}
+                strokeDashArray3={[4, 4]}
+            
+            
                   xAxisLabelTextStyle={{
                     transform: [{ rotate: '-15deg' }], // Consistent rotation angle for all labels
                     textAlign: 'center',
@@ -535,21 +561,183 @@ const calculateAverageLine = (data) => {
                     paddingTop: -20,
                     paddingLeft: 20, // Add padding to the left to prevent coverage
                   }}
+            
                 />
-                
+              </View>
+            </ScrollView>
+            
+            <View className="flex-row justify-between mb-4">
+            
             </View>
-          </ScrollView>
-          
-          <View className="bg-optimistic-gray-10 p-4 rounded-lg mb-4">
             <Text className="text-mindful-brown-100 font-urbanist-bold text-xl mb-4">
-              Popular Landmarks
+              Average Duration of Sessions Overtime
             </Text>
-            <View>
-              
-            </View>
-          </View>
+            <ScrollView horizontal={true}>
+              <View className="flex-row justify-between mb-4 style={{ width: chartWidth }}">
+              <LineChart
+                    areaChart
+                    curved
+                    data={sessionDurationLineData.length > 1 ? sessionDurationLineData : null} // Ensure this is your data
+                    data2={averageLineDataDuration.length > 1 ? averageLineDataDuration : null}
+                    data3={trendlineDataDuration.length > 1 ? trendlineDataDuration : null}
+                    width={chartWidth} // Make chart width dynamic based on data
+                    height={250}
+                    showVerticalLines
+                    spacing={44}
+                    initialSpacing={0}
+                    color1={colors.mindfulBrown100}
+                    color2={colors.optimisticGray50}
+                    color3={colors.optimisticGray50}
+                    textColor1="green"
+                    hideDataPoints
+                    dataPointsColor1={colors.mindfulBrown100}
+                    startFillColor1={colors.mindfulBrown50}
+                    endFillColor1={colors.mindfulBrown30}
+                    startOpacity1={0.8}
+                    endOpacity1={0.3}
+                    // To avoid any shadow or transparency effects on the second dataset
+                    startOpacity2={0}
+                    endOpacity2={0}
+                    startOpacity3={0}
+                    endOpacity3={0}
+                    strokeDashArray2={[4, 4]}
+                    strokeDashArray3={[4, 4]}
+                    xAxisLabelTextStyle={{
+                      transform: [{ rotate: '-15deg' }], // Consistent rotation angle for all labels
+                      textAlign: 'center',
+                      overflow: 'visible',
+                      fontSize: sessionNumLineData.length > 10 ? 8 : 11,
+                      color: colors.mindfulBrown100,
+                      fontWeight: 'bold',
+                    }}
+                    xAxisLabelContainerStyle={{
+                      paddingBottom: 60,
+                      paddingHorizontal: sessionNumLineData.length > 10 ? 15 : 7,
+                      paddingTop: -20,
+                      paddingLeft: 20, // Add padding to the left to prevent coverage
+                    }}
+                  />
+            
+              </View>
+            </ScrollView>
+            <View className="flex-row justify-between mb-4" style={{ borderBottomWidth: 1, borderBottomColor: colors.mindfulBrown80, marginTop: 50 }}>
+            <View style={{ flexDirection: 'row', alignItems: 'center',paddingHorizontal: 30 }}>
 
-          <View style={{ borderBottomWidth: 1, borderBottomColor: colors.mindfulBrown80, marginTop: 50 }} />
+        <View style={{ alignItems: 'center', marginRight: 10 }}>
+            <Text>Year</Text>
+            <TextInput
+              style={{ borderWidth: 1, borderColor: colors.zenYellow20, padding: 5, width: 80, textAlign: 'center', borderRadius: 8 }}
+              placeholder="YYYY"
+              keyboardType="numeric"
+              value={year}
+              onChangeText={(text) => setYear(text)}
+            />
+          </View>
+          <View style={{ alignItems: 'center', marginRight: 10 }}>
+            <Text>Month</Text>
+            <TextInput
+              style={{ borderWidth: 1, borderColor: colors.zenYellow20, padding: 5, width: 80, textAlign: 'center', borderRadius: 8 }}
+              placeholder="MM"
+              keyboardType="numeric"
+              value={month}
+              onChangeText={(text) => setMonth(text)}
+            />
+          </View>
+          {/* Apply Button with Brown Background and Aligned with Filter Boxes */}
+          <FilterButton
+            title="Apply"
+            onPress={retrieveData}
+            style={{
+              marginLeft: 100,
+              marginTop: 17// Add margin to adjust alignment
+            }}
+          />
+                    
+                    </View>
+                
+                    </View>
+            <View className="flex-row justify-between mb-4">
+            
+            </View>
+            <Text className="text-mindful-brown-100 font-urbanist-bold text-xl mb-4">
+              Popular Exercises by Count
+            </Text>
+            <ScrollView horizontal={true}>
+              <View className="flex-row justify-between mb-4 " >
+              {exercisesSessionCountData.length > 0   ? (
+              <ScrollView horizontal={true}>
+                  <View style={{ width: exerciseSessionCountChartWidth }}>
+                      <BarChart
+                          data={exercisesSessionCountData.map((item) => ({
+                              ...item,
+                              frontColor: getColorForValue(item.value,maxSessionCountValue),
+                              topLabelComponent: () => (
+                                  <Text style={{ color: colors.optimisticGray50, fontSize: 12, marginBottom: 6 }}>
+                                      {item.value}
+                                  </Text>
+                              ),
+                          }))}
+                    
+                    barWidth={exerciseSessionCountBarWidth}
+                    barBorderRadius={4}
+                    width={exerciseSessionCountChartWidth}
+                    height={defaultchartHeight}
+                    yAxisThickness={1}
+                    xAxisThickness={1}
+                    showYAxisIndices
+                    yAxisLabelTextStyle={{ color: colors.mindfulBrown70, fontSize: 10 }}
+                    xAxisLabelTextStyle={{ color: colors.mindfulBrown90, fontSize: 10 }}
+                    maxValue={30}
+                  />
+                 </View> 
+              </ScrollView>
+             
+            
+          ) : (
+            <Text>No data available for selected period</Text>
+        )}
+              </View>
+            </ScrollView>
+
+            <View className="flex-row justify-between mb-4">
+            
+            </View>
+            <Text className="text-mindful-brown-100 font-urbanist-bold text-xl mb-4">
+              Popular Exercises by Duration
+            </Text>
+          {exerciseSessionDurationData.length > 0  ? (
+              <ScrollView horizontal={true}>
+                  <View style={{ width: exerciseSessionDurationChartWidth }}>
+                      <BarChart
+                          data={exerciseSessionDurationData.map((item) => ({
+                              ...item,
+                              frontColor: getColorForValue(item.value,30),
+                              topLabelComponent: () => (
+                                  <Text style={{ color: colors.optimisticGray50, fontSize: 12, marginBottom: 6 }}>
+                                      {item.value}
+                                  </Text>
+                              ),
+                          }))}
+                    
+                    barWidth={exerciseSessionDurationBarWidth}
+                    barBorderRadius={4}
+                    width={exerciseSessionDurationChartWidth}
+                    height={defaultchartHeight}
+                    yAxisThickness={1}
+                    xAxisThickness={1}
+                    showYAxisIndices
+                    yAxisLabelTextStyle={{ color: colors.mindfulBrown70, fontSize: 10 }}
+                    xAxisLabelTextStyle={{ color: colors.mindfulBrown90, fontSize: 10 }}
+                    maxValue={30}
+                  />
+                </View>
+              </ScrollView>
+            
+          ) : (
+            <Text>No data available for selected period</Text>
+        )}
+
+<View style={{ borderBottomWidth: 1, borderBottomColor: colors.mindfulBrown80, marginTop: 50 }} />
           {/* Exercise Picker with Dropdown Component */}
           <Text className="text-mindful-brown-80 font-urbanist-bold text-xl mt-10">Exercises Rating:</Text>
           <Dropdown
@@ -820,8 +1008,12 @@ const calculateAverageLine = (data) => {
                 <Text style={{ color: 'gray', margin: 20, textAlign: 'center', fontSize: 16 }}>No suggestions available for app improvements.</Text>
               )
             )}
-
-        </View>
+            
+          </View> 
+         
+)}
+          </View>
+      
       </ScrollView>
     </SafeAreaView>
   )

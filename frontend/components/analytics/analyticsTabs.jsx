@@ -27,30 +27,10 @@ const AnalyticsTabs = () => {
           </View>
         </TouchableOpacity>
       </Link>
-    ),
-    featureFlags.isSurveyScores && (
-      <Link href="/admin/survey-scores" asChild key="survey-scores">
-        <TouchableOpacity className="bg-white p-4 rounded-2xl mb-4">
-          <View className="flex-row items-center justify-between">
-            <View className="w-16 h-16 rounded-full bg-zen-yellow-20 flex items-center justify-center">
-              <MaterialCommunityIcons
-                name="chart-bar"
-                size={32}
-                color="#4A2006"
-              />
-            </View>
-            <View className="flex-1 ml-4">
-              <Text className="font-urbanist-bold text-lg">Survey Scores</Text>
-              <Text className="font-urbanist-regular">
-                PSS, SMS, user feedback analysis
-              </Text>
-            </View>
-          </View>
-        </TouchableOpacity>
-      </Link>
-    ),
-  ]
 
+    )]
+
+  
   const staffViews = [
     <Link
       href={{
@@ -103,6 +83,25 @@ const AnalyticsTabs = () => {
         </View>
       </TouchableOpacity>
     </Link>,
+    <Link href="/survey-scores" asChild key="survey-scores">
+    <TouchableOpacity className="bg-white p-4 rounded-2xl mb-4">
+      <View className="flex-row items-center justify-between">
+        <View className="w-16 h-16 rounded-full bg-zen-yellow-20 flex items-center justify-center">
+          <MaterialCommunityIcons
+            name="chart-bar"
+            size={32}
+            color="#4A2006"
+          />
+        </View>
+        <View className="flex-1 ml-4">
+          <Text className="font-urbanist-bold text-lg">Survey Scores</Text>
+          <Text className="font-urbanist-regular">
+            PSS, SMS, user feedback analysis
+          </Text>
+        </View>
+      </View>
+    </TouchableOpacity>
+  </Link>
   ]
 
   const nonStaffViews = [
