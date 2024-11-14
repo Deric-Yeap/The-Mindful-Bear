@@ -7,8 +7,6 @@ import { setIsShownNav } from '../../redux/slices/isShownNavSlice'
 import ConfirmModal from '../../components/confirmModal'
 import { confirmModal } from '../../assets/image'
 import { colors } from '../../common/styles'
-
-
 import { isLandmarkRatingsEmpty } from '../../api/form'
 
 const Questionaire = () => {
