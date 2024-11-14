@@ -106,6 +106,9 @@ const Shop = () => {
         <Text className="font-urbanist-bold text-kind-purple-60">
           -100 points
         </Text>
+        <Text className="font-urbanist-bold text-kind-purple-60 my-2">
+          Open a box to obtain an avatar fragment!
+        </Text>
 
         <CustomButton
           title="Open Box"

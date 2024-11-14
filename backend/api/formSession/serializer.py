@@ -387,3 +387,4 @@ class ScoreAggregationProfPercentageSerializer(serializers.Serializer):
         return result
     
 
+

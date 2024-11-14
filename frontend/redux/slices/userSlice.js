@@ -18,6 +18,7 @@ const userSlice = createSlice({
     },
     isStaff: false,
     name: '',
+    isUserView: true,
   },
   reducers: {
     setUserDetails: (state, action) => {
@@ -37,6 +38,7 @@ const userSlice = createSlice({
       state.department = department
       state.isStaff = is_staff
       state.name = name
+      state.isUserView = !is_staff
     },
     clearUserDetails: (state) => {
       state.userId = null
@@ -54,9 +56,14 @@ const userSlice = createSlice({
       }
       state.isStaff = false
       state.name = ''
+      state.isUserView = false
+    },
+    toggleUserView: (state) => {
+      state.isUserView = !state.isUserView
     },
   },
 })
 
-export const { setUserDetails, clearUserDetails } = userSlice.actions
+export const { setUserDetails, clearUserDetails, toggleUserView } =
+  userSlice.actions
 export default userSlice.reducer
