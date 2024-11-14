@@ -259,7 +259,7 @@ const JournalAnalytics = () => {
           title="Apply"
           onPress={fetchClassificationData}
           style={{
-            marginLeft: 100,
+            marginLeft: 50,
             marginTop: 17// Add margin to adjust alignment
           }}
         />

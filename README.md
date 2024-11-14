@@ -82,6 +82,14 @@
      deactivate
      ```
 
+## Deployment setup (AWS EC2)
+1.connect to instance
+2.install aws cli and docker in instance
+3.run
+    ```bash
+    aws configure     
+     ```
+- Access key ID,Secret access key can be found in ./general-developer_accessKeys.csv
 
 ## Deployment
 

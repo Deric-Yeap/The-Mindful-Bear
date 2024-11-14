@@ -4,7 +4,13 @@ import MaterialIcons from '@expo/vector-icons/MaterialIcons'
 import { View, Text, TouchableOpacity } from 'react-native'
 import { colors } from '../common/styles'
 
-const BackButton = ({ title, buttonStyle, tabName, screenName }) => {
+const BackButton = ({
+  title,
+  buttonStyle,
+  tabName,
+  screenName,
+  onClosePdf,
+}) => {
   const navigation = useNavigation()
 
   const handlePress = () => {
@@ -14,11 +20,11 @@ const BackButton = ({ title, buttonStyle, tabName, screenName }) => {
       navigation.goBack()
     }
   }
-
+  const handleOnPress = onClosePdf || handlePress
   return (
     <View className={`flex-row items-center ${buttonStyle}`}>
       <TouchableOpacity
-        onPress={handlePress}
+        onPress={handleOnPress}
         className="p-3 bg-mindful-brown-20 rounded-full mr-4"
       >
         <MaterialIcons

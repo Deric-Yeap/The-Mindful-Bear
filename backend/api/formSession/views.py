@@ -24,6 +24,8 @@ class FormSessionScoreView(generics.ListAPIView):
         except FormSession.DoesNotExist:
             return Response({'detail': 'FormSession not found'}, status=status.HTTP_404_NOT_FOUND)
         except Exception as e:
+
+
             return Response({'detail': str(e)}, status=status.HTTP_400_BAD_REQUEST)
         
 class FormSessionScorePercentageView(generics.ListAPIView):
@@ -44,3 +46,4 @@ class FormSessionScorePercentageView(generics.ListAPIView):
         except Exception as e:
             return Response({'detail': str(e)}, status=status.HTTP_400_BAD_REQUEST)
         
+

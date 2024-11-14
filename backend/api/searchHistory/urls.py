@@ -7,4 +7,5 @@ urlpatterns = [
     path('user_history/', SearchHistoryViewSet.as_view({'get': 'user_history'}), name='user-history'),
     path('popular_searches/', SearchHistoryViewSet.as_view({'get': 'popular_searches'}), name='popular-searches'),
     path('clicked_articles/', SearchHistoryViewSet.as_view({'get': 'clicked_articles'}), name='clicked-articles'),
+    path('all_history/', SearchHistoryViewSet.as_view({'get': 'list'}), name='all-history')
 ]

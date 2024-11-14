@@ -24,7 +24,7 @@ export default function Admin() {
         backgroundColor={colors.mindfulBrown100}
       />
       <ScrollView className="flex-1 bg-optimistic-gray-10 mb-16 mt-12">
-        <TopBrownSearchBar title="Hi Admin!" />
+        <TopBrownSearchBar title="Hi Admin!" showBackButton={false} />
         <View className="p-4">
           <Text className="text-mindful-brown-100 font-urbanist-bold text-xl mb-4">
             Management
@@ -97,7 +97,6 @@ export default function Admin() {
                 </View>
               </TouchableOpacity>
             </Link>
-            
           </View>
           <View className="flex-row justify-between mb-4">
             <Link href="/articleManagement" asChild>
@@ -116,7 +115,6 @@ export default function Admin() {
                 </View>
               </TouchableOpacity>
             </Link>
-            
           </View>
 
           <Text className="text-mindful-brown-100 font-urbanist-bold text-xl mb-4">
@@ -141,7 +139,6 @@ export default function Admin() {
                   />
                 </View>
               </TouchableOpacity>
-              
             </Link>
             <Link href="/admin/department" asChild>
               <TouchableOpacity className="flex-1 bg-kind-purple-30 p-2 rounded-2xl ml-2">
@@ -167,9 +164,9 @@ export default function Admin() {
             <Text className="text-mindful-brown-100 font-urbanist-bold text-xl mb-4">
               Mindfulness Tracker
             </Text>
-            <View className="-mx-4"> 
-            <AnalyticsTabs />
-          </View>
+            <View className="-mx-4">
+              <AnalyticsTabs />
+            </View>
           </View>
         </View>
       </ScrollView>

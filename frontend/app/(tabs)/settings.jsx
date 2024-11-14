@@ -10,9 +10,12 @@ import { clearUserDetails } from '../../redux/slices/userSlice'
 import ConfirmModal from '../../components/confirmModal'
 import { confirmModal } from '../../assets/image'
 import { useRouter } from 'expo-router'
+import { useSelector } from 'react-redux'
 
 const SettingsPage = () => {
   const router = useRouter()
+  const user = useSelector((state) => state.user)
+
   const [isShowLogoutModal, setIsShowLogoutModal] = useState(false)
   const handleLogout = () => {
     clearUserDetails()
@@ -39,7 +42,7 @@ const SettingsPage = () => {
           barStyle="light-content"
           backgroundColor={colors.mindfulBrown100}
         />
-        <TopBrownSearchBar title="Settings" showSearchBar={false}/>
+        <TopBrownSearchBar title="Settings" showSearchBar={false} />
         <View className="p-4">
           {/* General Settings Section */}
           {featureFlags.isSettings && (
@@ -103,6 +106,30 @@ const SettingsPage = () => {
             </View>
           )}
           {/* Danger Zone */}
+          {user.isStaff && !user.isUserView && (
+            <View className="mt-4">
+              <Text className="text-mindful-brown-80 font-urbanist-bold text-lg mb-4">
+                Swap to User View
+              </Text>
+              <SettingsItem
+                title="Swap to User View"
+                iconName="account-switch-outline"
+                href="user-home"
+              />
+            </View>
+          )}
+          {user.isStaff && user.isUserView && (
+            <View className="mt-4">
+              <Text className="text-mindful-brown-80 font-urbanist-bold text-lg mb-4">
+                Swap to Admin View
+              </Text>
+              <SettingsItem
+                title="Swap to Admin View"
+                iconName="account-switch-outline"
+                href="user-admin"
+              />
+            </View>
+          )}
 
           {/* Log Out */}
           <View className="mt-4 mb-10">

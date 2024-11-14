@@ -7,6 +7,7 @@ import { useSelector } from 'react-redux'
 
 const AnalyticsTabs = () => {
   const user = useSelector((state) => state.user)
+
   const commonViews = [
     featureFlags.isMindfulnessExercise && (
       <Link href="/mindfulness-exercises" asChild key="mindfulness-exercises">
@@ -26,9 +27,19 @@ const AnalyticsTabs = () => {
           </View>
         </TouchableOpacity>
       </Link>
+
     )]
+
+  
   const staffViews = [
-    <Link href={{ pathname: '/journal-analytics', query: { previousScreen: 'stats' } }} asChild key="journal-analytics">
+    <Link
+      href={{
+        pathname: '/journal-analytics',
+        query: { previousScreen: 'stats' },
+      }}
+      asChild
+      key="journal-analytics"
+    >
       <TouchableOpacity className="bg-white p-4 rounded-2xl mb-4">
         <View className="flex-row items-center justify-between">
           <View className="w-16 h-16 rounded-full bg-mindful-brown-20 flex items-center justify-center">
@@ -47,7 +58,11 @@ const AnalyticsTabs = () => {
         </View>
       </TouchableOpacity>
     </Link>,
-    <Link href="/mindfulness-exercises-analytics" asChild key="engagement-metrics">
+    <Link
+      href="/mindfulness-exercises-analytics"
+      asChild
+      key="engagement-metrics"
+    >
       <TouchableOpacity className="bg-white p-4 rounded-2xl">
         <View className="flex-row items-center justify-between">
           <View className="w-16 h-16 rounded-full bg-empathy-orange-20 flex items-center justify-center">
@@ -88,13 +103,12 @@ const AnalyticsTabs = () => {
     </TouchableOpacity>
   </Link>
   ]
+
   const nonStaffViews = [
     <Link
       href={{
         pathname: '/journal-stats',
-        params: { tabName: '(tabs)',
-          screenName: 'stats'
-         },
+        params: { tabName: '(tabs)', screenName: 'stats' },
       }}
       asChild
       key="journal-stats"
@@ -109,9 +123,7 @@ const AnalyticsTabs = () => {
             />
           </View>
           <View className="flex-1 ml-4">
-            <Text className="font-urbanist-bold text-lg">
-              My Journal Stats
-            </Text>
+            <Text className="font-urbanist-bold text-lg">My Journal Stats</Text>
             <Text className="font-urbanist-regular">
               Sentiment analysis, frequency of journalling
             </Text>
@@ -124,7 +136,7 @@ const AnalyticsTabs = () => {
   return (
     <View className="px-3 mt-4">
       {commonViews}
-      {user.isStaff ? staffViews : nonStaffViews}
+      {user.isStaff && !user.isUserView ? staffViews : nonStaffViews}
     </View>
   )
 }
