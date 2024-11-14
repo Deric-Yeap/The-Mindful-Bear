@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import FormQuestionList, FormQuestionCreate, FormQuestionUpdate, BulkFormQuestionCreate, ExerciseLandmarkRatingDistribution, LikelihoodOfFutureUseDistribution, OverallExperienceRatingDistribution, SuggestionOnLandmarkAPIView, ImprovementsToAppAPIView
+from .views import FormQuestionList, FormQuestionCreate, FormQuestionUpdate, BulkFormQuestionCreate, FormQuestionScoreGenView,  ExerciseLandmarkRatingDistribution, LikelihoodOfFutureUseDistribution, OverallExperienceRatingDistribution, SuggestionOnLandmarkAPIView, ImprovementsToAppAPIView
 
 urlpatterns = [
     path('get/', FormQuestionList.as_view(), name='form_question_list'),
@@ -21,4 +21,6 @@ urlpatterns = [
     
     #http://127.0.0.1:8000/api/formQuestion/improvements_to_app/
     path('improvements_to_app/', ImprovementsToAppAPIView.as_view(), name='improvements_to_app'),
+    
+    path('gen-score/', FormQuestionScoreGenView.as_view(), name='form-question-gen-score')
 ]
