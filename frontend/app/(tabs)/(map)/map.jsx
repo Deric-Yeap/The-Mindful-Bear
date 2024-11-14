@@ -34,7 +34,7 @@ const initialFormState = {
   engagement_metrics: 1,
 }
 
-const POLLING_INTERVAL = 500
+const POLLING_INTERVAL = 2000
 // const DISTANCE_THRESHOLD = 100 // Distance in meters to trigger directions fetch
 const DEVIATION_THRESHOLD = 52
 
