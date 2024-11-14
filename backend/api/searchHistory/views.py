@@ -14,6 +14,12 @@ class SearchHistoryViewSet(viewsets.ModelViewSet):
         return SearchHistory.objects.filter(
             userID=self.request.user
         ).select_related('userID', 'articleID')
+    
+    @action(detail=False, methods=['GET'])
+    def list(self, request):
+        """Get all search history"""
+        history = SearchHistory.objects.all()
+        return Response(self.get_serializer(history, many=True).data)
 
     @action(detail=False, methods=['POST'])
     def record_search(self, request):
@@ -96,3 +102,4 @@ class SearchHistoryViewSet(viewsets.ModelViewSet):
         ).order_by('-click_count')[:10]
         
         return Response(list(clicked))
+
