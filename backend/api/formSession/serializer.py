@@ -3,7 +3,7 @@ from .models import FormSession
 from ..session.models import Session
 from django.conf import settings
 from datetime import datetime, timedelta
-from django.db.models import FloatField, Avg, F, Count, Q, Min, Max
+from django.db.models import FloatField,  Count, Min, Max, Case, When, IntegerField
 from django.db.models.functions import Cast
 from .utils import get_sessions_by_period
 
@@ -17,84 +17,11 @@ class FormSessionSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
-class ScoreAggregationSerializer(serializers.Serializer):
+class ScoreAggregationProfSerializer(serializers.Serializer):
     average_pss_before = serializers.FloatField()
     average_pss_after = serializers.FloatField()
     average_sms_before = serializers.FloatField()
     average_sms_after = serializers.FloatField()
-
-    # def get_sessions_by_period(self, start_date, end_date, period):
-    #     SGT = pytz.timezone('Asia/Singapore')
-    #     start_date_utc = start_date.astimezone(UTC)
-        
-    #     end_date_utc = end_date.astimezone(UTC)
-
-    #     start_date_sgt = start_date.astimezone(SGT)
-    #     end_date_sgt = end_date.astimezone(SGT)
-
-    #     sessions = Session.objects.filter(
-    #         start_datetime__gte=start_date_utc,
-    #         start_datetime__lt=end_date_utc
-    #     ).exclude(
-    #         start_datetime=F('end_datetime')  # Exclude sessions where start and end times are the same
-    #     )
-
-
-    #     print("sessions",sessions)
-        
-    #     session_dict = {}
-    #     current_date = start_date_sgt.replace(hour=0, minute=0, second=0, microsecond=0)
-    #     # Adjust the filter based on the period
-    #     if period == 'daily':
-    #         delta = timedelta(days=1)
-            
-    #     elif period == 'monthly':
-    #         current_date = current_date.replace(day=1)  # Set to the first day of the month
-    #     # No delta needed here since we'll calculate the next month on the fly
-    #     elif period == 'yearly':
-    #         current_date = current_date.replace(month=1, day=1)
-    #     else:
-    #         raise serializers.ValidationError("Invalid period specified.")
-    #      # Loop through the date range by the specified period (daily, weekly, etc.)
-    #     while current_date < end_date_sgt:
-           
-    #         if period == 'monthly':
-    #             key = f"{current_date.year}-{current_date.month:02d}"  # Format as MMM-YY
-    #             key = current_date.strftime("%b-%y").title()
-    #             if current_date.month == 12:
-    #                 next_date = datetime(current_date.year + 1, 1, 1, tzinfo=SGT)  # January next year
-    #             else:
-    #                 next_date = datetime(current_date.year, current_date.month + 1, 1, tzinfo=SGT)  # First day of next month
-    #         elif period == 'yearly':
-    #             key = f"{current_date.year}"
-    #             next_date = datetime(current_date.year + 1, 1, 1, tzinfo=SGT)  # January next year
-    #         else:
-    #             next_date = current_date + delta
-    #             key = f"{current_date.date()}"
-
-    #         # Filter sessions for the current period
-    #         print("current_date",current_date)
-    #         period_sessions = sessions.filter(start_datetime__gte=current_date.astimezone(UTC), 
-    #                                           start_datetime__lt=next_date.astimezone(UTC))
-            
-    #                     # Extract session IDs from the filtered period_sessions
-    #         session_ids = period_sessions.values_list('id', flat=True)  # Extracting the session IDs
-    #         session_count = session_ids.count()  # Counting the number of session IDs
-
-    #         # Now filter FormSession based on these session IDs
-            
-    #         # Prepare the data for this period
-    #         session_dict[key] = {
-    #             'session_count': session_count,
-    #             'session_ids': session_ids  # return the session ids
-    #         }
-            
-    #         # Move to the next period
-    #         current_date = next_date.astimezone(SGT)  # Ensure current_date is UTC
-
-    #     return session_dict
-
-
     
     def get_form_averages(self, session_ids):
         # Filter only valid sessions for averaging
@@ -218,7 +145,6 @@ class ScoreAggregationSerializer(serializers.Serializer):
                 'average_sms_before': sms_before_avg,
                 'average_sms_after': sms_after_avg
             }
-                
     
 
     def to_representation(self, instance):
@@ -265,9 +191,200 @@ class ScoreAggregationSerializer(serializers.Serializer):
         print("session data",session_data)
         result = {}
         for period_key, data in session_data.items():
-            form_averages = self.get_form_averages(data['session_ids'])
+            form_averages = self.get_form_averages(data['session_prof_ids'])
             result[period_key] = {
-                **form_averages
+                **form_averages,
+                'session_prof_ids': data['session_prof_ids'],
             }
 
         return result
+
+class ScoreAggregationProfPercentageSerializer(serializers.Serializer):
+
+    session_id = serializers.IntegerField()
+    pss_percentage_change = serializers.SerializerMethodField()
+    sms_percentage_change = serializers.SerializerMethodField()
+
+    def get_pss_percentage_change(self, session_ids,count,pss_threshold=None):
+        filtered_sessions = FormSession.objects.filter(SessionID__in=session_ids)
+
+        
+        # Get the new session count
+        session_count = filtered_sessions.values('SessionID').distinct().count()
+
+        # If there are no valid sessions, return 0 
+        if session_count == 0:
+           return {
+            'session_count_pss': 0,
+            'session_count_percent_pss': 0,
+            'percentage_changes_pss': {}  # No sessions, so no percentage change
+            }
+        else: 
+             # Step 1: Retrieve "before" and "after" score IDs for each session
+            pss_scores = (
+                filtered_sessions
+                .filter(FormID=3)  # Only PSS form
+                .values('SessionID')
+                .annotate(before_score_id=Min('id'), after_score_id=Max('id'))  # First and last entry per session
+                .values('SessionID', 'before_score_id', 'after_score_id')
+            )
+
+            print("pss_scores",pss_scores)
+
+            # Step 2: Calculate percentage change for each session
+            percentage_changes_pss = {}
+            pss_filter_count = 0
+
+            for session in pss_scores:
+                before_score = float(filtered_sessions.get(id=session['before_score_id']).aggregatedScore)
+                after_score = float(filtered_sessions.get(id=session['after_score_id']).aggregatedScore)
+                session_id = session['SessionID']
+
+                #extract session id as an int from the queryset
+                session_obj = Session.objects.filter(id=session_id)
+                session_id = session_obj.values_list('id', flat=True).first()
+                # Calculate percentage change
+
+                #Calculate the percentage change
+                if before_score:  # Avoid division by zero
+                    percentage_score = ((after_score - before_score) / before_score) * 100
+                    
+                else:
+                    percentage_score = 0  # If before_score is zero, define change as 0%
+
+                # Apply threshold filter only if threshold is provided
+                if pss_threshold is None or percentage_score >= float(pss_threshold):
+                    percentage_changes_pss[session_id] = percentage_score
+                    pss_filter_count += 1
+
+            session_count_percent_pss = pss_filter_count / count * 100
+                
+                
+
+            return {
+                'session_count_pss':pss_filter_count,
+                'session_count_percent_pss': session_count_percent_pss,
+                'percentage_changes_pss': percentage_changes_pss
+            }
+                 
+
+    def get_sms_percentage_change(self, session_ids,count,sms_threshold=None):
+        filtered_sessions = FormSession.objects.filter(SessionID__in=session_ids)
+
+        
+        # Get the new session count
+        session_count = filtered_sessions.values('SessionID').distinct().count()
+
+        # If there are no valid sessions, return 0 
+        if session_count == 0:
+           return {
+            'session_count_sms': 0,
+            'session_count_percent_sms': 0,
+            'percentage_changes_sms': {}  # No sessions, so no percentage change
+            }
+        else: 
+             # Step 1: Retrieve "before" and "after" score IDs for each session
+            sms_scores = (
+                filtered_sessions
+                .filter(FormID=5)  # Only PSS form
+                .values('SessionID')
+                .annotate(before_score_id=Min('id'), after_score_id=Max('id'))  # First and last entry per session
+                .values('SessionID', 'before_score_id', 'after_score_id')
+            )
+
+            print("sms_scores",sms_scores)
+
+            # Step 2: Calculate percentage change for each session
+            percentage_changes_sms= {}
+            sms_filter_count = 0
+
+            for session in sms_scores:
+                before_score = float(filtered_sessions.get(id=session['before_score_id']).aggregatedScore)
+                after_score = float(filtered_sessions.get(id=session['after_score_id']).aggregatedScore)
+                session_id = session['SessionID']
+
+                #extract session id as an int from the queryset
+                session_obj = Session.objects.filter(id=session_id)
+                session_id = session_obj.values_list('id', flat=True).first()
+                #Calculate the percentage change
+                if before_score:  # Avoid division by zero
+                    percentage_score = ((after_score - before_score) / before_score) * 100
+                else:
+                    percentage_score = 0  # If before_score is zero, define change as 0%
+
+                # Apply threshold filter only if threshold is provided
+                if sms_threshold is None or percentage_score <= float(sms_threshold):
+                    percentage_changes_sms[session_id] = percentage_score
+                    sms_filter_count += 1
+            
+            session_count_percent_sms = sms_filter_count / count * 100
+
+
+            return {
+                'session_count_sms': sms_filter_count,
+                'session_count_percent_sms': session_count_percent_sms,
+                'percentage_changes_sms': percentage_changes_sms
+            }
+                 
+
+    def to_representation(self, instance):
+        request = self.context.get('request')
+        year = request.query_params.get('year')
+        month = request.query_params.get('month')
+        period = request.query_params.get('period', 'daily')
+        pss = request.query_params.get('pss')
+        sms = request.query_params.get('sms')
+        print("period",period)
+
+        SGT = pytz.timezone('Asia/Singapore')
+         # Get all sessions if year and month are not provided
+        sessions = Session.objects.all()
+        if period == 'daily':
+             # Calculate start and end dates for the last 30 days
+            end_date = datetime.now(tz=SGT)
+            start_date = end_date - timedelta(days=30)
+        else:
+            if year and month:
+                # If year and month are provided, filter by the month
+                year = int(year)
+                month = int(month)
+                start_date = datetime(year, month, 1, tzinfo=SGT)
+
+                if month == 12:
+                    end_date = datetime(year + 1, 1, 1, tzinfo=SGT) - timedelta(microseconds=1)
+                else:
+                    end_date = datetime(year, month + 1, 1, tzinfo=SGT) - timedelta(microseconds=1)
+
+                sessions = sessions.filter(start_datetime__gte=start_date, start_datetime__lt=end_date)
+            else:
+                # If no year and month, use the full date range of all sessions
+                if sessions.exists():
+                    start_date = sessions.order_by('start_datetime').first().start_datetime
+                    end_date = sessions.order_by('-start_datetime').first().start_datetime
+                else:
+                    start_date = datetime.now(tz=SGT)
+                    end_date = datetime.now(tz=SGT)
+
+        # Get the session data for the specified period
+        # Get sessions aggregated by period
+         # Iterate over each period and calculate form averages
+         # Get sessions aggregated by period
+        session_data = get_sessions_by_period(start_date, end_date, period)
+
+        result = {}
+        for period_key, data in session_data.items():
+            pss_percentage_scores = self.get_pss_percentage_change(data['session_prof_ids'],data['session_prof_count'],pss)
+            sms_percentage_scores = self.get_sms_percentage_change(data['session_prof_ids'],data['session_prof_count'],sms)
+            
+            result[period_key] = {
+                **pss_percentage_scores,
+                **sms_percentage_scores,
+                'session_prof_ids': data['session_prof_ids'],
+                'session_prof_count': data['session_prof_count']
+                
+            }
+
+        return result
+    
+
+

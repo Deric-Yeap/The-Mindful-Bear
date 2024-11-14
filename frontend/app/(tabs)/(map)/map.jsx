@@ -34,8 +34,7 @@ const initialFormState = {
   engagement_metrics: 1,
 }
 
-const POLLING_INTERVAL = 500
-// const DISTANCE_THRESHOLD = 100 // Distance in meters to trigger directions fetch
+const POLLING_INTERVAL = 2000
 const DEVIATION_THRESHOLD = 52
 
 const Map = () => {
@@ -449,7 +448,7 @@ const Map = () => {
                   centerCoordinate={location}
                   zoomLevel={18.0}
                   animationMode="flyto"
-                  animationDuration={500}
+                  animationDuration={15}
                   pitch={60}
                 />
                 <UserLocationCustom

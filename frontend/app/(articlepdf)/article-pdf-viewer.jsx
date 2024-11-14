@@ -1,19 +1,28 @@
-import React, { useEffect, useState} from 'react';
-import { View, SafeAreaView, ActivityIndicator, ScrollView, TouchableOpacity, Text,} from 'react-native';
-// import PDFView from 'react-native-pdf';
-import { WebView } from 'react-native-webview';
-import StatusBarComponent from '../../components/darkThemStatusBar';
-import TopBrownSearchBar from '../../components/topBrownSearchBar';
-import Loading from '../../components/loading';
-import { colors } from '../../common/styles';
-import { BackButton } from '../../components/backButton';
-import { LandmarkBackButton } from '../../components/landmarkBackButton';
+import React, { useEffect, useState } from 'react'
+import {
+  View,
+  SafeAreaView,
+  ActivityIndicator,
+  ScrollView,
+  TouchableOpacity,
+  StyleSheet,
+  Dimensions,
+  Text,
+} from 'react-native'
+import { MaterialIcons } from '@expo/vector-icons'
+import Pdf from 'react-native-pdf'
+import { WebView } from 'react-native-webview'
+import StatusBarComponent from '../../components/darkThemStatusBar'
+import TopBrownSearchBar from '../../components/topBrownSearchBar'
+import Loading from '../../components/loading'
+import { colors } from '../../common/styles'
+import BackButton from '../../components/backButton'
+import { LandmarkBackButton } from '../../components/landmarkBackButton'
 
+const PdfViewer = ({ pdfUrl, onClose }) => {
+  const encodedPdfUrl = encodeURI(pdfUrl)
 
-const PdfViewer = ({ pdfUrl,onClose }) => {
-  const encodedPdfUrl = encodeURI(pdfUrl);
-
-  console.log('onclose', pdfUrl.onClose);
+  console.log('onclose', pdfUrl.onClose)
   console.log('Encoded PDF URL:', encodedPdfUrl)
   const injectedJavaScript = `
   const meta = document.createElement('meta');
@@ -29,47 +38,41 @@ const PdfViewer = ({ pdfUrl,onClose }) => {
   document.documentElement.style.height = '100%';
   document.body.style.height = '100%';
   true;
-  `;
-  const googleDocsViewerUrl = `https://docs.google.com/viewer?url=${encodeURIComponent(encodedPdfUrl)}&embedded=true`;
-  console.log('Google Docs Viewer URL:', googleDocsViewerUrl);
-  // useEffect(() => {
-  //   console.log('PDF URL:', pdfUrl.pdfUrl);
-    
-    
-  // }, [pdfUrl]);
-  
+  `
+  const googleDocsViewerUrl = `https://docs.google.com/viewer?url=${encodeURIComponent(encodedPdfUrl)}&embedded=true`
 
-  
   return (
     <SafeAreaView className="flex-1  bg-[#cacac9]">
-    <ScrollView className="flex-1" contentContainerStyle={{ flexGrow: 1 }}>
-      <StatusBarComponent barStyle="light-content" backgroundColor="#251404" />
-      
-      <TopBrownSearchBar title="Article Display" />
-      <TouchableOpacity className="absolute left-4 top-2 z-10 bg-mindful-brown-80 p-3 rounded-full opacity-0" onPress={onClose}>
-        <Text className="text-white text-lg font-bold">      </Text>
-    </TouchableOpacity>
-      
-    <SafeAreaView className="flex-1 bg-white">
-    
-      <WebView
-        source={{ uri: googleDocsViewerUrl }}
-        style={{ flex: 1 , width:'100%' }}
-        scalesPageToFit={true}
-        javaScriptEnabled={true}
-        domStorageEnabled={true}
-        onLoad={() => console.log('PDF loaded')}
-        onError={(error) => console.log('Cannot load PDF', error)}
-        startInLoadingState={true}
-        injectedJavaScript={injectedJavaScript}
-        renderLoading={() => <ActivityIndicator size="large" color="#0000ff" 
-  />}
-        />
+      <View className=" absolute top-4 left-4 z-20">
+        <BackButton onClosePdf={onClose} />
+      </View>
+      <Pdf
+        source={{ uri: pdfUrl }}
+        trustAllCerts={false}
+        onLoadComplete={(numberOfPages, filePath) => {}}
+        onPageChanged={(page, numberOfPages) => {}}
+        onError={(error) => {
+          console.log(error)
+        }}
+        onPressLink={(uri) => {}}
+        style={styles.pdf}
+        showsVerticalScrollIndicator={false}
+        enablePaging={true}
+        scrollEnabled={true}
+        resizeMode="contain"
+        spacing={0}
+      />
     </SafeAreaView>
-    </ScrollView>
-    </SafeAreaView>
-  );
-};
+  )
+}
 
-export default PdfViewer;
-
+export default PdfViewer
+const styles = StyleSheet.create({
+  pdf: {
+    flex: 1,
+    width: Dimensions.get('window').width,
+    height: Dimensions.get('window').height,
+    margin: 0,
+    padding: 0,
+  },
+})

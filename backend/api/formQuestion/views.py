@@ -3,7 +3,7 @@ from rest_framework import generics, status
 from rest_framework.response import Response
 from .models import FormQuestion
 from api.question.models import Question
-from .serializer import FormQuestionSerializer
+from .serializer import FormQuestionSerializer, ScoreAggregationGenSerializer
 from rest_framework.exceptions import ValidationError
 from .serializer import BulkFormQuestionSerializer
 from api.session.models import Session
@@ -184,3 +184,48 @@ class ImprovementsToAppAPIView(APIView):
 
         # Return the response in the required format without extra nesting
         return Response(data,  status=status.HTTP_200_OK)
+
+    
+# class ExerciseLandmarkRatingDistribution(APIView):
+    
+
+class FormQuestionScoreGenView(generics.ListAPIView):
+    # def get(self, request):
+    #     # Define question IDs related to exercises and landmarks
+    #     question_ids = [177,178]  # Adjust as necessary
+
+    #     # Fetch and aggregate rating counts for each question ID
+    #     rating_counts = (
+    #         FormQuestion.objects
+    #         .filter(QuestionID__in=question_ids, Response__in=['yes','no'])
+    #         .values('QuestionID', 'Response')
+    #         .annotate(count=Count('Response'))
+    #         .order_by('QuestionID', 'Response')
+    #     )
+
+    #     # Structure the response to show counts for each rating (1–5) by question ID
+    #     data = {}
+    #     for item in rating_counts:
+    #         question_id = item['QuestionID']
+    #         if question_id not in data:
+    #             data[question_id] = {str(i): 0 for i in range(0, 5)}  # Initialize counts for ratings 0 - 4
+    #         data[question_id][item['Response']] = item['count']
+
+    #     return Response(data, status=status.HTTP_200_OK)
+    queryset = FormQuestion.objects.all()
+    serializer_class = ScoreAggregationGenSerializer
+
+    def get(self, request, *args, **kwargs):
+        try:
+            # Initialize the serializer with context including the request
+            serializer = self.get_serializer(context={'request': request})
+
+            # Get the serialized data
+            data = serializer.to_representation(None)
+            
+            return Response(data, status=status.HTTP_200_OK)
+        except FormQuestion.DoesNotExist:
+            return Response({'detail': 'FormSession not found'}, status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            return Response({'detail': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
