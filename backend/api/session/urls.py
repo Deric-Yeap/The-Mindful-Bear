@@ -9,5 +9,3 @@ urlpatterns = [
     # path('get_by_date/', views.SessionByDate.as_view(), name='session-by-date'),
     path('split/', views.SessionSplitView.as_view(), name='session-period-split')
 ]
-
- 
