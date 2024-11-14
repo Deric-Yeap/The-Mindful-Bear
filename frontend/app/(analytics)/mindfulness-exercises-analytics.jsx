@@ -59,8 +59,7 @@ const getColorForValue = (value, maxCount) => {
 
 // Default to 20 if no data available
 
-
-  useEffect(() => {
+  
     const fetchData = async () => {
       setLoading(true); 
       setError(null); 
@@ -84,26 +83,26 @@ const getColorForValue = (value, maxCount) => {
          
 
           
-            userSession = await splitUserSession();
-            console.log("userSession",userSession)
-            // Initialize an array to hold the formatted data
-            const exerciseSessionCountData = Object.keys(userSession).map((exercise_name) => ({
+        //     userSession = await splitUserSession();
+        //     console.log("userSession",userSession)
+        //     // Initialize an array to hold the formatted data
+        //     const exerciseSessionCountData = Object.keys(userSession).map((exercise_name) => ({
               
-             value: userSession[exercise_name].count || 0, // Use session_count or default to 0
-             label: exercise_name
-           }));
+        //      value: userSession[exercise_name].count || 0, // Use session_count or default to 0
+        //      label: exercise_name
+        //    }));
           
-         // Update the state with the formatted data
-         setExercisesSessionCountData(exerciseSessionCountData);
+        //  // Update the state with the formatted data
+        //  setExercisesSessionCountData(exerciseSessionCountData);
   
-         const exerciseSessionDurationData = Object.keys(userSession).map((exercise_name) => ({
+        //  const exerciseSessionDurationData = Object.keys(userSession).map((exercise_name) => ({
               
-          value: userSession[exercise_name].average_duration || 0, // Use session_count or default to 0
-          label: exercise_name
-        }));
+        //   value: userSession[exercise_name].average_duration || 0, // Use session_count or default to 0
+        //   label: exercise_name
+        // }));
   
-        setExerciseSessionDurationData(exerciseSessionDurationData);
-        console.log("exerciseSessionDurationData",exerciseSessionDurationData)
+        // setExerciseSessionDurationData(exerciseSessionDurationData);
+        // console.log("exerciseSessionDurationData",exerciseSessionDurationData)
        
        
        
@@ -113,28 +112,23 @@ const getColorForValue = (value, maxCount) => {
         } else {
           setError('An unexpected error occurred. Please try again.');
         }
-      }finally {
-        setLoading(false)
+      }
     }
-    }
-    fetchData();
-  }, [selectedOption]);
+   
     
-// Separate useEffect for calculating max values after data is set
-useEffect(() => {
+/// Calculate max values whenever exercise session data changes
+const retrieveMaxValues = () => {
   if (exercisesSessionCountData.length > 0) {
-      const maxSessionCount = Math.max(...exercisesSessionCountData.map(item => item.value), 20);
-      setMaxSessionCountValue(maxSessionCount);
+    const maxCountValue = Math.max(...exercisesSessionCountData.map(item => item.value)+2, 20);
+    setMaxSessionCountValue(maxCountValue);
   }
 
   if (exerciseSessionDurationData.length > 0) {
-      const maxSessionDuration = Math.max(...exerciseSessionDurationData.map(item => item.value), 20);
-      setMaxSessionDurationValue(maxSessionDuration);
-      
+    const maxDurationValue = Math.max(...exerciseSessionDurationData.map(item => item.value)+2, 20);
+    setMaxSessionDurationValue(maxDurationValue);
   }
-
-  console.log("try again","maxSessionCountValue",maxSessionCountValue)
-}, [exercisesSessionCountData, exerciseSessionDurationData]);
+};
+//retrieve exercise sessiondata
   
     const retrieveData = async () => {
       setLoading(true); 
@@ -164,14 +158,14 @@ useEffect(() => {
 
       setExerciseSessionDurationData(exerciseSessionDurationData);
 
-      const maxSessionCountValue = exercisesSessionCountData.length > 0 
-      ? Math.max(...exercisesSessionCountData.map(item => item.value)+2, 20) 
-      : 20;
-      setMaxSessionCountValue(maxSessionCountValue)
-      const maxSessionDurationValue = exerciseSessionDurationData.length > 0 
-      ? Math.max(...exerciseSessionDurationData.map(item => item.value)+2, 20) 
-      : 20;
-      setMaxSessionDurationValue(maxSessionDurationValue)
+      // const maxSessionCountValue = exercisesSessionCountData.length > 0 
+      // ? Math.max(...exercisesSessionCountData.map(item => item.value)+2, 20) 
+      // : 20;
+      // setMaxSessionCountValue(maxSessionCountValue)
+      // const maxSessionDurationValue = exerciseSessionDurationData.length > 0 
+      // ? Math.max(...exerciseSessionDurationData.map(item => item.value)+2, 20) 
+      // : 20;
+      // setMaxSessionDurationValue(maxSessionDurationValue)
        
       } catch (error) {
         if (error.response) {
@@ -180,27 +174,29 @@ useEffect(() => {
           setError('An unexpected error occurred. Please try again.');
         }
       
-      } finally {
-        setLoading(false);
-      }
+      } 
     }
 
-    // Run both fetchData and retrieveData in parallel
-    // const fetchAllData = async () => {
-    //   setLoading(true);
-    //   try {
-    //     await Promise.all([fetchData(), retrieveData()]); // Wait for both to complete
-    //     console.log("both data retrieval done")
-    //   } catch (error) {
-    //     // If either call fails, set the error immediately
-    //     setError('An error occurred during data fetching.');
-    //   }finally {
-    //     // Set loading to false only after both fetchData and retrieveData have completed (or failed)
-    //     setLoading(false);
-    //   }
-    // };
+    //Run both fetchData and retrieveData in parallel
+    const fetchAllData = async () => {
+      setLoading(true);
+      try {
+        await Promise.all([fetchData(), retrieveData()]); // Wait for both to complete
+        retrieveMaxValues();
+        console.log("both data retrieval done")
+      } catch (error) {
+        // If either call fails, set the error immediately
+        setError('An error occurred during data fetching.');
+      }finally {
+        // Set loading to false only after both fetchData and retrieveData have completed (or failed)
+        setLoading(false);
+      }
+    };
   
     // Trigger fetchAllData when the selected option, year, or month changes
+    useEffect(() => {
+      fetchAllData();
+    }, [selectedOption, year, month]);
 
 
   const onSelectSwitch = option => {
@@ -426,8 +422,9 @@ const calculateAverageLine = (data) => {
             
               </View>
             </ScrollView>
-            <View className="flex-row justify-between mb-4">
-            <View style={{ flexDirection: 'row', alignItems: 'center',paddingHorizontal: 30 }}>
+            <View className="flex-row justify-between mb-4">{/* Line Break */}
+            <View style={{ height: 10 }} /> 
+            
 
         <View style={{ alignItems: 'center', marginRight: 10 }}>
             <Text>Year</Text>
@@ -459,7 +456,7 @@ const calculateAverageLine = (data) => {
             }}
           />
                     
-                    </View>
+                    
                 
                     </View>
             <View className="flex-row justify-between mb-4">
@@ -494,6 +491,50 @@ const calculateAverageLine = (data) => {
                     yAxisLabelTextStyle={{ color: colors.mindfulBrown70, fontSize: 10 }}
                     xAxisLabelTextStyle={{ color: colors.mindfulBrown90, fontSize: 10 }}
                     maxValue={maxSessionCountValue}
+                  />
+                 </View> 
+              </ScrollView>
+             
+            
+          ) : (
+            <Text>No data available for selected period</Text>
+        )}
+              </View>
+            </ScrollView>
+
+
+            <View className="flex-row justify-between mb-4">
+            
+            </View>
+            <Text className="text-mindful-brown-100 font-urbanist-bold text-xl mb-4">
+              Popular Exercises by Duration
+            </Text>
+            <ScrollView horizontal={true}>
+              <View className="flex-row justify-between mb-4 " >
+              {exerciseSessionDurationData.length > 0 ? (
+              <ScrollView horizontal={true}>
+                  <View style={{ width: exerciseSessionDurationChartWidth }}>
+                      <BarChart
+                          data={exerciseSessionDurationData.map((item) => ({
+                              ...item,
+                              frontColor: getColorForValue(item.value,maxSessionDurationValue),
+                              topLabelComponent: () => (
+                                  <Text style={{ color: colors.optimisticGray50, fontSize: 12, marginBottom: 6 }}>
+                                      {item.value}
+                                  </Text>
+                              ),
+                          }))}
+                    
+                    barWidth={exerciseSessionDurationBarWidth}
+                    barBorderRadius={4}
+                    width={exerciseSessionDurationChartWidth}
+                    height={defaultchartHeight}
+                    yAxisThickness={1}
+                    xAxisThickness={1}
+                    showYAxisIndices
+                    yAxisLabelTextStyle={{ color: colors.mindfulBrown70, fontSize: 10 }}
+                    xAxisLabelTextStyle={{ color: colors.mindfulBrown90, fontSize: 10 }}
+                    maxValue={maxSessionDurationValue}
                   />
                  </View> 
               </ScrollView>
