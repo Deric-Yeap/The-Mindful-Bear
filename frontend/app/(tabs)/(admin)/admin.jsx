@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useState, useEffect } from 'react'
 import {
   View,
   Text,
@@ -12,8 +12,103 @@ import { colors } from '../../../common/styles'
 import TopBrownSearchBar from '../../../components/topBrownSearchBar'
 import StatusBarComponent from '../../../components/darkThemStatusBar'
 import AnalyticsTabs from '../../../components/analytics/analyticsTabs'
+import axiosInstance from '../../../common/axiosInstance'
+import { listUsers } from '../../../api/user'
 
 export default function Admin() {
+  const [ageStats, setAgeStats] = useState({ percentage: 0, range: '' })
+  const [deptStats, setDeptStats] = useState({ percentage: 0, department: '' })
+
+  useEffect(() => {
+    const calculateAgeDistribution = (users) => {
+      // Calculate age for each user
+      const ages = users.map((user) => {
+        const birthDate = new Date(user.date_of_birth)
+        const today = new Date()
+        let age = today.getFullYear() - birthDate.getFullYear()
+        const monthDiff = today.getMonth() - birthDate.getMonth()
+        if (
+          monthDiff < 0 ||
+          (monthDiff === 0 && today.getDate() < birthDate.getDate())
+        ) {
+          age--
+        }
+        return age
+      })
+
+      // Define age ranges
+      const ageRanges = {
+        '18-29': ages.filter((age) => age >= 18 && age <= 29).length,
+        '30-40': ages.filter((age) => age >= 30 && age <= 40).length,
+        '41-50': ages.filter((age) => age >= 41 && age <= 50).length,
+        '51+': ages.filter((age) => age >= 51).length,
+      }
+
+      // Find the range with highest count
+      const totalUsers = ages.length
+      let maxRange = ''
+      let maxCount = 0
+
+      for (const [range, count] of Object.entries(ageRanges)) {
+        if (count > maxCount) {
+          maxCount = count
+          maxRange = range
+        }
+      }
+
+      const percentage = Math.round((maxCount / totalUsers) * 100)
+
+      return {
+        percentage,
+        range: maxRange,
+      }
+    }
+
+    const calculateDepartmentDistribution = (users) => {
+      // Count users in each department
+      const deptCount = users.reduce((acc, user) => {
+        const dept = user.department
+        if (dept) {
+          acc[dept] = (acc[dept] || 0) + 1
+        }
+        return acc
+      }, {})
+
+      // Find department with highest count
+      let maxCount = 0
+      let maxDept = ''
+      const totalUsers = users.length
+
+      for (const [dept, count] of Object.entries(deptCount)) {
+        if (count > maxCount) {
+          maxCount = count
+          maxDept = dept
+        }
+      }
+
+      const percentage =
+        totalUsers > 0 ? Math.round((maxCount / totalUsers) * 100) : 0
+
+      return {
+        percentage,
+        department: maxDept || 'Unknown Department',
+      }
+    }
+    const fetchUsers = async () => {
+      try {
+        const response = await listUsers()
+        const stats = calculateAgeDistribution(response)
+        const deptStats = calculateDepartmentDistribution(response)
+        setAgeStats(stats)
+        setDeptStats(deptStats)
+      } catch (error) {
+        console.error('Error fetching users:', error)
+      }
+    }
+
+    fetchUsers()
+  }, [])
+
   return (
     <SafeAreaView
       className="flex-1 bg-optimistic-gray-10"
@@ -128,7 +223,7 @@ export default function Admin() {
                     Age
                   </Text>
                   <Text className="text-empathy-orange-10 font-urbanist-bold mt-1">
-                    35% of users are between ages 30-40
+                    {`${ageStats.percentage}% of users are between ages ${ageStats.range}`}
                   </Text>
                 </View>
                 <View className="items-center justify-center mt-2">
@@ -147,7 +242,7 @@ export default function Admin() {
                     Department
                   </Text>
                   <Text className="text-white font-urbanist-bold mt-1">
-                    69% users are from the Office of Well Being
+                    {`${deptStats.percentage}% users are from ${deptStats.department}`}
                   </Text>
                 </View>
                 <View className="items-center justify-center mt-2">
