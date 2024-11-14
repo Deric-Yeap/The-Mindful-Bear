@@ -144,17 +144,37 @@ class UpgradeUserView(generics.GenericAPIView):
 
 class ListUserView(generics.GenericAPIView):
     permission_classes = [CustomDjangoModelPermissions]
-    queryset = CustomUser.objects.all()
+    queryset = CustomUser.objects.select_related('department').all()
 
     def get(self, request):
-        users = self.get_queryset().values('user_id', 'email', 'is_staff')
+        users = self.get_queryset().values(
+            'user_id', 
+            'email', 
+            'is_staff', 
+            'date_of_birth',
+            'department__description'  
+        )
         user_list = []
 
         for user in users:
+            # Format date_of_birth to string if it exists, otherwise return None
+            dob = user['date_of_birth'].strftime('%Y-%m-%d') if user['date_of_birth'] else None
+            
             if user['is_staff']:
-                user_list.append({'key': user['user_id'], 'value': f"{user['email']} (Admin)"})
+                user_list.append({
+                    'key': user['user_id'], 
+                    'value': f"{user['email']} (Admin)",
+                    'date_of_birth': dob,
+                    'department': user['department__description']  # Using the joined field
+                })
             else:
-                user_list.append({'key': user['user_id'], 'value': user['email']})
+                user_list.append({
+                    'key': user['user_id'], 
+                    'value': user['email'],
+                    'date_of_birth': dob,
+                    'department': user['department__description']  # Using the joined field
+                })
+                
         return Response(user_list, status=status.HTTP_200_OK)
     
 class UserExercisesView(generics.ListAPIView):
