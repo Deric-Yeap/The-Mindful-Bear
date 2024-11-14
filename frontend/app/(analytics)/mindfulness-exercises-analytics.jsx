@@ -11,6 +11,10 @@ import Toggle from '../../components/toggle';
 import { Svg } from 'react-native-svg';
 import { splitUserSession } from '../../api/usersession';
 import FilterButton from '../../components/filterButton';
+import { fetchLikelihoodOfFutureUse, fetchOverallExperienceRating, fetchRatingDistribution, fetchSuggestionOnLandmark, fetchImprovementsToApp } from '../../api/formQuestion';
+import { Picker } from '@react-native-picker/picker';
+import Dropdown from '../../components/dropdown'; 
+
 
 
 // Helper function to calculate bar width
@@ -46,16 +50,62 @@ const MindfulnessExercisesAnalytics = () => {
 
 const exerciseSessionCountChartWidth = Math.max(screenWidth, (exercisesSessionCountData?.length || 0) * 80);  // Customize width multiplier
 const exerciseSessionDurationChartWidth = Math.max(screenWidth, (exerciseSessionDurationData?.length || 0) * 80);  // Customize width multiplier
+// newly added: Calculate chart width and height for each bar chart
+const likelihoodChartWidth = Math.max(screenWidth, (likelihoodData?.length || 0) * 80);  // Customize width multiplier
+const experienceChartWidth = Math.max(screenWidth, (experienceData?.length || 0) * 80);
+const exerciseChartWidth = Math.max(screenWidth, (formattedExerciseData?.length || 0) * 80);
+const landmarkChartWidth = Math.max(screenWidth, (formattedLandmarkData?.length || 0) * 80);
 
 const defaultchartHeight = 250; // Set a standard height for all charts, or customize if needed
 
 // newly added: Calculate bar width for each chart individually
 const exerciseSessionCountBarWidth = calculateBarWidth(exercisesSessionCountData || [], exerciseSessionCountChartWidth);
 const exerciseSessionDurationBarWidth = calculateBarWidth(exerciseSessionDurationData || [], exerciseSessionDurationChartWidth);
+const likelihoodBarWidth = calculateBarWidth(likelihoodData || [], likelihoodChartWidth);
+const experienceBarWidth = calculateBarWidth(experienceData || [], experienceChartWidth);
+const exerciseBarWidth = calculateBarWidth(formattedExerciseData || [], exerciseChartWidth);
+const landmarkBarWidth = calculateBarWidth(formattedLandmarkData || [], landmarkChartWidth);
+
+ // newly added: Add suggestions for landmarks and app
+ const [landmarkSuggestions, setLandmarkSuggestions] = useState([]);
+ const [appImprovements, setAppImprovements] = useState([]);
+ const [suggestionsLoading, setSuggestionsLoading] = useState(false);
+ const [suggestionsError, setSuggestionsError] = useState(null);
+ // newly added: Add suggestions for landmarks and app
+
+
+
+ // newly added: State for likelihood and experience data
+ const [likelihoodData, setLikelihoodData] = useState([]);
+ const [experienceData, setExperienceData] = useState([]);
+ const likelihoodLabels = {
+   "0": "Very Unlikely",
+   "1": "Unlikely",
+   "2": "Neutral",
+   "3": "Likely",
+   "4": "Very Likely",
+ };
+ const experienceLabels = {
+   "0": "Very Bad",
+   "1": "Bad",
+   "2": "Neutral",
+   "3": "Good",
+   "4": "Very Good",
+ };
 const getColorForValue = (value, maxCount) => {
   const intensity = value / maxCount; // Calculate intensity from 0 to 1
   return `rgba(108, 83, 61, ${0.4 + 0.5 * intensity})`; // From mindfulnessbrown30 to mindfulnessbrown80
 };
+
+const maxLikelihoodValue = Math.max(...likelihoodData.map(item => item.value), 20); // Default to 20 if no data available
+  const maxExperienceValue = Math.max(...experienceData.map(item => item.value), 20); // Default to 20 if no data available
+  // newly added: State for likelihood and experience data
+
+  //newly added: landmark_exercise_ratingscore
+  const [exerciseRatings, setExerciseRatings] = useState({});
+  const [landmarkRatings, setLandmarkRatings] = useState({});
+  const [selectedExercise, setSelectedExercise] = useState(null);
+  const [selectedLandmark, setSelectedLandmark] = useState(null);
 
 // Default to 20 if no data available
 
@@ -119,6 +169,7 @@ const getColorForValue = (value, maxCount) => {
     }
     fetchData();
   }, [selectedOption]);
+
     
 // Separate useEffect for calculating max values after data is set
 useEffect(() => {
@@ -206,7 +257,160 @@ useEffect(() => {
     // };
   
     // Trigger fetchAllData when the selected option, year, or month changes
+ // newly added: likelihood and experience data
+  useEffect(() => {
+    const getData = async () => {
+      try {
+        const likelihood = await fetchLikelihoodOfFutureUse();
+        const experience = await fetchOverallExperienceRating();
+        setLikelihoodData(Object.keys(likelihood).map(rating => ({
+          value: likelihood[rating],
+          label: likelihoodLabels[rating] || rating,
+        })));
+        setExperienceData(Object.keys(experience).map(rating => ({
+          value: experience[rating],
+          label: experienceLabels[rating] || rating,
+        })));
+      } catch (error) {
+        console.error("Error fetching data for charts:", error);
+      }
+    };
+    getData();
+  }, []);
+  // newly added: likelihood and experience data
 
+  //newly added: landmark_exercise_ratingscore
+  useEffect(() => {
+    const loadRatingsData = async () => {
+      try {
+        setLoading(true);
+        const response = await fetchRatingDistribution();
+
+        // Separate data into exercises and landmarks
+        const exerciseData = {};
+        const landmarkData = {};
+
+        Object.keys(response).forEach((questionID) => {
+          if (isExerciseQuestion(questionID)) {
+            exerciseData[questionID] = response[questionID];
+          } else if (isLandmarkQuestion(questionID)) {
+            landmarkData[questionID] = response[questionID];
+          }
+        });
+
+        setExerciseRatings(exerciseData);
+        setLandmarkRatings(landmarkData);
+
+        // Set default selections to the first exercise and landmark if available
+        //setSelectedExercise(Object.keys(exerciseData)[0] || null);
+        //setSelectedLandmark(Object.keys(landmarkData)[0] || null);
+
+      } catch (error) {
+        setError("Error fetching rating distribution. Please try again later.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadRatingsData();
+  }, []);
+
+  // Mapping for question IDs to human-readable names
+  const exerciseLabelsMap = {
+    "165": "Breathe Awareness and Mindfulness",
+    "167": "Mindfulness Walking Exercise",
+    "180": "Engaging Taste and Touch",
+    "193": "Expanding Awareness through Senses",
+  };
+
+  const landmarkLabelsMap = {
+    "164": "Connector",
+    "166": "SGH Outdoor Area",
+    "179": "SGH Bicentennial Garden",
+    "192": "SGH Museum",
+  };
+
+  // Helper functions to check question IDs
+  const isExerciseQuestion = (questionID) => ["165", "167", "180", "193"].includes(String(questionID));
+  const isLandmarkQuestion = (questionID) => ["164", "166", "179", "192"].includes(String(questionID));
+
+  // Fallbacks to handle undefined or empty data
+  const exerciseOptions = Object.keys(exerciseRatings || {}).map((exerciseId) => ({
+    key: exerciseId,
+    value: exerciseLabelsMap[exerciseId] || "Unnamed Exercise",
+  }));
+
+  const landmarkOptions = Object.keys(landmarkRatings || {}).map((landmarkId) => ({
+    key: landmarkId,
+    value: landmarkLabelsMap[landmarkId] || "Unnamed Landmark",
+  }));
+
+  // Format data for each chart
+  const formatChartData = (data) => {
+    if (!data) return [];
+
+    const maxCount = Math.max(...Object.values(data));
+    return Object.keys(data).map((rating) => ({
+      label: ratingLabels[rating] || rating,
+      value: Math.round(data[rating]),
+      frontColor: getColorForValue(data[rating], maxCount),
+      topLabelComponent: () => (
+        <Text style={{ color: colors.mindfulBrown100, fontSize: 12, marginBottom: 6 }}>
+          {Math.round(data[rating])}
+        </Text>
+      ),
+    }));
+  };
+
+  const ratingLabels = {
+    "0": "Very Bad",
+    "1": "Bad",
+    "2": "Neutral",
+    "3": "Good",
+    "4": "Very Good",
+  };
+
+  const formattedExerciseData = formatChartData(exerciseRatings[selectedExercise]);
+  const formattedLandmarkData = formatChartData(landmarkRatings[selectedLandmark]);
+
+  const maxExerciseValue = formattedExerciseData.length > 0 
+  ? Math.max(...formattedExerciseData.map(item => item.value), 5) 
+  : 5;
+
+  const maxLandmarkValue = formattedLandmarkData.length > 0 
+  ? Math.max(...formattedLandmarkData.map(item => item.value), 5) 
+  : 5;
+
+  //newly added: landmark_exercise_ratingscore
+
+  // Fetch Suggestions on Landmark and App Improvements
+  useEffect(() => {
+    const fetchSuggestionsData = async () => {
+      setSuggestionsLoading(true);
+      try {
+        // Fetch landmark suggestions
+        const landmarkResponse = await fetchSuggestionOnLandmark();
+        console.log("Landmark Suggestions API Response:", landmarkResponse);
+        setLandmarkSuggestions(landmarkResponse || []);
+  
+        // Fetch app improvements
+        const appResponse = await fetchImprovementsToApp();
+        console.log("App Improvements API Response:", appResponse);
+        setAppImprovements(appResponse || []);
+        
+        setSuggestionsError(null);
+      } catch (error) {
+        setSuggestionsError('Failed to load suggestions data.');
+        console.error("Error fetching suggestions data:", error);
+      } finally {
+        setSuggestionsLoading(false);
+      }
+    };
+  
+    fetchSuggestionsData();
+  }, []);
+
+// Fetch Suggestions on Landmark and App Improvements
 
   const onSelectSwitch = option => {
     setSelectedOption(option);
@@ -547,9 +751,281 @@ const calculateAverageLine = (data) => {
           ) : (
             <Text>No data available for selected period</Text>
         )}
+
+<View style={{ borderBottomWidth: 1, borderBottomColor: colors.mindfulBrown80, marginTop: 50 }} />
+          {/* Exercise Picker with Dropdown Component */}
+          <Text className="text-mindful-brown-80 font-urbanist-bold text-xl mt-10">Exercises Rating:</Text>
+          <Dropdown
+            data={exerciseOptions}
+            handleSelect={(itemValue) => setSelectedExercise(itemValue)}
+            selectedValue={selectedExercise}
+            iconName="chevron-down"
+          />
+
+          {/* Exercise Rating Chart */}
+          {formattedExerciseData.length > 0 ? (
+            <View className="mt-4">
+              <Text className="text-mindful-brown-80 font-urbanist-bold text-lg mb-2">
+                {exerciseLabelsMap[selectedExercise] || "Exercise Rating"}
+              </Text>
+              <ScrollView horizontal={true}>
+                <View style={{ width: exerciseChartWidth }}>
+                  <BarChart
+                    data={formattedExerciseData}
+                    barWidth={exerciseBarWidth}
+                    barBorderRadius={4}
+                    width={exerciseChartWidth}
+                    height={defaultchartHeight}
+                    yAxisThickness={1}
+                    xAxisThickness={1}
+                    stepValue={1} 
+                    yAxisLabelTextStyle={{ color: colors.mindfulBrown70, fontSize: 10 }}
+                    xAxisLabelTextStyle={{ color: colors.mindfulBrown90, fontSize: 10 }}
+                    maxValue={Math.floor(maxExerciseValue)}
+                  />
+                </View>
+              </ScrollView>
+            </View>
+          ) : (
+            selectedExercise && (
+              <Text className="text-mindful-brown-80 text-center mt-4">
+                No data available for the selected exercise
+              </Text>
+            )
+          )}
+
+          {/* Landmark Picker with Dropdown Component */}
+          <Text className="text-mindful-brown-80 font-urbanist-bold text-xl mt-10">Landmarks Rating:</Text>
+          <Dropdown
+            data={landmarkOptions}
+            handleSelect={(itemValue) => setSelectedLandmark(itemValue)}
+            selectedValue={selectedLandmark}
+            iconName="chevron-down"
+          />
+
+          {/* Landmark Rating Chart */}
+          {formattedLandmarkData.length > 0 ? (
+            <View className="mt-4">
+              <Text className="text-mindful-brown-80 font-urbanist-bold text-lg mb-2">
+                {landmarkLabelsMap[selectedLandmark] || "Landmark Rating"}
+              </Text>
+              <ScrollView horizontal={true}>
+                <View style={{ width: landmarkChartWidth }}>
+                  <BarChart
+                    data={formattedLandmarkData}
+                    barWidth={landmarkBarWidth}
+                    barBorderRadius={4}
+                    width={landmarkChartWidth}
+                    height={defaultchartHeight}
+                    yAxisThickness={1}
+                    xAxisThickness={1}
+                    stepValue={1} 
+                    yAxisLabelTextStyle={{ color: colors.mindfulBrown70, fontSize: 10 }}
+                    xAxisLabelTextStyle={{ color: colors.mindfulBrown90, fontSize: 10 }}
+                    maxValue={maxLandmarkValue}
+                  />
+                </View>
+              </ScrollView>
+            </View>
+          ) : (
+            selectedLandmark && (
+              <Text className="text-mindful-brown-80 text-center mt-4">
+                No data available for the selected landmark
+              </Text>
+            )
+          )}
+
+          <View style={{ borderBottomWidth: 1, borderBottomColor: colors.mindfulBrown80, marginTop: 50 }} />
+
+          <Text className="text-mindful-brown-80 font-urbanist-bold text-xl mb-4">Likelihood of Future Use</Text>
+          {likelihoodData.length > 0 ? (
+              <ScrollView horizontal={true}>
+                  <View style={{ width: likelihoodChartWidth }}>
+                      <BarChart
+                          data={likelihoodData.map((item) => ({
+                              ...item,
+                              frontColor: getColorForValue(item.value, maxLikelihoodValue),
+                              topLabelComponent: () => (
+                                  <Text style={{ color: colors.optimisticGray50, fontSize: 12, marginBottom: 6 }}>
+                                      {item.value}
+                                  </Text>
+                              ),
+                          }))}
+                          barWidth={likelihoodBarWidth}  // Specific bar width for this chart
+                          barBorderRadius={4}
+                          width={likelihoodChartWidth}  // Specific chart width
+                          height={defaultchartHeight}  // Default chart height
+                          yAxisThickness={1}
+                          xAxisThickness={1}
+                          yAxisLabelTextStyle={{ color: colors.mindfulBrown70, fontSize: 10 }}
+                          xAxisLabelTextStyle={{ color: colors.mindfulBrown90, fontSize: 10 }}
+                          maxValue={maxLikelihoodValue}
+                      />
+                  </View>
+              </ScrollView>
+          ) : (
+              <Text>No data available</Text>
+          )}
+
+
+          <Text className="text-mindful-brown-80 font-urbanist-bold text-xl mb-4 mt-8">Overall Experience Rating</Text>
+          {experienceData.length > 0 ? (
+              <ScrollView horizontal={true}>
+                  <View style={{ width: experienceChartWidth }}>
+                      <BarChart
+                          data={experienceData.map((item) => ({
+                              ...item,
+                              frontColor: getColorForValue(item.value, maxExperienceValue),
+                              topLabelComponent: () => (
+                                  <Text style={{ color: colors.optimisticGray50, fontSize: 12, marginBottom: 6 }}>
+                                      {item.value}
+                                  </Text>
+                              ),
+                          }))}
+                          barWidth={experienceBarWidth}  // Specific bar width for this chart
+                          barBorderRadius={4}
+                          width={experienceChartWidth}  // Specific chart width
+                          height={defaultchartHeight}  // Default chart height
+                          yAxisThickness={1}
+                          xAxisThickness={1}
+                          yAxisLabelTextStyle={{ color: colors.mindfulBrown70, fontSize: 10 }}
+                          xAxisLabelTextStyle={{ color: colors.mindfulBrown90, fontSize: 10 }}
+                          maxValue={maxExperienceValue}
+                      />
+                  </View>
+              </ScrollView>
+          ) : (
+              <Text>No data available</Text>
+          )}
+
+
+          
+                    
+
+
+          {/* Suggestions Section */}
+            <View style={{ borderBottomWidth: 1, borderBottomColor: colors.mindfulBrown80, marginTop: 50 }} />
+
+            {/* Suggestions to Improve Landmark */}
+            <Text className="text-mindful-brown-100 font-urbanist-extra-bold text-2xl mt-6 ml-6">
+              Suggestions to Improve Landmark
+            </Text>
+            {suggestionsLoading ? (
+              <ActivityIndicator size="large" color={colors.mindfulBrown80} style={{ marginVertical: 20 }} />
+            ) : suggestionsError ? (
+              <Text style={{ color: 'red', marginVertical: 20, textAlign: 'center' }}>{suggestionsError}</Text>
+            ) : (
+              landmarkSuggestions.length > 0 ? (
+                <View style={{ margin: 10, padding: 10, backgroundColor: colors['mindful-brown-20'], borderRadius: 10 }}>
+                  {/* Table Header */}
+                  <View style={{ flexDirection: 'row', justifyContent: 'space-between', paddingBottom: 10, borderBottomWidth: 1, borderColor: colors['mindful-brown-60'] }}>
+                    <Text className="text-mindful-brown-100 font-urbanist-bold text-base">Suggestion</Text>
+                    <Text className="text-mindful-brown-100 font-urbanist-bold text-base">Mentions</Text>
+                  </View>
+                  {/* Table Rows */}
+                  {landmarkSuggestions.map((suggestion, idx) => (
+                    <View
+                      key={idx}
+                      style={{
+                        flexDirection: 'row',
+                        alignItems: 'center',  // Aligns items vertically
+                        paddingVertical: 6,
+                        borderBottomWidth: idx === landmarkSuggestions.length - 1 ? 0 : 1,
+                        borderColor: colors['mindful-brown-30'],
+                      }}
+                    >
+                      {/* Suggestion Text */}
+                      <Text
+                        style={{
+                          flex: 1,
+                          marginRight: 30,  // Space between suggestion and mentions
+                          color: colors.mindfulBrown100,
+                          fontSize: 16,
+                        }}
+                      >
+                        {suggestion.response}
+                      </Text>
+                      
+                      {/* Mentions Count */}
+                      <Text
+                        style={{
+                          color: colors.mindfulBrown100,
+                          fontSize: 16,
+                          width: 30,  // Fixed width for alignment
+                          textAlign: 'right',  // Align text to the right
+                        }}
+                      >
+                        {suggestion.count}
+                      </Text>
+                    </View>
+                  ))}
+                </View>
+              ) : (
+                <Text style={{ color: 'gray', margin: 20, textAlign: 'center', fontSize: 16 }}>No suggestions available for landmarks.</Text>
+              )
+            )}
+
+            {/* Suggestions to Improve App */}
+            <Text className="text-mindful-brown-100 font-urbanist-extra-bold text-2xl mt-6 ml-6">
+              Suggestions to Improve App
+            </Text>
+            {suggestionsLoading ? (
+              <ActivityIndicator size="large" color={colors.mindfulBrown80} style={{ marginVertical: 20 }} />
+            ) : suggestionsError ? (
+              <Text style={{ color: 'red', marginVertical: 20, textAlign: 'center' }}>{suggestionsError}</Text>
+            ) : (
+              appImprovements.length > 0 ? (
+                <View style={{ margin: 10, padding: 10, backgroundColor: colors['mindful-brown-20'], borderRadius: 10 }}>
+                  {/* Table Header */}
+                  <View style={{ flexDirection: 'row', justifyContent: 'space-between', paddingBottom: 10, borderBottomWidth: 1, borderColor: colors['mindful-brown-60'] }}>
+                    <Text className="text-mindful-brown-100 font-urbanist-bold text-base">Suggestion</Text>
+                    <Text className="text-mindful-brown-100 font-urbanist-bold text-base">Mentions</Text>
+                  </View>
+                  {/* Table Rows */}
+                  {appImprovements.map((improvement, idx) => (
+                    <View
+                      key={idx}
+                      style={{
+                        flexDirection: 'row',
+                        alignItems: 'center',  // Aligns items vertically
+                        paddingVertical: 6,
+                        borderBottomWidth: idx === appImprovements.length - 1 ? 0 : 1,
+                        borderColor: colors['mindful-brown-30'],
+                      }}
+                    >
+                      {/* Suggestion Text */}
+                      <Text
+                        style={{
+                          flex: 1,
+                          marginRight: 20,  // Space between suggestion and mentions
+                          color: colors.mindfulBrown100,
+                          fontSize: 16,
+                        }}
+                      >
+                        {improvement.response}
+                      </Text>
+                      
+                      {/* Mentions Count */}
+                      <Text
+                        style={{
+                          color: colors.mindfulBrown100,
+                          fontSize: 16,
+                          width: 30,  // Fixed width for alignment
+                          textAlign: 'right',  // Align text to the right
+                        }}
+                      >
+                        {improvement.count}
+                      </Text>
+                    </View>
+                  ))}
+                </View>
+              ) : (
+                <Text style={{ color: 'gray', margin: 20, textAlign: 'center', fontSize: 16 }}>No suggestions available for app improvements.</Text>
+              )
+            )}
             
           </View> 
-             
+         
 )}
           </View>
       
