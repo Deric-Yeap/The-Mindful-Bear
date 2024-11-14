@@ -27,7 +27,6 @@ urlpatterns = [
     
     path('gen-score/', FormQuestionScoreGenView.as_view(), name='form-question-gen-score')
 
-    path('gen-score/', FormQuestionScoreGenView.as_view(), name='form-question-gen-score'),
 
 
 
