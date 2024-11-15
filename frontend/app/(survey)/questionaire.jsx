@@ -6,6 +6,7 @@ import { useSelector } from 'react-redux'
 import { setIsShownNav } from '../../redux/slices/isShownNavSlice'
 import ConfirmModal from '../../components/confirmModal'
 import { confirmModal } from '../../assets/image'
+import { colors } from '../../common/styles'
 import { isLandmarkRatingsEmpty } from '../../api/form'
 
 const Questionaire = () => {
@@ -34,11 +35,14 @@ const Questionaire = () => {
   const [isShowConfirmModal, setIsShowConfirmModal] = useState(false)
   const [startPressed, setStartPressed] = useState(false)
   const router = useRouter()
-  const images = [
-    require('../../../frontend/assets/young-man-practicing-yoga-exercises-mental-body-health.png'),
-    require('../../../frontend/assets/self-care-health-concept.png'),
+
+  // Define the array of background colors for cards
+  const cardColors = [
+    'bg-kind-purple-20',
+    'bg-serenity-green-30',
+    'bg-present-red-10',
+    'bg-zen-yellow-20'
   ]
-  let filteredForms
 
   useEffect(() => {
     const fetchData = async () => {
@@ -207,7 +211,7 @@ const Questionaire = () => {
                       ? 'border-2 border-green-500 bg-green-100'
                       : isUncompletedCompulsory
                         ? 'border-2 border-red-500'
-                        : 'bg-white'
+                        : cardColors[index % 4]
                   }`}
                   onPress={() => {
                     handleFormComplete(form.id)
@@ -216,15 +220,6 @@ const Questionaire = () => {
                   disabled={isCompleted}
                   style={{ overflow: 'hidden' }}
                 >
-                  {/* Background Image */}
-                  <Image
-                    source={images[index % 2]}
-                    className="absolute right-0 w-48 h-48"
-                    style={{
-                      opacity: 0.8,
-                    }}
-                    resizeMode="contain"
-                  />
 
                   {/* Text Content */}
                   <View className="flex-1">

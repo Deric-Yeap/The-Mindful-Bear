@@ -5,7 +5,7 @@ from django.conf import settings
 from datetime import datetime, timedelta
 from django.db.models import FloatField,  Count, Min, Max, Case, When, IntegerField
 from django.db.models.functions import Cast
-from .utils import get_sessions_by_period
+from .utils import get_sessions_by_period, get_sessions
 
 import pytz
 from pytz import UTC  # Make sure pytz is installed
@@ -157,31 +157,38 @@ class ScoreAggregationProfSerializer(serializers.Serializer):
         SGT = pytz.timezone('Asia/Singapore')
          # Get all sessions if year and month are not provided
         sessions = Session.objects.all()
-        if period == 'daily':
-             # Calculate start and end dates for the last 30 days
-            end_date = datetime.now(tz=SGT)
-            start_date = end_date - timedelta(days=30)
-        else:
-            if year and month:
-                # If year and month are provided, filter by the month
-                year = int(year)
-                month = int(month)
-                start_date = datetime(year, month, 1, tzinfo=SGT)
-
-                if month == 12:
-                    end_date = datetime(year + 1, 1, 1, tzinfo=SGT) - timedelta(microseconds=1)
-                else:
-                    end_date = datetime(year, month + 1, 1, tzinfo=SGT) - timedelta(microseconds=1)
-
-                sessions = sessions.filter(start_datetime__gte=start_date, start_datetime__lt=end_date)
+        # Use the current year if no year is provided
+        if not year and not month:
+        # No year and no month provided, use the full date range of all sessions
+            if sessions.exists():
+                start_date = sessions.order_by('start_datetime').first().start_datetime
+                end_date = sessions.order_by('-start_datetime').first().start_datetime
             else:
-                # If no year and month, use the full date range of all sessions
-                if sessions.exists():
-                    start_date = sessions.order_by('start_datetime').first().start_datetime
-                    end_date = sessions.order_by('-start_datetime').first().start_datetime
-                else:
-                    start_date = datetime.now(tz=SGT)
-                    end_date = datetime.now(tz=SGT)
+                # If no sessions are available, use the current date
+                start_date = datetime.now(tz=SGT)
+                end_date = datetime.now(tz=SGT)
+                
+        elif year and not month:
+            # Only year provided, take all months in that year
+            year = int(year)
+            start_date = datetime(year, 1, 1, tzinfo=SGT)
+            end_date = datetime(year + 1, 1, 1, tzinfo=SGT) - timedelta(microseconds=1)
+            
+        elif month and not year:
+            # Only month provided, take the specified month across all years
+            month = int(month)
+            start_date = sessions.filter(start_datetime__month=month).order_by('start_datetime').first().start_datetime
+            end_date = sessions.filter(start_datetime__month=month).order_by('-start_datetime').first().start_datetime
+
+        else:
+            # Both year and month are provided
+            year = int(year)
+            month = int(month)
+            start_date = datetime(year, month, 1, tzinfo=SGT)
+            if month == 12:
+                end_date = datetime(year + 1, 1, 1, tzinfo=SGT) - timedelta(microseconds=1)
+            else:
+                end_date = datetime(year, month + 1, 1, tzinfo=SGT) - timedelta(microseconds=1)
 
         # Get the session data for the specified period
         # Get sessions aggregated by period
@@ -264,6 +271,7 @@ class ScoreAggregationProfPercentageSerializer(serializers.Serializer):
             return {
                 'session_count_pss':pss_filter_count,
                 'session_count_percent_pss': session_count_percent_pss,
+                'session_count_percent_pss_no': 100-session_count_percent_pss,
                 'percentage_changes_pss': percentage_changes_pss
             }
                  
@@ -323,6 +331,7 @@ class ScoreAggregationProfPercentageSerializer(serializers.Serializer):
             return {
                 'session_count_sms': sms_filter_count,
                 'session_count_percent_sms': session_count_percent_sms,
+                'session_count_percent_sms_no': 100-session_count_percent_sms,
                 'percentage_changes_sms': percentage_changes_sms
             }
                  
@@ -331,58 +340,68 @@ class ScoreAggregationProfPercentageSerializer(serializers.Serializer):
         request = self.context.get('request')
         year = request.query_params.get('year')
         month = request.query_params.get('month')
-        period = request.query_params.get('period', 'daily')
+        
         pss = request.query_params.get('pss')
         sms = request.query_params.get('sms')
-        print("period",period)
+       
 
         SGT = pytz.timezone('Asia/Singapore')
          # Get all sessions if year and month are not provided
         sessions = Session.objects.all()
-        if period == 'daily':
-             # Calculate start and end dates for the last 30 days
-            end_date = datetime.now(tz=SGT)
-            start_date = end_date - timedelta(days=30)
-        else:
-            if year and month:
-                # If year and month are provided, filter by the month
-                year = int(year)
-                month = int(month)
-                start_date = datetime(year, month, 1, tzinfo=SGT)
-
-                if month == 12:
-                    end_date = datetime(year + 1, 1, 1, tzinfo=SGT) - timedelta(microseconds=1)
-                else:
-                    end_date = datetime(year, month + 1, 1, tzinfo=SGT) - timedelta(microseconds=1)
-
-                sessions = sessions.filter(start_datetime__gte=start_date, start_datetime__lt=end_date)
+        # Use the current year if no year is provided
+        if not year and not month:
+        # No year and no month provided, use the full date range of all sessions
+            if sessions.exists():
+                start_date = sessions.order_by('start_datetime').first().start_datetime
+                end_date = sessions.order_by('-start_datetime').first().start_datetime
             else:
-                # If no year and month, use the full date range of all sessions
-                if sessions.exists():
-                    start_date = sessions.order_by('start_datetime').first().start_datetime
-                    end_date = sessions.order_by('-start_datetime').first().start_datetime
-                else:
-                    start_date = datetime.now(tz=SGT)
-                    end_date = datetime.now(tz=SGT)
+                # If no sessions are available, use the current date
+                start_date = datetime.now(tz=SGT)
+                end_date = datetime.now(tz=SGT)
+                
+        elif year and not month:
+            # Only year provided, take all months in that year
+            year = int(year)
+            start_date = datetime(year, 1, 1, tzinfo=SGT)
+            end_date = datetime(year + 1, 1, 1, tzinfo=SGT) - timedelta(microseconds=1)
+            
+        elif month and not year:
+            # Only month provided, take the specified month across all years
+            month = int(month)
+            start_date = sessions.filter(start_datetime__month=month).order_by('start_datetime').first().start_datetime
+            end_date = sessions.filter(start_datetime__month=month).order_by('-start_datetime').first().start_datetime
+
+        else:
+            # Both year and month are provided
+            year = int(year)
+            month = int(month)
+            start_date = datetime(year, month, 1, tzinfo=SGT)
+            if month == 12:
+                end_date = datetime(year + 1, 1, 1, tzinfo=SGT) - timedelta(microseconds=1)
+            else:
+                end_date = datetime(year, month + 1, 1, tzinfo=SGT) - timedelta(microseconds=1)
 
         # Get the session data for the specified period
         # Get sessions aggregated by period
          # Iterate over each period and calculate form averages
          # Get sessions aggregated by period
-        session_data = get_sessions_by_period(start_date, end_date, period)
+        session_data = get_sessions(start_date, end_date)
+        print("session_data",session_data)
+        print("start_date",start_date)
+        print("end_date",end_date)
 
         result = {}
-        for period_key, data in session_data.items():
-            pss_percentage_scores = self.get_pss_percentage_change(data['session_prof_ids'],data['session_prof_count'],pss)
-            sms_percentage_scores = self.get_sms_percentage_change(data['session_prof_ids'],data['session_prof_count'],sms)
+        
+        pss_percentage_scores = self.get_pss_percentage_change(session_data['session_prof_ids'],session_data['session_prof_count'],pss)
+        sms_percentage_scores = self.get_sms_percentage_change(session_data['session_prof_ids'],session_data['session_prof_count'],sms)
+        
+        result = {
+            **pss_percentage_scores,
+            **sms_percentage_scores,
+            'session_prof_ids': session_data['session_prof_ids'],
+            'session_prof_count': session_data['session_prof_count']
             
-            result[period_key] = {
-                **pss_percentage_scores,
-                **sms_percentage_scores,
-                'session_prof_ids': data['session_prof_ids'],
-                'session_prof_count': data['session_prof_count']
-                
-            }
+        }
 
         return result
     
