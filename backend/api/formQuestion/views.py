@@ -95,7 +95,7 @@ class ExerciseLandmarkRatingDistribution(APIView):
         # Fetch and aggregate rating counts for each question ID
         rating_counts = (
             FormQuestion.objects
-            .filter(QuestionID__in=rating_question_ids, Response__in=['0', '1', '2', '3', '4'])
+            .filter(QuestionID__in=rating_question_ids, Response__in=['1', '2', '3', '4', '5'])
             .values('QuestionID', 'Response')
             .annotate(count=Count('Response'))
             .order_by('QuestionID', 'Response')
@@ -106,7 +106,7 @@ class ExerciseLandmarkRatingDistribution(APIView):
         for item in rating_counts:
             question_id = item['QuestionID']
             if question_id not in data:
-                data[question_id] = {str(i): 0 for i in range(0, 5)}  # Initialize counts for ratings 0 - 4
+                data[question_id] = {str(i): 0 for i in range(1, 6)}  # Initialize counts for ratings 0 - 4
             data[question_id][item['Response']] = item['count']
 
         return Response(data, status=status.HTTP_200_OK)
