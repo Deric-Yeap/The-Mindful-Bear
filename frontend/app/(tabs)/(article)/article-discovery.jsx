@@ -83,7 +83,7 @@ const ArticleDiscovery = () => {
           >
             <View style={{ flexDirection: 'row', alignItems: 'center' }}>
               <TextInput
-                placeholder="ask me a question..."
+                placeholder="e.g. Any tips to feel less stress?"
                 placeholderTextColor="#F7F4F2"
                 value={searchTerm}
                 onChangeText={setSearchTerm}
