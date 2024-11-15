@@ -573,7 +573,7 @@ const calculateAverageLine = (data) => {
               Average Duration of Sessions Overtime
             </Text>
             <ScrollView horizontal={true}>
-              <View className="flex-row justify-between mb-4 style={{ width: chartWidth }}">
+              <View className="flex-row justify-between mb-4 style={{ width: chartWidth }} " >
               <LineChart
                     areaChart
                     curved
@@ -620,8 +620,8 @@ const calculateAverageLine = (data) => {
             
               </View>
             </ScrollView>
-            <View className="flex-row justify-between mb-4" style={{ borderBottomWidth: 1, borderBottomColor: colors.mindfulBrown80, marginTop: 50 }}>
-            <View style={{ flexDirection: 'row', alignItems: 'center',paddingHorizontal: 30 }}>
+            <View className="flex-row justify-between mb-4 border-t border-mindfulBrown80 mt-50px mb-50px" >
+            <View style={{ flexDirection: 'row', alignItems: 'center',paddingHorizontal: 30 , marginTop:10}}>
 
         <View style={{ alignItems: 'center', marginRight: 10 }}>
             <Text>Year</Text>
@@ -648,7 +648,7 @@ const calculateAverageLine = (data) => {
             title="Apply"
             onPress={retrieveData}
             style={{
-              marginLeft: 100,
+              marginLeft: 10,
               marginTop: 17// Add margin to adjust alignment
             }}
           />

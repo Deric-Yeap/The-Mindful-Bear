@@ -264,7 +264,7 @@ class ScoreAggregationProfPercentageSerializer(serializers.Serializer):
                     percentage_changes_pss[session_id] = percentage_score
                     pss_filter_count += 1
 
-            session_count_percent_pss = pss_filter_count / count * 100
+            session_count_percent_pss = round(pss_filter_count / count * 100,2)
                 
                 
 
@@ -325,7 +325,7 @@ class ScoreAggregationProfPercentageSerializer(serializers.Serializer):
                     percentage_changes_sms[session_id] = percentage_score
                     sms_filter_count += 1
             
-            session_count_percent_sms = sms_filter_count / count * 100
+            session_count_percent_sms = round(sms_filter_count / count * 100,2)
 
 
             return {

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, ScrollView, Dimensions, ActivityIndicator } from 'react-native';
+import { View, Text, ScrollView, Dimensions, ActivityIndicator, TextInput } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import BrownPageTitlePortion from '../../components/brownPageTitlePortion';
 import StatusBarComponent from '../../components/darkThemStatusBar';
@@ -9,9 +9,10 @@ import Loading from '../../components/loading';
 import Toggle from '../../components/toggle';
 import { Svg } from 'react-native-svg';
 import { profScoreSession, profPercentScoreSession } from '../../api/formSession';
+import { genScoreSession } from '../../api/formQuestion';
 import { Picker } from '@react-native-picker/picker';
 import Dropdown from '../../components/dropdown'; 
-
+import FilterButton from '../../components/filterButton';
 // Helper function to calculate bar width
 const calculateBarWidth = (data, chartWidth) => {
   return data && data.length > 0
@@ -22,31 +23,137 @@ const calculateBarWidth = (data, chartWidth) => {
 const SurveyScoresAnalytics = () => {
   const [loading, setLoading] = useState(false); 
   const [error, setError] = useState(null); 
-  const [profScorePercentData, setProfScorePercentData] = useState([]);
-  
-  // Inside your MindfulnessExercisesAnalytics component
-  const screenWidth = Dimensions.get('window').width;
+  //For general line charts
+  const optionList = ['daily', 'monthly', 'yearly'];
+  const periodSelected =  optionList[selectedOption - 1]
+  const [selectedOption, setSelectedOption] = useState(1);
+  const [formattedPssBeforeData, setFormattedPssBeforeData] = useState([]);
+const [formattedPssAfterData, setFormattedPssAfterData] = useState([]);
+const [formattedSmsBeforeData, setFormattedSmsBeforeData] = useState([]);
+const [formattedSmsAfterData, setFormattedSmsAfterData] = useState([]);
 
-// newly added: Calculate chart width and height for each bar chart
-const profScorePercentDataChartWidth = Math.max(screenWidth, (profScorePercentData?.length || 0) * 80);  // Customize width multiplier
+  //For PSS & SMS Prof Pie Charts
+  const [profScorePercentData, setProfScorePercentData] = useState([]);
+  const [genScoreData, setGenScoreData] = useState([]);
+  const [pssPieChartData, setPssPieChartData] = useState([]);
+  const [smsPieChartData, setSmsPieChartData] = useState([]);
+  const [year, setYear] = useState(null);
+    const [month, setMonth] = useState(null);
+    const [pssThreshold, setPssThreshold] = useState(20);
+    const [smsThreshold, setSmsThreshold] = useState(-20);
+
+    //For General Line Charts
+    const [stressGenData, setStressGenData] = useState([]);
+    const [mindfulnessGenData, setMindfulnessGenData] = useState([]);
+  
+  // Calculate chartwidth & height
+  const screenWidth = Dimensions.get('window').width;
+const pieChartWidth = Math.max(screenWidth, (profScorePercentData?.length || 0) * 10);  // Customize width multiplier
 
 const defaultchartHeight = 250; // Set a standard height for all charts, or customize if needed
 
-// newly added: Calculate bar width for each chart individually
-const profScorePercentDataBarWidth = calculateBarWidth(profScorePercentData || [], profScorePercentDataChartWidth)
+
+// Helper function to create colour gradient for bar charts
 const getColorForValue = (value, maxCount) => {
     const intensity = value / maxCount; // Calculate intensity from 0 to 1
     return `rgba(108, 83, 61, ${0.4 + 0.5 * intensity})`; // From mindfulnessbrown30 to mindfulnessbrown80
   };
 
-const exerciseSessionCountChartWidth = Math.max(screenWidth, (exercisesSessionCountData?.length || 0) * 80);  // Customize width multiplier
+  const getLineData = async() =>
+    {
+        const period = optionList[selectedOption - 1]; // Get the period based on selected option
+      try {
+        response = await profScoreSession({ period })
+
+        // Format the data for the line chart
+           const formattedPssBeforeData = Object.keys(response.dates).map((date) => ({
+          value: response.dates[date].average_pss_before || 0, // Use session_count or default to 0
+          label: date
+        }));
+
+        const formattedPssAfterData = Object.keys(response.dates).map((date) => ({
+            value: response.dates[date].average_pss_after || 0, // Use session_count or default to 0
+            label: date
+         }));
+         const formattedSmsBeforeData = Object.keys(response.dates).map((date) => ({
+            value: response.dates[date].average_sms_before || 0, // Use session_count or default to 0
+            label: date
+            }));
+
+        const formattedSmsAfterData = Object.keys(response.dates).map((date) => ({
+            value: response.dates[date].average_sms_after || 0, // Use session_count or default to 0
+            label: date
+            }));
+
+       
+         // Update the state with the formatted data
+         setFormattedPssBeforeData(formattedPssBeforeData);
+         setFormattedPssAfterData(formattedPssAfterData);
+         setFormattedSmsBeforeData(formattedSmsBeforeData);
+         setFormattedSmsAfterData(formattedSmsAfterData);
+        } catch (error) {
+            console.error('Error fetching data for charts:', error);
+        }
+    }
+         
+
+// const exerciseSessionCountChartWidth = Math.max(screenWidth, (exercisesSessionCountData?.length || 0) * 80);  // Customize width multiplier
+    const getGenData = async() =>
+    {
+        try {
+            const params = {}
+            if(year) params.year = year;
+            if(month) params.month = month;
+            const genScoreData = await genScoreSession(params);
+            console.log("genScoreData",genScoreData)
+
+            // Prepare the data for the bar chart
+            const stressGenData = [
+                {
+                    value: genScoreData["percentage_yes_stress"],
+                    label: "Improvement",
+                    color: colors.mindfulBrown90
+                },
+                {
+                    value: genScoreData["percentage_no_stress"],
+                    label: "No Improvement",
+                    color: colors.mindfulBrown30
+                }
+            ]
+            setStressGenData(stressGenData);
+
+            const mindfulnessGenData = [
+                {
+                    value: genScoreData["percentage_yes_mindfulness"],
+                    label: "Improvement",
+                    color: colors.mindfulBrown90
+                },
+                {
+                    value: genScoreData["percentage_no_mindfulness"],
+                    label: "No Improvement",
+                    color: colors.mindfulBrown30
+                }
+            ]
+            setMindfulnessGenData(mindfulnessGenData);
+            console.log("mindfulnessGenData",mindfulnessGenData)
+
+        } catch (error) {
+            console.error("Error fetching data for charts:", error);
+
+        }
+    }
  
     const getProfData = async () => {
       try {
+        console.log("starts here")
+        
         const params = {
-            pss: pss || 20,  // If pss is not provided, set it to 20
-            sms: sms || -20  // If sms is not provided, set it to -20
+            pss: pssThreshold || 20,  // If pss is not provided, set it to 20
+            sms: smsThreshold || -20  // If sms is not provided, set it to -20
         };
+
+        if(year) params.year = year;
+        if(month) params.month = month;
         
         const profScorePercentData = await profPercentScoreSession(params);
         console.log("profScorePercentData",profScorePercentData)
@@ -54,27 +161,35 @@ const exerciseSessionCountChartWidth = Math.max(screenWidth, (exercisesSessionCo
 
 
         // Prepare the data for the pie chart
-        const pieChartProfData = [
+        const smsPieChartData = [
             {
                 value: profScorePercentData["session_count_percent_sms"],
-                label: "SMS Improvent",
+                label: "Improvement",
+                color: colors.mindfulBrown90
             },
             {
                 value: profScorePercentData["session_count_percent_sms_no"],
-                label: "SMS No  Improvement",
-            },
+                label: "No Improvement",
+                color: colors.mindfulBrown30
+            }
+        ];
+        setSmsPieChartData(smsPieChartData); 
+
+        const pssPieChartData = [
             {
                 value: profScorePercentData["session_count_percent_pss"],
-                label: "PSS Improve",
+                label: "Improvement",
+                color: colors.mindfulBrown90
             },
             {
                 value: profScorePercentData["session_count_percent_pss_no"],
-                label: "PSS No Improvement",
+                label: "No Improvement",
+                color: colors.mindfulBrown30
             }
         ];
-        setProfScorePercentData(pieChartProfData )
-
-
+        setPssPieChartData(pssPieChartData);
+        console.log("smsPieChartData",smsPieChartData)
+        console.log("pssPieChartData",pssPieChartData)
 
       } catch (error) {
         console.error("Error fetching data for charts:", error);
@@ -85,7 +200,7 @@ const exerciseSessionCountChartWidth = Math.max(screenWidth, (exercisesSessionCo
    const fetchAllData = async () => {
     setLoading(true);
     try {
-      await Promise.all([getProfData()]); // Wait for both to complete
+      await Promise.all([getProfData(),getGenData()]); // Wait for both to complete
     } catch (error) {
       // If either call fails, set the error immediately
       setError('An error occurred during data fetching.');
@@ -100,6 +215,10 @@ const exerciseSessionCountChartWidth = Math.max(screenWidth, (exercisesSessionCo
     fetchAllData();
   }, []);
 
+  const onSelectSwitch = option => {
+    setSelectedOption(option);
+  };
+
   if (loading) {
     return (
       <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: colors.optimisticGray10 }}>
@@ -109,8 +228,6 @@ const exerciseSessionCountChartWidth = Math.max(screenWidth, (exercisesSessionCo
   }
 
   // Use the number of data points to determine the chart width
-  const chartWidth = Math.max(screenWidth, sessionNumLineData.length * 100); // Ensure at least the screen width
-  console.log("chartWidth",chartWidth)
 
  // Function to calculate linear regression (trendline)
  const calculateTrendline = (data) => {
@@ -141,7 +258,7 @@ const calculateAverageLine = (data) => {
   });
 
   // Calculate the average value from the filtered data
-  const averageValue = filteredData.reduce((sum, point) => sum + point.value, 0) / filteredData.length || 0; // Prevent division by zero
+//   const averageValue = filteredData.reduce((sum, point) => sum + point.value, 0) / filteredData.length || 0; // Prevent division by zero
 
   // Return the average line data
   return filteredData.map(point => ({
@@ -150,28 +267,26 @@ const calculateAverageLine = (data) => {
   }));
 };
 
- const averageLineDataDuration = selectedOption === 1 ? calculateAverageLine(sessionDurationLineData) : [];
-  const trendlineDataDuration = selectedOption !== 1 ? calculateTrendline(sessionDurationLineData) : [];
+//  const averageLineDataDuration = selectedOption === 1 ? calculateAverageLine(sessionDurationLineData) : [];
+//   const trendlineDataDuration = selectedOption !== 1 ? calculateTrendline(sessionDurationLineData) : [];
 
-  const averageLineDataSessions = selectedOption === 1 ? calculateAverageLine(sessionNumLineData) : [];
-  const trendlineDataSessions = selectedOption !== 1 ? calculateTrendline(sessionNumLineData) : [];
-  console.log("averageLineDataSessions",averageLineDataSessions)
-  console.log("trendlineDataSessions",trendlineDataSessions)
+//   const averageLineDataSessions = selectedOption === 1 ? calculateAverageLine(sessionNumLineData) : [];
+//   const trendlineDataSessions = selectedOption !== 1 ? calculateTrendline(sessionNumLineData) : [];
+//   console.log("averageLineDataSessions",averageLineDataSessions)
+//   console.log("trendlineDataSessions",trendlineDataSessions)
 
   // Step 1: Extract the average value
-  const averageDataSessionsValue = averageLineDataSessions.length > 0 ? averageLineDataSessions[0].value : 0;
+//   const averageDataSessionsValue = averageLineDataSessions.length > 0 ? averageLineDataSessions[0].value : 0;
 
   // Step 2: Define the chart boundaries (yMin, yMax, chartHeight)
-  const yMin = 0; // Minimum value for y-axis
-  const yMax = Math.max(...sessionNumLineData.map(d => d.value)); // Maximum value based on data
-  const chartHeight = 250; // Assume chart height is 250 pixels
+//   const yMin = 0; // Minimum value for y-axis
+//   const yMax = Math.max(...sessionNumLineData.map(d => d.value)); // Maximum value based on data
+//   const chartHeight = 250; // Assume chart height is 250 pixels
 
   // Step 3: Calculate the y-coordinate for the average line
-  const yCoordinateNumBasedOnAverage = chartHeight * (1 - (averageDataSessionsValue - yMin) / (yMax - yMin));
-  console.log("yCoordinateNumBasedOnAverage",yCoordinateNumBasedOnAverage)
+//   const yCoordinateNumBasedOnAverage = chartHeight * (1 - (averageDataSessionsValue - yMin) / (yMax - yMin));
+//   console.log("yCoordinateNumBasedOnAverage",yCoordinateNumBasedOnAverage)
 
-  console.log("Data before rendering - Landmark Suggestions:", landmarkSuggestions);
-  console.log("Data before rendering - App Improvements:", appImprovements);
 
   return (
     <SafeAreaView
@@ -212,10 +327,11 @@ const calculateAverageLine = (data) => {
             ) : error ? (
               <Text style={{ color: 'red', marginVertical: 20 }}>{error}</Text>
             ) : (
+        <View>
           <ScrollView horizontal={true}>
             <View className="flex-row justify-between mb-4 style={{ width: chartWidth }} ">
              
-            <LineChart
+            {/* <LineChart
                 areaChart
                 curved
                 data={sessionNumLineData.length > 1 ? sessionNumLineData : null}
@@ -263,13 +379,13 @@ const calculateAverageLine = (data) => {
                   paddingLeft: 20, // Add padding to the left to prevent coverage
                 }}
                 
-              />
+              /> */}
               
            
             
             </View>
           </ScrollView>
-          )}
+          
           <View className="flex-row justify-between mb-4">
             
             
@@ -280,7 +396,7 @@ const calculateAverageLine = (data) => {
           </Text>
           <ScrollView horizontal={true}>
             <View className="flex-row justify-between mb-4 style={{ width: chartWidth }}">
-            <LineChart
+            {/* <LineChart
                   areaChart
                   curved
                   data={sessionDurationLineData.length > 1 ? sessionDurationLineData : null} // Ensure this is your data
@@ -324,159 +440,250 @@ const calculateAverageLine = (data) => {
                     paddingTop: -20,
                     paddingLeft: 20, // Add padding to the left to prevent coverage
                   }}
-                />
+                /> */}
                 
             </View>
           </ScrollView>
-          
+          <View className="flex flex-wrap p-4 ">
+  {/* First Row with 3 Filters */}
+  <View className="flex-row justify-between w-full mb-4 border-t border-mindfulBrown80 mt-50px mb-50px">
+    <View className="w-1/3 mt-4">
+        <Text className="text-sm">Year</Text>
+            <TextInput
+            className="border border-yellow-400 px-2 py-1 w-20 text-center rounded"
+            placeholder="YYYY"
+            keyboardType="numeric"
+            value={year}
+            onChangeText={(text) => setYear(text)}
+            />
+    </View>
+    <View className="w-1/3 mt-4">
+        <Text className="text-sm">Month</Text>
+            <TextInput
+            className="border border-yellow-400 px-2 py-1 w-20 text-center rounded"
+            placeholder="MM"
+            keyboardType="numeric"
+            value={month}
+            onChangeText={(text) => setMonth(text)}
+            />
+        
+    </View>
+    <View className="w-1/3 mt-4">
+        <Text className="text-sm">PSS Threshold (%)</Text>
+            <TextInput
+            className="border border-yellow-400 px-2 py-1 w-20 text-center rounded"
+            placeholder='%'
+            keyboardType="numeric"
+            value={`${pssThreshold}`} // Replace with appropriate state variable
+            onChangeText={(text) => setPssThreshold(text)}  // Replace with appropriate handler
+            />
+    </View>
+  </View>
 
-          <View style={{ borderBottomWidth: 1, borderBottomColor: colors.mindfulBrown80, marginTop: 50 }} />
-          {/* Exercise Picker with Dropdown Component */}
-          <Text className="text-mindful-brown-80 font-urbanist-bold text-xl mt-10">Exercises Rating:</Text>
-          <Dropdown
-            data={exerciseOptions}
-            handleSelect={(itemValue) => setSelectedExercise(itemValue)}
-            selectedValue={selectedExercise}
-            iconName="chevron-down"
-          />
+  {/* Second Row with 1 Filter and Apply Button */}
+  <View className="flex-row items-center justify-between w-full gap-x-2">
+    <View className="w-5/12 mt-2 mb-1">
+        <Text className="text-sm">SMS Threshold (%)</Text>
+            <TextInput
+            className="border border-yellow-400 px-2 py-1 w-20 text-center rounded"
+            placeholder='%'
+            keyboardType="numeric"
+            value={`${smsThreshold}`} // Replace with appropriate state variable
+            onChangeText={(text) => setSmsThreshold(text)}  // Replace with appropriate handler
+            />
+    </View>
+    <View className="w-1/3 mt-2 mb-1">
+    <Text className="text-sm"></Text>
+    <FilterButton
+        title="Apply"
+        onPress={fetchAllData}
+        className="bg-brown-500 py-2 px-2 rounded text-white text-sm"
+        />
+      
+        </View>
+    </View>
+    </View>
+    <Text className="text-mindful-brown-100 font-urbanist-bold text-xl mb-4">
+        Stress Reduction Group 
+    </Text>
+    <Text className="text-mindful-brown-100 font-urbanist-bold text-lg mb-4">
+        PSS Results
+    </Text>
+    
+    <ScrollView horizontal={true}>
+        <View className="flex-row justify-between mb-4 " >
+        {pssPieChartData.length > 0   ? (
+        <ScrollView horizontal={true}>
+            <View style={{ width: pieChartWidth }}>
+                <PieChart
+                data={pssPieChartData}
+                colors={[colors.mindfulBrown30, colors.mindfulBrown90]}
+                radius={pieChartWidth / 2.5}  // Make it a donut chart
+                innerRadius={pieChartWidth / 5} // Inner radius for the hole
+                donut={true}
+                showText
+                centerLabelComponent={() => {
+                    return(
+                    <View>
+                        <Text className = "font-urbanist-bold text-2xl text-center text-mindfulbrown-100">{`${pssPieChartData.find(item => item.label === "Improvement").value} % `}</Text>
+                        <Text className = "font-urbanist text-sm text-mindfulbrown-100 text-center">sessions effectively reduced stress</Text>
+                                        
+                    </View>
+                    )
+                }}
+                textPosition="center"
+                centerTextFontSize={18}
+                textColor={colors.mindfulBrown100}
+                centerTextFontWeight="bold"
 
-          {/* Exercise Rating Chart */}
-          {formattedExerciseData.length > 0 ? (
-            <View className="mt-4">
-              <Text className="text-mindful-brown-80 font-urbanist-bold text-lg mb-2">
-                {exerciseLabelsMap[selectedExercise] || "Exercise Rating"}
-              </Text>
-              <ScrollView horizontal={true}>
-                <View style={{ width: exerciseChartWidth }}>
-                  <BarChart
-                    data={formattedExerciseData}
-                    barWidth={exerciseBarWidth}
-                    barBorderRadius={4}
-                    width={exerciseChartWidth}
-                    height={defaultchartHeight}
-                    yAxisThickness={1}
-                    xAxisThickness={1}
-                    showYAxisIndices
-                    yAxisLabelTextStyle={{ color: colors.mindfulBrown70, fontSize: 10 }}
-                    xAxisLabelTextStyle={{ color: colors.mindfulBrown90, fontSize: 10 }}
-                    maxValue={maxExerciseValue}
-                  />
-                </View>
-              </ScrollView>
-            </View>
+            />
+            </View> 
+        </ScrollView>
+             
+            
           ) : (
-            selectedExercise && (
-              <Text className="text-mindful-brown-80 text-center mt-4">
-                No data available for the selected exercise
-              </Text>
-            )
-          )}
+            <Text>No data available for selected period and/or threshold</Text>
+        )}
+        </View>
+    </ScrollView>
 
-          {/* Landmark Picker with Dropdown Component */}
-          <Text className="text-mindful-brown-80 font-urbanist-bold text-xl mt-10">Landmarks Rating:</Text>
-          <Dropdown
-            data={landmarkOptions}
-            handleSelect={(itemValue) => setSelectedLandmark(itemValue)}
-            selectedValue={selectedLandmark}
-            iconName="chevron-down"
-          />
+    <Text className="text-mindful-brown-100 font-urbanist-bold text-lg mb-4">
+        General Assessment Results
+    </Text>
+    {/* <PieChartComponent pieChartData = { pssPieChartData } 
+                        pieChartWidth = {pieChartWidth} 
+                        title = "PSS Improved" 
+                        chartLabel = "improved in PSS" /> */}
+    
+    <ScrollView horizontal={true}>
+        <View className="flex-row justify-between mb-4 " >
+        {stressGenData.length > 0   ? (
+        <ScrollView horizontal={true}>
+            <View style={{ width: pieChartWidth }}>
+                <PieChart
+                data={stressGenData}
+                colors={[colors.mindfulBrown30, colors.mindfulBrown90]}
+                radius={pieChartWidth / 2.5}  // Make it a donut chart
+                innerRadius={pieChartWidth / 5} // Inner radius for the hole
+                donut={true}
+                showText
+                centerLabelComponent={() => {
+                    return(
+                    <View>
+                        <Text className = "font-urbanist-bold text-2xl text-center text-mindfulbrown-100">{`${stressGenData.find(item => item.label === "Improvement").value} % `}</Text>
+                        <Text className = "font-urbanist text-sm text-mindfulbrown-100 text-center">sessions effectively reduced stress</Text>
+                                        
+                    </View>
+                    )
+                }}
+                textPosition="center"
+                centerTextFontSize={18}
+                textColor={colors.mindfulBrown100}
+                centerTextFontWeight="bold"
 
-          {/* Landmark Rating Chart */}
-          {formattedLandmarkData.length > 0 ? (
-            <View className="mt-4">
-              <Text className="text-mindful-brown-80 font-urbanist-bold text-lg mb-2">
-                {landmarkLabelsMap[selectedLandmark] || "Landmark Rating"}
-              </Text>
-              <ScrollView horizontal={true}>
-                <View style={{ width: landmarkChartWidth }}>
-                  <BarChart
-                    data={formattedLandmarkData}
-                    barWidth={landmarkBarWidth}
-                    barBorderRadius={4}
-                    width={landmarkChartWidth}
-                    height={defaultchartHeight}
-                    yAxisThickness={1}
-                    xAxisThickness={1}
-                    showYAxisIndices
-                    yAxisLabelTextStyle={{ color: colors.mindfulBrown70, fontSize: 10 }}
-                    xAxisLabelTextStyle={{ color: colors.mindfulBrown90, fontSize: 10 }}
-                    maxValue={maxLandmarkValue}
-                  />
-                </View>
-              </ScrollView>
-            </View>
+            />
+            </View> 
+        </ScrollView>
+             
+            
           ) : (
-            selectedLandmark && (
-              <Text className="text-mindful-brown-80 text-center mt-4">
-                No data available for the selected landmark
-              </Text>
-            )
-          )}
+            <Text>No data available for selected period and/or threshold</Text>
+        )}
+        </View>
+    </ScrollView>
 
-          <View style={{ borderBottomWidth: 1, borderBottomColor: colors.mindfulBrown80, marginTop: 50 }} />
+    <Text className="text-mindful-brown-100 font-urbanist-bold text-xl mb-4">
+        Mindfulness Improve Group 
+    </Text>
+    <Text className="text-mindful-brown-100 font-urbanist-bold text-lg mb-4">
+        SMS Results
+    </Text>
 
-          <Text className="text-mindful-brown-80 font-urbanist-bold text-xl mb-4">Likelihood of Future Use</Text>
-          {likelihoodData.length > 0 ? (
-              <ScrollView horizontal={true}>
-                  <View style={{ width: likelihoodChartWidth }}>
-                      <BarChart
-                          data={likelihoodData.map((item) => ({
-                              ...item,
-                              frontColor: getColorForValue(item.value, maxLikelihoodValue),
-                              topLabelComponent: () => (
-                                  <Text style={{ color: colors.optimisticGray50, fontSize: 12, marginBottom: 6 }}>
-                                      {item.value}
-                                  </Text>
-                              ),
-                          }))}
-                          barWidth={likelihoodBarWidth}  // Specific bar width for this chart
-                          barBorderRadius={4}
-                          width={likelihoodChartWidth}  // Specific chart width
-                          height={defaultchartHeight}  // Default chart height
-                          yAxisThickness={1}
-                          xAxisThickness={1}
-                          showYAxisIndices
-                          yAxisLabelTextStyle={{ color: colors.mindfulBrown70, fontSize: 10 }}
-                          xAxisLabelTextStyle={{ color: colors.mindfulBrown90, fontSize: 10 }}
-                          maxValue={maxLikelihoodValue}
-                      />
-                  </View>
-              </ScrollView>
+    <ScrollView horizontal={true}>
+        <View className="flex-row justify-between mb-4 " >
+        {smsPieChartData.length > 0   ? (
+        <ScrollView horizontal={true}>
+            <View style={{ width: pieChartWidth }}>
+                <PieChart
+                data={smsPieChartData}
+                colors={[colors.mindfulBrown30, colors.mindfulBrown90]}
+                radius={pieChartWidth / 2.5}  // Make it a donut chart
+                innerRadius={pieChartWidth / 5} // Inner radius for the hole
+                donut={true}
+                showText
+                centerLabelComponent={() => {
+                    return(
+                    <View>
+                        <Text className = "font-urbanist-bold text-2xl text-center text-mindfulbrown-100">{`${smsPieChartData.find(item => item.label === "Improvement").value} % `}</Text>
+                        <Text className = "font-urbanist text-sm text-mindfulbrown-100 text-center">sessions effectively improved mindfulness</Text>
+                                        
+                    </View>
+                    )
+                }}
+                textPosition="center"
+                centerTextFontSize={18}
+                textColor={colors.mindfulBrown100}
+                centerTextFontWeight="bold"
+
+            />
+            </View> 
+        </ScrollView>
+             
+            
           ) : (
-              <Text>No data available</Text>
-          )}
+            <Text>No data available for selected period and/or threshold</Text>
+        )}
+        </View>
+    </ScrollView>
 
+    <Text className="text-mindful-brown-100 font-urbanist-bold text-lg mb-4">
+        General Assessment Results
+    </Text>
 
-          <Text className="text-mindful-brown-80 font-urbanist-bold text-xl mb-4 mt-8">Overall Experience Rating</Text>
-          {experienceData.length > 0 ? (
-              <ScrollView horizontal={true}>
-                  <View style={{ width: experienceChartWidth }}>
-                      <BarChart
-                          data={experienceData.map((item) => ({
-                              ...item,
-                              frontColor: getColorForValue(item.value, maxExperienceValue),
-                              topLabelComponent: () => (
-                                  <Text style={{ color: colors.optimisticGray50, fontSize: 12, marginBottom: 6 }}>
-                                      {item.value}
-                                  </Text>
-                              ),
-                          }))}
-                          barWidth={experienceBarWidth}  // Specific bar width for this chart
-                          barBorderRadius={4}
-                          width={experienceChartWidth}  // Specific chart width
-                          height={defaultchartHeight}  // Default chart height
-                          yAxisThickness={1}
-                          xAxisThickness={1}
-                          showYAxisIndices
-                          yAxisLabelTextStyle={{ color: colors.mindfulBrown70, fontSize: 10 }}
-                          xAxisLabelTextStyle={{ color: colors.mindfulBrown90, fontSize: 10 }}
-                          maxValue={maxExperienceValue}
-                      />
-                  </View>
-              </ScrollView>
+    <ScrollView horizontal={true}>
+        <View className="flex-row justify-between mb-4 " >
+        {mindfulnessGenData.length > 0   ? (
+        <ScrollView horizontal={true}>
+            <View style={{ width: pieChartWidth }}>
+                <PieChart
+                data={mindfulnessGenData}
+                colors={[colors.mindfulBrown30, colors.mindfulBrown90]}
+                radius={pieChartWidth / 2.5}  // Make it a donut chart
+                innerRadius={pieChartWidth / 5} // Inner radius for the hole
+                donut={true}
+                showText
+                centerLabelComponent={() => {
+                    return(
+                    <View>
+                        <Text className = "font-urbanist-bold text-2xl text-center text-mindfulbrown-100">{`${mindfulnessGenData.find(item => item.label === "Improvement").value} % `}</Text>
+                        <Text className = "font-urbanist text-sm text-mindfulbrown-100 text-center">sessions effectively improved mindfulness</Text>
+                                        
+                    </View>
+                    )
+                }}
+                textPosition="center"
+                centerTextFontSize={18}
+                textColor={colors.mindfulBrown100}
+                centerTextFontWeight="bold"
+
+            />
+            </View> 
+        </ScrollView>
+             
+            
           ) : (
-              <Text>No data available</Text>
-          )}
+            <Text>No data available for selected period and/or threshold</Text>
+        )}
+        </View>
+    </ScrollView>
+
+   
+    
+         </View>
+
+        )}
+
+         
         </View>
       </ScrollView>
     </SafeAreaView>
