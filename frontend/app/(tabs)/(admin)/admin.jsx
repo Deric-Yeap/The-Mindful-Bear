@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useState, useEffect } from 'react'
 import {
   View,
   Text,
@@ -12,8 +12,104 @@ import { colors } from '../../../common/styles'
 import TopBrownSearchBar from '../../../components/topBrownSearchBar'
 import StatusBarComponent from '../../../components/darkThemStatusBar'
 import AnalyticsTabs from '../../../components/analytics/analyticsTabs'
+import axiosInstance from '../../../common/axiosInstance'
+import { listUsers } from '../../../api/user'
+import Svg, { Circle, Path, Text as SvgText } from 'react-native-svg'
 
 export default function Admin() {
+  const [ageStats, setAgeStats] = useState({ percentage: 0, range: '' })
+  const [deptStats, setDeptStats] = useState({ percentage: 0, department: '' })
+
+  useEffect(() => {
+    const calculateAgeDistribution = (users) => {
+      // Calculate age for each user
+      const ages = users.map((user) => {
+        const birthDate = new Date(user.date_of_birth)
+        const today = new Date()
+        let age = today.getFullYear() - birthDate.getFullYear()
+        const monthDiff = today.getMonth() - birthDate.getMonth()
+        if (
+          monthDiff < 0 ||
+          (monthDiff === 0 && today.getDate() < birthDate.getDate())
+        ) {
+          age--
+        }
+        return age
+      })
+
+      // Define age ranges
+      const ageRanges = {
+        '18-29': ages.filter((age) => age >= 18 && age <= 29).length,
+        '30-40': ages.filter((age) => age >= 30 && age <= 40).length,
+        '41-50': ages.filter((age) => age >= 41 && age <= 50).length,
+        '51+': ages.filter((age) => age >= 51).length,
+      }
+
+      // Find the range with highest count
+      const totalUsers = ages.length
+      let maxRange = ''
+      let maxCount = 0
+
+      for (const [range, count] of Object.entries(ageRanges)) {
+        if (count > maxCount) {
+          maxCount = count
+          maxRange = range
+        }
+      }
+
+      const percentage = Math.round((maxCount / totalUsers) * 100)
+
+      return {
+        percentage,
+        range: maxRange,
+      }
+    }
+
+    const calculateDepartmentDistribution = (users) => {
+      // Count users in each department
+      const deptCount = users.reduce((acc, user) => {
+        const dept = user.department
+        if (dept) {
+          acc[dept] = (acc[dept] || 0) + 1
+        }
+        return acc
+      }, {})
+
+      // Find department with highest count
+      let maxCount = 0
+      let maxDept = ''
+      const totalUsers = users.length
+
+      for (const [dept, count] of Object.entries(deptCount)) {
+        if (count > maxCount) {
+          maxCount = count
+          maxDept = dept
+        }
+      }
+
+      const percentage =
+        totalUsers > 0 ? Math.round((maxCount / totalUsers) * 100) : 0
+
+      return {
+        percentage,
+        department: maxDept || 'Unknown Department',
+      }
+    }
+    const fetchUsers = async () => {
+      try {
+        const response = await listUsers()
+        const stats = calculateAgeDistribution(response)
+        const deptStats = calculateDepartmentDistribution(response)
+        setAgeStats(stats)
+        setDeptStats(deptStats)
+      } catch (error) {
+        console.error('Error fetching users:', error)
+      }
+    }
+
+    fetchUsers()
+  }, [])
+
   return (
     <SafeAreaView
       className="flex-1 bg-optimistic-gray-10"
@@ -118,47 +214,111 @@ export default function Admin() {
           </View>
 
           <Text className="text-mindful-brown-100 font-urbanist-bold text-xl mb-4">
-            Demographic
+            User Demographic
           </Text>
-          <View className="flex-row justify-between mb-4">
-            <Link href="/admin/age" asChild>
-              <TouchableOpacity className="flex-1 bg-empathy-orange-40 p-2 rounded-2xl mr-2">
-                <View className="items-start">
-                  <Text className="text-empathy-orange-10 font-urbanist-bold text-lg">
-                    Age
+          <View className="mb-4">
+            <View className="flex-row justify-between gap-4">
+              {/* Age Distribution Card */}
+              <TouchableOpacity className="flex-1 bg-white p-6 rounded-[32px] shadow-sm">
+                <View>
+                  <Text className="text-gray-900 font-urbanist-bold text-lg mb-6">
+                    Age Distribution
                   </Text>
-                  <Text className="text-empathy-orange-10 font-urbanist-bold mt-1">
-                    35% of users are between ages 30-40
-                  </Text>
-                </View>
-                <View className="items-center justify-center mt-2">
-                  <MaterialCommunityIcons
-                    name="chart-bar"
-                    size={128}
-                    color={colors.empathyOrange20}
-                  />
+
+                  <View className="items-center justify-center">
+                    <Svg height="120" width="120" viewBox="0 0 180 180">
+                      {/* Background circle */}
+                      <Circle
+                        cx="90"
+                        cy="90"
+                        r="60"
+                        stroke="#FFE5D3"
+                        strokeWidth="20"
+                        fill="transparent"
+                      />
+                      {/* Progress circle */}
+                      <Circle
+                        cx="90"
+                        cy="90"
+                        r="60"
+                        stroke={colors.empathyOrange40}
+                        strokeWidth="20"
+                        fill="transparent"
+                        strokeDasharray={`${ageStats.percentage * 3.77} 377`}
+                        strokeDashoffset={-94.25}
+                      />
+                      {/* Percentage */}
+                      <SvgText
+                        x="90"
+                        y="90"
+                        fontSize="32"
+                        fontWeight="bold"
+                        fill="#1A1A1A"
+                        textAnchor="middle"
+                        dy="10"
+                      >
+                        {ageStats.percentage}%
+                      </SvgText>
+                    </Svg>
+
+                    <Text className="text-gray-600 font-urbanist-bold text-lg mt-4">
+                      {ageStats.range} years
+                    </Text>
+                  </View>
                 </View>
               </TouchableOpacity>
-            </Link>
-            <Link href="/admin/department" asChild>
-              <TouchableOpacity className="flex-1 bg-kind-purple-30 p-2 rounded-2xl ml-2">
-                <View className="items-start">
-                  <Text className="text-white font-urbanist-bold text-lg">
+
+              {/* Department Stats Card */}
+              <TouchableOpacity className="flex-1 bg-white p-6 rounded-[32px] shadow-sm">
+                <View>
+                  <Text className="text-gray-900 font-urbanist-bold text-lg mb-6">
                     Department
                   </Text>
-                  <Text className="text-white font-urbanist-bold mt-1">
-                    69% users are from the Office of Well Being
-                  </Text>
-                </View>
-                <View className="items-center justify-center mt-2">
-                  <MaterialCommunityIcons
-                    name="office-building"
-                    size={128}
-                    color={colors.kindPurple10}
-                  />
+
+                  <View className="items-center justify-center">
+                    <Svg height="120" width="120" viewBox="0 0 180 180">
+                      {/* Background circle */}
+                      <Circle cx="90" cy="90" r="65" fill="#F3F0FF" />
+                      {/* Progress sector */}
+                      <Path
+                        d={`M 90 90 L 90 25 A 65 65 0 ${deptStats.percentage > 50 ? 1 : 0} 1 ${
+                          90 +
+                          65 *
+                            Math.cos(
+                              (deptStats.percentage / 100) * 2 * Math.PI -
+                                Math.PI / 2
+                            )
+                        } ${
+                          90 +
+                          65 *
+                            Math.sin(
+                              (deptStats.percentage / 100) * 2 * Math.PI -
+                                Math.PI / 2
+                            )
+                        } Z`}
+                        fill={colors.kindPurple30}
+                      />
+                      {/* Percentage */}
+                      <SvgText
+                        x="90"
+                        y="90"
+                        fontSize="32"
+                        fontWeight="bold"
+                        fill="#1A1A1A"
+                        textAnchor="middle"
+                        dy="10"
+                      >
+                        {deptStats.percentage}%
+                      </SvgText>
+                    </Svg>
+
+                    <Text className="text-gray-600 font-urbanist-bold text-lg mt-4">
+                      {deptStats.department}
+                    </Text>
+                  </View>
                 </View>
               </TouchableOpacity>
-            </Link>
+            </View>
           </View>
           <View className="bg-optimistic-gray-10 p-4 rounded-lg mb-4">
             <Text className="text-mindful-brown-100 font-urbanist-bold text-xl mb-4">
