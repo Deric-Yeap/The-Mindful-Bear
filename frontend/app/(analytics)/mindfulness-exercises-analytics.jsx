@@ -348,24 +348,26 @@ useEffect(() => {
   };
 
   const ratingLabels = {
-    "0": "Very Bad",
-    "1": "Bad",
-    "2": "Neutral",
-    "3": "Good",
-    "4": "Very Good",
+    "1": "Very Bad",
+    "2": "Bad",
+    "3": "Neutral",
+    "4": "Good",
+    "5": "Very Good",
   };
 
   const formattedExerciseData = formatChartData(exerciseRatings[selectedExercise]);
   const formattedLandmarkData = formatChartData(landmarkRatings[selectedLandmark]);
 
-  const maxExerciseValue = formattedExerciseData.length > 0 
-  ? Math.max(...formattedExerciseData.map(item => item.value), 5) 
+  const maxExerciseValue = formattedExerciseData.length > 0
+  ? Math.max(...formattedExerciseData.map(item => item.value)) * 1.2 // Add buffer
   : 5;
+  const exerciseStepValue = Math.ceil(maxExerciseValue / 5); // Divide max value by 5 for intervals
 
-  const maxLandmarkValue = formattedLandmarkData.length > 0 
-  ? Math.max(...formattedLandmarkData.map(item => item.value), 5) 
+  const maxLandmarkValue = formattedLandmarkData.length > 0
+  ? Math.max(...formattedLandmarkData.map(item => item.value)) * 1.2 // Add buffer
   : 5;
-
+  const landmarkStepValue = Math.ceil(maxLandmarkValue / 5); // Divide max value by 5 for intervals
+  
   //newly added: landmark_exercise_ratingscore
 
   // Fetch Suggestions on Landmark and App Improvements
@@ -754,7 +756,7 @@ const calculateAverageLine = (data) => {
                 {exerciseLabelsMap[selectedExercise] || "Exercise Rating"}
               </Text>
               <ScrollView horizontal={true}>
-                <View style={{ width: exerciseChartWidth }}>
+                <View style={{ width: exerciseChartWidth, paddingBottom: 40 }}>
                   <BarChart
                     data={formattedExerciseData}
                     barWidth={exerciseBarWidth}
@@ -763,10 +765,10 @@ const calculateAverageLine = (data) => {
                     height={defaultchartHeight}
                     yAxisThickness={1}
                     xAxisThickness={1}
-                    stepValue={1} 
+                    stepValue={exerciseStepValue} // Use dynamic step value
+                    maxValue={Math.ceil(maxExerciseValue)} // Use buffered max value
                     yAxisLabelTextStyle={{ color: colors.mindfulBrown70, fontSize: 10 }}
                     xAxisLabelTextStyle={{ color: colors.mindfulBrown90, fontSize: 10 }}
-                    maxValue={Math.floor(maxExerciseValue)}
                   />
                 </View>
               </ScrollView>
@@ -804,10 +806,10 @@ const calculateAverageLine = (data) => {
                     height={defaultchartHeight}
                     yAxisThickness={1}
                     xAxisThickness={1}
-                    stepValue={1} 
+                    stepValue={landmarkStepValue} // Use dynamic step value
+                    maxValue={Math.ceil(maxLandmarkValue)} // Use buffered max value
                     yAxisLabelTextStyle={{ color: colors.mindfulBrown70, fontSize: 10 }}
                     xAxisLabelTextStyle={{ color: colors.mindfulBrown90, fontSize: 10 }}
-                    maxValue={maxLandmarkValue}
                   />
                 </View>
               </ScrollView>
