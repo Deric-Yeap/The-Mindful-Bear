@@ -13,6 +13,8 @@ import { genScoreSession } from '../../api/formQuestion';
 import { Picker } from '@react-native-picker/picker';
 import Dropdown from '../../components/dropdown'; 
 import FilterButton from '../../components/filterButton';
+import ImprovementAnalytics from './conclusion';
+import { PieChartComponent } from '../../components/analytics/pieChartComponent';
 // Helper function to calculate bar width
 const calculateBarWidth = (data, chartWidth) => {
   return data && data.length > 0
@@ -27,6 +29,9 @@ const SurveyScoresAnalytics = () => {
   const optionList = ['daily', 'monthly', 'yearly'];
   const periodSelected =  optionList[selectedOption - 1]
   const [selectedOption, setSelectedOption] = useState(1);
+  const today = new Date();
+  const thirtyDaysAgo = new Date();
+  thirtyDaysAgo.setDate(today.getDate() - 30);
   const [formattedPssBeforeData, setFormattedPssBeforeData] = useState([]);
 const [formattedPssAfterData, setFormattedPssAfterData] = useState([]);
 const [formattedSmsBeforeData, setFormattedSmsBeforeData] = useState([]);
@@ -38,50 +43,44 @@ const [formattedSmsAfterData, setFormattedSmsAfterData] = useState([]);
   const [pssPieChartData, setPssPieChartData] = useState([]);
   const [smsPieChartData, setSmsPieChartData] = useState([]);
   const [year, setYear] = useState(null);
-    const [month, setMonth] = useState(null);
-    const [pssThreshold, setPssThreshold] = useState(20);
-    const [smsThreshold, setSmsThreshold] = useState(-20);
+  const [month, setMonth] = useState(null);
+  const [pssThreshold, setPssThreshold] = useState(20);
+  const [smsThreshold, setSmsThreshold] = useState(-20);
 
-    //For General Line Charts
-    const [stressGenData, setStressGenData] = useState([]);
-    const [mindfulnessGenData, setMindfulnessGenData] = useState([]);
-  
+  //For General Line Charts
+  const [stressGenData, setStressGenData] = useState([]);
+  const [mindfulnessGenData, setMindfulnessGenData] = useState([]);
+    
   // Calculate chartwidth & height
   const screenWidth = Dimensions.get('window').width;
-const pieChartWidth = Math.max(screenWidth, (profScorePercentData?.length || 0) * 10);  // Customize width multiplier
+  const pieChartWidth = Math.max(screenWidth, (profScorePercentData?.length || 0) * 10);  // Customize width multiplier
 
 const defaultchartHeight = 250; // Set a standard height for all charts, or customize if needed
-
-
-// Helper function to create colour gradient for bar charts
-const getColorForValue = (value, maxCount) => {
-    const intensity = value / maxCount; // Calculate intensity from 0 to 1
-    return `rgba(108, 83, 61, ${0.4 + 0.5 * intensity})`; // From mindfulnessbrown30 to mindfulnessbrown80
-  };
 
   const getLineData = async() =>
     {
         const period = optionList[selectedOption - 1]; // Get the period based on selected option
       try {
         response = await profScoreSession({ period })
+        console.log("response",response)
 
         // Format the data for the line chart
-           const formattedPssBeforeData = Object.keys(response.dates).map((date) => ({
-          value: response.dates[date].average_pss_before || 0, // Use session_count or default to 0
+           const formattedPssBeforeData = Object.keys(response).map((date) => ({
+          value: response[date].average_pss_before || 0, // Use session_count or default to 0
           label: date
         }));
 
-        const formattedPssAfterData = Object.keys(response.dates).map((date) => ({
-            value: response.dates[date].average_pss_after || 0, // Use session_count or default to 0
+        const formattedPssAfterData = Object.keys(response).map((date) => ({
+            value: response[date].average_pss_after || 0, // Use session_count or default to 0
             label: date
          }));
-         const formattedSmsBeforeData = Object.keys(response.dates).map((date) => ({
-            value: response.dates[date].average_sms_before || 0, // Use session_count or default to 0
+         const formattedSmsBeforeData = Object.keys(response).map((date) => ({
+            value: response[date].average_sms_before || 0, // Use session_count or default to 0
             label: date
             }));
 
-        const formattedSmsAfterData = Object.keys(response.dates).map((date) => ({
-            value: response.dates[date].average_sms_after || 0, // Use session_count or default to 0
+        const formattedSmsAfterData = Object.keys(response).map((date) => ({
+            value: response[date].average_sms_after || 0, // Use session_count or default to 0
             label: date
             }));
 
@@ -91,13 +90,18 @@ const getColorForValue = (value, maxCount) => {
          setFormattedPssAfterData(formattedPssAfterData);
          setFormattedSmsBeforeData(formattedSmsBeforeData);
          setFormattedSmsAfterData(formattedSmsAfterData);
+         console.log("formattedPssBeforeData",formattedPssBeforeData)
         } catch (error) {
             console.error('Error fetching data for charts:', error);
         }
     }
          
+//Line Chart width
+const formattedPssBeforeChartWidth = Math.max(screenWidth, (formattedPssBeforeData?.length || 0) * 80);  
+const formattedPssAfterChartWidth = Math.max(screenWidth, (formattedPssAfterData?.length || 0) * 80);
+const formattedSmsBeforeChartWidth = Math.max(screenWidth, (formattedSmsBeforeData?.length || 0) * 80);
+const formattedSmsAfterChartWidth = Math.max(screenWidth, (formattedSmsAfterData?.length || 0) * 80);
 
-// const exerciseSessionCountChartWidth = Math.max(screenWidth, (exercisesSessionCountData?.length || 0) * 80);  // Customize width multiplier
     const getGenData = async() =>
     {
         try {
@@ -112,7 +116,7 @@ const getColorForValue = (value, maxCount) => {
                 {
                     value: genScoreData["percentage_yes_stress"],
                     label: "Improvement",
-                    color: colors.mindfulBrown90
+                    color: colors.mindfulBrown80
                 },
                 {
                     value: genScoreData["percentage_no_stress"],
@@ -126,7 +130,7 @@ const getColorForValue = (value, maxCount) => {
                 {
                     value: genScoreData["percentage_yes_mindfulness"],
                     label: "Improvement",
-                    color: colors.mindfulBrown90
+                    color: colors.mindfulBrown80
                 },
                 {
                     value: genScoreData["percentage_no_mindfulness"],
@@ -165,7 +169,7 @@ const getColorForValue = (value, maxCount) => {
             {
                 value: profScorePercentData["session_count_percent_sms"],
                 label: "Improvement",
-                color: colors.mindfulBrown90
+                color: colors.mindfulBrown80
             },
             {
                 value: profScorePercentData["session_count_percent_sms_no"],
@@ -179,7 +183,7 @@ const getColorForValue = (value, maxCount) => {
             {
                 value: profScorePercentData["session_count_percent_pss"],
                 label: "Improvement",
-                color: colors.mindfulBrown90
+                color: colors.mindfulBrown80
             },
             {
                 value: profScorePercentData["session_count_percent_pss_no"],
@@ -196,7 +200,7 @@ const getColorForValue = (value, maxCount) => {
       }
     };
     
-   // Run both fetchData and retrieveData in parallel
+   // Run all data retrieval functions in parallel
    const fetchAllData = async () => {
     setLoading(true);
     try {
@@ -258,7 +262,7 @@ const calculateAverageLine = (data) => {
   });
 
   // Calculate the average value from the filtered data
-//   const averageValue = filteredData.reduce((sum, point) => sum + point.value, 0) / filteredData.length || 0; // Prevent division by zero
+  const averageValue = filteredData.reduce((sum, point) => sum + point.value, 0) / filteredData.length || 0; // Prevent division by zero
 
   // Return the average line data
   return filteredData.map(point => ({
@@ -267,7 +271,14 @@ const calculateAverageLine = (data) => {
   }));
 };
 
-//  const averageLineDataDuration = selectedOption === 1 ? calculateAverageLine(sessionDurationLineData) : [];
+//  const averagePssBeforeLineChart = selectedOption === 1 ? calculateAverageLine(formattedPssBeforeData) : [];
+//  const trendlinePssBeforeLineChart = selectedOption !== 1 ? calculateTrendline(formattedPssBeforeData) : [];
+// const averagePssAfterLineChart = selectedOption === 1 ? calculateAverageLine(formattedPssAfterData) : [];
+// const trendlinePssAfterLineChart = selectedOption !== 1 ? calculateTrendline(formattedPssAfterData) : [];
+// const averageSmsBeforeLineChart = selectedOption === 1 ? calculateAverageLine(formattedSmsBeforeData) : [];
+// const trendlineSmsBeforeLineChart = selectedOption !== 1 ? calculateTrendline(formattedSmsBeforeData) : [];
+// const averageSmsAfterLineChart = selectedOption === 1 ? calculateAverageLine(formattedSmsAfterData) : [];
+// const trendlineSmsAfterLineChart = selectedOption !== 1 ? calculateTrendline(formattedSmsAfterData) : [];
 //   const trendlineDataDuration = selectedOption !== 1 ? calculateTrendline(sessionDurationLineData) : [];
 
 //   const averageLineDataSessions = selectedOption === 1 ? calculateAverageLine(sessionNumLineData) : [];
@@ -510,11 +521,11 @@ const calculateAverageLine = (data) => {
         PSS Results
     </Text>
     
-    <ScrollView horizontal={true}>
-        <View className="flex-row justify-between mb-4 " >
+    <View className="items-center justify-center">
+        <View className="flex-row justify-center items-center w-full mb-4 " >
         {pssPieChartData.length > 0   ? (
-        <ScrollView horizontal={true}>
-            <View style={{ width: pieChartWidth }}>
+        <ScrollView contentContainerStyle="items-center justify-center">
+            <View style={{ width: pieChartWidth }} className="w-full items-center justify-center">
                 <PieChart
                 data={pssPieChartData}
                 colors={[colors.mindfulBrown30, colors.mindfulBrown90]}
@@ -545,15 +556,11 @@ const calculateAverageLine = (data) => {
             <Text>No data available for selected period and/or threshold</Text>
         )}
         </View>
-    </ScrollView>
+    </View>
 
     <Text className="text-mindful-brown-100 font-urbanist-bold text-lg mb-4">
         General Assessment Results
     </Text>
-    {/* <PieChartComponent pieChartData = { pssPieChartData } 
-                        pieChartWidth = {pieChartWidth} 
-                        title = "PSS Improved" 
-                        chartLabel = "improved in PSS" /> */}
     
     <ScrollView horizontal={true}>
         <View className="flex-row justify-between mb-4 " >
@@ -676,6 +683,13 @@ const calculateAverageLine = (data) => {
         )}
         </View>
     </ScrollView>
+
+    <Text className="text-mindful-brown-100 font-urbanist-bold text-2xl mb-4">
+        Overall Improvement Analysis
+    </Text>
+    <View className="flex-row justify-between mb-4">
+        <ImprovementAnalytics pssPieChartData={pssPieChartData} smsPieChartData={smsPieChartData} stressGenData={stressGenData} mindfulnessGenData={mindfulnessGenData} />
+    </View>
 
    
     
