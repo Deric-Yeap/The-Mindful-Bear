@@ -36,10 +36,10 @@ const MindfulnessExercisesAnalytics = () => {
   const periodSelected =  optionList[selectedOption - 1]
   const [selectedOption, setSelectedOption] = useState(1);
   const today = new Date();
-  const thirtyDaysAgo = new Date();
-  thirtyDaysAgo.setDate(today.getDate() - 30);
+  const fortyDaysAgo = new Date();
+  fortyDaysAgo.setDate(today.getDate() - 40);
   // Format the cutoff date to a comparable format (YYYY-MM-DD)
-  const cutoffDate = thirtyDaysAgo.toISOString().split('T')[0]; 
+  const cutoffDate = fortyDaysAgo.toISOString().split('T')[0]; 
   const [exercisesSessionCountData, setExercisesSessionCountData] = useState([]) // state for dynamic line data
   const [exerciseSessionDurationData, setExerciseSessionDurationData] = useState([]) // state for dynamic line data
   
@@ -439,7 +439,7 @@ const calculateAverageLine = (data) => {
   // Filter data for the last 30 days
   const filteredData = data.filter(point => {
     const pointDate = new Date(point.label); // Assuming point.label is a date string
-    return pointDate >= thirtyDaysAgo && pointDate <= today;
+    return pointDate >= fortyDaysAgo && pointDate <= today;
   });
 
   // Calculate the average value from the filtered data
@@ -573,7 +573,7 @@ const calculateAverageLine = (data) => {
               Average Duration of Sessions Overtime
             </Text>
             <ScrollView horizontal={true}>
-              <View className="flex-row justify-between mb-4 style={{ width: chartWidth }}">
+              <View className="flex-row justify-between mb-4 style={{ width: chartWidth }} " >
               <LineChart
                     areaChart
                     curved
@@ -620,8 +620,8 @@ const calculateAverageLine = (data) => {
             
               </View>
             </ScrollView>
-            <View className="flex-row justify-between mb-4" style={{ borderBottomWidth: 1, borderBottomColor: colors.mindfulBrown80, marginTop: 50 }}>
-            <View style={{ flexDirection: 'row', alignItems: 'center',paddingHorizontal: 30 }}>
+            <View className="flex-row justify-between mb-4 border-t border-mindfulBrown80 mt-50px mb-50px" >
+            <View style={{ flexDirection: 'row', alignItems: 'center',paddingHorizontal: 30 , marginTop:10}}>
 
         <View style={{ alignItems: 'center', marginRight: 10 }}>
             <Text>Year</Text>
@@ -648,7 +648,7 @@ const calculateAverageLine = (data) => {
             title="Apply"
             onPress={retrieveData}
             style={{
-              marginLeft: 100,
+              marginLeft: 10,
               marginTop: 17// Add margin to adjust alignment
             }}
           />

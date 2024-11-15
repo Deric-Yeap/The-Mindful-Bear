@@ -88,7 +88,7 @@ class SessionSplitSerializer(serializers.Serializer):
         if period == 'daily':
              # Calculate start and end dates for the last 30 days
             end_date = datetime.now(tz=SGT)
-            start_date = end_date - timedelta(days=30)
+            start_date = end_date - timedelta(days=40)
         else:
             if year and month:
                 # If year and month are provided, filter by the month
