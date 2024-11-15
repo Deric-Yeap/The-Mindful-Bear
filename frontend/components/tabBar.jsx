@@ -32,10 +32,27 @@ const TabBar = ({ state, descriptors, navigation }) => {
   useEffect(() => {
     const fetchUser = async () => {
       try {
-        if (!user.isStaff) {
-          setNotIncludedRoutes((prevRoutes) => [...prevRoutes, 'admin'])
+        if (user.isStaff && !user.isUserView) {
+          setNotIncludedRoutes((prevRoutes) =>
+            prevRoutes.includes('(map)') ? prevRoutes : [...prevRoutes, '(map)']
+          )
         } else {
-          setNotIncludedRoutes((prevRoutes) => [...prevRoutes, '(map)'])
+          // If the user is not staff or is staff but in user view, allow access to 'map'
+          setNotIncludedRoutes((prevRoutes) =>
+            prevRoutes.filter((route) => route !== '(map)')
+          )
+        }
+
+        // Always exclude 'admin' for non-staff users or users in user view
+        if (!user.isStaff || user.isUserView) {
+          setNotIncludedRoutes((prevRoutes) =>
+            prevRoutes.includes('admin') ? prevRoutes : [...prevRoutes, 'admin']
+          )
+        } else {
+          // Allow access to 'admin' only for staff who are not in user view
+          setNotIncludedRoutes((prevRoutes) =>
+            prevRoutes.filter((route) => route !== 'admin')
+          )
         }
       } catch (error) {
         console.error(error)
@@ -43,7 +60,7 @@ const TabBar = ({ state, descriptors, navigation }) => {
     }
 
     fetchUser()
-  }, [user.isStaff])
+  }, [user.isStaff, user.isUserView])
 
   // Check if the settings tab should be included
 
@@ -75,7 +92,11 @@ const TabBar = ({ state, descriptors, navigation }) => {
 
             if (!isFocused && !event.defaultPrevented) {
               if (route.name === 'home') {
-                navigation.navigate(user.isStaff ? '(admin)' : 'home')
+                if (user.isStaff) {
+                  navigation.navigate(user.isUserView ? 'home' : '(admin)')
+                } else {
+                  navigation.navigate('home')
+                }
               } else {
                 navigation.navigate(route.name, route.params)
               }

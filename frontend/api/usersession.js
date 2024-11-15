@@ -1,32 +1,39 @@
 import axiosInstance from '../common/axiosInstance'
 
-export const createSession = async (data) => {
-  return axiosInstance.post('session/create/', data)
-}
+// export const createSession = async (data) => {
+//   return axiosInstance.post('session/create/', data)
+// }
 
-export const listSession = async () => {
-  return axiosInstance.get('session/list/')
-}
+// export const listSession = async () => {
+//   return axiosInstance.get('session/list/')
+// }
 
-export const getSession = async (sessionId) => {
-  return axiosInstance.get(`session/detail/${sessionId}/`)
-}
+// export const getSession = async (sessionId) => {
+//   return axiosInstance.get(`session/detail/${sessionId}/`)
+// }
 
 
-export const splitSession = async ({ period = 'daily', year, month } = {}) => {
+export const splitUserSession = async ({ year, month } ={}) => {
   try {
     // Construct the URL based on the provided parameters
-    let url = `session/split/?period=${period}`
+    let url = `userSession/split-exercise/`
 
-    // Append year and month to the URL if they are provided
-    if (year) url += `&year=${year}`
-    if (month) url += `&month=${month}`
+    // Check if `year` or `month` are provided and add parameters accordingly
+    const params = [];
+    if (year) params.push(`year=${year}`);
+    if (month) params.push(`month=${month}`);
+
+    // Append the parameters to the URL
+    if (params.length > 0) {
+        url += `?${params.join('&')}`;
+    }
 
     // Make the API request
     const response = await axiosInstance.get(url)
+    console.log("response",response)
 
     // Return the response data
-    return response.data
+    return response.dates
   } catch (error) {
     console.error('Error fetching session split data:', error)
     throw error

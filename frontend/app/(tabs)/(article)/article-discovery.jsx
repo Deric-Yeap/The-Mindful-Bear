@@ -61,6 +61,17 @@ const ArticleDiscovery = () => {
             <Text className="text-mindful-brown-80 font-urbanist-extra-bold text-4xl lg:text-5xl">
               Article Search
             </Text>
+            <Text 
+            className="text-mindful-brown-80 font-urbanist-extra-bold text-sm lg:text-sm" 
+            style={{ 
+              paddingHorizontal: 40,
+              marginHorizontal: 40,
+              width: screenWidth * 1 ,
+              textAlign: 'justify',  
+            }}
+          >
+            Search for articles that address your specific needs—share more about your situation. The more details you provide, the better we can match you with articles that truly suit your needs.
+          </Text>
           </View>
 
           <View
@@ -72,7 +83,7 @@ const ArticleDiscovery = () => {
           >
             <View style={{ flexDirection: 'row', alignItems: 'center' }}>
               <TextInput
-                placeholder="How may i help you today..."
+                placeholder="e.g. Any tips to feel less stress?"
                 placeholderTextColor="#F7F4F2"
                 value={searchTerm}
                 onChangeText={setSearchTerm}
