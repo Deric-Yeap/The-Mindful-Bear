@@ -14,7 +14,7 @@ import StatusBarComponent from '../../../components/darkThemStatusBar'
 import AnalyticsTabs from '../../../components/analytics/analyticsTabs'
 import axiosInstance from '../../../common/axiosInstance'
 import { listUsers } from '../../../api/user'
-import Svg, { Circle, Path, Text as SvgText } from 'react-native-svg';
+import Svg, { Circle, Path, Text as SvgText } from 'react-native-svg'
 
 export default function Admin() {
   const [ageStats, setAgeStats] = useState({ percentage: 0, range: '' })
@@ -217,105 +217,109 @@ export default function Admin() {
             User Demographic
           </Text>
           <View className="mb-4">
-  
-          <View className="flex-row justify-between gap-4">
-    {/* Age Distribution Card */}
-    <TouchableOpacity className="flex-1 bg-white p-6 rounded-[32px] shadow-sm">
-      <View>
-        <Text className="text-gray-900 font-urbanist-bold text-lg mb-6">
-          Age Distribution
-        </Text>
+            <View className="flex-row justify-between gap-4">
+              {/* Age Distribution Card */}
+              <TouchableOpacity className="flex-1 bg-white p-6 rounded-[32px] shadow-sm">
+                <View>
+                  <Text className="text-gray-900 font-urbanist-bold text-lg mb-6">
+                    Age Distribution
+                  </Text>
 
-        <View className="items-center justify-center">
-          <Svg height="120" width="120" viewBox="0 0 180 180">
-            {/* Background circle */}
-            <Circle
-              cx="90"
-              cy="90"
-              r="60"
-              stroke="#FFE5D3"
-              strokeWidth="20"
-              fill="transparent"
-            />
-            {/* Progress circle */}
-            <Circle
-              cx="90"
-              cy="90"
-              r="60"
-              stroke={colors.empathyOrange40}
-              strokeWidth="20"
-              fill="transparent"
-              strokeDasharray={`${ageStats.percentage * 3.77} 377`}
-              strokeDashoffset={-94.25}
-            />
-            {/* Percentage */}
-            <SvgText
-              x="90"
-              y="90"
-              fontSize="32"
-              fontWeight="bold"
-              fill="#1A1A1A"
-              textAnchor="middle"
-              dy="10"
-            >
-              {ageStats.percentage}%
-            </SvgText>
-          </Svg>
-          
-          <Text className="text-gray-600 font-urbanist-bold text-lg mt-4">
-            {ageStats.range} years
-          </Text>
-        </View>
-      </View>
-    </TouchableOpacity>
+                  <View className="items-center justify-center">
+                    <Svg height="120" width="120" viewBox="0 0 180 180">
+                      {/* Background circle */}
+                      <Circle
+                        cx="90"
+                        cy="90"
+                        r="60"
+                        stroke="#FFE5D3"
+                        strokeWidth="20"
+                        fill="transparent"
+                      />
+                      {/* Progress circle */}
+                      <Circle
+                        cx="90"
+                        cy="90"
+                        r="60"
+                        stroke={colors.empathyOrange40}
+                        strokeWidth="20"
+                        fill="transparent"
+                        strokeDasharray={`${ageStats.percentage * 3.77} 377`}
+                        strokeDashoffset={-94.25}
+                      />
+                      {/* Percentage */}
+                      <SvgText
+                        x="90"
+                        y="90"
+                        fontSize="32"
+                        fontWeight="bold"
+                        fill="#1A1A1A"
+                        textAnchor="middle"
+                        dy="10"
+                      >
+                        {ageStats.percentage}%
+                      </SvgText>
+                    </Svg>
 
-    {/* Department Stats Card */}
-    <TouchableOpacity className="flex-1 bg-white p-6 rounded-[32px] shadow-sm">
-      <View>
-        <Text className="text-gray-900 font-urbanist-bold text-lg mb-6">
-          Department
-        </Text>
+                    <Text className="text-gray-600 font-urbanist-bold text-lg mt-4">
+                      {ageStats.range} years
+                    </Text>
+                  </View>
+                </View>
+              </TouchableOpacity>
 
-        <View className="items-center justify-center">
-          <Svg height="120" width="120" viewBox="0 0 180 180">
-            {/* Background circle */}
-            <Circle
-              cx="90"
-              cy="90"
-              r="65"
-              fill="#F3F0FF"
-            />
-            {/* Progress sector */}
-            <Path
-              d={`M 90 90 L 90 25 A 65 65 0 ${deptStats.percentage > 50 ? 1 : 0} 1 ${
-                90 + 65 * Math.cos((deptStats.percentage / 100) * 2 * Math.PI - Math.PI/2)
-              } ${
-                90 + 65 * Math.sin((deptStats.percentage / 100) * 2 * Math.PI - Math.PI/2)
-              } Z`}
-              fill={colors.kindPurple30}
-            />
-            {/* Percentage */}
-            <SvgText
-              x="90"
-              y="90"
-              fontSize="32"
-              fontWeight="bold"
-              fill="#1A1A1A"
-              textAnchor="middle"
-              dy="10"
-            >
-              {deptStats.percentage}%
-            </SvgText>
-          </Svg>
-          
-          <Text className="text-gray-600 font-urbanist-bold text-lg mt-4">
-            {deptStats.department}
-          </Text>
-        </View>
-      </View>
-    </TouchableOpacity>
-  </View>
-</View>
+              {/* Department Stats Card */}
+              <TouchableOpacity className="flex-1 bg-white p-6 rounded-[32px] shadow-sm">
+                <View>
+                  <Text className="text-gray-900 font-urbanist-bold text-lg mb-6">
+                    Department
+                  </Text>
+
+                  <View className="items-center justify-center">
+                    <Svg height="120" width="120" viewBox="0 0 180 180">
+                      {/* Background circle */}
+                      <Circle cx="90" cy="90" r="65" fill="#F3F0FF" />
+                      {/* Progress sector */}
+                      <Path
+                        d={`M 90 90 L 90 25 A 65 65 0 ${deptStats.percentage > 50 ? 1 : 0} 1 ${
+                          90 +
+                          65 *
+                            Math.cos(
+                              (deptStats.percentage / 100) * 2 * Math.PI -
+                                Math.PI / 2
+                            )
+                        } ${
+                          90 +
+                          65 *
+                            Math.sin(
+                              (deptStats.percentage / 100) * 2 * Math.PI -
+                                Math.PI / 2
+                            )
+                        } Z`}
+                        fill={colors.kindPurple30}
+                      />
+                      {/* Percentage */}
+                      <SvgText
+                        x="90"
+                        y="90"
+                        fontSize="32"
+                        fontWeight="bold"
+                        fill="#1A1A1A"
+                        textAnchor="middle"
+                        dy="10"
+                      >
+                        {deptStats.percentage}%
+                      </SvgText>
+                    </Svg>
+
+                    <Text className="text-gray-600 font-urbanist-bold text-lg mt-4">
+                      {deptStats.department}
+                    </Text>
+                  </View>
+                </View>
+              </TouchableOpacity>
+            </View>
+          </View>
           <View className="bg-optimistic-gray-10 p-4 rounded-lg mb-4">
             <Text className="text-mindful-brown-100 font-urbanist-bold text-xl mb-4">
               Mindfulness Tracker
