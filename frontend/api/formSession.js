@@ -38,11 +38,9 @@ export const profPercentScoreSession = async ({  year, month, pss, sms } = {}) =
     if (params.length > 0) {
         url += `?${params.join('&')}`;
     }
-    console.log("url", url) 
 
     // Make the API request
     const response = await axiosInstance.get(url)
-    console.log("response", response)
     return response
     } catch (error) {
       console.error('Error fetching session split data:', error)

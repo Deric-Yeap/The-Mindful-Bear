@@ -36,10 +36,10 @@ const MindfulnessExercisesAnalytics = () => {
   const periodSelected =  optionList[selectedOption - 1]
   const [selectedOption, setSelectedOption] = useState(1);
   const today = new Date();
-  const thirtyDaysAgo = new Date();
-  thirtyDaysAgo.setDate(today.getDate() - 30);
+  const fortyDaysAgo = new Date();
+  fortyDaysAgo.setDate(today.getDate() - 40);
   // Format the cutoff date to a comparable format (YYYY-MM-DD)
-  const cutoffDate = thirtyDaysAgo.toISOString().split('T')[0]; 
+  const cutoffDate = fortyDaysAgo.toISOString().split('T')[0]; 
   const [exercisesSessionCountData, setExercisesSessionCountData] = useState([]) // state for dynamic line data
   const [exerciseSessionDurationData, setExerciseSessionDurationData] = useState([]) // state for dynamic line data
   
@@ -439,7 +439,7 @@ const calculateAverageLine = (data) => {
   // Filter data for the last 30 days
   const filteredData = data.filter(point => {
     const pointDate = new Date(point.label); // Assuming point.label is a date string
-    return pointDate >= thirtyDaysAgo && pointDate <= today;
+    return pointDate >= fortyDaysAgo && pointDate <= today;
   });
 
   // Calculate the average value from the filtered data
