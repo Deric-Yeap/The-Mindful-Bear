@@ -181,7 +181,7 @@ const defaultchartHeight = 250; // Set a standard height for all charts, or cust
       backgroundColor="#251404"
     >
       <StatusBarComponent barStyle="light-content" backgroundColor="#251404" />
-      <BrownPageTitlePortion title="Mindfulness Exercises" />
+      <BrownPageTitlePortion title="Mindfulness Exercises Assessment" />
 
       <ScrollView className="flex-1 bg-optimistic-gray-10 mb-16">
       
