@@ -121,8 +121,8 @@ class ScoreAggregationGenSerializer(serializers.Serializer):
             print('total_no_count',total_no_count)
 
             
-            percentage_yes = (total_yes_count /session_count) * 100
-            percentage_no = (total_no_count / session_count) * 100
+            percentage_yes = round((total_yes_count /session_count) * 100,2)
+            percentage_no = 100-percentage_yes
             
     
 
@@ -165,8 +165,8 @@ class ScoreAggregationGenSerializer(serializers.Serializer):
             print('total_no_count',total_no_count)
 
             
-            percentage_yes = (total_yes_count /session_count) * 100
-            percentage_no = (total_no_count / session_count) * 100
+            percentage_yes = round((total_yes_count /session_count) * 100,2)
+            percentage_no = 100-percentage_yes
             
     
 
