@@ -15,7 +15,12 @@ import { colors } from '../../common/styles';
 const screenWidth = Dimensions.get('window').width;
 
 const ImprovementAnalytics = ({ pssPieChartData,smsPieChartData, stressGenData, mindfulnessGenData }) => {
+  const cleanData = (data) => data.map(({ value, ...rest }) => ({ ...rest, value: +value.toFixed(2) }));
 
+  const cleanedPssPieChartData = cleanData(pssPieChartData);
+  const cleanedSmsPieChartData = cleanData(smsPieChartData);
+  const cleanedStressGenData = cleanData(stressGenData);
+  const cleanedMindfulnessGenData = cleanData(mindfulnessGenData);
 
   const [genericWeight, setGenericWeight] = useState('50');
   const [professionalWeight, setProfessionalWeight] = useState('50');
@@ -125,8 +130,6 @@ const ImprovementAnalytics = ({ pssPieChartData,smsPieChartData, stressGenData, 
   const renderConclusion = () => {
     const pssResults = calculateWeightedImprovement(stressGenData, pssPieChartData);
     const smsResults = calculateWeightedImprovement(mindfulnessGenData, smsPieChartData);
-    
-
    
     const conclusionText = pssResults.totalWeightedImprovement >= 50 
       ? smsResults.totalWeightedImprovement >= 50 
@@ -194,8 +197,8 @@ const ImprovementAnalytics = ({ pssPieChartData,smsPieChartData, stressGenData, 
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView style={styles.scrollContainer}>
-        {renderAnalysisSection(stressGenData, pssPieChartData, "Stress Improvement")}
-        {renderAnalysisSection(mindfulnessGenData, smsPieChartData, "Mindfulness Improvement")}
+        {renderAnalysisSection(cleanedStressGenData, cleanedPssPieChartData, "Stress Improvement")}
+        {renderAnalysisSection(cleanedMindfulnessGenData, cleanedSmsPieChartData, "Mindfulness Improvement")}
 
         <View style={styles.weightageContainer}>
           <Text className="text-mindful-brown-80 font-urbanist-bold text-xl mb-4">Weightage Configuration</Text>
