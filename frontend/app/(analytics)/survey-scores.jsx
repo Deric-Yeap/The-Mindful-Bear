@@ -181,13 +181,13 @@ const defaultchartHeight = 250; // Set a standard height for all charts, or cust
       backgroundColor="#251404"
     >
       <StatusBarComponent barStyle="light-content" backgroundColor="#251404" />
-      <BrownPageTitlePortion title="Mindfulness Exercises Assessment" />
+      <BrownPageTitlePortion title="Overall Assessment" />
 
-      <ScrollView className="flex-1 bg-optimistic-gray-10 mb-16">
+      <ScrollView className="flex-1 bg-optimistic-gray-10 mb-16 ">
       
         
 
-        <View className="p-4">
+        <View className="p-2">
           
           {loading ? (
               <ActivityIndicator size="large" color={colors.mindfulBrown80} style={{ marginVertical: 20 }} />
@@ -201,69 +201,69 @@ const defaultchartHeight = 250; // Set a standard height for all charts, or cust
         Overall Improvement Analysis
         </Text>
           <View className="flex flex-wrap p-4 ">
-  {/* First Row with 3 Filters */}
-  <View className="flex-row justify-between w-full ">
-    <View className="w-1/3 mt-4">
-        <Text className="text-sm">Year</Text>
-            <TextInput
-            className="border border-yellow-400 px-2 py-1 w-20 text-center rounded"
-            placeholder="YYYY"
-            keyboardType="numeric"
-            value={year}
-            onChangeText={(text) => setYear(text)}
-            />
-    </View>
-    <View className="w-1/3 mt-4">
-        <Text className="text-sm">Month</Text>
-            <TextInput
-            className="border border-yellow-400 px-2 py-1 w-20 text-center rounded"
-            placeholder="MM"
-            keyboardType="numeric"
-            value={month}
-            onChangeText={(text) => setMonth(text)}
-            />
-        
-    </View>
-    <View className="w-1/3 mt-4">
-        <Text className="text-sm">PSS Threshold (%)</Text>
-            <TextInput
-            className="border border-yellow-400 px-2 py-1 w-20 text-center rounded"
-            placeholder='%'
-            keyboardType="numeric"
-            value={`${pssThreshold}`} // Replace with appropriate state variable
-            onChangeText={(text) => setPssThreshold(text)}  // Replace with appropriate handler
-            />
-    </View>
-  </View>
+            {/* First Row with 3 Filters */}
+            <View className="flex-row justify-between w-full ">
+              <View className="w-1/3 mt-4">
+                  <Text className="text-mindful-brown-80 font-urbanist-bold text-sm">Year</Text>
+                    <TextInput
+                    className="border-2 border-optimistic-gray-30 px-2 py-1 w-20 text-center rounded"
+                    placeholder="YYYY"
+                    keyboardType="numeric"
+                    value={year}
+                    onChangeText={(text) => setYear(text)}
+                    />
+              </View>
+              <View className="w-1/3 mt-4">
+                  <Text className="text-mindful-brown-80 font-urbanist-bold text-sm">Month</Text>
+                    <TextInput
+                    className="border-2 border-optimistic-gray-30 px-2 py-1 w-20 text-center rounded"
+                    placeholder="MM"
+                    keyboardType="numeric"
+                    value={month}
+                    onChangeText={(text) => setMonth(text)}
+                    />
+                  
+              </View>
+              <View className="w-1/3 mt-4">
+                  <Text className="text-mindful-brown-80 font-urbanist-bold text-sm">PSS Threshold (%)</Text>
+                    <TextInput
+                    className="border-2 border-optimistic-gray-30 px-2 py-1 w-20 text-center rounded"
+                    placeholder='%'
+                    keyboardType="numeric"
+                    value={`${pssThreshold}`} // Replace with appropriate state variable
+                    onChangeText={(text) => setPssThreshold(text)}  // Replace with appropriate handler
+                    />
+              </View>
+            </View>
 
-  {/* Second Row with 1 Filter and Apply Button */}
-  <View className="flex-row items-center justify-between w-full gap-x-2">
-    <View className="w-5/12 mt-2 mb-1">
-        <Text className="text-sm">SMS Threshold (%)</Text>
-            <TextInput
-            className="border border-yellow-400 px-2 py-1 w-20 text-center rounded"
-            placeholder='%'
-            keyboardType="numeric"
-            value={`${smsThreshold}`} // Replace with appropriate state variable
-            onChangeText={(text) => setSmsThreshold(text)}  // Replace with appropriate handler
-            />
-    </View>
-    <View className="w-1/3 mt-2 mb-1">
-    <Text className="text-sm"></Text>
-    <FilterButton
-        title="Apply"
-        onPress={fetchAllData}
-        className="bg-brown-500 py-2 px-2 rounded text-white text-sm"
-        />
-      
-        </View>
-    </View>
-    </View>
-    
-    
-    <View className="flex-row justify-between mb-4">
-        <ImprovementAnalytics pssPieChartData={pssPieChartData} smsPieChartData={smsPieChartData} stressGenData={stressGenData} mindfulnessGenData={mindfulnessGenData} />
-    </View>
+            {/* Second Row with 1 Filter and Apply Button */}
+            <View className="flex-row items-center justify-between w-full gap-x-2 ">
+              <View className="w-5/12 mt-2 mb-1">
+                  <Text className="text-mindful-brown-80 font-urbanist-bold text-sm">SMS Threshold (%)</Text>
+                    <TextInput
+                    className="border-2 border-optimistic-gray-30 px-2 py-1 w-20 text-center rounded"
+                    placeholder='%'
+                    keyboardType="numeric"
+                    value={`${smsThreshold}`} // Replace with appropriate state variable
+                    onChangeText={(text) => setSmsThreshold(text)}  // Replace with appropriate handler
+                    />
+              </View>
+              <View className="w-1/3 mt-2 mb-1">
+              <Text className="text-sm"></Text>
+              <FilterButton
+                  title="Apply"
+                  onPress={fetchAllData}
+                  className="bg-brown-500 py-2 px-2 rounded text-white text-sm"
+                  />
+                
+                  </View>
+              </View>
+          </View>
+          
+          
+          <View className="flex-row justify-between mb-4">
+              <ImprovementAnalytics pssPieChartData={pssPieChartData} smsPieChartData={smsPieChartData} stressGenData={stressGenData} mindfulnessGenData={mindfulnessGenData} />
+          </View>
 
          </View>
 
