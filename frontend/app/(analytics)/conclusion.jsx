@@ -15,7 +15,12 @@ import { colors } from '../../common/styles';
 const screenWidth = Dimensions.get('window').width;
 
 const ImprovementAnalytics = ({ pssPieChartData,smsPieChartData, stressGenData, mindfulnessGenData }) => {
+  const cleanData = (data) => data.map(({ value, ...rest }) => ({ ...rest, value: +value.toFixed(2) }));
 
+  const cleanedPssPieChartData = cleanData(pssPieChartData);
+  const cleanedSmsPieChartData = cleanData(smsPieChartData);
+  const cleanedStressGenData = cleanData(stressGenData);
+  const cleanedMindfulnessGenData = cleanData(mindfulnessGenData);
 
   const [genericWeight, setGenericWeight] = useState('50');
   const [professionalWeight, setProfessionalWeight] = useState('50');
@@ -65,11 +70,11 @@ const ImprovementAnalytics = ({ pssPieChartData,smsPieChartData, stressGenData, 
 
   const renderAnalysisSection = (genericData, professionalData, title) => {
     return (
-      <View style={styles.analysisSection}>
+      <View style={styles.analysisSection} className="px-1">
         <Text className="text-mindful-brown-80 font-urbanist-bold text-xl mb-4 items-center text-center">{title}</Text>
         <View style={styles.chartsRow}>
           <View style={[styles.chartContainer, styles.halfWidth]}>
-            <Text className="text-mindful-brown-80 font-urbanist-bold text-sm items-center text-center">Generic {title}</Text>
+            <Text className="text-mindful-brown-80 font-urbanist-bold text-lg items-center text-center">Generic Improvement</Text>
             <View style={styles.pieChartContainer}>
               <PieChart
                 data={genericData}
@@ -94,7 +99,7 @@ const ImprovementAnalytics = ({ pssPieChartData,smsPieChartData, stressGenData, 
           </View>
 
           <View style={[styles.chartContainer, styles.halfWidth]}>
-            <Text className="text-mindful-brown-80 font-urbanist-bold text-sm items-center text-center">Professional {title}</Text>
+            <Text className="text-mindful-brown-80 font-urbanist-bold text-lg items-center text-center">Professional Improvement</Text>
             <View style={styles.pieChartContainer}>
               <PieChart
                 data={professionalData}
@@ -125,8 +130,6 @@ const ImprovementAnalytics = ({ pssPieChartData,smsPieChartData, stressGenData, 
   const renderConclusion = () => {
     const pssResults = calculateWeightedImprovement(stressGenData, pssPieChartData);
     const smsResults = calculateWeightedImprovement(mindfulnessGenData, smsPieChartData);
-    
-
    
     const conclusionText = pssResults.totalWeightedImprovement >= 50 
       ? smsResults.totalWeightedImprovement >= 50 
@@ -194,25 +197,25 @@ const ImprovementAnalytics = ({ pssPieChartData,smsPieChartData, stressGenData, 
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView style={styles.scrollContainer}>
-        {renderAnalysisSection(stressGenData, pssPieChartData, "Stress Improvement")}
-        {renderAnalysisSection(mindfulnessGenData, smsPieChartData, "Mindfulness Improvement")}
+        {renderAnalysisSection(cleanedStressGenData, cleanedPssPieChartData, "Stress Improvement")}
+        {renderAnalysisSection(cleanedMindfulnessGenData, cleanedSmsPieChartData, "Mindfulness Improvement")}
 
         <View style={styles.weightageContainer}>
           <Text className="text-mindful-brown-80 font-urbanist-bold text-xl mb-4">Weightage Configuration</Text>
           <View style={styles.inputContainer}>
             <View style={styles.inputGroup}>
-              <Text className="text-mindful-brown-80 font-urbanist-bold text-sm mb-4">Generic Weight (%)</Text>
+              <Text className="text-mindful-brown-80 font-urbanist-bold text-sm mb-2">Generic Weight (%)</Text>
               <TextInput
-                className="text-mindful-brown-80 font-urbanist text-sm mb-4"
+                className="text-mindful-brown-80 font-urbanist text-sm mb-4 border-2 border-optimistic-gray-30 h-10 w-1/6 text-center"
                 value={genericWeight}
                 onChangeText={(value) => handleWeightChange(value, 'generic')}
                 keyboardType="numeric"
               />
             </View>
             <View style={styles.inputGroup}>
-              <Text className="text-mindful-brown-80 font-urbanist-bold text-sm mb-4">Professional Weight (%)</Text>
+              <Text className="text-mindful-brown-80 font-urbanist-bold text-sm mb-2">Professional Weight (%)</Text>
               <TextInput
-                className="text-mindful-brown-80 font-urbanist text-sm mb-4"
+                className="text-mindful-brown-80 font-urbanist text-sm mb-4 border-2 border-optimistic-gray-30 h-10 w-1/6 text-center"
                 value={professionalWeight}
                 onChangeText={(value) => handleWeightChange(value, 'professional')}
                 keyboardType="numeric"
@@ -284,7 +287,7 @@ const styles = StyleSheet.create({
   },
   legendContainer: {
     marginTop: 12,
-    alignItems: 'center',
+    alignItems: 'start',
   },
   legendItem: {
     flexDirection: 'row',

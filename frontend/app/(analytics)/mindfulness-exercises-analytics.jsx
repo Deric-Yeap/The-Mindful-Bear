@@ -478,7 +478,7 @@ const calculateAverageLine = (data) => {
       backgroundColor="#251404"
     >
       <StatusBarComponent barStyle="light-content" backgroundColor="#251404" />
-      <BrownPageTitlePortion title="Mindfulness Exercises" />
+      <BrownPageTitlePortion title="Engagement Metrics" />
 
       <ScrollView className="flex-1 bg-optimistic-gray-10 mb-16">
       

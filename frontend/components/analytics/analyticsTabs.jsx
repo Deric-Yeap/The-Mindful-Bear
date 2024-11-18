@@ -94,7 +94,7 @@ const AnalyticsTabs = () => {
           />
         </View>
         <View className="flex-1 ml-4">
-          <Text className="font-urbanist-bold text-lg">Mindfuless Exercise Assessment</Text>
+          <Text className="font-urbanist-bold text-lg">Overall Assessment</Text>
           <Text className="font-urbanist-regular">
             PSS, SMS, generic assessment analysis
           </Text>
