@@ -56,16 +56,16 @@ const Questionaire = () => {
             ['General Questions', 'Feedback', 'Landmark Ratings'].includes(
               form.form_name
             )
-          )
-          const hasLandmarkRatings = filteredForms.some((form) => form.form_name === 'Landmark Ratings');
-          if (hasLandmarkRatings && await isLandmarkRatingsEmpty(sessionID)) {
-            filteredForms = filteredForms.filter((form) => form.form_name !== 'Landmark Ratings');
-          }
+          )          
         } else if (start === 'true') {
           filteredForms = response.filter((form) => form.is_presession)
         } else {
           filteredForms = response.filter((form) => form.is_postsession)
         }
+        const hasLandmarkRatings = filteredForms.some((form) => form.form_name === 'Landmark Ratings');
+          if (hasLandmarkRatings && await isLandmarkRatingsEmpty(sessionID)) {
+            filteredForms = filteredForms.filter((form) => form.form_name !== 'Landmark Ratings');
+          }
 
         setForms(filteredForms)
       } catch (error) {
@@ -98,7 +98,7 @@ const Questionaire = () => {
         isForceStart: isForceStart,
         start: start,
         completedForms: JSON.stringify(updatedCompletedForms),
-        isGeneric: isGeneric,
+        isGeneric: isGeneric !== undefined ? isGeneric : false,
       },
     })
   }
@@ -143,6 +143,7 @@ const Questionaire = () => {
             sessionStarted: true,
             isClickTravel: isClickTravel,
             isForceStart: isForceStart,
+            isGeneric: false,
           },
         })
       } else {
@@ -170,23 +171,25 @@ const Questionaire = () => {
           }}
         />
       )}
-      <ScrollView className="flex-1 bg-optimistic-gray-10">
+      <ScrollView className="flex-1 bg-optimistic-gray-10 mt-4">
         <View className="flex-1 p-6 bg-optimistic-gray-10">
           {/* Title */}
           <View className="relative items-center">
             <Text className="text-2xl font-urbanist-bold text-mindful-brown-90">
               {start === 'true' ? 'Before We Begin...' : 'Before We End...'}
             </Text>
-            {start === 'true' && (
+            {!completedForms.some(
+              (form) => form === 3 || form.form_name === 5
+              ) && start === 'true' && (
               <TouchableOpacity
                 onPress={() => {
                   setIsShowConfirmModal(true)
                 }}
                 className="absolute right-0"
-              >
+              >             
                 <Text className="text-lg font-urbanist-bold text-present-red-60">
-                  Skip
-                </Text>
+                  Skip                  
+                </Text>              
               </TouchableOpacity>
             )}
           </View>
