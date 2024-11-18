@@ -448,7 +448,7 @@ const Map = () => {
                   centerCoordinate={location}
                   zoomLevel={18.0}
                   animationMode="flyto"
-                  animationDuration={15}
+                  animationDuration={300}
                   pitch={60}
                 />
                 <UserLocationCustom
