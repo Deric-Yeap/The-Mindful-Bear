@@ -9,7 +9,7 @@ export const getUserFragments = (id) => {
 }
 
 export const deleteUserFragments = (id) => {
-  return axiosInstance.get(`userFragment/delete/${id}`)
+  return axiosInstance.delete(`userFragment/delete/${id}`)
 }
 
 export const updateUserFragment = async (id, userFragmentData) => {
