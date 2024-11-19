@@ -183,13 +183,13 @@ docker logs -f mindfulbear_container_ssl
 
 # Contributors
 
-<table style="border: none !important; border-collapse: collapse; width: 100%;">
+<table style="border: none !important; border-collapse: collapse; width: 100%; table-layout: fixed;">
     <tr>
-        <td style="border: none; text-align: center;"><img src="/readmeAssets/bryen.jpeg" width="150px"/><br /><sub><b>Bryen Yeoh</b></sub></td>
-        <td style="border: none; text-align: center;"><img src="/readmeAssets/deric.jpeg" width="150px"/><br /><sub><b>Yeap Kian Lee Deric</b></sub></td>
-        <td style="border: none; text-align: center;"><img src="/readmeAssets/huimin.jpeg" width="150px"/><br /><sub><b>Poh Hui Min</b></sub></td>
-        <td style="border: none; text-align: center;"><img src="/readmeAssets/tiffany.jpeg" width="150px"/><br /><sub><b>Tiffany Hu</b></sub></td>
-        <td style="border: none; text-align: center;"><img src="/readmeAssets/wanqi.jpeg" width="150px"/><br /><sub><b>Lee Wan Qi</b></sub></td>
-        <td style="border: none; text-align: center;"><img src="/readmeAssets/weiguang.jpeg" width="150px"/><br /><sub><b>Ong Wei Guang</b></sub></td>
+        <td style="border: none; text-align: center; width: 16.66%;"><img src="/readmeAssets/bryen.jpeg" width="150px" style="margin-bottom: 10px;"/><br /><sub><b>Bryen Yeoh</b></sub></td>
+        <td style="border: none; text-align: center; width: 16.66%;"><img src="/readmeAssets/deric.jpeg" width="150px" style="margin-bottom: 10px;"/><br /><sub><b>Yeap Kian Lee Deric</b></sub></td>
+        <td style="border: none; text-align: center; width: 16.66%;"><img src="/readmeAssets/huimin.jpeg" width="150px" style="margin-bottom: 10px;"/><br /><sub><b>Poh Hui Min</b></sub></td>
+        <td style="border: none; text-align: center; width: 16.66%;"><img src="/readmeAssets/tiffany.jpeg" width="150px" style="margin-bottom: 10px;"/><br /><sub><b>Tiffany Hu</b></sub></td>
+        <td style="border: none; text-align: center; width: 16.66%;"><img src="/readmeAssets/wanqi.jpeg" width="150px" style="margin-bottom: 10px;"/><br /><sub><b>Lee Wan Qi</b></sub></td>
+        <td style="border: none; text-align: center; width: 16.66%;"><img src="/readmeAssets/weiguang.jpeg" width="150px" style="margin-bottom: 10px;"/><br /><sub><b>Ong Wei Guang</b></sub></td>
     </tr>
 </table>
