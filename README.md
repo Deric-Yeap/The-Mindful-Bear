@@ -1,6 +1,8 @@
 # The Mindful Bear  
 *A Mindfulness App Project in Collaboration with SGH*
 
+The Mindful Bear is a comprehensive mobile wellness application designed for healthcare professionals at Singapore General Hospital, focusing on stress reduction and mindfulness enhancement. Built with React Native (Expo) and Django, it features guided mindfulness exercises, emotion-tracking journals with sentiment analysis, personalized article recommendations powered by semantic search, and an engaging avatar gacha system. The app employs advanced analytics to deliver actionable insights on user well-being, while maintaining high standards of data privacy and security. This solution aims to complement existing wellness programs by providing an accessible, scalable platform for mental health support in high-stress healthcare environments.
+
 ### Dependencies
 - **Python 3.12**: [Download here](https://www.python.org/downloads/)
 - **Android Studio**: [Download here](https://developer.android.com/studio)
