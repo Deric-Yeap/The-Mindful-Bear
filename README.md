@@ -174,19 +174,22 @@ Run the new container with SSL enabled:
 ```sh
 docker run -d --name mindfulbear_container_ssl -p 443:443 --restart always 010928205024.dkr.ecr.ap-southeast-1.amazonaws.com/themindfulbear:{version}
 ```
-# Contributors
-<table>
-    <tr>
-        <td align="center"><img src="" width="150px"/><br /><sub><b>Bryen Yeoh</b></sub></a></td>
-        <td align="center"><img src="" width="150px"/><br /><sub><b>Yeap Kian Lee Deric</b></sub></a></td>
-        <td align="center"><img src="" width="150px"/><br /><sub><b>Poh Hui Min</b></sub></a></td>
-        <td align="center"><img src="" width="150px"/><br /><sub><b>Tiffany Hu</b></sub></a></td>
-        <td align="center"><img src="" width="150px"/><br /><sub><b>Lee Wan Qi</b></sub></a></td>
-         <td align="center"><img src="" width="150px"/><br /><sub><b>Ong Wei Guang</b></sub></a></td>
-    </tr>
-</table>
+
 See the logs:
 
 ```sh
 docker logs -f mindfulbear_container_ssl
 ```
+
+# Contributors
+
+<table style="border: none !important; border-collapse: collapse; width: 100%;">
+    <tr>
+        <td style="border: none; text-align: center;"><img src="/readmeAssets/bryen.jpeg" width="150px"/><br /><sub><b>Bryen Yeoh</b></sub></td>
+        <td style="border: none; text-align: center;"><img src="/readmeAssets/deric.jpeg" width="150px"/><br /><sub><b>Yeap Kian Lee Deric</b></sub></td>
+        <td style="border: none; text-align: center;"><img src="/readmeAssets/huimin.jpeg" width="150px"/><br /><sub><b>Poh Hui Min</b></sub></td>
+        <td style="border: none; text-align: center;"><img src="/readmeAssets/tiffany.jpeg" width="150px"/><br /><sub><b>Tiffany Hu</b></sub></td>
+        <td style="border: none; text-align: center;"><img src="/readmeAssets/wanqi.jpeg" width="150px"/><br /><sub><b>Lee Wan Qi</b></sub></td>
+        <td style="border: none; text-align: center;"><img src="/readmeAssets/weiguang.jpeg" width="150px"/><br /><sub><b>Ong Wei Guang</b></sub></td>
+    </tr>
+</table>
