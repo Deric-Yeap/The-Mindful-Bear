@@ -1,14 +1,22 @@
-# The Mindful Bear  
+# Final Year Project
 <div align="center">
    <img src="/readmeAssets/theMindfulBearLogo.png" width="200" alt="The Mindful Bear Logo"/>
 </div>
 <p align="center" style="margin-top: -15px;">A Mindfulness App Project in Collaboration with SGH</p>
 
+<div align="justify">
 The Mindful Bear is a comprehensive mobile wellness application designed for healthcare professionals at Singapore General Hospital, focusing on stress reduction and mindfulness enhancement. Built with React Native (Expo) and Django, it features guided mindfulness exercises, emotion-tracking journals with sentiment analysis, personalized article recommendations powered by semantic search, and an engaging avatar gacha system. The app employs advanced analytics to deliver actionable insights on user well-being, while maintaining high standards of data privacy and security. This solution aims to complement existing wellness programs by providing an accessible, scalable platform for mental health support in high-stress healthcare environments.
+</div>
 
 # Solution Architechture
+<p align="center">
+<img src="/readmeAssets/solutionArchitecture.png" style="border-radius:10px">
+</p>
 
 # Tools and Technologies
+<p align="center">
+<img src="/readmeAssets/toolsAndTechnologies.png" style="border-radius:10px">
+</p>
 
 # Dependencies
 - **Python 3.12**: [Download here](https://www.python.org/downloads/)
@@ -166,7 +174,17 @@ Run the new container with SSL enabled:
 ```sh
 docker run -d --name mindfulbear_container_ssl -p 443:443 --restart always 010928205024.dkr.ecr.ap-southeast-1.amazonaws.com/themindfulbear:{version}
 ```
-
+# Contributors
+<table>
+    <tr>
+        <td align="center"><img src="" width="150px"/><br /><sub><b>Bryen Yeoh</b></sub></a></td>
+        <td align="center"><img src="" width="150px"/><br /><sub><b>Yeap Kian Lee Deric</b></sub></a></td>
+        <td align="center"><img src="" width="150px"/><br /><sub><b>Poh Hui Min</b></sub></a></td>
+        <td align="center"><img src="" width="150px"/><br /><sub><b>Tiffany Hu</b></sub></a></td>
+        <td align="center"><img src="" width="150px"/><br /><sub><b>Lee Wan Qi</b></sub></a></td>
+         <td align="center"><img src="" width="150px"/><br /><sub><b>Ong Wei Guang</b></sub></a></td>
+    </tr>
+</table>
 See the logs:
 
 ```sh
