@@ -8,12 +8,10 @@
 The Mindful Bear is a comprehensive mobile wellness application designed for healthcare professionals at Singapore General Hospital, focusing on stress reduction and mindfulness enhancement. Built with React Native (Expo) and Django, it features guided mindfulness exercises, emotion-tracking journals with sentiment analysis, personalized article recommendations powered by semantic search, and an engaging avatar gacha system. The app employs advanced analytics to deliver actionable insights on user well-being, while maintaining high standards of data privacy and security. This solution aims to complement existing wellness programs by providing an accessible, scalable platform for mental health support in high-stress healthcare environments.
 <br/><br/>
 
-Check out our <a href="https://www.canva.com/design/DAGWoNE41t0/bE8XcI79i6WCNdv85ELqHQ/view?utm_content=DAGWoNE41t0&utm_campaign=designshare&utm_medium=link&utm_source=editor">presentation slides</a>, <a href="https://docs.google.com/document/d/1McKXJjfXv8pk8CwDLc-pPRNoIIcT9AiG5WjDQa4X2qo/edit?usp=sharing">project report</a> and <a href="https://www.canva.com/design/DAGWXxFehfY/DSecM93D7TzwZNNl6XVQeQ/view?utm_content=DAGWXxFehfY&utm_campaign=designshare&utm_medium=link&utm_source=editor">poster</a> to learn more about our solution!
+Do check out our <a href="https://www.canva.com/design/DAGWoNE41t0/bE8XcI79i6WCNdv85ELqHQ/view?utm_content=DAGWoNE41t0&utm_campaign=designshare&utm_medium=link&utm_source=editor">presentation slides</a>, <a href="https://docs.google.com/document/d/1McKXJjfXv8pk8CwDLc-pPRNoIIcT9AiG5WjDQa4X2qo/edit?usp=sharing">project report</a> and <a href="https://www.canva.com/design/DAGWXxFehfY/DSecM93D7TzwZNNl6XVQeQ/view?utm_content=DAGWXxFehfY&utm_campaign=designshare&utm_medium=link&utm_source=editor">poster</a> to learn more about our solution!
 
+We would like to express our heartfelt gratitude to our Supervisor, [Professor Zhou Pan](https://faculty.smu.edu.sg/profile/zhou-pan-7776) for his invaluable guidance and constructive feedback throughout the project. We also extend our sincere thanks to our Sponsors from Singapore General Hospital, [Dr. Evelyn Boon](https://www.sgh.com.sg/Annual-Scientific-Meeting/Pages/Symposium%20Speakers/Dr-Evelyn-Boon.aspx), [Mr. Gary Ong](https://www.singhealthdukenus.com.sg/SDEC2024/Pages/Speakers/GaryOng.aspx) and Ms. Mavis Chun for their generous support and encouragement, which has been instrumental in helping us achieve our goals.
 </div>
-
-
-
 
 # Solution Architechture
 <p align="center">
