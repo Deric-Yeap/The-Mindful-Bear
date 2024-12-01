@@ -81,6 +81,8 @@ The Mindful Bear is a comprehensive mobile wellness application designed for hea
 
 **4. Verify:**
    - Django administration can be found at http://127.0.0.1:8000/admin/
+   - API Documentation can be found at: [http://127.0.0.1:8000/redoc/](http://127.0.0.1:8000/redoc/)   
+
 ---
 
 **5. Start the Andriod Emulator**

@@ -22,7 +22,7 @@ class UserAchievementCreateSerializer(serializers.ModelSerializer):
     avatar = serializers.PrimaryKeyRelatedField(queryset=Achievement.objects.all())
     class Meta:
         model = UserAchievement
-        fields = ['id','user', 'achievement', 'date_obtained'] 
+        fields = ['id','user', 'achievement', 'date_obtained', 'avatar'] 
 
     def create(self, validated_data):
         request = self.context.get('request')

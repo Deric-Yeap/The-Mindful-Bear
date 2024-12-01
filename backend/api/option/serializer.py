@@ -5,3 +5,4 @@ class OptionSerializer(serializers.ModelSerializer):
     class Meta:
         model = Option
         fields = ['description', 'value', 'OptionSetID','id'] 
+        ref_name = "OptionSerializerOption"
