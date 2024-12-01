@@ -69,7 +69,7 @@ The Mindful Bear is a comprehensive mobile wellness application designed for hea
      pip install -r requirements.txt
      ```
 
-**3. Start the Servers:**
+**3. Start the Server:**
    - Apply database migrations:
      ```bash
      python manage.py migrate
@@ -81,18 +81,16 @@ The Mindful Bear is a comprehensive mobile wellness application designed for hea
 
 **4. Verify:**
    - Django administration can be found at http://127.0.0.1:8000/admin/
-   - API Documentation can be found at: [http://127.0.0.1:8000/redoc/](http://127.0.0.1:8000/redoc/)   
+   - API Documentation can be found at http://127.0.0.1:8000/redoc/
 
----
 
-**5. Start the Andriod Emulator**
+**5. Start the Application on Andriod Emulator**
    - On another terminal:
-   - ```bash
-    cd frontend
-    npm install
-    npx expo run:android
-    ```
-   
+     ```bash
+     cd frontend
+     npm install
+     npx expo run:android
+     ```    
 
 ### Stopping the Application
 
@@ -103,13 +101,104 @@ The Mindful Bear is a comprehensive mobile wellness application designed for hea
      ```
 
 ## Deployment setup (AWS EC2)
-1.connect to instance
-2.install aws cli and docker in instance
-3.run
-    ```bash
+
+**1. Connect to instance through console:**
+
+https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2-instance-connect-methods.html
+
+**2.Install AWS CLI and Docker in instance**
+ 
+### Installing Docker
+1. **Update the package list**:
+   ```bash
+   sudo apt update
+   ```
+
+2. **Install prerequisites**:
+   ```bash
+   sudo apt install -y apt-transport-https ca-certificates curl software-properties-common
+   ```
+
+3. **Add Docker’s official GPG key**:
+   ```bash
+   curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
+   ```
+
+4. **Add the Docker repository**:
+   ```bash
+   echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+   ```
+
+5. **Update the package list again**:
+   ```bash
+   sudo apt update
+   ```
+
+6. **Install Docker**:
+   ```bash
+   sudo apt install -y docker-ce
+   ```
+
+7. **Start and enable Docker**:
+   ```bash
+   sudo systemctl start docker
+   sudo systemctl enable docker
+   ```
+
+8. **Add your user to the Docker group** (optional, for running Docker without `sudo`):
+   ```bash
+   sudo usermod -aG docker ${USER}
+   ```
+
+9. **Verify the installation**:
+   ```bash
+   docker --version
+   ```
+
+---
+
+### Installing AWS CLI
+1. **Update the system**:
+   ```bash
+   sudo apt update
+   ```
+
+2. **Install dependencies**:
+   ```bash
+   sudo apt install -y unzip curl
+   ```
+
+3. **Download the AWS CLI installer**:
+   ```bash
+   curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+   ```
+
+4. **Unzip the installer**:
+   ```bash
+   unzip awscliv2.zip
+   ```
+
+5. **Run the installation script**:
+   ```bash
+   sudo ./aws/install
+   ```
+
+6. **Verify the installation**:
+   ```bash
+   aws --version
+   ```
+
+7. **Configure AWS CLI**:
+   ```bash
+   aws configure
+   ```
+
+**3.Configure AWS Account Credentials**
+
     aws configure     
-     ```
-- Access key ID,Secret access key can be found in ./general-developer_accessKeys.csv
+
+Access key ID and Secret access key can be found in ./general-developer_accessKeys.csv
+
 
 ## Deployment
 
@@ -139,9 +228,9 @@ Push the Docker image to AWS ECR:
 docker push 010928205024.dkr.ecr.ap-southeast-1.amazonaws.com/themindfulbear:{version}
 ```
 
-## Deploy the Docker Container on Host
+## Deploy the Docker Container on EC2 Instance
 
-Log in to AWS ECR on the host machine:
+Log in to AWS ECR on the EC2 Instance:
 
 ```sh
 aws ecr get-login-password --region ap-southeast-1 | docker login --username AWS --password-stdin 010928205024.dkr.ecr.ap-southeast-1.amazonaws.com
