@@ -20,21 +20,49 @@ The Mindful Bear is a comprehensive mobile wellness application designed for hea
 </p>
 
 # Dependencies
-- **Python 3.12**: [Download here](https://www.python.org/downloads/)
-- **Android Studio**: [Download here](https://developer.android.com/studio)
-- **NodeJS**: [Download here](https://nodejs.org/en)
-- **JavaJDK 22**: [Download here](https://www.oracle.com/java/technologies/downloads/?er=221886#jdk22)
-- **Environment Files**: 
-  The-MINDFUL_BEAR/:
-    - .env
-    - private_key.pem
-    - public_key.pem
-    - general-developer_accessKeys.csv
-    - general-developer_credentials.csv
-    - frontend/.env
+
+1. **Python 3.12** 
+   Required for running backend scripts and managing dependencies.  
+   [Download Python 3.12](https://www.python.org/downloads/)
+
+2. **Android Studio**  
+   Necessary for Android development and testing.  
+   [Download Android Studio](https://developer.android.com/studio)
+
+3. **Node.js**  
+   Used for managing frontend dependencies and building the application.  
+   [Download Node.js](https://nodejs.org/en)
+
+4. **Java JDK 22**  
+   Required for building Android apps.  
+   [Download Java JDK 22](https://www.oracle.com/java/technologies/downloads/?er=221886#jdk22)
+
+5. **Environment Files**  
+   The project folder `THE-MINDFUL_BEAR/` must include the following files:
+   - `.env`: Environment configuration file for the backend.
+   - `private_key.pem`: Private key for secure communications.
+   - `public_key.pem`: Public key for secure communications.
+   - `general-developer_accessKeys.csv`: Access keys for AWS or other services.
+   - `general-developer_credentials.csv`: Developer credentials.
+   - `frontend/.env`: Environment configuration file for the frontend.
+
+6. **Domain**  
+   The project uses the domain: **themindfulbear.xyz**.  
+
+    #### Configuration:
+   - Create an **A Record** in the domain's DNS settings:
+     - **Name**: `@`
+     - **Type**: `A`
+     - **Value**: `<EC2 Instance Public IP>`
+   - Ensure the DNS record points the domain to the EC2 instance's public IP.
+
+   Certificates for SSL encryption (enables HTTPS) must be generated with the following files placed in THE-MINDFUL_BEAR/:
+   - `sslprivate_key.pem`: used as the private key for SSL.
+   - `sslcert.pem`: used as the SSL certificate.
+
 ---
 
-### Initial Setup (One-time Only)
+## Initial Setup (One-time Only)
 
 **1. Set Up the Environment:**
    - Navigate to the backend directory:
@@ -51,7 +79,7 @@ The Mindful Bear is a comprehensive mobile wellness application designed for hea
 
 ---
 
-### Running the Application
+## Running the Application
 
 **1. Activate the Environment (if not already activated):**
    - macOS/Linux:
@@ -104,11 +132,11 @@ The Mindful Bear is a comprehensive mobile wellness application designed for hea
 
 **1. Connect to instance through console:**
 
-https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2-instance-connect-methods.html
+- https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2-instance-connect-methods.html
 
-**2.Install AWS CLI and Docker in instance**
+**2. Install AWS CLI and Docker in instance**
  
-### Installing Docker
+#### Installing Docker
 1. **Update the package list**:
    ```bash
    sudo apt update
@@ -154,10 +182,11 @@ https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2-instance-connect-methods
    ```bash
    docker --version
    ```
+  - After this, log out and back in for the group change to take effect
 
 ---
 
-### Installing AWS CLI
+####  Installing AWS CLI
 1. **Update the system**:
    ```bash
    sudo apt update
@@ -193,82 +222,72 @@ https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2-instance-connect-methods
    aws configure
    ```
 
-**3.Configure AWS Account Credentials**
+**3. Configure AWS Account Credentials**
 
     aws configure     
 
 Access key ID and Secret access key can be found in ./general-developer_accessKeys.csv
 
+## Deployment (Backend)
 
-## Deployment
+### Build and Push Docker Image to ECR
 
-### Build and Push Docker Image (Backend) to AWS ECR
+1. Log in to the AWS ECR registry. Replace `{version}` with your specific version (e.g., `UAT1.3`):
+   ```sh
+   aws ecr get-login-password --region ap-southeast-1 | docker login --username AWS --password-stdin 010928205024.dkr.ecr.ap-southeast-1.amazonaws.com
+   ```
 
-First, log in to the AWS ECR registry. Replace `{version}` with your specific version (e.g., `UAT1.3`).
+2. Build the Docker image:
+   ```sh
+   docker build -t themindfulbear:{version} .
+   ```
 
-```sh
-aws ecr get-login-password --region ap-southeast-1 | docker login --username AWS --password-stdin 010928205024.dkr.ecr.ap-southeast-1.amazonaws.com
-```
+3. Tag the newly created image for ECR:
+   ```sh
+   docker tag themindfulbear:{version} 010928205024.dkr.ecr.ap-southeast-1.amazonaws.com/themindfulbear:{version}
+   ```
 
-Next, build the Docker image:
+4. Push the Docker image to AWS ECR:
+   ```sh
+   docker push 010928205024.dkr.ecr.ap-southeast-1.amazonaws.com/themindfulbear:{version}
+   ```
 
-```sh
-docker build -t themindfulbear:{version} .
-```
+---
 
-Tag the newly created image for ECR:
+## Retrieve Image and Deploy Application on EC2 Instance
 
-```sh
-docker tag themindfulbear:{version} 010928205024.dkr.ecr.ap-southeast-1.amazonaws.com/themindfulbear:{version}
-```
+1. Log in to AWS ECR on the EC2 Instance:
+   ```sh
+   aws ecr get-login-password --region ap-southeast-1 | docker login --username AWS --password-stdin 010928205024.dkr.ecr.ap-southeast-1.amazonaws.com
+   ```
 
-Push the Docker image to AWS ECR:
+2. Pull the latest image from AWS ECR:
+   ```sh
+   docker pull 010928205024.dkr.ecr.ap-southeast-1.amazonaws.com/themindfulbear:{version}
+   ```
 
-```sh
-docker push 010928205024.dkr.ecr.ap-southeast-1.amazonaws.com/themindfulbear:{version}
-```
+3. Stop the existing container (if running):
+   ```sh
+   docker stop mindfulbear_container_ssl
+   ```
 
-## Deploy the Docker Container on EC2 Instance
+4. Remove the old container:
+   ```sh
+   docker rm mindfulbear_container_ssl
+   ```
 
-Log in to AWS ECR on the EC2 Instance:
+5. Remove the old images:
+   ```sh
+   docker images
+   docker rmi {image_id}
+   ```
 
-```sh
-aws ecr get-login-password --region ap-southeast-1 | docker login --username AWS --password-stdin 010928205024.dkr.ecr.ap-southeast-1.amazonaws.com
-```
+6. Run the new container with SSL enabled:
+   ```sh
+   docker run -d --name mindfulbear_container_ssl -p 443:443 --restart always 010928205024.dkr.ecr.ap-southeast-1.amazonaws.com/themindfulbear:{version}
+   ```
 
-Pull the latest image from AWS ECR:
-
-```sh
-docker pull 010928205024.dkr.ecr.ap-southeast-1.amazonaws.com/themindfulbear:{version}
-```
-
-Stop the existing container (if running):
-
-```sh
-docker stop mindfulbear_container_ssl
-```
-
-Remove the old container:
-
-```sh
-docker rm mindfulbear_container_ssl
-```
-
-Remove the old images:
-
-```sh
-docker images
-docker rmi {image_id}
-```
-
-Run the new container with SSL enabled:
-
-```sh
-docker run -d --name mindfulbear_container_ssl -p 443:443 --restart always 010928205024.dkr.ecr.ap-southeast-1.amazonaws.com/themindfulbear:{version}
-```
-
-See the logs:
-
-```sh
-docker logs -f mindfulbear_container_ssl
-```
+7. See the logs:
+   ```sh
+   docker logs -f mindfulbear_container_ssl
+   ```
