@@ -158,7 +158,7 @@ const Home = () => {
             navigation.navigate('(achievement)')
           }}
           lottieSource={require('../../assets/diamond.json')}
-          title={'Congrats! You have got a new achievement!'}
+          title={'Congrats! You got a new achievement!'}
           subTitle={'Head to My Achievements to view!'}
           confirmButtonTitle={'Go to My Achievements!'}
         />

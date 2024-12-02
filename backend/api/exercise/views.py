@@ -130,19 +130,19 @@ class ExerciseUploadAudioView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
 
-class ExerciseCreateView(APIView):
-    def post(self, request, *args, **kwargs):
-        serializer = ExerciseCreateSerializer(data=request.data, context={'request': request})
+# class ExerciseCreateView(APIView):
+#     def post(self, request, *args, **kwargs):
+#         serializer = ExerciseCreateSerializer(data=request.data, context={'request': request})
         
-        if serializer.is_valid():
-            try:
-                exercise = serializer.save()
-                return Response(
-                    {"message": "Exercise created successfully!", "data": serializer.data},
-                    status=status.HTTP_201_CREATED
-                )
-            except Exception as e:
-                return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
-        else:
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+#         if serializer.is_valid():
+#             try:
+#                 exercise = serializer.save()
+#                 return Response(
+#                     {"message": "Exercise created successfully!", "data": serializer.data},
+#                     status=status.HTTP_201_CREATED
+#                 )
+#             except Exception as e:
+#                 return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+#         else:
+#             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 

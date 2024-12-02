@@ -15,8 +15,12 @@ import logo from '../../../assets/mindfulBearLogo.png'
 import { useRouter } from 'expo-router'
 import MaterialIcons from '@expo/vector-icons/MaterialIcons'
 import { colors } from '../../../common/styles'
+import { useDispatch, useSelector } from 'react-redux'
+import { setIsShownNav } from '../../../redux/slices/isShownNavSlice'
 
 const ArticleDiscovery = () => {
+  const dispatch = useDispatch()
+  const isShownNav = useSelector((state) => state.isShownNav).isShownNav
   const router = useRouter()
   const [searchTerm, setSearchTerm] = useState('')
 
@@ -32,10 +36,14 @@ const ArticleDiscovery = () => {
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: '#BEE2F8' }}>
-   <BackButton buttonStyle=" left-6 top-15 z-10" className="absolute" tabName="(tabs)" screenName="home" />
+      <BackButton
+        buttonStyle=" left-6 top-15 z-10"
+        className="absolute"
+        tabName="(tabs)"
+        screenName="home"
+      />
 
-    <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
-    
+      <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
         <View
           className="bg-serenity-green-50 p-3 h-full items-center mt-[screenHeight/3] rounded-t-full w-[150vw] -left-[25vw]"
           style={{
@@ -57,21 +65,23 @@ const ArticleDiscovery = () => {
             }}
             resizeMode="contain"
           />
-  <View className="items-center space-y-2 mb-2">
+          <View className="items-center space-y-2 mb-2">
             <Text className="text-mindful-brown-80 font-urbanist-extra-bold text-4xl lg:text-5xl">
               Article Search
             </Text>
-            <Text 
-            className="text-mindful-brown-80 font-urbanist-extra-bold text-sm lg:text-sm" 
-            style={{ 
-              paddingHorizontal: 40,
-              marginHorizontal: 40,
-              width: screenWidth * 1 ,
-              textAlign: 'justify',  
-            }}
-          >
-            Search for articles that address your specific needs—share more about your situation. The more details you provide, the better we can match you with articles that truly suit your needs.
-          </Text>
+            <Text
+              className="text-mindful-brown-80 font-urbanist-extra-bold text-sm lg:text-sm"
+              style={{
+                paddingHorizontal: 40,
+                marginHorizontal: 40,
+                width: screenWidth * 1,
+                textAlign: 'justify',
+              }}
+            >
+              Search for articles that address your specific needs—share more
+              about your situation. The more details you provide, the better we
+              can match you with articles that truly suit your needs.
+            </Text>
           </View>
 
           <View
@@ -95,6 +105,16 @@ const ArticleDiscovery = () => {
                   color: 'white',
                   borderWidth: 2,
                   borderColor: '#F7F4F2',
+                }}
+                onFocus={() => {
+                  if (isShownNav) {
+                    dispatch(setIsShownNav())
+                  }
+                }}
+                onBlur={() => {
+                  if (!isShownNav) {
+                    dispatch(setIsShownNav())
+                  }
                 }}
               />
               <TouchableOpacity

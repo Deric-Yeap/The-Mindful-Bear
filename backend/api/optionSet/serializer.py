@@ -6,6 +6,7 @@ class OptionSerializer(serializers.ModelSerializer):
     class Meta:
         model = Option
         fields = '__all__'
+        ref_name = "OptionSerializerOptionSet"
 
 class OptionSetSerializer(serializers.ModelSerializer):
     options = OptionSerializer(many=True, read_only=True)
