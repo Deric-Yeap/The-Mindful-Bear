@@ -7,20 +7,36 @@ from .serializer import AvatarSerializer, AvatarCreateSerializer, AvatarUpdateSe
 from ..common.permission import CustomDjangoModelPermissions
 
 class AvatarCreateView(generics.CreateAPIView):
+    """
+    Create Avatar
+
+    Allows creating a new avatar with relevant attributes.
+    """
     permission_classes = [CustomDjangoModelPermissions]
     queryset = Avatar.objects.all()
     serializer_class = AvatarCreateSerializer
-    
+
 class AvatarListView(generics.ListAPIView):
+    """
+    List Avatars
+
+    Retrieves all avatars from the database.
+    """
     queryset = Avatar.objects.all()
     serializer_class = AvatarSerializer
 
     def list(self, request, *args, **kwargs):
+
         queryset = self.get_queryset()
         serializer = self.get_serializer(queryset, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 class AvatarGetByIdView(generics.RetrieveAPIView):
+    """
+    Retrieve Avatar by ID
+
+    Fetches the details of a specific avatar using its unique identifier.
+    """
     queryset = Avatar.objects.all()
     serializer_class = AvatarSerializer
     lookup_field = "pk"
@@ -35,7 +51,12 @@ class AvatarGetByIdView(generics.RetrieveAPIView):
         except Exception as e:
             return Response({'detail': str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
-class AvatarUpdateDestroyView(generics.UpdateAPIView, generics.DestroyAPIView):
+class AvatarUpdateView(generics.UpdateAPIView):
+    """
+    Update Avatar
+
+    Updates avatar details.
+    """
     permission_classes = [CustomDjangoModelPermissions]
     queryset = Avatar.objects.all()
     serializer_class = AvatarUpdateSerializer
@@ -47,6 +68,17 @@ class AvatarUpdateDestroyView(generics.UpdateAPIView, generics.DestroyAPIView):
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+class AvatarDeleteView(generics.DestroyAPIView):
+    """
+    Delete Avatar
+
+    Deletes a specific avatar.
+    """
+    permission_classes = [CustomDjangoModelPermissions]
+    queryset = Avatar.objects.all()
+    lookup_field = "pk"
 
     def delete(self, request, *args, **kwargs):
         instance = self.get_object()

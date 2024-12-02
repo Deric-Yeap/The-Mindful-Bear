@@ -5,43 +5,56 @@ from rest_framework.response import Response
 from ..user.models import CustomUser
 from ..avatar.models import Avatar
 from .models import UserAvatar
-from .serializer import UserAvatarCreateSerializer, UserAvatarSerializer, UserAvatarUpdateSerializer
+from .serializer import (
+    UserAvatarCreateSerializer,
+    UserAvatarSerializer,
+    UserAvatarUpdateSerializer
+)
 
 
-class UserAvatarCreateView(generics.CreateAPIView):
+class CreateUserAvatar(generics.CreateAPIView):
+    """
+    Create User Avatar
+
+    Adds a new avatar for the user.
+    """
     queryset = UserAvatar.objects.all()
     serializer_class = UserAvatarCreateSerializer
 
-class UserAvatarListView(generics.ListAPIView):
+
+class ListUserAvatars(generics.ListAPIView):
+    """
+    List User Avatars
+
+    Retrieves all user avatars.
+    """
     queryset = UserAvatar.objects.all()
     serializer_class = UserAvatarSerializer
 
-    def list(self, request, *args, **kwargs):
-        queryset = self.get_queryset()
-        serializer = self.get_serializer(queryset, many=True)
-        return Response(serializer.data, status=status.HTTP_200_OK)
 
-class UserAvatarGetByIdView(generics.RetrieveAPIView):
+class RetrieveUserAvatar(generics.RetrieveAPIView):
+    """
+    Retrieve User Avatar
+
+    Retrieves details of a specific user avatar.
+    """
     queryset = UserAvatar.objects.all()
     serializer_class = UserAvatarSerializer
     lookup_field = "pk"
 
-    def get(self, request, *args, **kwargs):
-        try:
-            userAvatar = self.get_object()
-            serializer = self.get_serializer(userAvatar)
-            return Response(serializer.data, status=status.HTTP_200_OK)
-        except UserAvatar.DoesNotExist:
-            return Response({'detail': 'User Avatar not found'}, status=status.HTTP_404_NOT_FOUND)
-        except Exception as e:
-            return Response({'detail': str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
+class RetrieveUserAvatarsByUserId(generics.ListAPIView):
+    """
+    Retrieve Avatars by User ID
 
-class UserAvatarGetByUserIdView(generics.ListAPIView):
+    Retrieves all avatars for a specific user.
+    """
     serializer_class = UserAvatarSerializer
+
     def get_queryset(self):
         user_id = self.kwargs.get('user_id')
         return UserAvatar.objects.filter(user_id=user_id)
+
     def list(self, request, *args, **kwargs):
         user_id = self.kwargs.get('user_id')
         queryset = self.get_queryset()
@@ -59,19 +72,24 @@ class UserAvatarGetByUserIdView(generics.ListAPIView):
         serializer = self.get_serializer(queryset, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
-class UserAvatarUpdateDestroyView(generics.UpdateAPIView, generics.DestroyAPIView):
+
+class UpdateUserAvatar(generics.UpdateAPIView):
+    """
+    Update User Avatar
+
+    Modifies details of a user avatar.
+    """
     queryset = UserAvatar.objects.all()
     serializer_class = UserAvatarUpdateSerializer
     lookup_field = "pk"
 
-    def update(self, request, *args, **kwargs):
-        instance = self.get_object()
-        serializer = self.get_serializer(instance, data=request.data, partial=True)
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
-        return Response(serializer.data, status=status.HTTP_200_OK)
 
-    def delete(self, request, *args, **kwargs):
-        instance = self.get_object()
-        instance.delete()
-        return Response(status=status.HTTP_200_OK)
+class DeleteUserAvatar(generics.DestroyAPIView):
+    """
+    Delete User Avatar
+
+    Removes a user avatar.
+    """
+    queryset = UserAvatar.objects.all()
+    serializer_class = UserAvatarUpdateSerializer
+    lookup_field = "pk"

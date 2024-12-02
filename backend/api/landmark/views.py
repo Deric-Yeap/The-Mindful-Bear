@@ -5,12 +5,24 @@ from .models import Landmark
 from .serializer import LandmarkCreateSerializer, LandmarkSerializer, LandmarkUpdateSerializer
 from ..common.permission import CustomDjangoModelPermissions
 
+
 class LandmarkCreateView(generics.CreateAPIView):
+    """
+    Create a New Landmark
+
+    Allows authenticated users to create a new landmark entry.
+    """
     permission_classes = [CustomDjangoModelPermissions]
     queryset = Landmark.objects.all()
     serializer_class = LandmarkCreateSerializer
-    
+
+
 class LandmarkListView(generics.ListAPIView):
+    """
+    List All Landmarks
+
+    Retrieves a list of all landmarks available in the system.
+    """
     queryset = Landmark.objects.all()
     serializer_class = LandmarkSerializer
 
@@ -19,7 +31,13 @@ class LandmarkListView(generics.ListAPIView):
         serializer = self.get_serializer(queryset, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
+
 class LandmarkGetByIdView(generics.RetrieveAPIView):
+    """
+    Retrieve a Landmark by ID
+
+    Fetches the details of a specific landmark using its unique identifier.
+    """
     queryset = Landmark.objects.all()
     serializer_class = LandmarkSerializer
     lookup_field = "pk"
@@ -34,7 +52,13 @@ class LandmarkGetByIdView(generics.RetrieveAPIView):
         except Exception as e:
             return Response({'detail': str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
-class LandmarkUpdateDestroyView(generics.UpdateAPIView, generics.DestroyAPIView):
+
+class LandmarkUpdateView(generics.UpdateAPIView):
+    """
+    Update a Landmark
+
+    Updates the landmark entry specified by the ID. Allows partial updates to a specific landmark by ID.
+    """
     permission_classes = [CustomDjangoModelPermissions]
     queryset = Landmark.objects.all()
     serializer_class = LandmarkUpdateSerializer
@@ -47,7 +71,19 @@ class LandmarkUpdateDestroyView(generics.UpdateAPIView, generics.DestroyAPIView)
         serializer.save()
         return Response(serializer.data, status=status.HTTP_200_OK)
 
+
+class LandmarkDeleteView(generics.DestroyAPIView):
+    """
+    Delete Landmark
+
+    Deletes a specific landmark by ID.
+    """
+    permission_classes = [CustomDjangoModelPermissions]
+    queryset = Landmark.objects.all()
+    lookup_field = "pk"
+
     def delete(self, request, *args, **kwargs):
+
         instance = self.get_object()
         instance.delete()
         return Response(status=status.HTTP_200_OK)

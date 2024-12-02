@@ -24,7 +24,7 @@ from rest_framework import permissions
 schema_view = get_schema_view(
     openapi.Info(
         title="TheMindfulBear API Documentation",
-        default_version='v1',
+        default_version='v3.5',
         description="API documentation for all available endpoints.",
         terms_of_service="https://www.yourdomain.com/terms/",
         contact=openapi.Contact(email="themindfulbear0@gmail.com"),

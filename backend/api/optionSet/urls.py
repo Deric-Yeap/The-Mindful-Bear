@@ -1,9 +1,10 @@
 from django.urls import path
-from .views import OptionSetView,CreateOptionSet,OptionSetDestroy,UpdateOptionSet
+from . import views
 
 urlpatterns = [
-    path('get/', OptionSetView.as_view(), name='form_question_list'),
-    path('get/<int:pk>/', OptionSetView.as_view(), name='optionset-detail'), path('create/', CreateOptionSet.as_view(), name='create-optionset'), 
-    path('update/<int:pk>/', UpdateOptionSet.as_view(), name='update-optionset'), 
-    path("delete/<int:pk>/", OptionSetDestroy.as_view(),name="optionset-delete"),
+    path('get/', views.ListOptionSet.as_view(), name='form_question_list'),
+    path('get/<int:pk>/', views.RetrieveOptionSet.as_view(), name='optionset-detail'),
+    path('create/', views.CreateOptionSet.as_view(), name='create-optionset'), 
+    path('update/<int:pk>/', views.UpdateOptionSet.as_view(), name='update-optionset'), 
+    path("delete/<int:pk>/", views.OptionSetDestroy.as_view(),name="optionset-delete"),
 ] 

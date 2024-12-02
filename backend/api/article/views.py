@@ -3,32 +3,57 @@ from django.shortcuts import render
 from rest_framework import generics, status
 from rest_framework.response import Response
 from .models import Article
-from .serializer import ArticleCreateSerializer, ArticleSerializer, ArticleUpdateSerializer,SearchQuerySerializer,SearchResultItemSerializer,IntentSerializer,SearchResultSerializer
+from .serializer import ArticleCreateSerializer, ArticleSerializer, ArticleUpdateSerializer, SearchQuerySerializer, SearchResultItemSerializer, IntentSerializer, SearchResultSerializer
 from ..common.permission import CustomDjangoModelPermissions
 from .semantic_search import SemanticSearchEngine
 from rest_framework.permissions import IsAuthenticated
 from ..searchHistory.views import SearchHistoryViewSet
 
 class ArticleCreateView(generics.CreateAPIView):
+    """
+    Create Article
+
+    Allows creating a new article with relevant attributes.
+    """
     permission_classes = [CustomDjangoModelPermissions]
     queryset = Article.objects.all()
     serializer_class = ArticleCreateSerializer
-    
+
 class ArticleListView(generics.ListAPIView):
+    """
+    List Articles
+
+    Retrieves all articles from the database.
+    """
     queryset = Article.objects.all()
     serializer_class = ArticleSerializer
 
     def list(self, request, *args, **kwargs):
+        """
+        Handle GET request to list articles.
+
+        Retrieves all articles and returns them in serialized format.
+        """
         queryset = self.get_queryset()
         serializer = self.get_serializer(queryset, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 class ArticleGetByIdView(generics.RetrieveAPIView):
+    """
+    Retrieve Article by ID
+
+    Fetches the details of a specific article using its unique identifier.
+    """
     queryset = Article.objects.all()
     serializer_class = ArticleSerializer
     lookup_field = "pk"
 
     def get(self, request, *args, **kwargs):
+        """
+        Handle GET request to retrieve an article by ID.
+
+        Returns the details of the specified article or an error if not found.
+        """
         try:
             article = self.get_object()
             serializer = self.get_serializer(article)
@@ -38,7 +63,12 @@ class ArticleGetByIdView(generics.RetrieveAPIView):
         except Exception as e:
             return Response({'detail': str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
-class ArticleUpdateDestroyView(generics.UpdateAPIView, generics.DestroyAPIView):
+class ArticleUpdateView(generics.UpdateAPIView):
+    """
+    Update Article
+
+    Updates article details.
+    """
     permission_classes = [CustomDjangoModelPermissions]
     queryset = Article.objects.all()
     serializer_class = ArticleUpdateSerializer
@@ -51,12 +81,29 @@ class ArticleUpdateDestroyView(generics.UpdateAPIView, generics.DestroyAPIView):
         serializer.save()
         return Response(serializer.data, status=status.HTTP_200_OK)
 
+
+class ArticleDeleteView(generics.DestroyAPIView):
+    """
+    Delete Article
+
+    Removes a specified article.
+    """
+    permission_classes = [CustomDjangoModelPermissions]
+    queryset = Article.objects.all()
+    lookup_field = "pk"
+
     def delete(self, request, *args, **kwargs):
         instance = self.get_object()
         instance.delete()
         return Response(status=status.HTTP_200_OK)
-    
+
+
 class SemanticSearchView(generics.ListAPIView):
+    """
+    Semantic Search for Articles
+
+    Uses a semantic search engine to find relevant articles based on user history and search queries.
+    """
     permission_classes = [IsAuthenticated]
     serializer_class = SearchResultSerializer
     queryset = Article.objects.all()
@@ -66,6 +113,11 @@ class SemanticSearchView(generics.ListAPIView):
         self.search_engine = SemanticSearchEngine(relevancy_threshold=0.5)
     
     def post(self, request):
+        """
+        Handle POST request for semantic search.
+
+        Accepts a search query and retrieves relevant articles along with intent information.
+        """
         serializer = SearchQuerySerializer(data=request.data)
         if serializer.is_valid():
             query = serializer.validated_data['query']
@@ -79,7 +131,6 @@ class SemanticSearchView(generics.ListAPIView):
                         {"error": "Failed to fetch articles"},
                         status=status.HTTP_500_INTERNAL_SERVER_ERROR
                     )
-            
             
             history_viewset = SearchHistoryViewSet()
             history_viewset.request = request

@@ -1,36 +1,62 @@
 from django.shortcuts import render
 from rest_framework import generics, status
-from rest_framework.views import View
 from rest_framework.response import Response
-
-from ..achievement.serializer import AchievementSerializer
-
 from ..achievement.views import checkAchievementAttainedView
 from .models import UserAchievement
-from .serializer import UserAchievementSerializer, UserAchievementCreateSerializer, UserAchievementUpdateSerializer
+from .serializer import (
+    UserAchievementSerializer,
+    UserAchievementCreateSerializer,
+    UserAchievementUpdateSerializer
+)
 from ..achievement.models import Achievement
 
 
-
 class UserAchievementCreateView(generics.CreateAPIView):
+    """
+    Create User Achievement
+
+    Creates a new user achievement record.
+    """
     queryset = UserAchievement.objects.all()
     serializer_class = UserAchievementCreateSerializer
 
+
 class UserAchievementListView(generics.ListAPIView):
+    """
+    List User Achievements
+
+    Retrieves all user achievement records.
+    """
     queryset = UserAchievement.objects.all()
     serializer_class = UserAchievementSerializer
 
     def list(self, request, *args, **kwargs):
+        """
+        List Achievements
+
+        Returns all user achievements.
+        """
         queryset = self.get_queryset()
         serializer = self.get_serializer(queryset, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
+
 class UserAchievementGetByIdView(generics.RetrieveAPIView):
+    """
+    Get User Achievement by ID
+
+    Retrieves details of a specific user achievement.
+    """
     queryset = UserAchievement.objects.all()
     serializer_class = UserAchievementSerializer
     lookup_field = "pk"
 
     def get(self, request, *args, **kwargs):
+        """
+        Retrieve Achievement by ID
+
+        Returns user achievement details for the given ID.
+        """
         try:
             userAchievement = self.get_object()
             serializer = self.get_serializer(userAchievement)
@@ -42,25 +68,51 @@ class UserAchievementGetByIdView(generics.RetrieveAPIView):
 
 
 class UserAchievementGetByUserIdView(generics.ListAPIView):
+    """
+    Get User Achievements by User ID
+
+    Retrieves all achievements for a specific user.
+    """
     serializer_class = UserAchievementSerializer
+
     def get_queryset(self):
+        """
+        Filter by User ID
+
+        Returns achievements filtered by user ID.
+        """
         user_id = self.kwargs.get('user_id')
-        print(user_id)
         return UserAchievement.objects.filter(user_id=user_id)
 
     def list(self, request, *args, **kwargs):
+        """
+        List Achievements by User ID
+
+        Returns all achievements for the given user ID.
+        """
         queryset = self.get_queryset()
         if not queryset.exists():
             return Response({'detail': 'No Achievements found for this user.'}, status=status.HTTP_404_NOT_FOUND)
         serializer = self.get_serializer(queryset, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
+
 class UserAchievementUpdateDestroyView(generics.UpdateAPIView, generics.DestroyAPIView):
+    """
+    Update or Delete User Achievement
+
+    Updates or deletes a specific user achievement.
+    """
     queryset = UserAchievement.objects.all()
     serializer_class = UserAchievementUpdateSerializer
     lookup_field = "pk"
 
     def update(self, request, *args, **kwargs):
+        """
+        Update Achievement
+
+        Modifies the details of a user achievement.
+        """
         instance = self.get_object()
         serializer = self.get_serializer(instance, data=request.data, partial=True)
         serializer.is_valid(raise_exception=True)
@@ -68,16 +120,29 @@ class UserAchievementUpdateDestroyView(generics.UpdateAPIView, generics.DestroyA
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     def delete(self, request, *args, **kwargs):
+        """
+        Delete Achievement
+
+        Removes a user achievement record.
+        """
         instance = self.get_object()
         instance.delete()
         return Response(status=status.HTTP_200_OK)
 
 
-
 class checkUserAchievementsView(generics.GenericAPIView):
-    def get(self, request, *args, **kwargs):
-        http_request = request._request
+    """
+    Check User Achievements
 
+    Verifies and updates user achievements based on attained milestones.
+    """
+    def get(self, request, *args, **kwargs):
+        """
+        Verify Achievements
+
+        Checks and updates the user's achievements.
+        """
+        http_request = request._request
         check_view = checkAchievementAttainedView.as_view()
         response = check_view(http_request, *args, **kwargs).data
 
@@ -95,16 +160,12 @@ class checkUserAchievementsView(generics.GenericAPIView):
                     achievement=achievement,
                 )
                 if created:
-                    print(f"Created new UserAchievement for user {user.user_id} and achievement {achievement_id}.")
                     newly_created_achievements.append(achievement_id)
-                else:
-                    print(f"UserAchievement already exists for user {user.user_id} and achievement {achievement_id}.")
             except Achievement.DoesNotExist:
-                continue  
+                continue
 
         user_achievements = UserAchievement.objects.filter(user=user)
         serializer = UserAchievementSerializer(user_achievements, many=True)
-        
 
         return Response({
             'user_achievements': serializer.data,

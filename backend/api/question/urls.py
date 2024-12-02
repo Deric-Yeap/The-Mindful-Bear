@@ -3,8 +3,6 @@ from . import views
 from rest_framework.routers import DefaultRouter
 
 router = DefaultRouter()
-router.register(r'', views.QuestionViewSet, basename='question')
-
 urlpatterns = [    
     path("getFormQuestions/",views.GetQuestions.as_view(),name="get-questions"),    
     path("getFormQuestions/<int:pk>/",views.FormGetQuestions.as_view(),name="form-get-questions"),

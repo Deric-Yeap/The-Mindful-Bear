@@ -4,15 +4,23 @@ from .models import LandmarkUserCount
 from .serializer import LandmarkUserCountSerializer
 
 
-# View to get the user count for a landmark
 class GetUserCountView(generics.RetrieveAPIView):
+    """
+    Landmark User Count
+
+    Retrieve the current user count for a specific landmark by its ID.
+    """
     queryset = LandmarkUserCount.objects.all()
     serializer_class = LandmarkUserCountSerializer
     lookup_field = 'landmark_id'
 
 
-# View to increment the user count for a landmark
 class IncrementUserCountView(generics.UpdateAPIView):
+    """
+    Increment User Count
+
+    Increases the user count for a specific landmark by 1.
+    """
     queryset = LandmarkUserCount.objects.all()
     serializer_class = LandmarkUserCountSerializer
     lookup_field = 'landmark_id'
@@ -24,13 +32,18 @@ class IncrementUserCountView(generics.UpdateAPIView):
         return Response(self.get_serializer(instance).data, status=status.HTTP_200_OK)
 
 
-# View to decrement the user count for a landmark
 class DecrementUserCountView(generics.UpdateAPIView):
+    """
+    Decrement User Count
+
+    Decreases the user count for a specific landmark by 1, with a minimum value of 0.
+    """
     queryset = LandmarkUserCount.objects.all()
     serializer_class = LandmarkUserCountSerializer
     lookup_field = 'landmark_id'
 
     def patch(self, request, *args, **kwargs):
+    
         instance = self.get_object()
         if instance.user_count > 0:
             instance.user_count -= 1

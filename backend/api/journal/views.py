@@ -34,70 +34,87 @@ tokenizer = AutoTokenizer.from_pretrained(MODEL)
 model = AutoModelForSequenceClassification.from_pretrained(MODEL)
 # Download VADER lexicon if not already downloaded
 # nltk.download('vader_lexicon')
-
 class JournalListView(APIView):
+    """
+    Retrieve and Create Journal Entries    
+    """
     def get(self, request):
-        journals = Journal.objects.filter(user_id = request.user.user_id)
+        """
+        Retrieve all journal entries for the authenticated user.
+        """
+        journals = Journal.objects.filter(user_id=request.user.user_id)
         serializer = JournalGetSerializer(journals, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
-    def post(self, request):  # Can create an entry first, then upload audio next time, or do both together
+    def post(self, request):
+        """
+        Create a new journal entry.
+
+        Includes sentiment analysis using RoBERTa.
+        """
         serializer = JournalCreateSerializer(data=request.data, context={'request': request})
         
         if serializer.is_valid():
             journal_text = serializer.validated_data['journal_text']
-             # Preprocess the text (e.g., handle "not not")
+            
+            # Preprocess the text to clean up redundancies like "not not"
             cleaned_text = self.preprocess_text(journal_text)
-            print(cleaned_text)
 
-            sentiment_result = self.analyze_sentiment(cleaned_text)  # Remove self as the first argument
+            # Perform sentiment analysis
+            sentiment_result = self.analyze_sentiment(cleaned_text)
             serializer.validated_data['sentiment_analysis_result'] = sentiment_result
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
-    
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def preprocess_text(self, text):
+        """
+        Preprocess the journal text.
+
+        Example: Remove double negatives like "not not".
+        """
+        if "not not" in text:
+            text = text.replace("not not", "")
+        return text
+
     def polarity_scores_roberta(self, text):
-        # Tokenize and encode the text
+        """
+        Calculate sentiment scores using RoBERTa.
+
+        Returns a dictionary with negative, neutral, and positive scores.
+        """
         encoded_text = tokenizer(text, return_tensors='pt')
         output = model(**encoded_text)
         scores = output[0][0].detach().numpy()
         scores = softmax(scores)
-        scores_dict = {
+        return {
             'roberta_neg': scores[0],
             'roberta_neu': scores[1],
             'roberta_pos': scores[2]
         }
-        return scores_dict
 
-    def preprocess_text(self, text):
-        # Handle double negation or any other text processing here
-        if "not not" in text:
-            text = text.replace("not not", "")
-        return text
     def analyze_sentiment(self, text):
+        """
+        Analyze sentiment using RoBERTa scores.
 
-        # Get sentiment analysis from RoBERTa
+        Returns a sentiment classification: Positive, Neutral, or Negative.
+        """
         roberta_scores = self.polarity_scores_roberta(text)
-
-        #Calculate roberta_compound
         roberta_compound = roberta_scores['roberta_pos'] - roberta_scores['roberta_neg']
 
-        #Get RoBERTa sentiment analysis
-        roberta_sentiment_analysis = (
-            'Positive' if roberta_compound > 0.05 else ('Negative' if roberta_compound < -0.05 else 'Neutral')
-        )
-
-        return roberta_sentiment_analysis
-        # sid = SentimentIntensityAnalyzer()
-        # polarity_scores = sid.polarity_scores(text)
+        if roberta_compound > 0.05:
+            return 'Positive'
+        elif roberta_compound < -0.05:
+            return 'Negative'
+        else:
+            return 'Neutral'
         
-        # if polarity_scores['compound'] >= 0.05:
-        #     return 'Positive'
-        # elif polarity_scores['compound'] <= -0.05:
-        #     return 'Negative'
-        # else:
-        #     return 'Neutral'
-    
 class UploadFileView(APIView):
+    """
+    Upload Journal Audio File
+
+    Upload an audio file and save the corresponding journal entry.
+    """
     parser_classes = [MultiPartParser, FormParser]
 
     def post(self, request):
@@ -105,13 +122,29 @@ class UploadFileView(APIView):
         if serializer.is_valid():
             try: 
                 journal_entry = serializer.save()
-                return Response({'message': 'File uploaded successfully', 'journal_entry': JournalGetSerializer(journal_entry).data}, status=status.HTTP_201_CREATED)
+                return Response(
+                    {'message': 'File uploaded successfully', 'journal_entry': JournalGetSerializer(journal_entry).data},
+                    status=status.HTTP_201_CREATED
+                )
             except Exception as e:
-                return Response({'message': 'File upload failed', 'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+                return Response(
+                    {'message': 'File upload failed', 'error': str(e)},
+                    status=status.HTTP_500_INTERNAL_SERVER_ERROR
+                )
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
 class JournalCalendarView(APIView):
+    """
+    Retrieve Weekly Journal Summaries for a Specific Month
+
+    Returns a weekly matrix of journal summaries for the specified year and month.
+    """
     def post(self, request):
+        """
+        Retrieve weekly journal summaries for a specific month.
+
+        Requires `year` and `month` in the request body.
+        """
         year = request.data.get('year')
         month = request.data.get('month')
 
@@ -126,17 +159,25 @@ class JournalCalendarView(APIView):
         
         serializer = JournalCalendarSerializer(context={'request': request})
         weeks = serializer.get_weekly_matrix(year, month)
-        
+
+        # Serialize the weekly journal summaries
         serialized_weeks = [
             [JournalSummarySerializer(journal, context={'request': request}).data if journal else None for journal in week]
             for week in weeks
         ]
-        
+
         return Response({'weeks': serialized_weeks}, status=status.HTTP_200_OK)
-    
+
 class CountYearJournalView(APIView):
+    """
+    Count Journal Entries for a Specific Year
+
+    Returns the total number of journal entries created in the specified year.
+    """
     def get(self, request):
+
         year = request.query_params.get('year', datetime.now().year)
+
         try:
             year = int(year)
         except ValueError:
@@ -145,34 +186,40 @@ class CountYearJournalView(APIView):
         journals = Journal.objects.filter(user_id=request.user.user_id, upload_date__year=year)
         return Response({'count': journals.count()}, status=status.HTTP_200_OK)
 
-
-
 class Count(APIView):
+    """
+    Count Journal Entries Based on Sentiment and Time Period
+
+    GET: Returns the count of journal entries grouped by a specified time period (daily, monthly, or yearly).
+    """
     def get(self, request):
-        # Get parameters from the request
+        """
+        Retrieve the count of journal entries grouped by sentiment and time period.
+
+        Query Parameters:
+        - `sentiment` (optional): Filter by sentiment analysis result (Positive, Neutral, Negative).
+        - `period` (optional): Specify the grouping period (daily, monthly, yearly). Defaults to `daily`.
+        """
         sentiment = request.query_params.get('sentiment', None)
         period = request.query_params.get('period', 'daily')  # Default to daily
-
-        # Filter journals by user (this line is commented out)
-        # journals = Journal.objects.filter(user_id=request.user.user_id)
-    
         journals = Journal.objects.all()
 
         # Filter by sentiment if provided
         if sentiment:
             journals = journals.filter(sentiment_analysis_result=sentiment)
 
-        # Prepare response data
         response_data = {}
 
-        # Apply period filtering
         if period == 'daily':
             daily_counts = (
                 journals.values('upload_date__date')  # Group by the date part of upload_date
                 .annotate(count=JournalCount('id'))
                 .order_by('upload_date__date')
             )
-            response_data['counts'] = [{'date': entry['upload_date__date'].strftime('%d/%m/%Y'), 'count': entry['count']} for entry in daily_counts]
+            response_data['counts'] = [
+                {'date': entry['upload_date__date'].strftime('%d/%m/%Y'), 'count': entry['count']}
+                for entry in daily_counts
+            ]
 
         elif period == 'monthly':
             monthly_counts = (
@@ -181,11 +228,9 @@ class Count(APIView):
                 .order_by('upload_date__year', 'upload_date__month')
             )
             month_names = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
-    
-            # Format the output as "Jan 24", "Feb 24", etc.
             response_data['counts'] = [
                 {
-                    'date': f"{month_names[entry['upload_date__month'] - 1]} {str(entry['upload_date__year'])[2:]}",  # Get the last two digits of the year
+                    'date': f"{month_names[entry['upload_date__month'] - 1]} {str(entry['upload_date__year'])[2:]}",
                     'count': entry['count']
                 }
                 for entry in monthly_counts
@@ -193,34 +238,52 @@ class Count(APIView):
 
         elif period == 'yearly':
             yearly_counts = (
-                journals.values('upload_date__year')  # Group by the year part of upload_date
-                .annotate(count=JournalCount('id'))  # Count journal entries per year
+                journals.values('upload_date__year')  # Group by year
+                .annotate(count=JournalCount('id'))
                 .order_by('upload_date__year')
             )
-            response_data['counts'] = [{'date': entry['upload_date__year'], 'count': entry['count']} for entry in yearly_counts]
+            response_data['counts'] = [
+                {'date': entry['upload_date__year'], 'count': entry['count']}
+                for entry in yearly_counts
+            ]
 
         else:
             return Response({'error': 'Invalid period specified'}, status=status.HTTP_400_BAD_REQUEST)
 
         return Response(response_data, status=status.HTTP_200_OK)
 
-
-    
 class SpeechToTextView(APIView):
+    """
+    Convert Speech to Text
+
+    Converts an uploaded audio file into transcribed text using a transcription service.
+    """
     def post(self, request):
         if 'audio_file' not in request.FILES:
             return Response({'error': 'No audio file provided.'}, status=status.HTTP_400_BAD_REQUEST)
-    
+
         audio_file = request.FILES['audio_file']
-        
+
         try:
             transcription = transcribe(audio_file)
             return Response({'transcription': transcription}, status=status.HTTP_200_OK)
         except Exception as e:
             return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-        
+
 class JournalEntriesByDateView(APIView):
+    """
+    Retrieve Journal Entries for a Specific Month
+
+    Returns journal entries grouped by date for the specified year and month.
+    """
     def get(self, request, *args, **kwargs):
+        """
+        Retrieve journal entries for a specific year and month.
+
+        Query Parameters:
+        - `year`: The year to filter entries.
+        - `month`: The month to filter entries.
+        """
         year = request.query_params.get('year')
         month = request.query_params.get('month')
 
@@ -233,10 +296,9 @@ class JournalEntriesByDateView(APIView):
         except ValueError:
             return Response({"error": "Year and month must be integers."}, status=status.HTTP_400_BAD_REQUEST)
 
-        serializer_context = {
-            'request': request,
-        }
+        serializer_context = {'request': request}
         serializer = JournalEntriesByDateSerializer(data={}, context=serializer_context)
+
         if serializer.is_valid():
             data = serializer.get_journal_entries_by_date(year, month)
             return Response(data, status=status.HTTP_200_OK)
@@ -244,88 +306,134 @@ class JournalEntriesByDateView(APIView):
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class JournalEntriesByPeriodView(APIView):
+    """
+    Retrieve Journal Entries for a Date Range
+
+    Returns journal entries for the specified date range.
+    """
     def get(self, request, *args, **kwargs):
+        """
+        Retrieve journal entries for a specific date range.
+
+        Query Parameters:
+        - `start_date`: Start date in the format YYYY-MM-DD.
+        - `end_date`: End date in the format YYYY-MM-DD.
+        """
         start_date_str = request.query_params.get('start_date')
         end_date_str = request.query_params.get('end_date')
 
-       
         if not start_date_str or not end_date_str:
             return Response({"error": "Start date and end date are required parameters."}, status=status.HTTP_400_BAD_REQUEST)
 
         try:
-          
             start_date = datetime.strptime(start_date_str, '%Y-%m-%d')
             end_date = datetime.strptime(end_date_str, '%Y-%m-%d')
 
             if start_date > end_date:
                 return Response({"error": "Start date must be before or equal to end date."}, status=status.HTTP_400_BAD_REQUEST)
 
-     
-            serializer_context = {'request': request}  # Include context if needed
+            serializer_context = {'request': request}
             serializer = JournalEntriesByPeriodSerializer(context=serializer_context)
             data = serializer.get_journal_entries_by_date_range(start_date, end_date)
 
             return Response(data, status=status.HTTP_200_OK)
-
         except ValueError:
             return Response({"error": "Invalid date format. Use YYYY-MM-DD."}, status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
+            return Response({"error": "An unexpected error occurred.", "details": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
     
-            print(f"Exception occurred: {str(e)}")
-            return Response({"error": "An unexpected error occurred."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-        
 class JournalStreakView(APIView):
+    """
+    Retrieve the Current Journal Streak
+
+    GET: Calculates and returns the current journal streak for the authenticated user.
+    """
     def get(self, request):
+        """
+        Calculate Current Journal Streak
+
+        A streak is defined as consecutive journal entries on consecutive days.
+        """
         journals = Journal.objects.filter(user_id=request.user.user_id).order_by('-upload_date')
         current_streak = 0
         last_date = None
 
         for journal in journals:
-            print(journal.upload_date, "user_id", journal.user_id.user_id)
             if last_date is None:
                 last_date = journal.upload_date
-                current_streak = 1  
+                current_streak = 1
             else:
-                if (last_date.date() - journal.upload_date.date()).days == 1:
-                    current_streak += 1 
-                elif (last_date.date() - journal.upload_date.date()).days > 1:
-                    break  
-                last_date = journal.upload_date  
+                days_difference = (last_date.date() - journal.upload_date.date()).days
+                if days_difference == 1:
+                    current_streak += 1
+                elif days_difference > 1:
+                    break
+                last_date = journal.upload_date
+
         return Response({'streak': current_streak}, status=status.HTTP_200_OK)
-            
+
         
 class JournalEntryViewSet(viewsets.ViewSet):
+    """
+    Manage Individual Journal Entries
+
+    Provides retrieve, update, and delete functionality for journal entries.
+    """
     def retrieve(self, request, pk=None):
+        """
+        Retrieve journal entry by ID
+
+        Path Parameters:
+        - `pk`: Primary key of the journal entry to retrieve.
+        """
         journal = get_object_or_404(Journal, pk=pk)
         serializer = JournalGetSerializer(journal)
         return Response(serializer.data, status=status.HTTP_200_OK)
-    
+
     def update(self, request, pk=None):
+        """
+        Update journal entry by ID
+
+        Path Parameters:
+        - `pk`: Primary key of the journal entry to update.
+        """
         journal = get_object_or_404(Journal, pk=pk)
         serializer = JournalUpdateSerializer(journal, data=request.data, partial=True, context={'request': request})
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-    
+
     def destroy(self, request, pk=None):
+        """
+        Delete journal entry by ID
+
+        Path Parameters:
+        - `pk`: Primary key of the journal entry to delete.
+        """
         journal = get_object_or_404(Journal, pk=pk)
         journal.delete()
         return Response({'message': 'Journal entry deleted successfully.'}, status=status.HTTP_200_OK)
 
-
 # Configure logging if it's not already configured
 logging.basicConfig(level=logging.INFO)
 
-
 class JournalClassificationView(APIView):
-    #def post(self, request):
-        #text = request.data.get('text')
-        #journals = Journal.objects.all()
-        #journalTexts = [journal.journal_text for journal in journals] #just a random example, transform your own data to return
-       # journal['predicted_labels'] = classify_text(journal_text)
-        #return Response({"result": journalTexts}, status=status.HTTP_200_OK)
+    """
+    Classify Journal Entries by Topics and Keywords
+
+    GET: Retrieves journal entries classified into predefined topics, aggregated with their most mentioned keywords.
+    """
     def get(self, request):
+        """
+        Retrieve classified journal entries for a specified year and month.
+
+        Query Parameters:
+        - `year` (optional): Year to filter journal entries. Defaults to all years if not provided.
+        - `month` (optional): Month to filter journal entries. Defaults to all months if not provided.
+
+        Aggregates the journal entries into predefined topics and lists the top keywords for each topic.
+        """
         year = request.query_params.get('year')
         month = request.query_params.get('month')
 
@@ -333,7 +441,7 @@ class JournalClassificationView(APIView):
         sgt_timezone = pytz.timezone("Asia/Singapore")
         utc_timezone = pytz.UTC
 
-        # Convert the SGT date range to UTC if year and month are provided
+        # Filter journals based on year and month
         if year and month:
             try:
                 year = int(year)
@@ -341,38 +449,28 @@ class JournalClassificationView(APIView):
 
                 # Define the start and end of the month in SGT
                 start_date_sgt = sgt_timezone.localize(datetime(year, month, 1, 0, 0, 0))
-                
-                # Calculate the end of the month in SGT
                 if month == 12:
                     end_date_sgt = sgt_timezone.localize(datetime(year + 1, 1, 1, 0, 0, 0))
                 else:
                     end_date_sgt = sgt_timezone.localize(datetime(year, month + 1, 1, 0, 0, 0))
 
-                # Convert start and end of the month to UTC for querying in Supabase
+                # Convert start and end dates to UTC for filtering
                 start_date_utc = start_date_sgt.astimezone(utc_timezone)
                 end_date_utc = end_date_sgt.astimezone(utc_timezone)
-                
-                 # Log the dates to verify conversion
-                logging.info(f"Filter year/month: {year}-{month}")
-                logging.info(f"SGT Start Date: {start_date_sgt}, SGT End Date: {end_date_sgt}")
-                logging.info(f"UTC Start Date: {start_date_utc}, UTC End Date: {end_date_utc}")
 
-
-                # Filter journals by the UTC datetime range in Supabase
                 journals = Journal.objects.filter(upload_date__gte=start_date_utc, upload_date__lt=end_date_utc)
             except ValueError:
                 return Response({"error": "Year and month must be integers."}, status=status.HTTP_400_BAD_REQUEST)
         else:
             journals = Journal.objects.all()
-            
-            if not journals.exists():
-                return Response({
-                    'code': 404,
-                    'message': 'No journal entries found for the selected date range.',
-                    'data': [],
-                    'error_description': 'No journal entries available for the chosen year and month.'
-                }, status=status.HTTP_404_NOT_FOUND)
-        
+
+        if not journals.exists():
+            return Response({
+                'code': 404,
+                'message': 'No journal entries found for the selected date range.',
+                'data': [],
+                'error_description': 'No journal entries available for the chosen year and month.'
+            }, status=status.HTTP_404_NOT_FOUND)
 
         # Process journals for topic classification and keyword aggregation
         aggregated_topic_keywords = defaultdict(lambda: defaultdict(int))
@@ -402,8 +500,8 @@ class JournalClassificationView(APIView):
             if topic in aggregated_topic_keywords:
                 # Sort keywords by count and select the top 10
                 sorted_keywords = sorted(
-                    aggregated_topic_keywords[topic].items(), 
-                    key=lambda x: x[1], 
+                    aggregated_topic_keywords[topic].items(),
+                    key=lambda x: x[1],
                     reverse=True
                 )[:10]
                 formatted_output.append({

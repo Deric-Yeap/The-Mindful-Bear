@@ -6,28 +6,47 @@ from django.db.models import Count, Avg, Max
 from .models import SearchHistory
 from .serializer import SearchHistorySerializer, SearchClickSerializer
 
+
 class SearchHistoryViewSet(viewsets.ModelViewSet):
+    """
+    Manage Search History
+
+    Provides functionality to record, retrieve, and analyze user search history and clicks.
+    """
     permission_classes = [IsAuthenticated]
     serializer_class = SearchHistorySerializer
 
     def get_queryset(self):
+        """
+        Retrieve search history for the authenticated user.
+
+        Includes related user and article information.
+        """
         return SearchHistory.objects.filter(
             userID=self.request.user
         ).select_related('userID', 'articleID')
-    
+
     @action(detail=False, methods=['GET'])
     def list(self, request):
-        """Get all search history"""
+        """
+        List All History
+
+        Retrieves all search history records.
+        """
         history = SearchHistory.objects.all()
         return Response(self.get_serializer(history, many=True).data)
 
     @action(detail=False, methods=['POST'])
     def record_search(self, request):
-        """Record a search query"""
+        """
+        Record Search
+
+        Records a search query for the authenticated user.
+        """
         query = request.data.get('query')
         if not query:
             return Response(
-                {'error': 'Query is required'}, 
+                {'error': 'Query is required'},
                 status=status.HTTP_400_BAD_REQUEST
             )
 
@@ -35,13 +54,17 @@ class SearchHistoryViewSet(viewsets.ModelViewSet):
             userID=request.user,
             query=query
         )
-        
+
         serializer = self.get_serializer(search_history)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
     @action(detail=False, methods=['POST'])
     def record_click(self, request):
-        """Record when user clicks an article"""
+        """
+        Record Click
+
+        Records a click on an article from search results.
+        """
         serializer = SearchClickSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save(userID=request.user)
@@ -50,11 +73,14 @@ class SearchHistoryViewSet(viewsets.ModelViewSet):
 
     @action(detail=False, methods=['GET'])
     def user_history(self, request):
-        """Get user's search history"""
+        """
+        Get User History
+
+        Retrieves the search history of the authenticated user grouped by query.
+        """
         history = self.get_queryset().order_by('-created_at')[:50]
         serializer = self.get_serializer(history, many=True)
-        
-        # Group by query to show clicked articles
+
         grouped_history = {}
         for item in serializer.data:
             query = item['query']
@@ -74,7 +100,11 @@ class SearchHistoryViewSet(viewsets.ModelViewSet):
 
     @action(detail=False, methods=['GET'])
     def popular_searches(self, request):
-        """Get most popular searches"""
+        """
+        Get Popular Searches
+
+        Retrieves the most popular searches made by the user.
+        """
         popular = SearchHistory.objects.filter(
             userID=request.user
         ).values('query').annotate(
@@ -82,12 +112,16 @@ class SearchHistoryViewSet(viewsets.ModelViewSet):
             last_searched=Max('created_at'),
             click_count=Count('articleID', distinct=True)
         ).order_by('-search_count')[:10]
-        
+
         return Response(list(popular))
 
     @action(detail=False, methods=['GET'])
     def clicked_articles(self, request):
-        """Get articles clicked from search results"""
+        """
+        Get Clicked Articles
+
+        Retrieves articles clicked from search results.
+        """
         clicked = SearchHistory.objects.filter(
             userID=request.user,
             articleID__isnull=False
@@ -100,6 +134,5 @@ class SearchHistoryViewSet(viewsets.ModelViewSet):
             avg_position=Avg('rankPosition'),
             last_clicked=Max('created_at')
         ).order_by('-click_count')[:10]
-        
-        return Response(list(clicked))
 
+        return Response(list(clicked))

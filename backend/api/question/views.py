@@ -1,54 +1,78 @@
-from rest_framework import generics
+from rest_framework import generics, status, viewsets
+from rest_framework.exceptions import ValidationError
+from rest_framework.response import Response
 from .models import Question, Form
 from .serializer import QuestionSerializer, NewQuestionSerializer
-from rest_framework.exceptions import ValidationError
-from rest_framework import viewsets, status
-from rest_framework.response import Response
+
 
 # User Side
-#This gets all questions for a particular form
 class FormGetQuestions(generics.ListAPIView):
+    """
+    Get Questions for Form
+
+    Retrieves all questions associated with a specific form.
+    """
     serializer_class = QuestionSerializer
 
     def get_queryset(self):
+        """
+        Filter questions by form ID.
+
+        Extracts the form ID from the URL parameters.
+        """
         form_id = self.kwargs.get('pk')
         return Question.objects.filter(formID=form_id)
-    
+
+
 # Admin Side
-# Admin can create more questions
 class GetQuestions(generics.ListAPIView):
+    """
+    Get All Questions
+
+    Returns a list of all questions in the database.
+    """
     queryset = Question.objects.all()
     serializer_class = QuestionSerializer
-    
+
+
 class CreateQuestion(generics.CreateAPIView):
+    """
+    Create Question
+
+    Adds a new question associated with a specific form.
+    """
     serializer_class = QuestionSerializer
 
     def perform_create(self, serializer):
+        """
+        Validate form ID and save question.
+
+        Ensures the form exists before associating the question.
+        """
         form_id = self.request.data.get('FormID')
-        #checks if form exists in form table before assigning question to the form
         if not Form.objects.filter(id=form_id).exists():
             raise ValidationError(f"Form with ID {form_id} does not exist.")
         serializer.save()
 
-# Admin can Edit and Delete questions
+
 class UpdateQuestion(generics.UpdateAPIView):
+    """
+    Update Question
+
+    Modifies details of a specific question.
+    """
     queryset = Question.objects.all()
     serializer_class = QuestionSerializer
-    lookup_field = "QuestionID"  # Change to the primary key field in your model
+    lookup_field = "QuestionID"
+
 
 class DeleteQuestion(generics.DestroyAPIView):
+    """
+    Delete Question
+
+    Removes a specific question from the database.
+    """
     queryset = Question.objects.all()
     serializer_class = QuestionSerializer
-    lookup_field = "QuestionID"  # Change to the primary key field in your model
+    lookup_field = "QuestionID"
 
-# if above not using can delete?
-
-# newcode
-class QuestionViewSet(viewsets.ModelViewSet):
-    serializer_class = NewQuestionSerializer
-    queryset= Question.objects.all()
-
-    def destroy(self, request, *args, **kwargs):
-        instance = self.get_object()
-        instance.delete()
-        return Response(status=status.HTTP_200_OK)
