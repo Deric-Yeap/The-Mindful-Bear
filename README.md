@@ -217,11 +217,6 @@ The Mindful Bear is a comprehensive mobile wellness application designed for hea
    aws --version
    ```
 
-7. **Configure AWS CLI**:
-   ```bash
-   aws configure
-   ```
-
 **3. Configure AWS Account Credentials**
 
     aws configure     
